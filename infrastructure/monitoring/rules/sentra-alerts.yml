@@ -1,0 +1,240 @@
+groups:
+  - name: sentra.system
+    rules:
+      # System-level alerts
+      - alert: SystemDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "SENTRA service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} on instance {{ $labels.instance }} has been down for more than 1 minute"
+          runbook_url: "https://docs.sentra.com/runbooks/system-down"
+          dashboard_url: "https://monitoring.sentra.com/d/sentra-overview"
+          
+      - alert: HighCPUUsage
+        expr: 100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is above 80% for more than 5 minutes"
+          runbook_url: "https://docs.sentra.com/runbooks/high-cpu"
+          
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 90
+        for: 5m
+        labels:
+          severity: critical
+          service: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is above 90% for more than 5 minutes"
+          runbook_url: "https://docs.sentra.com/runbooks/high-memory"
+          
+      - alert: DiskSpaceLow
+        expr: (node_filesystem_avail_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"}) * 100 < 10
+        for: 5m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "Disk space is running low"
+          description: "Disk space is below 10% on {{ $labels.device }}"
+          runbook_url: "https://docs.sentra.com/runbooks/disk-space"
+
+  - name: sentra.services
+    rules:
+      # Service health alerts
+      - alert: ServiceUnhealthy
+        expr: sentra_service_health == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "SENTRA service {{ $labels.service }} is unhealthy"
+          description: "Service {{ $labels.service }} has been reporting unhealthy status for more than 2 minutes"
+          runbook_url: "https://docs.sentra.com/runbooks/service-unhealthy/{{ $labels.service }}"
+          dashboard_url: "https://monitoring.sentra.com/d/sentra-services"
+          
+      - alert: HighResponseTime
+        expr: sentra_service_response_time_ms > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: "{{ $labels.service }}"
+        annotations:
+          summary: "High response time for {{ $labels.service }}"
+          description: "Response time for {{ $labels.service }} is above 1000ms: {{ $value }}ms"
+          runbook_url: "https://docs.sentra.com/runbooks/high-response-time"
+          
+      - alert: ServiceOverallStatusDegraded
+        expr: sentra_overall_health < 1
+        for: 3m
+        labels:
+          severity: warning
+          service: system
+        annotations:
+          summary: "SENTRA system status is degraded"
+          description: "Overall system health is below 100%: {{ $value }}"
+          runbook_url: "https://docs.sentra.com/runbooks/system-degraded"
+
+  - name: sentra.database
+    rules:
+      # Database alerts
+      - alert: PostgresDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL database has been down for more than 1 minute"
+          runbook_url: "https://docs.sentra.com/runbooks/postgres-down"
+          
+      - alert: PostgresConnectionsHigh
+        expr: sum(pg_stat_database_numbackends) > 150
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "High number of PostgreSQL connections"
+          description: "PostgreSQL has {{ $value }} active connections (threshold: 150)"
+          runbook_url: "https://docs.sentra.com/runbooks/postgres-connections"
+          
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 1 minute"
+          runbook_url: "https://docs.sentra.com/runbooks/redis-down"
+          
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Redis memory usage is high"
+          description: "Redis memory usage is above 90%: {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.sentra.com/runbooks/redis-memory"
+
+  - name: sentra.api
+    rules:
+      # API-specific alerts
+      - alert: APIHighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          service: api
+        annotations:
+          summary: "High API error rate detected"
+          description: "API error rate is above 5%: {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.sentra.com/runbooks/api-errors"
+          
+      - alert: APIHighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "High API latency detected"
+          description: "95th percentile latency is above 2s: {{ $value }}s"
+          runbook_url: "https://docs.sentra.com/runbooks/api-latency"
+          
+      - alert: AuthenticationFailuresHigh
+        expr: sum(rate(auth_failures_total[5m])) > 10
+        for: 2m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "High authentication failure rate"
+          description: "Authentication failures exceed 10/min: {{ $value }}/min"
+          runbook_url: "https://docs.sentra.com/runbooks/auth-failures"
+
+  - name: sentra.security
+    rules:
+      # Security alerts
+      - alert: SuspiciousLoginActivity
+        expr: increase(failed_login_attempts_total[5m]) > 50
+        for: 1m
+        labels:
+          severity: critical
+          service: auth
+        annotations:
+          summary: "Suspicious login activity detected"
+          description: "More than 50 failed login attempts in 5 minutes from {{ $labels.source_ip }}"
+          runbook_url: "https://docs.sentra.com/runbooks/suspicious-login"
+          
+      - alert: RateLimitExceeded
+        expr: sum(rate(rate_limit_exceeded_total[5m])) > 100
+        for: 2m
+        labels:
+          severity: warning
+          service: api
+        annotations:
+          summary: "Rate limit frequently exceeded"
+          description: "Rate limit exceeded {{ $value }} times per minute"
+          runbook_url: "https://docs.sentra.com/runbooks/rate-limit"
+          
+      - alert: UnauthorizedAccessAttempt
+        expr: sum(rate(unauthorized_access_total[5m])) > 20
+        for: 1m
+        labels:
+          severity: warning
+          service: auth
+        annotations:
+          summary: "High unauthorized access attempts"
+          description: "{{ $value }} unauthorized access attempts per minute"
+          runbook_url: "https://docs.sentra.com/runbooks/unauthorized-access"
+
+  - name: sentra.business
+    rules:
+      # Business logic alerts
+      - alert: AgentOrchestrationFailures
+        expr: sum(rate(agent_task_failures_total[5m])) > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: orchestrator
+        annotations:
+          summary: "High agent orchestration failure rate"
+          description: "{{ $value }} agent tasks failing per minute"
+          runbook_url: "https://docs.sentra.com/runbooks/agent-failures"
+          
+      - alert: CodeAnalysisBacklog
+        expr: code_analysis_queue_size > 100
+        for: 10m
+        labels:
+          severity: warning
+          service: analyzer
+        annotations:
+          summary: "Code analysis backlog is high"
+          description: "{{ $value }} items in analysis queue for more than 10 minutes"
+          runbook_url: "https://docs.sentra.com/runbooks/analysis-backlog"
+          
+      - alert: LowUserActivity
+        expr: sum(rate(user_actions_total[1h])) < 10
+        for: 30m
+        labels:
+          severity: info
+          service: business
+        annotations:
+          summary: "Low user activity detected"
+          description: "User activity is below normal levels: {{ $value }} actions/hour"
+          runbook_url: "https://docs.sentra.com/runbooks/low-activity"

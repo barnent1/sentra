@@ -1,0 +1,318 @@
+# SENTRA Load Testing Configuration with Artillery
+# Comprehensive performance testing scenarios
+
+config:
+  target: 'https://api.sentra.com'
+  phases:
+    # Warm-up phase
+    - duration: 60
+      arrivalRate: 5
+      name: "Warm-up"
+    # Ramp-up phase
+    - duration: 300
+      arrivalRate: 10
+      rampTo: 50
+      name: "Ramp-up"
+    # Sustained load
+    - duration: 600
+      arrivalRate: 50
+      name: "Sustained Load"
+    # Peak load
+    - duration: 300
+      arrivalRate: 100
+      rampTo: 200
+      name: "Peak Load"
+    # Cool-down
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 1
+      name: "Cool-down"
+  
+  # Global configuration
+  defaults:
+    headers:
+      'User-Agent': 'SENTRA Load Test'
+      'Content-Type': 'application/json'
+  
+  # Processor functions
+  processor: "./load-test-functions.js"
+  
+  # Environment variables
+  environments:
+    production:
+      target: 'https://api.sentra.com'
+    staging:
+      target: 'https://staging-api.sentra.com'
+    local:
+      target: 'http://localhost:3000'
+  
+  # Plugins
+  plugins:
+    metrics-by-endpoint:
+      useOnlyRequestNames: true
+    publish-metrics:
+      - type: datadog
+        apiKey: "{{ $processEnvironment.DD_API_KEY }}"
+        prefix: "sentra.loadtest"
+    expect:
+      outputFormat: 'json'
+      
+  # HTTP settings
+  http:
+    timeout: 30
+    pool: 50
+    maxSockets: 100
+    
+  # Payload configuration
+  payload:
+    path: "./test-data.csv"
+    fields:
+      - "userId"
+      - "projectId"
+      - "email"
+      - "apiKey"
+
+# Test scenarios
+scenarios:
+  # Authentication flow testing
+  - name: "User Authentication Flow"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "{{ email }}"
+            password: "LoadTest123!"
+          expect:
+            - statusCode: 200
+            - hasHeader: "set-cookie"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+            - json: "$.user.id"
+              as: "userId"
+      
+      - get:
+          url: "/api/auth/me"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - contentType: json
+      
+      - post:
+          url: "/api/auth/refresh"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+  # Project operations
+  - name: "Project Management"
+    weight: 25
+    flow:
+      # Login first
+      - function: "authenticate"
+      
+      # List projects
+      - get:
+          url: "/api/projects"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+      
+      # Create project
+      - post:
+          url: "/api/projects"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            name: "Load Test Project {{ $randomInt(1, 10000) }}"
+            description: "Project created during load testing"
+            language: "javascript"
+          expect:
+            - statusCode: 201
+          capture:
+            - json: "$.id"
+              as: "newProjectId"
+      
+      # Get project details
+      - get:
+          url: "/api/projects/{{ newProjectId }}"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+      
+      # Update project
+      - put:
+          url: "/api/projects/{{ newProjectId }}"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            description: "Updated during load test"
+          expect:
+            - statusCode: 200
+
+  # Agent orchestration testing
+  - name: "Agent Operations"
+    weight: 20
+    flow:
+      - function: "authenticate"
+      
+      # List available agents
+      - get:
+          url: "/api/agents"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+      
+      # Create agent task
+      - post:
+          url: "/api/agents/tasks"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            agentType: "code-analyzer"
+            projectId: "{{ projectId }}"
+            priority: "{{ $randomInt(1, 5) }}"
+            config:
+              analysisType: "full"
+              includeTests: true
+          expect:
+            - statusCode: 201
+          capture:
+            - json: "$.taskId"
+              as: "taskId"
+      
+      # Check task status
+      - get:
+          url: "/api/agents/tasks/{{ taskId }}"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+  # Real-time features (WebSocket simulation)
+  - name: "Real-time Updates"
+    weight: 15
+    flow:
+      - function: "authenticate"
+      
+      # Subscribe to project updates
+      - get:
+          url: "/api/projects/{{ projectId }}/updates"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+      
+      # Trigger update
+      - post:
+          url: "/api/projects/{{ projectId }}/trigger-update"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            updateType: "status"
+          expect:
+            - statusCode: 200
+
+  # Dashboard and analytics
+  - name: "Dashboard Data"
+    weight: 10
+    flow:
+      - function: "authenticate"
+      
+      # Get dashboard metrics
+      - get:
+          url: "/api/dashboard/metrics"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+            - contentType: json
+      
+      # Get activity feed
+      - get:
+          url: "/api/dashboard/activity"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          qs:
+            limit: 20
+            page: 1
+          expect:
+            - statusCode: 200
+      
+      # Get project statistics
+      - get:
+          url: "/api/projects/{{ projectId }}/stats"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+# Error scenarios to test system resilience
+  - name: "Error Handling"
+    weight: 5
+    flow:
+      # Test with invalid token
+      - get:
+          url: "/api/projects"
+          headers:
+            Authorization: "Bearer invalid-token"
+          expect:
+            - statusCode: 401
+      
+      # Test with non-existent resource
+      - get:
+          url: "/api/projects/non-existent-id"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 404
+      
+      # Test rate limiting
+      - loop:
+          - get:
+              url: "/api/health"
+          count: 100
+          whileTrue: "statusCode == 200"
+
+# Long-running operations
+  - name: "Long Operations"
+    weight: 5
+    flow:
+      - function: "authenticate"
+      
+      # Start code analysis (long-running operation)
+      - post:
+          url: "/api/analysis/start"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            projectId: "{{ projectId }}"
+            analysisType: "comprehensive"
+          expect:
+            - statusCode: 202
+          capture:
+            - json: "$.analysisId"
+              as: "analysisId"
+      
+      # Poll for completion
+      - loop:
+          - get:
+              url: "/api/analysis/{{ analysisId }}/status"
+              headers:
+                Authorization: "Bearer {{ authToken }}"
+          whileTrue: "json.status != 'completed'"
+          count: 10
+          
+      # Get analysis results
+      - get:
+          url: "/api/analysis/{{ analysisId }}/results"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200

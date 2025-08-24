@@ -1,0 +1,23 @@
+{
+  "name": "@sentra/scripts",
+  "version": "1.0.0",
+  "description": "SENTRA automation and testing scripts",
+  "scripts": {
+    "test:framework": "ts-node test-agent-framework.ts",
+    "setup:dev": "ts-node setup-development.ts",
+    "build:all": "ts-node build-all-services.ts",
+    "deploy:services": "ts-node deploy-services.ts"
+  },
+  "dependencies": {
+    "axios": "^1.5.0",
+    "fs-extra": "^11.1.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.5",
+    "@types/fs-extra": "^11.0.1",
+    "@types/uuid": "^9.0.2",
+    "typescript": "^5.1.6",
+    "ts-node": "^10.9.1"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "sentra-healthcheck",
+  "version": "1.0.0",
+  "description": "SENTRA Health Check Service",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.4.0",
+    "redis": "^4.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}

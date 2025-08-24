@@ -1,0 +1,241 @@
+import { EventEmitter } from 'events';
+import * as nodemailer from 'nodemailer';
+import MarkdownIt from 'markdown-it';
+import moment from 'moment-timezone';
+import { logger } from '../utils/logger';
+
+export interface EmailConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  auth: {
+    user: string;
+    pass: string;
+  };
+}
+
+export interface ClientUpdate {
+  id: string;
+  projectId: string;
+  type: string;
+  subject: string;
+  content: string;
+  recipients: string[];
+  priority: string;
+  scheduledAt?: Date;
+  sentAt?: Date;
+  status: string;
+  attachments: string[];
+}
+
+export class ClientCommunication extends EventEmitter {
+  private transporter: nodemailer.Transporter | null = null;
+  private markdown: MarkdownIt;
+  private emailTemplates = new Map<string, string>();
+
+  constructor(private emailConfig: EmailConfig) {
+    super();
+    this.markdown = new MarkdownIt();
+    this.initializeEmailTemplates();
+  }
+
+  async initialize(): Promise<void> {
+    logger.info('Initializing Client Communication system...');
+
+    try {
+      // Initialize email transporter
+      if (this.emailConfig.host) {
+        this.transporter = nodemailer.createTransporter({
+          host: this.emailConfig.host,
+          port: this.emailConfig.port,
+          secure: this.emailConfig.secure,
+          auth: this.emailConfig.auth,
+        });
+
+        // Verify connection
+        await this.transporter.verify();
+        logger.info('Email transporter configured successfully');
+      } else {
+        logger.warn('Email configuration not provided, using mock mode');
+      }
+
+      logger.info('Client Communication system initialized');
+    } catch (error) {
+      logger.error('Failed to initialize Client Communication:', error);
+      // Don't throw - continue in mock mode
+    }
+  }
+
+  async shutdown(): Promise<void> {
+    logger.info('Shutting down Client Communication system...');
+    if (this.transporter) {
+      this.transporter.close();
+    }
+  }
+
+  async sendUpdate(clientUpdate: ClientUpdate): Promise<{ success: boolean; error?: string }> {
+    try {
+      const emailContent = this.generateEmailContent(clientUpdate);
+      
+      if (this.transporter) {
+        const mailOptions = {
+          from: this.emailConfig.auth.user,
+          to: clientUpdate.recipients.join(', '),
+          subject: clientUpdate.subject,
+          html: emailContent,
+          priority: this.mapPriorityToEmail(clientUpdate.priority),
+        };
+
+        await this.transporter.sendMail(mailOptions);
+        logger.info('Client communication sent successfully', { 
+          updateId: clientUpdate.id,
+          recipients: clientUpdate.recipients.length 
+        });
+
+        return { success: true };
+      } else {
+        // Mock mode
+        logger.info('Mock client communication sent', {
+          updateId: clientUpdate.id,
+          subject: clientUpdate.subject,
+          recipients: clientUpdate.recipients.length,
+        });
+        return { success: true };
+      }
+    } catch (error) {
+      logger.error('Failed to send client communication:', { updateId: clientUpdate.id, error });
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+    }
+  }
+
+  async sendDailyStatusUpdate(projectId: string, status: any): Promise<void> {
+    const template = this.emailTemplates.get('daily_status');
+    if (!template) {
+      logger.warn('Daily status template not found');
+      return;
+    }
+
+    const content = this.interpolateTemplate(template, {
+      projectId,
+      date: moment().format('MMMM Do, YYYY'),
+      ...status,
+    });
+
+    // This would send to configured recipients for the project
+    logger.info('Daily status update generated', { projectId });
+  }
+
+  private generateEmailContent(clientUpdate: ClientUpdate): string {
+    const template = `
+      <html>
+      <head>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .header { background: #f4f4f4; padding: 20px; border-bottom: 3px solid #007cba; }
+          .content { padding: 20px; }
+          .footer { background: #f4f4f4; padding: 10px; font-size: 12px; }
+          .priority-urgent { border-left: 4px solid #ff4444; }
+          .priority-high { border-left: 4px solid #ff8800; }
+          .priority-medium { border-left: 4px solid #ffaa00; }
+          .priority-low { border-left: 4px solid #00aa00; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Project Update</h1>
+          <p>From: Mike PM Agent | Date: ${moment().format('MMMM Do, YYYY HH:mm')}</p>
+        </div>
+        <div class="content priority-${clientUpdate.priority}">
+          ${this.markdown.render(clientUpdate.content)}
+        </div>
+        <div class="footer">
+          <p>This message was automatically generated by the SENTRA AI Project Management System.</p>
+          <p>Project ID: ${clientUpdate.projectId} | Update ID: ${clientUpdate.id}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    return template;
+  }
+
+  private mapPriorityToEmail(priority: string): 'high' | 'normal' | 'low' {
+    const mapping: Record<string, 'high' | 'normal' | 'low'> = {
+      'urgent': 'high',
+      'high': 'high',
+      'medium': 'normal',
+      'low': 'low',
+    };
+    return mapping[priority] || 'normal';
+  }
+
+  private initializeEmailTemplates(): void {
+    this.emailTemplates.set('daily_status', `
+# Daily Project Status - {{date}}
+
+## Project: {{projectName}}
+
+### Today's Progress
+- **Completed Stories**: {{completedStories}}
+- **In Progress**: {{inProgressStories}}  
+- **Blocked**: {{blockedStories}}
+
+### Metrics
+- **Velocity**: {{currentVelocity}} story points
+- **Burn Rate**: {{burnRate}}%
+- **On Track**: {{onTrack ? 'Yes' : 'No'}}
+
+### Key Updates
+{{#each updates}}
+- {{this}}
+{{/each}}
+
+### Next Steps
+{{#each nextSteps}}
+- {{this}}
+{{/each}}
+
+### Issues & Risks
+{{#each risks}}
+- **{{severity}}**: {{description}}
+{{/each}}
+
+---
+*Generated by Mike PM Agent*
+    `);
+
+    this.emailTemplates.set('milestone_report', `
+# Milestone Report - {{milestoneName}}
+
+## Status: {{status}}
+
+### Timeline
+- **Target Date**: {{targetDate}}
+- **Actual Date**: {{actualDate}}
+- **Variance**: {{variance}}
+
+### Deliverables
+{{#each deliverables}}
+- {{name}}: {{status}}
+{{/each}}
+
+### Impact Analysis
+{{impactAnalysis}}
+
+---
+*Generated by Mike PM Agent*
+    `);
+  }
+
+  private interpolateTemplate(template: string, data: any): string {
+    let result = template;
+    
+    // Simple template interpolation
+    for (const [key, value] of Object.entries(data)) {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      result = result.replace(regex, String(value));
+    }
+
+    return result;
+  }
+}

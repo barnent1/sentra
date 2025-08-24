@@ -1,0 +1,20 @@
+{
+  "name": "@sentra/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for SENTRA platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.1.6",
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0"
+  }
+}

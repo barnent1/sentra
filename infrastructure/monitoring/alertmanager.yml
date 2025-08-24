@@ -1,0 +1,202 @@
+global:
+  smtp_smarthost: '${SMTP_HOST}:${SMTP_PORT}'
+  smtp_from: '${SMTP_FROM_EMAIL}'
+  smtp_auth_username: '${SMTP_USER}'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: true
+
+# Template files for notifications
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Route configuration
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 12h
+  receiver: 'sentra-ops-team'
+  
+  routes:
+    # Critical alerts - immediate notification
+    - match:
+        severity: critical
+      receiver: 'critical-alerts'
+      group_wait: 0s
+      repeat_interval: 5m
+      
+    # Warning alerts - less frequent notifications
+    - match:
+        severity: warning
+      receiver: 'warning-alerts'
+      group_wait: 30s
+      repeat_interval: 2h
+      
+    # Service-specific routing
+    - match:
+        service: database
+      receiver: 'database-team'
+      
+    - match:
+        service: auth
+      receiver: 'security-team'
+      
+    # Maintenance window - suppress non-critical alerts
+    - match:
+        maintenance: 'true'
+      receiver: 'null'
+
+# Inhibition rules - suppress alerts when other alerts are firing
+inhibit_rules:
+  # Inhibit warning if critical alert for same service is firing
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['service', 'instance']
+    
+  # Inhibit service alerts if entire system is down
+  - source_match:
+      alertname: 'SystemDown'
+    target_match_re:
+      alertname: '(ServiceDown|HighLatency|DatabaseConnectionFailed)'
+    equal: ['cluster']
+
+# Receiver configurations
+receivers:
+  - name: 'null'
+    
+  - name: 'sentra-ops-team'
+    email_configs:
+      - to: 'ops@sentra.com'
+        subject: '[SENTRA Alert] {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Instance: {{ .Labels.instance }}
+          Severity: {{ .Labels.severity }}
+          Timestamp: {{ .StartsAt }}
+          
+          {{ if .GeneratorURL }}
+          Graph: {{ .GeneratorURL }}
+          {{ end }}
+          {{ end }}
+          
+    webhook_configs:
+      - url: 'http://notification-service:3000/webhook/alerts'
+        send_resolved: true
+        http_config:
+          bearer_token: '${WEBHOOK_TOKEN}'
+        
+  - name: 'critical-alerts'
+    email_configs:
+      - to: 'critical@sentra.com,ops@sentra.com'
+        subject: '🚨 [CRITICAL] SENTRA System Alert'
+        body: |
+          CRITICAL ALERT DETECTED
+          
+          {{ range .Alerts }}
+          🔥 {{ .Annotations.summary }}
+          
+          Description: {{ .Annotations.description }}
+          Service: {{ .Labels.service }}
+          Instance: {{ .Labels.instance }}
+          Started: {{ .StartsAt }}
+          
+          Runbook: {{ .Annotations.runbook_url }}
+          Dashboard: {{ .Annotations.dashboard_url }}
+          {{ end }}
+          
+          Immediate action required!
+        headers:
+          X-Priority: '1'
+          
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-critical'
+        username: 'SENTRA Alerts'
+        icon_emoji: ':fire:'
+        title: '🚨 Critical Alert - SENTRA'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          
+          *Service:* {{ .Labels.service }}
+          *Instance:* {{ .Labels.instance }}
+          *Description:* {{ .Annotations.description }}
+          *Started:* {{ .StartsAt }}
+          
+          <{{ .Annotations.runbook_url }}|View Runbook> | <{{ .Annotations.dashboard_url }}|View Dashboard>
+          {{ end }}
+        send_resolved: true
+        
+    pagerduty_configs:
+      - routing_key: '${PAGERDUTY_INTEGRATION_KEY}'
+        description: 'SENTRA Critical Alert: {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+        
+  - name: 'warning-alerts'
+    email_configs:
+      - to: 'ops@sentra.com'
+        subject: '⚠️ [WARNING] SENTRA System Alert'
+        body: |
+          Warning Alert Detected
+          
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          
+          Service: {{ .Labels.service }}
+          Description: {{ .Annotations.description }}
+          Started: {{ .StartsAt }}
+          {{ end }}
+          
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-warning'
+        username: 'SENTRA Alerts'
+        icon_emoji: ':warning:'
+        title: '⚠️ Warning Alert - SENTRA'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          Service: {{ .Labels.service }}
+          Description: {{ .Annotations.description }}
+          {{ end }}
+        send_resolved: true
+        
+  - name: 'database-team'
+    email_configs:
+      - to: 'database@sentra.com,ops@sentra.com'
+        subject: '[DATABASE] SENTRA Alert'
+        body: |
+          Database Alert Detected
+          
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          
+          Database: {{ .Labels.database }}
+          Instance: {{ .Labels.instance }}
+          Description: {{ .Annotations.description }}
+          
+          Troubleshooting: {{ .Annotations.runbook_url }}
+          {{ end }}
+          
+  - name: 'security-team'
+    email_configs:
+      - to: 'security@sentra.com,ops@sentra.com'
+        subject: '🔒 [SECURITY] SENTRA Alert'
+        body: |
+          Security Alert Detected
+          
+          {{ range .Alerts }}
+          {{ .Annotations.summary }}
+          
+          Service: {{ .Labels.service }}
+          Source IP: {{ .Labels.source_ip }}
+          Description: {{ .Annotations.description }}
+          
+          Immediate investigation required!
+          {{ end }}
+        headers:
+          X-Priority: '1'

@@ -1,0 +1,25 @@
+{
+  "name": "@sentra/cache",
+  "version": "1.0.0",
+  "description": "SENTRA Production Caching System",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "dependencies": {
+    "redis": "^4.6.5",
+    "ioredis": "^5.3.1",
+    "node-cache": "^5.1.2",
+    "lru-cache": "^9.1.1",
+    "compression": "^1.7.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/compression": "^1.7.2",
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0"
+  }
+}
