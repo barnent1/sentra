@@ -1,0 +1,83 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Core Package",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/packages/core/src/index.ts",
+      "outFiles": ["${workspaceFolder}/packages/core/dist/**/*.js"],
+      "runtimeArgs": ["-r", "tsx/cjs"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug API Package",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/packages/api/src/index.ts",
+      "outFiles": ["${workspaceFolder}/packages/api/dist/**/*.js"],
+      "runtimeArgs": ["-r", "tsx/cjs"],
+      "env": {
+        "NODE_ENV": "development",
+        "DATABASE_URL": "postgresql://sentra:sentra123@localhost:5433/sentra_evolution"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "port": 9229
+    },
+    {
+      "name": "Debug CLI",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/packages/cli/src/cli.ts",
+      "outFiles": ["${workspaceFolder}/packages/cli/dist/**/*.js"],
+      "runtimeArgs": ["-r", "tsx/cjs"],
+      "args": ["--help"],
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug Dashboard (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/packages/dashboard/src",
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/*"
+      }
+    },
+    {
+      "name": "Attach to Docker API",
+      "type": "node",
+      "request": "attach",
+      "address": "localhost",
+      "port": 9229,
+      "localRoot": "${workspaceFolder}/packages/api",
+      "remoteRoot": "/app/packages/api",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand", "--no-coverage", "--no-cache"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Full Stack",
+      "configurations": ["Debug API Package", "Debug Dashboard (Chrome)"]
+    }
+  ]
+}

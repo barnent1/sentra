@@ -1,0 +1,4 @@
+
+> @sentra/core@1.0.0 test:unit
+> jest --testPathIgnorePatterns=integration --testPathIgnorePatterns=performance --testPathIgnorePatterns=load
+

@@ -1,0 +1,147 @@
+version: '3.8'
+
+services:
+  # Existing PostgreSQL service (reused from main compose)
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: sentra-evolution-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - evolution_postgres_data:/var/lib/postgresql/data
+      - ./services/api/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./services/api/db/seeds.sql:/docker-entrypoint-initdb.d/02-seeds.sql
+    ports:
+      - "5433:5432"  # Different port to avoid conflict with main compose
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - evolution-network
+
+  # TypeScript Development Environment
+  evolution-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.evolution-dev
+    container_name: sentra-evolution-dev
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+      - VITE_API_URL=http://localhost:3001
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - evolution_node_modules:/app/packages/*/node_modules
+    ports:
+      - "3000:3000"  # Dashboard dev server
+      - "3001:3001"  # API dev server
+      - "9229:9229"  # Node.js debugging
+    depends_on:
+      postgres:
+        condition: service_healthy
+    working_dir: /app
+    command: npm run dev
+    networks:
+      - evolution-network
+
+  # Hot reload for individual packages
+  core-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.evolution-dev
+    container_name: sentra-core-dev
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./packages/core:/app/packages/core
+      - ./packages/types:/app/packages/types
+      - /app/packages/core/node_modules
+    working_dir: /app/packages/core
+    command: npm run dev
+    networks:
+      - evolution-network
+
+  dashboard-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.evolution-dev
+    container_name: sentra-dashboard-dev
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3001
+    volumes:
+      - ./packages/dashboard:/app/packages/dashboard
+      - ./packages/core:/app/packages/core
+      - ./packages/types:/app/packages/types
+      - /app/packages/dashboard/node_modules
+    ports:
+      - "5173:5173"  # Vite dev server
+    working_dir: /app/packages/dashboard
+    command: npm run dev
+    networks:
+      - evolution-network
+
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.evolution-dev
+    container_name: sentra-api-dev
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=${DATABASE_URL}
+    volumes:
+      - ./packages/api:/app/packages/api
+      - ./packages/core:/app/packages/core
+      - ./packages/types:/app/packages/types
+      - /app/packages/api/node_modules
+    ports:
+      - "8001:8001"  # TypeScript API server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    working_dir: /app/packages/api
+    command: npm run dev
+    networks:
+      - evolution-network
+
+  # Development tools
+  type-check:
+    build:
+      context: .
+      dockerfile: Dockerfile.evolution-dev
+    container_name: sentra-type-check
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+    command: npm run type-check
+    profiles: ["tools"]
+    networks:
+      - evolution-network
+
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile.evolution-dev
+    container_name: sentra-lint
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+    command: npm run lint
+    profiles: ["tools"]
+    networks:
+      - evolution-network
+
+volumes:
+  evolution_postgres_data:
+  evolution_node_modules:
+
+networks:
+  evolution-network:
+    driver: bridge

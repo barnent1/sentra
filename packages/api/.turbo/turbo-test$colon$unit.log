@@ -1,0 +1,32 @@
+
+> @sentra/api@1.0.0 test:unit
+> jest --testPathIgnorePatterns=integration --testPathIgnorePatterns=load
+
+FAIL src/__tests__/routes/evolution.unit.test.ts
+  ● Test suite failed to run
+
+    Cannot find module '@sentra/core' from 'src/__tests__/setup.ts'
+
+       8 |
+       9 | // Mock external dependencies
+    > 10 | jest.mock('@sentra/core');
+         |      ^
+      11 | jest.mock('express');
+      12 | jest.mock('socket.io');
+      13 | jest.mock('jsonwebtoken');
+
+      at Resolver._throwModNotFoundError (../../node_modules/jest-resolve/build/resolver.js:427:11)
+      at Object.<anonymous> (src/__tests__/setup.ts:10:6)
+
+Test Suites: 1 failed, 1 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        0.195 s
+Ran all test suites.
+npm error Lifecycle script `test:unit` failed with error:
+npm error code 1
+npm error path /Users/barnent1/Projects/sentra/packages/api
+npm error workspace @sentra/api@1.0.0
+npm error location /Users/barnent1/Projects/sentra/packages/api
+npm error command failed
+npm error command sh -c jest --testPathIgnorePatterns=integration --testPathIgnorePatterns=load

@@ -1,0 +1,207 @@
+version: '3.8'
+
+services:
+  # Test Database
+  postgres-test:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: sentra_test
+      POSTGRES_USER: sentra_test
+      POSTGRES_PASSWORD: test_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+      - ./packages/core/src/db/migrations:/docker-entrypoint-initdb.d/migrations
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentra_test -d sentra_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Vector Database for Testing
+  qdrant-test:
+    image: qdrant/qdrant:v1.7.0
+    ports:
+      - "6334:6333"
+      - "6335:6334"
+    volumes:
+      - qdrant_test_data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__SERVICE__GRPC_PORT: 6334
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Redis for Caching in Tests
+  redis-test:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_test_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Service for E2E Tests
+  api-test:
+    build:
+      context: .
+      dockerfile: packages/api/Dockerfile.test
+    ports:
+      - "3003:3002"
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://sentra_test:test_password@postgres-test:5432/sentra_test
+      QDRANT_URL: http://qdrant-test:6333
+      REDIS_URL: redis://redis-test:6379
+      OPENAI_API_KEY: test-api-key-mock
+      JWT_SECRET: test-jwt-secret-for-testing-only
+      API_PORT: 3002
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      qdrant-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    volumes:
+      - ./packages:/app/packages
+      - ./package.json:/app/package.json
+      - ./turbo.json:/app/turbo.json
+    command: ["npm", "run", "dev", "--workspace=@sentra/api"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Dashboard Service for E2E Tests
+  dashboard-test:
+    build:
+      context: .
+      dockerfile: packages/dashboard/Dockerfile.test
+    ports:
+      - "3001:3000"
+    environment:
+      NODE_ENV: test
+      VITE_API_BASE_URL: http://api-test:3002
+      VITE_WS_URL: ws://api-test:3002
+    depends_on:
+      api-test:
+        condition: service_healthy
+    volumes:
+      - ./packages/dashboard:/app/packages/dashboard
+      - ./packages/types:/app/packages/types
+      - ./packages/core:/app/packages/core
+    command: ["npm", "run", "dev", "--workspace=@sentra/dashboard"]
+
+  # Mobile PWA Service for E2E Tests
+  mobile-test:
+    build:
+      context: .
+      dockerfile: packages/mobile/Dockerfile.test
+    ports:
+      - "3002:3001"
+    environment:
+      NODE_ENV: test
+      VITE_API_BASE_URL: http://api-test:3002
+      VITE_WS_URL: ws://api-test:3002
+      VITE_PWA_MODE: test
+    depends_on:
+      api-test:
+        condition: service_healthy
+    volumes:
+      - ./packages/mobile:/app/packages/mobile
+      - ./packages/types:/app/packages/types
+      - ./packages/core:/app/packages/core
+    command: ["npm", "run", "dev", "--workspace=@sentra/mobile"]
+
+  # Test Runner Service
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://sentra_test:test_password@postgres-test:5432/sentra_test
+      QDRANT_URL: http://qdrant-test:6333
+      REDIS_URL: redis://redis-test:6379
+      API_BASE_URL: http://api-test:3002
+      DASHBOARD_BASE_URL: http://dashboard-test:3000
+      MOBILE_BASE_URL: http://mobile-test:3001
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      qdrant-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+      api-test:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - test_reports:/app/test-reports
+      - coverage_reports:/app/coverage
+    working_dir: /app
+    profiles:
+      - test
+
+  # Load Testing with Artillery
+  load-test:
+    image: artilleryio/artillery:latest
+    volumes:
+      - ./tests/load:/scripts
+      - load_test_reports:/reports
+    environment:
+      API_BASE_URL: http://api-test:3002
+    depends_on:
+      api-test:
+        condition: service_healthy
+    command: ["run", "--output", "/reports/load-test-results.json", "/scripts/load-test.yml"]
+    profiles:
+      - load-test
+
+  # Performance Monitoring
+  performance-monitor:
+    image: grafana/k6:latest
+    volumes:
+      - ./tests/performance:/scripts
+      - performance_reports:/reports
+    environment:
+      API_BASE_URL: http://api-test:3002
+    depends_on:
+      api-test:
+        condition: service_healthy
+    command: ["run", "--out", "json=/reports/performance-results.json", "/scripts/performance-test.js"]
+    profiles:
+      - performance
+
+volumes:
+  postgres_test_data:
+    driver: local
+  qdrant_test_data:
+    driver: local  
+  redis_test_data:
+    driver: local
+  test_reports:
+    driver: local
+  coverage_reports:
+    driver: local
+  load_test_reports:
+    driver: local
+  performance_reports:
+    driver: local
+
+networks:
+  default:
+    name: sentra-test-network

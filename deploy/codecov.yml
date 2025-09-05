@@ -1,0 +1,93 @@
+codecov:
+  require_ci_to_pass: true
+  notify:
+    wait_for_ci: true
+
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  status:
+    project:
+      default:
+        target: 90%
+        threshold: 2%
+        base: auto
+        informational: false
+      core:
+        target: 90%
+        threshold: 2%
+        paths:
+          - "packages/core/"
+        flags:
+          - core
+      api:
+        target: 85%
+        threshold: 3%
+        paths:
+          - "packages/api/"
+        flags:
+          - api
+      dashboard:
+        target: 80%
+        threshold: 3%
+        paths:
+          - "packages/dashboard/"
+        flags:
+          - dashboard
+
+    patch:
+      default:
+        target: 85%
+        threshold: 5%
+        base: auto
+        informational: false
+
+flags:
+  unit:
+    carryforward: false
+    paths:
+      - "packages/*/src/**/*.ts"
+      - "packages/*/src/**/*.vue"
+  integration:
+    carryforward: false
+    paths:
+      - "packages/core/src/**/*.ts"
+  core:
+    carryforward: false
+    paths:
+      - "packages/core/src/**/*.ts"
+  api:
+    carryforward: false
+    paths:
+      - "packages/api/src/**/*.ts"
+  dashboard:
+    carryforward: false
+    paths:
+      - "packages/dashboard/src/**/*.ts"
+      - "packages/dashboard/src/**/*.vue"
+
+ignore:
+  - "packages/*/dist/**"
+  - "packages/*/node_modules/**"
+  - "packages/*/coverage/**"
+  - "packages/*/__tests__/**"
+  - "packages/*/src/**/*.test.ts"
+  - "packages/*/src/**/*.spec.ts"
+  - "packages/*/src/**/*.d.ts"
+  - "packages/*/src/**/disabled/**"
+  - "packages/*/jest.config.js"
+  - "packages/*/playwright.config.ts"
+  - "deploy/**"
+  - "meteor-up/**"
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+
+github_checks:
+  annotations: true

@@ -1,0 +1,50 @@
+{$DOMAIN:localhost} {
+    # Redirect to HTTPS except for localhost
+    @notLocal not remote_ip private_ranges
+    redir @notLocal https://{host}{uri} permanent
+
+    # API and MCP routes
+    handle /api/* {
+        reverse_proxy api:8000
+    }
+    
+    handle /mcp {
+        reverse_proxy api:8000
+    }
+    
+    handle /approve* {
+        reverse_proxy api:8000
+    }
+    
+    handle /health {
+        reverse_proxy api:8000
+    }
+
+    # Default response for other routes
+    handle {
+        respond "Sentra Server - Access via MCP tools" 200
+    }
+
+    # Security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security max-age=63072000
+        # Prevent clickjacking
+        X-Frame-Options DENY
+        # Prevent MIME type sniffing
+        X-Content-Type-Options nosniff
+        # XSS protection
+        X-XSS-Protection "1; mode=block"
+        # Remove server header
+        -Server
+    }
+
+    # Logging
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 100mb
+            roll_keep 3
+        }
+        format json
+    }
+}

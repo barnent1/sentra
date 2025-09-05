@@ -1,0 +1,2 @@
+-- Sentra database seeds
+-- Insert default data if needed

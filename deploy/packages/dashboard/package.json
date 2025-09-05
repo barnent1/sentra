@@ -1,0 +1,62 @@
+{
+  "name": "@sentra/dashboard",
+  "version": "1.0.0",
+  "description": "Vue.js Evolution Dashboard for Sentra Evolutionary Agent System",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite dev",
+    "preview": "vite preview",
+    "clean": "rm -rf dist",
+    "lint": "eslint src --ext .ts,.vue",
+    "lint:fix": "eslint src --ext .ts,.vue --fix",
+    "type-check": "vue-tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "e2e": "playwright test",
+    "e2e:headed": "playwright test --headed",
+    "e2e:ui": "playwright test --ui"
+  },
+  "dependencies": {
+    "@headlessui/vue": "^1.7.16",
+    "@heroicons/vue": "^2.0.18",
+    "@sentra/core": "*",
+    "@sentra/types": "*",
+    "@vueuse/core": "^10.7.0",
+    "chart.js": "^4.4.1",
+    "clsx": "^2.1.0",
+    "pinia": "^2.3.1",
+    "tailwind-merge": "^2.2.0",
+    "vue": "^3.5.21",
+    "vue-chartjs": "^5.3.0",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.41.0",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.6",
+    "@vitejs/plugin-vue": "^5.0.2",
+    "@vue/eslint-config-typescript": "^12.0.0",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.5.1",
+    "@vue/vue3-jest": "^29.2.6",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.56.0",
+    "eslint-plugin-vue": "^9.19.2",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "playwright": "^1.41.0",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.4.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vue-tsc": "^2.2.12"
+  },
+  "files": [
+    "dist"
+  ]
+}

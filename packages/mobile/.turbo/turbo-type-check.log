@@ -1,0 +1,45 @@
+
+> @sentra/mobile@1.0.0 type-check
+> vue-tsc --noEmit
+
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module './dist/shared.cjs.js'
+Require stack:
+- /Users/barnent1/Projects/sentra/node_modules/@vue/shared/index.js
+- /Users/barnent1/Projects/sentra/node_modules/@vue/language-core/lib/utils/shared.js
+- /Users/barnent1/Projects/sentra/node_modules/@vue/language-core/lib/codegen/globalTypes.js
+- /Users/barnent1/Projects/sentra/node_modules/@vue/language-core/index.js
+- /Users/barnent1/Projects/sentra/node_modules/vue-tsc/index.js
+- /Users/barnent1/Projects/sentra/node_modules/vue-tsc/bin/vue-tsc.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (/Users/barnent1/Projects/sentra/node_modules/@vue/shared/index.js:6:20)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/barnent1/Projects/sentra/node_modules/@vue/shared/index.js',
+    '/Users/barnent1/Projects/sentra/node_modules/@vue/language-core/lib/utils/shared.js',
+    '/Users/barnent1/Projects/sentra/node_modules/@vue/language-core/lib/codegen/globalTypes.js',
+    '/Users/barnent1/Projects/sentra/node_modules/@vue/language-core/index.js',
+    '/Users/barnent1/Projects/sentra/node_modules/vue-tsc/index.js',
+    '/Users/barnent1/Projects/sentra/node_modules/vue-tsc/bin/vue-tsc.js'
+  ]
+}
+
+Node.js v22.15.1
+npm error Lifecycle script `type-check` failed with error:
+npm error code 1
+npm error path /Users/barnent1/Projects/sentra/packages/mobile
+npm error workspace @sentra/mobile@1.0.0
+npm error location /Users/barnent1/Projects/sentra/packages/mobile
+npm error command failed
+npm error command sh -c vue-tsc --noEmit

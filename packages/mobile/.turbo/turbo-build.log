@@ -1,0 +1,23 @@
+
+> @sentra/mobile@1.0.0 build
+> vite build
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+vite v5.4.19 building for production...
+transforming...
+✓ 733 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/registerSW.js                0.13 kB
+dist/manifest.webmanifest         0.51 kB
+dist/index.html                   8.46 kB │ gzip:  2.48 kB
+dist/assets/index-BI_L6dJe.css    5.32 kB │ gzip:  1.80 kB
+dist/assets/index-DpjwW6P0.js   168.19 kB │ gzip: 57.82 kB
+✓ built in 773ms
+
+PWA v0.17.5
+mode      generateSW
+precache  6 entries (179.56 KiB)
+files generated
+  dist/sw.js
+  dist/workbox-f3ab0377.js

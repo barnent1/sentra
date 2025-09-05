@@ -1,0 +1,52 @@
+{
+  "servers": {
+    "one": {
+      "host": "52.23.29.2",
+      "username": "ubuntu",
+      "pem": "~/.ssh/sentra.pem"
+    }
+  },
+  "app": {
+    "name": "sentra",
+    "path": "../",
+    "servers": {
+      "one": {}
+    },
+    "buildOptions": {
+      "serverOnly": true
+    },
+    "env": {
+      "ROOT_URL": "https://your-domain.com",
+      "SENTRA_PUBLIC_URL": "https://your-domain.com",
+      "NODE_ENV": "production"
+    },
+    "docker": {
+      "image": "sentra:latest"
+    },
+    "deployCheckWaitTime": 60,
+    "enableUploadProgressBar": true
+  },
+  "proxy": {
+    "domains": "your-domain.com,www.your-domain.com",
+    "ssl": {
+      "letsEncryptEmail": "you@example.com",
+      "forceSSL": true
+    }
+  },
+  "postgres": {
+    "version": "16",
+    "servers": {
+      "one": {}
+    },
+    "env": {
+      "POSTGRES_DB": "sentra",
+      "POSTGRES_USER": "sentra"
+    }
+  },
+  "hooks": {
+    "pre.setup": "./hooks/pre-setup.sh",
+    "post.setup": "./hooks/post-setup.sh", 
+    "pre.deploy": "./hooks/pre-deploy.sh",
+    "post.deploy": "./hooks/post-deploy.sh"
+  }
+}

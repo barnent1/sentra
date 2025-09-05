@@ -1,0 +1,84 @@
+{
+  "compilerOptions": {
+    // Strict Type Checking - Zero Tolerance for 'any'
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+
+    // Modules
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    // Emit
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "removeComments": false,
+    "importHelpers": true,
+
+    // JavaScript Support
+    "allowJs": false,
+    "checkJs": false,
+
+    // Interop Constraints
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Language and Environment
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "useDefineForClassFields": true,
+
+    // Completeness
+    "skipLibCheck": true,
+
+    // Path Mapping
+    "baseUrl": ".",
+    "paths": {
+      "@sentra/core": ["./packages/core/src"],
+      "@sentra/core/*": ["./packages/core/src/*"],
+      "@sentra/types": ["./packages/types/src"],
+      "@sentra/types/*": ["./packages/types/src/*"],
+      "@sentra/dashboard": ["./packages/dashboard/src"],
+      "@sentra/dashboard/*": ["./packages/dashboard/src/*"],
+      "@sentra/api": ["./packages/api/src"],
+      "@sentra/api/*": ["./packages/api/src/*"],
+      "@sentra/cli": ["./packages/cli/src"],
+      "@sentra/cli/*": ["./packages/cli/src/*"],
+      "@sentra/mobile": ["./packages/mobile/src"],
+      "@sentra/mobile/*": ["./packages/mobile/src/*"]
+    }
+  },
+  "include": ["packages/*/src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [
+    { "path": "./packages/types" },
+    { "path": "./packages/core" },
+    { "path": "./packages/dashboard" },
+    { "path": "./packages/api" },
+    { "path": "./packages/cli" },
+    { "path": "./packages/mobile" }
+  ]
+}

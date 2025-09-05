@@ -1,0 +1,175 @@
+
+> @sentra/core@1.0.0 build
+> tsc --build
+
+src/dna/index.ts(12,31): error TS2307: Cannot find module './test-engine' or its corresponding type declarations.
+src/dna/index.ts(13,34): error TS2307: Cannot find module './test-evolution' or its corresponding type declarations.
+src/observability/agent-monitor.ts(172,62): error TS6133: 'sessionCount' is declared but its value is never read.
+src/observability/agent-monitor.ts(185,11): error TS2375: Type '{ agentId: AgentInstanceId; sessionId: SessionId | undefined; status: "error" | "idle" | "active" | "offline"; currentTask: TaskId | undefined; toolsInUse: readonly string[]; performance: { ...; }; resources: { ...; }; activity: { ...; }; }' is not assignable to type 'AgentMetrics' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'sessionId' are incompatible.
+    Type 'SessionId | undefined' is not assignable to type 'SessionId'.
+      Type 'undefined' is not assignable to type 'SessionId'.
+        Type 'undefined' is not assignable to type 'string'.
+src/observability/agent-monitor.ts(255,16): error TS2540: Cannot assign to 'overallHealth' because it is a read-only property.
+src/observability/agent-monitor.ts(261,16): error TS2540: Cannot assign to 'recommendations' because it is a read-only property.
+src/observability/agent-monitor.ts(510,45): error TS18048: 'latestEvent' is possibly 'undefined'.
+src/observability/agent-monitor.ts(513,9): error TS18048: 'latestEvent' is possibly 'undefined'.
+src/observability/agent-monitor.ts(519,26): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(532,33): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(536,31): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(553,30): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(557,29): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(561,32): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(565,33): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(569,29): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(573,28): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(577,36): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(611,32): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/agent-monitor.ts(616,37): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/demo-integration.ts(11,28): error TS6133: 'BuiltInCollectors' is declared but its value is never read.
+src/observability/demo-integration.ts(12,1): error TS6133: 'createSessionId' is declared but its value is never read.
+src/observability/demo-integration.ts(33,14): error TS2323: Cannot redeclare exported variable 'ObservabilityDemoSimulator'.
+src/observability/demo-integration.ts(209,7): error TS2412: Type 'undefined' is not assignable to type 'Timeout' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+src/observability/demo-integration.ts(273,7): error TS2353: Object literal may only specify known properties, and 'context' does not exist in type 'Omit<PreToolHookData, "sessionId">'.
+src/observability/demo-integration.ts(287,57): error TS2379: Argument of type '{ agentId: AgentInstanceId; toolName: string; duration: number; success: boolean; result: string | undefined; tokensUsed: number; errorCount: number; warnings: string[]; taskId: TaskId | undefined; performanceMetrics: { ...; }; }' is not assignable to parameter of type 'Omit<PostToolHookData, "sessionId">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'taskId' are incompatible.
+    Type 'TaskId | undefined' is not assignable to type 'TaskId'.
+      Type 'undefined' is not assignable to type 'TaskId'.
+        Type 'undefined' is not assignable to type 'string'.
+src/observability/demo-integration.ts(309,17): error TS2304: Cannot find name 'actualDuration'.
+src/observability/demo-integration.ts(321,51): error TS2379: Argument of type '{ agentId: AgentInstanceId; taskId: TaskId | undefined; decisionType: "tool_selection" | "approach_choice" | "parameter_tuning" | "strategy_pivot"; ... 5 more ...; factors: { ...; }; }' is not assignable to parameter of type 'Omit<AgentDecisionHookData, "sessionId">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'taskId' are incompatible.
+    Type 'TaskId | undefined' is not assignable to type 'TaskId'.
+      Type 'undefined' is not assignable to type 'TaskId'.
+        Type 'undefined' is not assignable to type 'string'.
+src/observability/demo-integration.ts(327,23): error TS18048: 'selectedOption' is possibly 'undefined'.
+src/observability/demo-integration.ts(329,18): error TS18048: 'selectedOption' is possibly 'undefined'.
+src/observability/demo-integration.ts(356,7): error TS2322: Type '"store" | "retrieve" | "update" | "forget" | undefined' is not assignable to type '"store" | "retrieve" | "update" | "forget"'.
+  Type 'undefined' is not assignable to type '"store" | "retrieve" | "update" | "forget"'.
+src/observability/demo-integration.ts(357,7): error TS2322: Type '"working" | "episodic" | "semantic" | "procedural" | undefined' is not assignable to type '"working" | "episodic" | "semantic" | "procedural"'.
+  Type 'undefined' is not assignable to type '"working" | "episodic" | "semantic" | "procedural"'.
+src/observability/demo-integration.ts(382,7): error TS2322: Type '"conflict_resolution" | "collaboration" | "delegation" | "information_sharing" | undefined' is not assignable to type '"conflict_resolution" | "collaboration" | "delegation" | "information_sharing"'.
+  Type 'undefined' is not assignable to type '"conflict_resolution" | "collaboration" | "delegation" | "information_sharing"'.
+src/observability/demo-integration.ts(384,7): error TS2322: Type '"low" | "high" | "critical" | "medium" | undefined' is not assignable to type '"low" | "high" | "critical" | "medium"'.
+  Type 'undefined' is not assignable to type '"low" | "high" | "critical" | "medium"'.
+src/observability/demo-integration.ts(386,7): error TS2375: Type '{ sharedTaskId: TaskId | undefined; sharedResources: string[]; dependencies: string[]; }' is not assignable to type '{ readonly sharedTaskId?: TaskId; readonly sharedResources: readonly string[]; readonly dependencies: readonly string[]; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'sharedTaskId' are incompatible.
+    Type 'TaskId | undefined' is not assignable to type 'TaskId'.
+      Type 'undefined' is not assignable to type 'TaskId'.
+        Type 'undefined' is not assignable to type 'string'.
+src/observability/demo-integration.ts(406,5): error TS2322: Type '{ id: AgentInstanceId; name: string; type: "developer" | "orchestrator" | "specialist"; sessionId?: string; currentTask?: TaskId; toolHistory: string[]; decisionCount: number; errorRate: number; efficiency: number; } | undefined' is not assignable to type '{ id: AgentInstanceId; name: string; type: "developer" | "orchestrator" | "specialist"; sessionId?: string; currentTask?: TaskId; toolHistory: string[]; decisionCount: number; errorRate: number; efficiency: number; }'.
+  Type 'undefined' is not assignable to type '{ id: AgentInstanceId; name: string; type: "developer" | "orchestrator" | "specialist"; sessionId?: string; currentTask?: TaskId; toolHistory: string[]; decisionCount: number; errorRate: number; efficiency: number; }'.
+src/observability/demo-integration.ts(437,5): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+src/observability/demo-integration.ts(444,5): error TS2322: Type '"tool_selection" | "approach_choice" | "parameter_tuning" | "strategy_pivot" | undefined' is not assignable to type '"tool_selection" | "approach_choice" | "parameter_tuning" | "strategy_pivot"'.
+  Type 'undefined' is not assignable to type '"tool_selection" | "approach_choice" | "parameter_tuning" | "strategy_pivot"'.
+src/observability/demo-integration.ts(492,61): error TS6133: 'efficiency' is declared but its value is never read.
+src/observability/demo-integration.ts(696,3): error TS2323: Cannot redeclare exported variable 'ObservabilityDemoSimulator'.
+src/observability/demo-integration.ts(696,3): error TS2484: Export declaration conflicts with exported declaration of 'ObservabilityDemoSimulator'.
+src/observability/event-hooks.ts(12,1): error TS6192: All imports in import declaration are unused.
+src/observability/metrics-collector.ts(90,49): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/metrics-collector.ts(90,58): error TS6133: 'context' is declared but its value is never read.
+src/observability/metrics-collector.ts(99,45): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/metrics-collector.ts(99,54): error TS6133: 'context' is declared but its value is never read.
+src/observability/metrics-collector.ts(107,48): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/metrics-collector.ts(107,57): error TS6133: 'context' is declared but its value is never read.
+src/observability/metrics-collector.ts(115,55): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/metrics-collector.ts(115,64): error TS6133: 'context' is declared but its value is never read.
+src/observability/metrics-collector.ts(123,46): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/metrics-collector.ts(123,55): error TS6133: 'context' is declared but its value is never read.
+src/observability/metrics-collector.ts(131,53): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/metrics-collector.ts(131,62): error TS6133: 'context' is declared but its value is never read.
+src/observability/metrics-collector.ts(139,55): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/metrics-collector.ts(139,64): error TS6133: 'context' is declared but its value is never read.
+src/observability/metrics-collector.ts(147,47): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/metrics-collector.ts(147,56): error TS6133: 'context' is declared but its value is never read.
+src/observability/metrics-collector.ts(155,49): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/metrics-collector.ts(155,58): error TS6133: 'context' is declared but its value is never read.
+src/observability/metrics-collector.ts(563,21): error TS2532: Object is possibly 'undefined'.
+src/observability/metrics-collector.ts(564,24): error TS2532: Object is possibly 'undefined'.
+src/observability/metrics-collector.ts(577,7): error TS2322: Type '{ [x: string]: { count: number; sum: number; avg: number; min: number | undefined; max: number | undefined; stdDev: number; percentiles: { p50: number; p90: number; p95: number; p99: number; }; }; }' is not assignable to type 'Record<string, { readonly count: number; readonly sum: number; readonly avg: number; readonly min: number; readonly max: number; readonly stdDev: number; readonly percentiles: { readonly p50: number; readonly p90: number; readonly p95: number; readonly p99: number; }; }>'.
+  'string' index signatures are incompatible.
+    Type '{ count: number; sum: number; avg: number; min: number | undefined; max: number | undefined; stdDev: number; percentiles: { p50: number; p90: number; p95: number; p99: number; }; }' is not assignable to type '{ readonly count: number; readonly sum: number; readonly avg: number; readonly min: number; readonly max: number; readonly stdDev: number; readonly percentiles: { readonly p50: number; readonly p90: number; readonly p95: number; readonly p99: number; }; }'.
+      Types of property 'min' are incompatible.
+        Type 'number | undefined' is not assignable to type 'number'.
+          Type 'undefined' is not assignable to type 'number'.
+src/observability/metrics-collector.ts(603,7): error TS2322: Type 'number | undefined' is not assignable to type 'number'.
+  Type 'undefined' is not assignable to type 'number'.
+src/observability/metrics-collector.ts(607,12): error TS2532: Object is possibly 'undefined'.
+src/observability/metrics-collector.ts(607,49): error TS2532: Object is possibly 'undefined'.
+src/observability/observability-manager.ts(20,3): error TS6196: 'AgentLearningPatternEvent' is declared but never used.
+src/observability/observability-manager.ts(24,3): error TS6196: 'EventSource' is declared but never used.
+src/observability/observability-manager.ts(31,8): error TS6133: 'HookId' is declared but its value is never read.
+src/observability/observability-manager.ts(105,5): error TS2412: Type 'EventBus | undefined' is not assignable to type 'EventBus' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+  Type 'undefined' is not assignable to type 'EventBus'.
+src/observability/observability-manager.ts(133,11): error TS2375: Type '{ sessionId: SessionId; agentId: AgentInstanceId; startTime: Date; taskId: TaskId | undefined; toolsUsed: never[]; decisionsCount: number; memoryOperations: number; lastActivity: Date; }' is not assignable to type 'ActiveSession' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'taskId' are incompatible.
+    Type 'TaskId | undefined' is not assignable to type 'TaskId'.
+      Type 'undefined' is not assignable to type 'TaskId'.
+        Type 'undefined' is not assignable to type 'string'.
+src/observability/observability-manager.ts(379,40): error TS6133: 'agentId' is declared but its value is never read.
+src/observability/observability-manager.ts(455,17): error TS1361: 'EventCategory' cannot be used as a value because it was imported using 'import type'.
+src/observability/observability-manager.ts(456,17): error TS1361: 'EventPriority' cannot be used as a value because it was imported using 'import type'.
+src/observability/observability-manager.ts(482,9): error TS2375: Type '{ userQuery: string | undefined; previousTools: readonly string[]; chainOfThought: string | undefined; }' is not assignable to type '{ readonly userQuery?: string; readonly previousTools: readonly string[]; readonly chainOfThought?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'userQuery' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
+src/observability/observability-manager.ts(497,7): error TS2375: Type '{ agentId: AgentInstanceId; taskId: TaskId | undefined; toolName: string; sessionId: SessionId; duration: number; success: boolean; result: unknown; tokensUsed: number; errorCount: number; warnings: readonly string[]; performanceMetrics: { ...; }; }' is not assignable to type '{ readonly agentId: AgentInstanceId; readonly taskId?: TaskId; readonly toolName: string; readonly sessionId: string; readonly duration: number; readonly success: boolean; ... 4 more ...; readonly performanceMetrics: { ...; }; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'taskId' are incompatible.
+    Type 'TaskId | undefined' is not assignable to type 'TaskId'.
+      Type 'undefined' is not assignable to type 'TaskId'.
+        Type 'undefined' is not assignable to type 'string'.
+src/observability/observability-manager.ts(519,7): error TS2375: Type '{ agentId: AgentInstanceId; taskId: TaskId | undefined; sessionId: SessionId; decisionType: "tool_selection" | "approach_choice" | "parameter_tuning" | "strategy_pivot"; ... 5 more ...; factors: Record<...>; }' is not assignable to type '{ readonly agentId: AgentInstanceId; readonly taskId?: TaskId; readonly sessionId: string; readonly decisionType: "tool_selection" | "approach_choice" | "parameter_tuning" | "strategy_pivot"; ... 5 more ...; readonly factors: Record<...>; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'taskId' are incompatible.
+    Type 'TaskId | undefined' is not assignable to type 'TaskId'.
+      Type 'undefined' is not assignable to type 'TaskId'.
+        Type 'undefined' is not assignable to type 'string'.
+src/observability/observability-manager.ts(540,7): error TS2375: Type '{ agentId: AgentInstanceId; sessionId: SessionId; operation: "store" | "retrieve" | "update" | "forget"; memoryType: "working" | "episodic" | "semantic" | "procedural"; ... 4 more ...; associatedConcepts: readonly string[]; }' is not assignable to type '{ readonly agentId: AgentInstanceId; readonly sessionId: string; readonly operation: "store" | "retrieve" | "update" | "forget"; readonly memoryType: "working" | "episodic" | "semantic" | "procedural"; ... 4 more ...; readonly associatedConcepts: readonly string[]; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'relevanceScore' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/observability/observability-manager.ts(572,5): error TS2375: Type '{ data: { initiatorId: AgentInstanceId; targetId: AgentInstanceId; coordinationType: "conflict_resolution" | "collaboration" | "delegation" | "information_sharing"; topic: string; urgency: "low" | ... 2 more ... | "medium"; expectedOutcome: string; context: { ...; }; }; ... 10 more ...; version: number; }' is not assignable to type 'AgentCoordinationEvent' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"agent_coordination"'.
+src/observability/observability-manager.ts(590,5): error TS2375: Type '{ data: { agentId: AgentInstanceId; sessionId: SessionId; pulse: { readonly cpuUsage: number; readonly memoryUsage: number; readonly activeConnections: number; readonly queueDepth: number; readonly responseTime: number; readonly errorRate: number; }; healthScore: number; activities: readonly { ...; }[]; }; ... 10 mo...' is not assignable to type 'PerformancePulseEvent' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'type' are incompatible.
+    Type 'string' is not assignable to type '"performance_pulse"'.
+src/observability/observability-manager.ts(655,5): error TS2375: Type '{ environment: "development" | "production"; sessionId: undefined; requestId: undefined; userId: undefined; projectId: undefined; tags: string[]; retentionPolicy: "medium"; }' is not assignable to type 'EventMetadata' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'sessionId' are incompatible.
+    Type 'undefined' is not assignable to type 'string'.
+src/observability/observability-manager.ts(656,32): error TS4111: Property 'NODE_ENV' comes from an index signature, so it must be accessed with ['NODE_ENV'].
+src/observability/observability-manager.ts(703,28): error TS6133: 'session' is declared but its value is never read.
+src/observability/observability-manager.ts(753,7): error TS2412: Type 'undefined' is not assignable to type 'Timeout' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the type of the target.
+src/observability/performance-tracker.ts(152,11): error TS2375: Type '{ id: PerformanceMetricId; agentId: AgentInstanceId; sessionId: SessionId | undefined; taskId: TaskId | undefined; timestamp: Date; ... 4 more ...; tags: readonly string[]; }' is not assignable to type 'PerformanceMeasurement' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'sessionId' are incompatible.
+    Type 'SessionId | undefined' is not assignable to type 'SessionId'.
+      Type 'undefined' is not assignable to type 'SessionId'.
+        Type 'undefined' is not assignable to type 'string'.
+src/observability/performance-tracker.ts(337,7): error TS2322: Type '{ mean: number; median: number | undefined; stdDev: number; min: number | undefined; max: number | undefined; count: number; }' is not assignable to type '{ readonly mean: number; readonly median: number; readonly stdDev: number; readonly min: number; readonly max: number; readonly count: number; }'.
+  Types of property 'median' are incompatible.
+    Type 'number | undefined' is not assignable to type 'number'.
+      Type 'undefined' is not assignable to type 'number'.
+src/observability/performance-tracker.ts(349,47): error TS2379: Argument of type '{ agentId: AgentInstanceId; startTime: Date | undefined; endTime: Date | undefined; }' is not assignable to parameter of type '{ readonly agentId?: AgentInstanceId; readonly metric?: string; readonly startTime?: Date; readonly endTime?: Date; readonly limit?: number; readonly tags?: readonly string[]; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'startTime' are incompatible.
+    Type 'Date | undefined' is not assignable to type 'Date'.
+      Type 'undefined' is not assignable to type 'Date'.
+src/observability/performance-tracker.ts(415,28): error TS2532: Object is possibly 'undefined'.
+src/observability/performance-tracker.ts(431,24): error TS2379: Argument of type '{ benchmark: PerformanceBenchmark; currentValue: number; performance: "critical" | "below" | "exceeding" | "meeting"; gap: number; trend: "improving" | "stable" | "declining" | "volatile" | undefined; }' is not assignable to parameter of type '{ readonly benchmark: PerformanceBenchmark; readonly currentValue?: number; readonly performance: "critical" | "below" | "exceeding" | "meeting"; readonly gap: number; readonly trend?: "improving" | ... 2 more ... | "volatile"; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'trend' are incompatible.
+    Type '"improving" | "stable" | "declining" | "volatile" | undefined' is not assignable to type '"improving" | "stable" | "declining" | "volatile"'.
+      Type 'undefined' is not assignable to type '"improving" | "stable" | "declining" | "volatile"'.
+src/observability/performance-tracker.ts(657,10): error TS2532: Object is possibly 'undefined'.
+src/observability/performance-tracker.ts(657,42): error TS2532: Object is possibly 'undefined'.
+src/observability/performance-tracker.ts(706,22): error TS18048: 'last' is possibly 'undefined'.
+src/observability/performance-tracker.ts(706,49): error TS18048: 'first' is possibly 'undefined'.
+src/observability/performance-tracker.ts(707,23): error TS18048: 'last' is possibly 'undefined'.
+src/observability/performance-tracker.ts(707,36): error TS18048: 'first' is possibly 'undefined'.
+src/observability/performance-tracker.ts(718,5): error TS6133: 'trend' is declared but its value is never read.
+src/observability/performance-tracker.ts(743,23): error TS2532: Object is possibly 'undefined'.
+npm error Lifecycle script `build` failed with error:
+npm error code 1
+npm error path /Users/barnent1/Projects/sentra/deploy/packages/core
+npm error workspace @sentra/core@1.0.0
+npm error location /Users/barnent1/Projects/sentra/deploy/packages/core
+npm error command failed
+npm error command sh -c tsc --build

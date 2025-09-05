@@ -1,0 +1,54 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": ["NODE_ENV"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**", "test-results/**"],
+      "env": [
+        "NODE_ENV",
+        "DATABASE_URL",
+        "QDRANT_URL",
+        "OPENAI_API_KEY",
+        "VITE_API_BASE_URL",
+        "VITE_WS_URL"
+      ]
+    },
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "outputs": []
+    },
+    "type-check": {
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NODE_ENV",
+        "DATABASE_URL",
+        "QDRANT_URL",
+        "OPENAI_API_KEY",
+        "VITE_API_BASE_URL",
+        "VITE_WS_URL",
+        "PORT"
+      ]
+    }
+  },
+  "globalDependencies": [
+    "package.json",
+    "tsconfig.json",
+    ".env",
+    ".env.local",
+    ".env.test"
+  ]
+}

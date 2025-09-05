@@ -1,0 +1,110 @@
+version: '3.8'
+
+# Staging environment - simplified version of production
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: sentra-postgres-staging
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sentra_staging}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-staging_password}
+      POSTGRES_DB: ${POSTGRES_DB:-sentra_staging}
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+      - ./deployment/scripts/init-db.sql:/docker-entrypoint-initdb.d/01-init.sql
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    networks:
+      - sentra-staging-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sentra_staging} -d ${POSTGRES_DB:-sentra_staging}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../
+      dockerfile: deployment/docker/Dockerfile.api
+    container_name: sentra-api-staging
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-sentra_staging}:${POSTGRES_PASSWORD:-staging_password}@postgres:5432/${POSTGRES_DB:-sentra_staging}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SENTRA_PUBLIC_URL=${SENTRA_STAGING_URL:-http://staging.sentra.local}
+      - DEBUG=true
+      - LOG_LEVEL=debug
+      - ENVIRONMENT=staging
+    ports:
+      - "8001:8000"  # Different port for staging
+    networks:
+      - sentra-staging-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  dashboard:
+    build:
+      context: ../
+      dockerfile: deployment/docker/Dockerfile.dashboard
+    container_name: sentra-dashboard-staging
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=${SENTRA_STAGING_URL:-http://staging.sentra.local}/api
+      - VITE_ENVIRONMENT=staging
+    ports:
+      - "3001:80"
+    networks:
+      - sentra-staging-network
+
+  mobile:
+    build:
+      context: ../
+      dockerfile: deployment/docker/Dockerfile.mobile
+    container_name: sentra-mobile-staging
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=${SENTRA_STAGING_URL:-http://staging.sentra.local}/api
+      - VITE_ENVIRONMENT=staging
+    ports:
+      - "3002:80"
+    networks:
+      - sentra-staging-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: sentra-nginx-staging
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./deployment/nginx/staging.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - sentra-staging-network
+    depends_on:
+      - api
+      - dashboard
+      - mobile
+
+  redis:
+    image: redis:7-alpine
+    container_name: sentra-redis-staging
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - sentra-staging-network
+
+networks:
+  sentra-staging-network:
+    driver: bridge
+
+volumes:
+  postgres_staging_data:
+    driver: local

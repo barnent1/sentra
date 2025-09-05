@@ -1,0 +1,76 @@
+{
+  "typescript.preferences.useAliasesForRenames": false,
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.autoImports": true,
+  "typescript.suggest.completeFunctionCalls": true,
+  "typescript.workspaceSymbols.scope": "allOpenProjects",
+  
+  "eslint.workingDirectories": [
+    "packages/types",
+    "packages/core", 
+    "packages/dashboard",
+    "packages/api",
+    "packages/cli"
+  ],
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "typescriptreact"
+  ],
+  
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.next": true,
+    "**/.turbo": true
+  },
+  
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.turbo": true
+  },
+  
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.turbo/**": true
+  },
+  
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  
+  "editor.rulers": [80, 120],
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  
+  "files.associations": {
+    "*.env*": "properties"
+  },
+  
+  "emmet.includeLanguages": {
+    "typescript": "html",
+    "typescriptreact": "html"
+  },
+  
+  "path-intellisense.mappings": {
+    "@sentra/types": "${workspaceFolder}/packages/types/src",
+    "@sentra/core": "${workspaceFolder}/packages/core/src",
+    "@sentra/dashboard": "${workspaceFolder}/packages/dashboard/src",
+    "@sentra/api": "${workspaceFolder}/packages/api/src",
+    "@sentra/cli": "${workspaceFolder}/packages/cli/src"
+  },
+  
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  
+  "git.ignoreLimitWarning": true,
+  
+  "json.schemas": [
+    {
+      "fileMatch": ["turbo.json"],
+      "url": "https://turbo.build/schema.json"
+    }
+  ]
+}

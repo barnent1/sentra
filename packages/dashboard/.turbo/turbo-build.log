@@ -1,0 +1,29 @@
+
+> @sentra/dashboard@1.0.0 build
+> vite build
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+vite v5.4.19 building for production...
+(node:8447) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/barnent1/Projects/sentra/packages/dashboard/postcss.config.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/barnent1/Projects/sentra/packages/dashboard/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+transforming...
+✓ 424 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                                                  0.62 kB │ gzip:  0.37 kB
+dist/assets/EvolutionMonitor-BiB60RGN.css                                        0.17 kB │ gzip:  0.15 kB
+dist/assets/ObservabilityDashboard-OdhSm2dr.css                                  1.48 kB │ gzip:  0.53 kB
+dist/assets/index-DM4R_mXm.css                                                  42.56 kB │ gzip:  7.11 kB
+dist/assets/Analytics-4KAxG-GL.js                                                1.55 kB │ gzip:  0.66 kB │ map:   2.77 kB
+dist/assets/agents-DbO_kGDv.js                                                   4.12 kB │ gzip:  1.92 kB │ map:  16.88 kB
+dist/assets/EvolutionTimeline.vue_vue_type_script_setup_true_lang-ruk6-uAR.js    4.69 kB │ gzip:  1.97 kB │ map:  11.96 kB
+dist/assets/Settings-Bqki1-9G.js                                                 5.60 kB │ gzip:  1.86 kB │ map:  11.79 kB
+dist/assets/Dashboard-B_hTL6mk.js                                               10.71 kB │ gzip:  3.72 kB │ map:  30.07 kB
+dist/assets/EvolutionMonitor-BNf3RvpP.js                                        18.53 kB │ gzip:  6.21 kB │ map:  47.19 kB
+dist/assets/AgentManagement-4T7i5hKy.js                                         28.89 kB │ gzip:  8.10 kB │ map:  73.94 kB
+dist/assets/ObservabilityDashboard-CwC3afL6.js                                  44.68 kB │ gzip: 12.80 kB │ map: 122.24 kB
+dist/assets/index-CetbjyKv.js                                                  116.94 kB │ gzip: 45.28 kB │ map: 891.22 kB
+dist/assets/chart-CcBt6r-1.js                                                  178.02 kB │ gzip: 62.18 kB │ map: 844.18 kB
+✓ built in 5.92s

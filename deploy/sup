@@ -1,0 +1,17 @@
+#!/usr/bin/env node
+
+// Delegate to the proper SUP deployment tool
+const { spawn } = require('child_process');
+const path = require('path');
+
+const args = process.argv.slice(2);
+const supScript = path.join(__dirname, 'bin/sup.js');
+
+const child = spawn('node', [supScript, ...args], { 
+    stdio: 'inherit',
+    cwd: __dirname
+});
+
+child.on('close', (code) => {
+    process.exit(code);
+});

@@ -1,0 +1,6 @@
+- SENTRA PROJECT STANDARDS:
+- Evolutionary agents use strict TypeScript
+- All interfaces are readonly where possible  
+- Use branded types for IDs
+- Vector operations use proper generic constraints
+- No legacy patterns from pre-2023 TypeScript
