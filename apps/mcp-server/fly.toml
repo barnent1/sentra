@@ -1,0 +1,51 @@
+# Fly.io configuration for Sentra MCP Server
+app = "sentra-mcp"
+primary_region = "iad" # Washington DC - change to your preferred region
+
+# Build configuration
+[build]
+  dockerfile = "Dockerfile"
+
+# HTTP service
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = false  # Keep running for agent connections
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+  # Health check
+  [http_service.checks]
+    [http_service.checks.health]
+      grace_period = "10s"
+      interval = "30s"
+      method = "GET"
+      path = "/health"
+      protocol = "http"
+      timeout = "5s"
+      type = "http"
+
+# VM resources
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512  # Start small, scale up as needed
+
+# Environment variables (set secrets with: fly secrets set KEY=value)
+[env]
+  NODE_ENV = "production"
+  PORT = "8080"
+  AUTH_ENABLED = "true"
+  AUTH_TIMESTAMP_MAX_AGE = "60"
+  AUTH_CLOCK_SKEW = "5"
+
+# PostgreSQL database (create with: fly postgres create)
+# After creating, attach with: fly postgres attach <postgres-app-name>
+# This will set DATABASE_URL automatically
+
+# Persistent storage for git worktrees
+[[mounts]]
+  source = "sentra_worktrees"
+  destination = "/app/.sentra/worktrees"
+  initial_size = "10gb"  # Adjust based on needs

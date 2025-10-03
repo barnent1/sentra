@@ -1,0 +1,32 @@
+{
+  "name": "sentra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Autonomous AI development platform",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:mcp": "npm run dev --workspace=apps/mcp-server",
+    "dev:dashboard": "npm run dev --workspace=apps/dashboard",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "deploy:mcp": "cd apps/mcp-server && fly deploy",
+    "deploy:dashboard": "cd apps/dashboard && vercel --prod"
+  },
+  "keywords": [
+    "ai",
+    "autonomous",
+    "development",
+    "mcp",
+    "model-context-protocol"
+  ],
+  "author": "Sentra",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
