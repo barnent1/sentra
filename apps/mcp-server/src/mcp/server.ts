@@ -70,8 +70,34 @@ export function initializeMCPServer(): Server {
   mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
     logger.debug({ tool: request.params.name }, 'Handling tools/call request');
 
-    // Tool execution will be implemented in future tasks
-    throw new Error(`Tool not implemented: ${request.params.name}`);
+    try {
+      const { executeTool } = await import('./tools/index.js');
+      const result = await executeTool(request.params.name, request.params.arguments);
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      logger.error({ error, tool: request.params.name }, 'Tool execution failed');
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              error: error instanceof Error ? error.message : 'Unknown error',
+              tool: request.params.name,
+            }),
+          },
+        ],
+        isError: true,
+      };
+    }
   });
 
   // Register resources list handler
