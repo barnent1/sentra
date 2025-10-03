@@ -6,6 +6,116 @@ This document provides the complete workflow, quality standards, and execution m
 
 ---
 
+## 🚀 Project Status & Architecture
+
+### Current Progress (as of 2025-10-03)
+
+**Completed:**
+- ✅ **Module 1: Database Setup** (Task 1.1-1.5)
+  - PostgreSQL + Drizzle ORM with 14 tables
+  - Database migrations and schema
+  - Comprehensive test suite (119 tests passing)
+
+- ✅ **Task 2.1: Initialize MCP Server**
+  - Express.js + MCP SDK v1.19.1
+  - Streamable HTTP transport
+  - Health check endpoints
+  - Middleware stack (logging, CORS, security, rate limiting)
+
+- ✅ **Task 2.2: Implement Request Authentication**
+  - Ed25519 signature verification
+  - Timestamp validation (60s window + 5s clock skew)
+  - Per-user rate limiting
+  - Comprehensive authentication system
+
+**In Progress:**
+- 🔄 Module 2: MCP Server Core (Tasks 2.3-2.6 pending)
+
+### Project Structure
+
+```
+/Users/barnent1/sentra/                    # Project root
+├── apps/
+│   ├── mcp-server/                        # MCP Server → Fly.io (mcp.sentra.io)
+│   │   ├── src/                           # Source code
+│   │   │   ├── index.ts                   # Server entry point
+│   │   │   ├── mcp/                       # MCP protocol implementation
+│   │   │   │   ├── server.ts              # Core MCP server
+│   │   │   │   ├── transport.ts           # HTTP transport & sessions
+│   │   │   │   ├── tools/index.ts         # MCP tools (to implement)
+│   │   │   │   ├── resources/index.ts     # MCP resources (to implement)
+│   │   │   │   └── prompts/index.ts       # MCP prompts (to implement)
+│   │   │   ├── middleware/                # Express middleware
+│   │   │   │   ├── auth.ts                # Ed25519 authentication
+│   │   │   │   ├── cors.ts                # CORS configuration
+│   │   │   │   ├── errorHandler.ts        # Error handling
+│   │   │   │   ├── logger.ts              # Pino logging
+│   │   │   │   └── rateLimiter.ts         # Rate limiting
+│   │   │   ├── routes/                    # HTTP routes
+│   │   │   │   ├── health.ts              # Health checks
+│   │   │   │   └── mcp.ts                 # MCP endpoints
+│   │   │   ├── config/                    # Configuration
+│   │   │   │   └── server.ts              # Server config
+│   │   │   ├── types/                     # TypeScript types
+│   │   │   │   ├── auth.ts                # Auth types
+│   │   │   │   └── mcp.ts                 # MCP types
+│   │   │   └── utils/                     # Utilities
+│   │   │       └── crypto.ts              # Ed25519 crypto utilities
+│   │   ├── db/                            # Database
+│   │   │   ├── schema/                    # Drizzle schemas
+│   │   │   │   ├── index.ts               # Schema exports
+│   │   │   │   ├── users.ts               # User accounts
+│   │   │   │   ├── auth.ts                # API keys & audit log
+│   │   │   │   ├── stacks.ts              # Tech stacks & docs
+│   │   │   │   ├── projects.ts            # Projects & worktrees
+│   │   │   │   ├── tasks.ts               # Task management
+│   │   │   │   ├── workflows.ts           # Workflow state
+│   │   │   │   ├── logs.ts                # System logging
+│   │   │   │   ├── prompts.ts             # Agent prompts
+│   │   │   │   └── assets.ts              # Screenshots & designs
+│   │   │   ├── migrations/                # SQL migrations
+│   │   │   └── index.ts                   # DB connection
+│   │   ├── tests/                         # Test suite
+│   │   │   ├── unit/                      # Unit tests
+│   │   │   ├── integration/               # Integration tests
+│   │   │   └── helpers/                   # Test utilities
+│   │   ├── Dockerfile                     # Fly.io deployment
+│   │   ├── fly.toml                       # Fly.io configuration
+│   │   ├── package.json                   # Dependencies
+│   │   ├── tsconfig.json                  # TypeScript config
+│   │   └── README.md                      # MCP server docs
+│   ├── dashboard/                         # Next.js Dashboard → Vercel (app.sentra.io) [TO BE BUILT]
+│   └── marketing/                         # Landing page → Vercel (sentra.io) [TO BE BUILT]
+├── packages/
+│   ├── cli/                               # CLI tool → npm (@sentra/cli) [TO BE BUILT]
+│   └── shared/                            # Shared types/utils [TO BE BUILT]
+├── docs/                                  # Documentation
+├── PRD.md                                 # Product Requirements
+├── TASKS.md                               # Task breakdown
+├── orchestrator.md                        # This file
+├── DEPLOYMENT.md                          # Deployment guide
+├── package.json                           # Workspace root
+└── README.md                              # Project overview
+```
+
+### Deployment Architecture
+
+```
+sentra.io (Cloudflare DNS)
+├── app.sentra.io       → Vercel (Next.js Dashboard)
+└── mcp.sentra.io       → Fly.io (MCP Server + PostgreSQL)
+```
+
+**Technology Stack:**
+- **MCP Server:** Node.js 20 + TypeScript + Express + MCP SDK
+- **Database:** PostgreSQL + Drizzle ORM + pgvector
+- **Authentication:** Ed25519 signatures
+- **Testing:** Jest + Supertest + Playwright
+- **Deployment:** Fly.io (MCP) + Vercel (Dashboard)
+- **DNS/CDN:** Cloudflare
+
+---
+
 ## Core Principles
 
 ### 1. Agent Separation Model
