@@ -8,6 +8,7 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { taskManagementTools } from './task-management.js';
 import { patternLearningTools } from './pattern-learning.js';
+import { codeExecutionTools } from './code-execution.js';
 
 /**
  * Registry of all MCP tools
@@ -15,6 +16,7 @@ import { patternLearningTools } from './pattern-learning.js';
 export const tools: Tool[] = [
   ...taskManagementTools,
   ...patternLearningTools,
+  ...codeExecutionTools,
 ];
 
 /**
@@ -44,6 +46,14 @@ export async function executeTool(
       toolName.startsWith('search_by_pattern')) {
     const { executePatternLearningTool } = await import('./pattern-learning.js');
     return executePatternLearningTool(toolName, args);
+  }
+
+  if (toolName.startsWith('execute_command') ||
+      toolName.startsWith('run_tests') ||
+      toolName.startsWith('typecheck') ||
+      toolName.startsWith('capture_screenshot')) {
+    const { executeCodeExecutionTool } = await import('./code-execution.js');
+    return executeCodeExecutionTool(toolName, args);
   }
 
   throw new Error(`Unknown tool: ${toolName}`);
