@@ -523,6 +523,32 @@ Next: Task X.X (<Title>)
 
 ## Git Workflow
 
+### Repository
+**GitHub:** https://github.com/barnent1/sentra
+**Main Branch:** `master`
+
+### Branch Strategy
+For each task, create a new branch:
+```
+<type>/task-<number>-<description>
+
+Examples:
+feature/task-2.3-task-management-tools
+feature/task-2.4-pattern-learning-tools
+chore/task-1.1-database-schema
+```
+
+### Workflow Per Task
+1. **Create branch:** `git checkout -b feature/task-2.3-task-management-tools`
+2. **PLAN phase:** Analyst agent creates implementation plan
+3. **CODE phase:** Coder agent implements (commit after each file/feature)
+4. **TEST phase:** Tester agent writes tests (commit when passing)
+5. **REVIEW phase:** Reviewer agent validates quality
+6. **Create PR:** `gh pr create` with task checklist
+7. **Auto-merge:** After review approval
+8. **Update PROGRESS.md:** Check off completed task
+9. **Push to master:** Merge PR
+
 ### Branch Naming
 ```
 <type>/<description>-<taskId>
