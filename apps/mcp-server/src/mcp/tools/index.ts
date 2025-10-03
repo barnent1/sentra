@@ -9,6 +9,7 @@ import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { taskManagementTools } from './task-management.js';
 import { patternLearningTools } from './pattern-learning.js';
 import { codeExecutionTools } from './code-execution.js';
+import { gitOperationsTools } from './git-operations.js';
 
 /**
  * Registry of all MCP tools
@@ -17,6 +18,7 @@ export const tools: Tool[] = [
   ...taskManagementTools,
   ...patternLearningTools,
   ...codeExecutionTools,
+  ...gitOperationsTools,
 ];
 
 /**
@@ -54,6 +56,15 @@ export async function executeTool(
       toolName.startsWith('capture_screenshot')) {
     const { executeCodeExecutionTool } = await import('./code-execution.js');
     return executeCodeExecutionTool(toolName, args);
+  }
+
+  if (toolName.startsWith('create_worktree') ||
+      toolName.startsWith('create_branch') ||
+      toolName.startsWith('commit_changes') ||
+      toolName.startsWith('create_pull_request') ||
+      toolName.startsWith('cleanup_worktree')) {
+    const { executeGitOperationsTool } = await import('./git-operations.js');
+    return executeGitOperationsTool(toolName, args);
   }
 
   throw new Error(`Unknown tool: ${toolName}`);
