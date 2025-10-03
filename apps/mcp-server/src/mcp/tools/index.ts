@@ -7,12 +7,14 @@
 
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { taskManagementTools } from './task-management.js';
+import { patternLearningTools } from './pattern-learning.js';
 
 /**
  * Registry of all MCP tools
  */
 export const tools: Tool[] = [
   ...taskManagementTools,
+  ...patternLearningTools,
 ];
 
 /**
@@ -35,6 +37,13 @@ export async function executeTool(
       toolName.startsWith('mark_task_complete')) {
     const { executeTaskManagementTool } = await import('./task-management.js');
     return executeTaskManagementTool(toolName, args);
+  }
+
+  if (toolName.startsWith('find_similar_implementations') ||
+      toolName.startsWith('get_relevant_docs') ||
+      toolName.startsWith('search_by_pattern')) {
+    const { executePatternLearningTool } = await import('./pattern-learning.js');
+    return executePatternLearningTool(toolName, args);
   }
 
   throw new Error(`Unknown tool: ${toolName}`);
