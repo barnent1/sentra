@@ -132,12 +132,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
-
-          gh issue comment "$ISSUE_NUMBER" --body "✅ AI agent completed this task successfully!
-
-A pull request should be created shortly. Please review the changes and merge when ready.
-
-View [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details."
+          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          BODY="✅ AI agent completed this task successfully!\n\nA pull request should be created shortly. Please review the changes and merge when ready.\n\nView [workflow logs]($WORKFLOW_URL) for details."
+          gh issue comment "$ISSUE_NUMBER" --body "$BODY"
 
       - name: Report failure
         if: failure()
@@ -145,11 +142,7 @@ View [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/r
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
-
-          gh issue comment "$ISSUE_NUMBER" --body "❌ AI agent encountered an issue while working on this task.
-
-Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
-
-This issue has been labeled 'needs-help' and requires human attention."
-
+          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          BODY="❌ AI agent encountered an issue while working on this task.\n\nCheck the [workflow logs]($WORKFLOW_URL) for details.\n\nThis issue has been labeled 'needs-help' and requires human attention."
+          gh issue comment "$ISSUE_NUMBER" --body "$BODY"
           gh issue edit "$ISSUE_NUMBER" --add-label "needs-help"
