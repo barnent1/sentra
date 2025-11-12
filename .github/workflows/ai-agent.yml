@@ -102,16 +102,8 @@ jobs:
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
 
-          # Download AI agent worker script from claude-code-base
-          mkdir -p .claude/scripts
-          curl -sSL -o .claude/scripts/ai-agent-worker.py \
-            https://raw.githubusercontent.com/barnent1/claude-code-base/main/scripts/ai-agent-worker.py
-          chmod +x .claude/scripts/ai-agent-worker.py
-
-          # Download notification script
-          curl -sSL -o .claude/scripts/notify.sh \
-            https://raw.githubusercontent.com/barnent1/claude-code-base/main/scripts/notify.sh
-          chmod +x .claude/scripts/notify.sh
+          # Scripts are checked into the repository at .claude/scripts/
+          chmod +x .claude/scripts/ai-agent-worker.py .claude/scripts/notify.sh
 
           # Run the AI agent
           python3 .claude/scripts/ai-agent-worker.py "$ISSUE_NUMBER" . | tee agent-output.json
