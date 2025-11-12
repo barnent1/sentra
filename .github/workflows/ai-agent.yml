@@ -89,6 +89,19 @@ jobs:
             echo "✅ Project configuration loaded"
           fi
 
+      - name: Debug Python environment
+        run: |
+          echo "=== Python Environment Debug ==="
+          echo "Python version:"
+          python3.11 --version
+          echo "Python path:"
+          python3.11 -c "import sys; print('\n'.join(sys.path))"
+          echo "PYTHONPATH: $PYTHONPATH"
+          echo "Checking for anthropic package:"
+          python3.11 -c "import anthropic; print(f'anthropic version: {anthropic.__version__}')" || echo "anthropic not found"
+          echo "User site-packages:"
+          ls -la /home/claude-agent/.local/lib/python3.11/site-packages/ | head -20
+
       - name: Run AI Agent
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -108,6 +121,8 @@ jobs:
           chmod +x .claude/scripts/ai-agent-worker.py .claude/scripts/notify.sh
 
           # Run the AI agent (using python3.11 to match Dockerfile)
+          # Use pipefail to ensure we catch errors even when piping to tee
+          set -o pipefail
           python3.11 .claude/scripts/ai-agent-worker.py "$ISSUE_NUMBER" . | tee agent-output.json
 
       - name: Upload agent logs
