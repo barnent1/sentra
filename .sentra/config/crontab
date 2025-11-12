@@ -1,0 +1,29 @@
+# Sentra Phase 3 - Automated Jobs
+# Install with: crontab .sentra/config/crontab
+
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+SENTRA_ROOT=/Users/barnent1/Projects/sentra
+
+# Daily auto-refactoring (2 AM) - Low risk only
+0 2 * * * cd $SENTRA_ROOT && python3 .sentra/scripts/auto-refactor.py --risk=low --auto-commit >> .sentra/metrics/auto-refactor.log 2>&1
+
+# Weekly pattern learning (Monday 8 AM)
+0 8 * * 1 cd $SENTRA_ROOT && echo "@pattern-learner analyze codebase for undocumented patterns" >> .sentra/metrics/pattern-learning-queue.txt
+
+# Weekly metrics collection (Monday 8:30 AM)
+30 8 * * 1 cd $SENTRA_ROOT && python3 .sentra/scripts/metrics-collector.py >> .sentra/metrics/collector.log 2>&1
+
+# Weekly dashboard generation (Monday 8:35 AM)
+35 8 * * 1 cd $SENTRA_ROOT && python3 .sentra/scripts/dashboard-generator.py >> .sentra/metrics/dashboard.log 2>&1
+
+# Monthly pattern health check (1st Monday 9 AM)
+# This runs on the first Monday of each month
+0 9 1-7 * * [ $(date +\%u) -eq 1 ] && cd $SENTRA_ROOT && python3 .sentra/scripts/pattern-evolution.py health --all >> .sentra/metrics/evolution.log 2>&1
+
+# Quarterly cross-project sync (1st Monday of Jan, Apr, Jul, Oct)
+# This runs on the first Monday of Q1, Q2, Q3, Q4
+0 10 1-7 1,4,7,10 * [ $(date +\%u) -eq 1 ] && cd $SENTRA_ROOT && python3 .sentra/scripts/pattern-sync.py sync >> .sentra/metrics/sync.log 2>&1
+
+# Daily metrics comparison (5 PM)
+0 17 * * * cd $SENTRA_ROOT && python3 .sentra/scripts/metrics-collector.py --compare=7d >> .sentra/metrics/comparison.log 2>&1

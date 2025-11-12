@@ -1,0 +1,115 @@
+{
+  "description": "Configuration for automatic refactoring engine",
+  "version": "1.0.0",
+
+  "risk_levels": {
+    "low": {
+      "description": "Safe fixes that cannot break functionality",
+      "patterns": [
+        "typescript_any",
+        "ts_ignore",
+        "console_log",
+        "unused_imports",
+        "img_tag"
+      ],
+      "require_approval": false,
+      "auto_commit": true
+    },
+    "medium": {
+      "description": "Pattern migrations that may require careful testing",
+      "patterns": [
+        "fetch_in_useeffect",
+        "polling",
+        "missing_zod_validation",
+        "no_error_boundary"
+      ],
+      "require_approval": true,
+      "auto_commit": false
+    },
+    "high": {
+      "description": "Structural changes requiring manual review",
+      "patterns": [
+        "client_component_async",
+        "state_management_conflict",
+        "api_structure_change"
+      ],
+      "require_approval": true,
+      "auto_commit": false
+    }
+  },
+
+  "fix_strategies": {
+    "typescript_any": {
+      "strategy": "replace_any_with_types",
+      "description": "Replace 'any' with 'unknown' or specific types",
+      "estimated_time_minutes": 6
+    },
+    "ts_ignore": {
+      "strategy": "remove_ts_ignore",
+      "description": "Remove @ts-ignore comments",
+      "estimated_time_minutes": 6
+    },
+    "console_log": {
+      "strategy": "remove_console_log",
+      "description": "Remove console.log statements",
+      "estimated_time_minutes": 3
+    },
+    "fetch_in_useeffect": {
+      "strategy": "migrate_to_sse",
+      "description": "Convert useEffect + fetch to SSE pattern",
+      "estimated_time_minutes": 30
+    },
+    "polling": {
+      "strategy": "migrate_to_sse",
+      "description": "Convert polling to SSE pattern",
+      "estimated_time_minutes": 30
+    },
+    "missing_zod_validation": {
+      "strategy": "add_zod_schema",
+      "description": "Add Zod validation to API route",
+      "estimated_time_minutes": 18
+    },
+    "img_tag": {
+      "strategy": "replace_with_next_image",
+      "description": "Replace <img> with Next.js Image component",
+      "estimated_time_minutes": 12
+    }
+  },
+
+  "safety_checks": {
+    "run_tests": true,
+    "check_coverage": true,
+    "coverage_threshold_drop": 1.0,
+    "rollback_on_failure": true,
+    "max_files_per_run": 10,
+    "commit_per_file": true
+  },
+
+  "exclusions": {
+    "directories": [
+      "node_modules",
+      "dist",
+      ".next",
+      "build",
+      "out",
+      ".git",
+      "coverage"
+    ],
+    "file_patterns": [
+      "*.min.js",
+      "*.bundle.js",
+      "*.generated.*"
+    ]
+  },
+
+  "notifications": {
+    "on_success": {
+      "enabled": false,
+      "channels": ["email", "slack"]
+    },
+    "on_failure": {
+      "enabled": true,
+      "channels": ["email", "slack"]
+    }
+  }
+}
