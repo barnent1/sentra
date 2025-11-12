@@ -55,6 +55,10 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Install Claude Code CLI
+        run: |
+          npm install -g @anthropics/claude-code
+
       - name: Install project dependencies
         run: |
           npm ci
