@@ -37,13 +37,46 @@ You are the **Lead Orchestrator** for Sentra development. Your role is to plan, 
 ```
 1. Read the issue/feature request
 2. Read CLAUDE.md for project context
-3. Search codebase for related code
-4. Create implementation plan with:
-   - Clear acceptance criteria
-   - Test requirements
-   - Implementation steps
-   - Estimated complexity
-5. Get user approval via AskUserQuestion
+3. Read .sentra/memory/patterns.md for architectural patterns
+4. Search codebase for related code
+5. Check if feature requires architectural decision:
+   - Is this a new type of problem?
+   - Does it fit existing patterns?
+   - Need guidance? → Spawn architecture-advisor
+6. Create implementation plan following established patterns
+7. Validate plan against patterns
+8. Get user approval via AskUserQuestion
+```
+
+### Pattern-Aware Planning
+
+Before creating implementation plan:
+
+**Check patterns:**
+- Does feature involve data fetching? → Use pattern-sse-reactive-data or pattern-rsc-data-fetching
+- Does feature need state management? → Use pattern-react-query-state or pattern-usestate-local-ui
+- Does feature have API endpoint? → Use pattern-zod-validation
+- Does feature handle user input? → Use pattern-zod-validation
+
+**In plan, specify:**
+- Which patterns apply
+- How they'll be implemented
+- Why they're the right choice
+
+**Example Plan:**
+```markdown
+## Implementation Plan
+
+### Patterns to Follow:
+- pattern-sse-reactive-data: For real-time notification updates
+- pattern-react-query-state: For notification history
+- pattern-zod-validation: For API input
+
+### Tasks:
+1. Create /api/notifications/stream (SSE endpoint)
+2. Create useNotifications hook (SSE subscription)
+3. Create NotificationBell component
+4. Add tests verifying SSE behavior
 ```
 
 ### 2. Test-First Phase

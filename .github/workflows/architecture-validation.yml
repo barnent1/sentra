@@ -1,0 +1,224 @@
+name: Architecture Validation
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate-architecture:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          pip install anthropic
+
+      - name: Run Architecture Scanner
+        run: |
+          python3 .claude/scripts/architecture-scanner.py . --format=markdown > architecture-report.md
+
+      - name: Check for High Severity Conflicts
+        run: |
+          if grep -q "HIGH Priority" architecture-report.md; then
+            echo "❌ High severity architectural conflicts detected!"
+            cat architecture-report.md
+            exit 1
+          fi
+
+      - name: Check for Anti-Patterns
+        run: |
+          if grep -q "Anti-pattern" architecture-report.md; then
+            echo "⚠️ Anti-patterns detected!"
+            cat architecture-report.md
+            exit 1
+          fi
+
+      - name: Upload Architecture Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: architecture-report
+          path: architecture-report.md
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('architecture-report.md', 'utf8');
+
+            // Only comment if there are issues
+            if (report.includes('HIGH Priority') || report.includes('Anti-pattern')) {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🏗️ Architecture Validation Report\n\n${report}`
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## ✅ Architecture Validation Passed\n\nAll code follows established architectural patterns.`
+              });
+            }
+
+  test-pattern-hooks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Test PreToolUse Hook (Architecture Validation)
+        run: |
+          echo "Testing architecture validation hook..."
+
+          # Create test file with pattern violation (TypeScript 'any')
+          cat > /tmp/test-violation.tsx <<'EOF'
+          import { useState } from 'react'
+
+          function TestComponent() {
+            const [data, setData] = useState<any>(null)  // ❌ Pattern violation
+
+            return <div>{data}</div>
+          }
+          EOF
+
+          # Simulate hook invocation
+          result=$(python3 .claude/hooks/validate-architecture-intent.py <<HOOK_INPUT
+          {
+            "toolName": "Write",
+            "toolInput": {
+              "file_path": "src/components/Test.tsx",
+              "content": "$(cat /tmp/test-violation.tsx)"
+            }
+          }
+          HOOK_INPUT
+          )
+
+          echo "Hook result: $result"
+
+          # Check if hook correctly blocked the violation
+          if echo "$result" | grep -q '"continue": false'; then
+            echo "✅ Hook correctly blocked pattern violation"
+          else
+            echo "❌ Hook failed to block pattern violation"
+            exit 1
+          fi
+
+      - name: Test PostToolUse Hook (Architecture Check)
+        run: |
+          echo "Testing post-validation hook..."
+
+          # Create valid file
+          cat > /tmp/test-valid.tsx <<'EOF'
+          import { useState } from 'react'
+
+          interface Data {
+            value: string
+          }
+
+          function TestComponent() {
+            const [data, setData] = useState<Data | null>(null)
+
+            return <div>{data?.value}</div>
+          }
+          EOF
+
+          # Write the file
+          cp /tmp/test-valid.tsx src/components/TestValid.tsx
+
+          # Simulate hook invocation
+          result=$(python3 .claude/hooks/verify-changes.py <<HOOK_INPUT
+          {
+            "toolName": "Write",
+            "toolInput": {
+              "file_path": "src/components/TestValid.tsx"
+            }
+          }
+          HOOK_INPUT
+          )
+
+          echo "Hook result: $result"
+
+          # Check if hook allows valid code
+          if echo "$result" | grep -q '"continue": true'; then
+            echo "✅ Hook correctly allowed valid code"
+          else
+            echo "❌ Hook incorrectly blocked valid code"
+            exit 1
+          fi
+
+          # Cleanup
+          rm -f src/components/TestValid.tsx
+
+  pattern-coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check Pattern Coverage
+        run: |
+          echo "Checking pattern coverage across codebase..."
+
+          # Count files using each pattern
+          echo "## Pattern Usage Report" > pattern-coverage.md
+          echo "" >> pattern-coverage.md
+
+          # SSE Pattern
+          sse_count=$(grep -r "EventSource\|useSSE" src/ 2>/dev/null | wc -l || echo "0")
+          echo "- **SSE Pattern**: $sse_count files" >> pattern-coverage.md
+
+          # React Query Pattern
+          rq_count=$(grep -r "useQuery\|useMutation" src/ 2>/dev/null | wc -l || echo "0")
+          echo "- **React Query**: $rq_count files" >> pattern-coverage.md
+
+          # Zod Validation Pattern
+          zod_count=$(grep -r "z\.object\|\.parse(" src/ 2>/dev/null | wc -l || echo "0")
+          echo "- **Zod Validation**: $zod_count files" >> pattern-coverage.md
+
+          # TypeScript Strict (count 'any' violations)
+          any_count=$(grep -r ":\s*any\b" src/ 2>/dev/null | wc -l || echo "0")
+          echo "- **TypeScript 'any' violations**: $any_count occurrences" >> pattern-coverage.md
+
+          cat pattern-coverage.md
+
+          # Fail if too many 'any' violations (threshold: 10)
+          if [ "$any_count" -gt 10 ]; then
+            echo "❌ Too many TypeScript 'any' violations detected!"
+            exit 1
+          fi
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pattern-coverage-report
+          path: pattern-coverage.md
+          retention-days: 30

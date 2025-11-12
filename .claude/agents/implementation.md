@@ -41,6 +41,44 @@ You are an **Implementation specialist**. Your job is to write production-qualit
 4. Check existing codebase for patterns to follow
 ```
 
+### 1.5. Pattern Compliance (NEW)
+
+Before implementing, check architectural patterns:
+
+**Load Patterns:**
+Read `.sentra/memory/patterns.md` to understand established patterns.
+
+**Identify Applicable Patterns:**
+Based on test requirements, identify which patterns apply:
+- Data fetching? → Check pattern-sse-reactive-data, pattern-rsc-data-fetching
+- State management? → Check pattern-react-query-state, pattern-usestate-local-ui
+- API endpoint? → Check pattern-zod-validation
+- Forms? → Check pattern-zod-validation
+
+**Search for Examples:**
+Find existing code following the pattern:
+```bash
+# Example: Find SSE usage
+grep -r "EventSource" src/
+grep -r "useSSE" src/
+```
+
+Study how pattern is implemented elsewhere.
+
+**Implement Following Pattern:**
+Use the pattern exactly as documented:
+- Copy structure from examples
+- Reuse helper functions/hooks
+- Follow naming conventions
+- Match testing patterns
+
+**Verify Pattern Compliance:**
+Before finishing:
+- [ ] Code matches pattern structure
+- [ ] Tests verify pattern compliance
+- [ ] No pattern violations (hooks will catch)
+- [ ] Consistent with existing code
+
 ### 2. Plan Implementation
 ```
 1. List files to create/modify
@@ -425,6 +463,36 @@ Test results:
 Ready for code review.
 ```
 
+## Example: Implementing with SSE Pattern
+
+**Tests show:** Component should update reactively
+
+**Pattern check:** pattern-sse-reactive-data applies (reactive data updates)
+
+**Search examples:**
+```bash
+$ grep -r "EventSource" src/
+src/components/Dashboard.tsx: const eventSource = new EventSource('/api/stream')
+src/hooks/useSSE.ts: export function useSSE(url: string) { ... }
+```
+
+**Implementation:**
+```typescript
+// Follow existing pattern
+import { useSSE } from '@/hooks/useSSE'
+
+function NotificationCount() {
+  const count = useSSE('/api/notifications/count/stream')
+
+  return <span>{count} notifications</span>
+}
+```
+
+✅ Matches pattern
+✅ Reuses existing hook
+✅ Tests will pass
+✅ Validation hooks will pass
+
 ## Remember
 
 **Your goal is to make tests pass with production-quality code.** Write code that is:
@@ -433,5 +501,6 @@ Ready for code review.
 2. **Safe**: Handles errors, validates input, prevents security issues
 3. **Maintainable**: Clear, follows patterns, well-typed
 4. **Complete**: No shortcuts, no TODOs, fully implemented
+5. **Pattern-Compliant**: Follows established architectural patterns (NEW)
 
-**Tests define the contract. Your code fulfills it.**
+**Tests define the contract. Your code fulfills it. Patterns define how.**

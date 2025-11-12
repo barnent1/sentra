@@ -89,6 +89,62 @@ def check_test_modifications(file_path, tool_name):
 
     return True, None
 
+def check_architectural_patterns(content: str, file_path: str):
+    """Check if code follows architectural patterns"""
+    issues = []
+
+    # Check SSE pattern for React components
+    if file_path.endswith(('.tsx', '.jsx')):
+        # Data fetching without SSE (warn only, not block)
+        if re.search(r'useEffect.*fetch\(', content, re.DOTALL):
+            if not any(p in content for p in ['EventSource', 'useSSE', '/stream']):
+                issues.append(
+                    "⚠️  Pattern suggestion: Consider using SSE pattern for reactive data. "
+                    "See pattern-sse-reactive-data in .sentra/memory/patterns.md"
+                )
+
+    # Check for 'any' type (architectural requirement)
+    if file_path.endswith(('.ts', '.tsx')):
+        if re.search(r':\s*any\b|<any>|\bany\[\]', content):
+            issues.append(
+                "❌ Pattern violation: TypeScript 'any' type not allowed. "
+                "See pattern-typescript-strict in .sentra/memory/patterns.md"
+            )
+
+    # Check for client component with async (architectural error)
+    if file_path.endswith(('.tsx', '.jsx')):
+        has_use_client = "'use client'" in content or '"use client"' in content
+        has_async = re.search(r'export\s+default\s+async\s+function', content)
+        if has_use_client and has_async:
+            issues.append(
+                "❌ Pattern violation: Cannot use async in client component. "
+                "See pattern-client-component-boundaries in .sentra/memory/patterns.md"
+            )
+
+    # Check API routes for Zod validation
+    if file_path.endswith('route.ts') and '/api/' in file_path:
+        handles_mutations = any([
+            re.search(r'export\s+async\s+function\s+POST', content),
+            re.search(r'export\s+async\s+function\s+PATCH', content),
+            re.search(r'export\s+async\s+function\s+PUT', content),
+        ])
+        uses_zod = any([
+            'z.object' in content,
+            '.parse(' in content,
+            '.safeParse(' in content,
+        ])
+        if handles_mutations and not uses_zod:
+            issues.append(
+                "❌ Pattern violation: API route must use Zod validation. "
+                "See pattern-zod-validation in .sentra/memory/patterns.md"
+            )
+
+    # Separate blocking issues from warnings
+    blocking_issues = [i for i in issues if i.startswith("❌")]
+    warning_issues = [i for i in issues if i.startswith("⚠️")]
+
+    return len(blocking_issues) == 0, issues
+
 def check_typescript_rules(content, file_path):
     """
     Check for TypeScript best practices violations.
@@ -96,6 +152,8 @@ def check_typescript_rules(content, file_path):
     issues = []
 
     # Check for 'any' type (should be explicit)
+    # NOTE: This is now also checked in check_architectural_patterns
+    # keeping this for backward compatibility
     if re.search(r":\s*any\b", content):
         issues.append("⚠️  'any' type used - use explicit types")
 
@@ -188,6 +246,20 @@ def verify_file_change(hook_context):
                 }
             }
         issues.extend(security_issues)
+
+    # Architectural pattern checks for all code files
+    if file_path.endswith((".ts", ".tsx", ".js", ".jsx")):
+        is_arch_valid, arch_issues = check_architectural_patterns(content, file_path)
+        if not is_arch_valid:
+            return {
+                "continue": False,
+                "stopReason": "🚫 Architectural violations:\n\n" + "\n".join(arch_issues),
+                "hookSpecificOutput": {
+                    "hookEventName": "PostToolUse",
+                    "architectureViolations": arch_issues
+                }
+            }
+        issues.extend(arch_issues)
 
     # If only warnings (not errors), allow but log
     if issues:

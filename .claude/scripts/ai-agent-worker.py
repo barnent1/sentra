@@ -454,6 +454,7 @@ _This is an automated progress update. Updates are posted every 5 minutes._
             "overview": "",
             "config": "",
             "memory": "",
+            "patterns": "",  # NEW: Architectural patterns
             "documentation": ""
         }
 
@@ -472,11 +473,19 @@ _This is an automated progress update. Updates are posted every 5 minutes._
                 context["config"] = config_file.read_text()
                 self.log("Loaded project config")
 
-            # Memory files (learnings, patterns, gotchas)
+            # Architectural patterns (CRITICAL - NEW)
+            patterns_file = sentra_dir / "memory" / "patterns.md"
+            if patterns_file.exists():
+                context["patterns"] = patterns_file.read_text()
+                self.log("✅ Loaded architectural patterns")
+            else:
+                self.log("⚠️ No architectural patterns found")
+
+            # Memory files (learnings, gotchas, decisions)
             memory_dir = sentra_dir / "memory"
             if memory_dir.exists():
                 memory_parts = []
-                for memory_file in ["gotchas.md", "patterns.md", "decisions.md"]:
+                for memory_file in ["gotchas.md", "decisions.md"]:  # patterns.md loaded separately
                     path = memory_dir / memory_file
                     if path.exists():
                         content = path.read_text()
@@ -537,6 +546,25 @@ _This is an automated progress update. Updates are posted every 5 minutes._
                 context['memory'],
                 "",
             ])
+
+        # Add architectural patterns (CRITICAL - NEW)
+        if context.get('patterns'):
+            prompt_parts.extend([
+                "",
+                "## 🏗️ CRITICAL: Architectural Patterns to Follow",
+                "",
+                "**These patterns are MANDATORY for this project.**",
+                "",
+                "⚠️ Your implementation MUST follow these established patterns.",
+                "⚠️ Pattern violations will be BLOCKED by validation hooks.",
+                "⚠️ If unsure, search codebase for existing examples.",
+                "",
+                context['patterns'],
+                "",
+                "---",
+                ""
+            ])
+            self.log("📚 Injected architectural patterns into prompt")
 
         # Add implementation guidelines
         prompt_parts.extend([

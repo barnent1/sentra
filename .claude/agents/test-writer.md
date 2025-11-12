@@ -83,6 +83,100 @@ When writing tests for UI components (files in `src/components/`, `src/app/`), y
 
 **IMPORTANT**: If your test only checks mock function calls without verifying DOM state, it is INCOMPLETE and must be enhanced.
 
+## Pattern-Specific Test Requirements
+
+When writing tests, check if code follows architectural patterns and ensure tests verify pattern compliance.
+
+### SSE Pattern Tests (pattern-sse-reactive-data)
+
+If component uses EventSource or SSE:
+
+**REQUIRED tests:**
+```typescript
+describe('Component (SSE Pattern)', () => {
+  it('should subscribe to SSE on mount', () => {
+    render(<Component />)
+    expect(mockEventSource).toHaveBeenCalledWith('/api/resource/stream')
+  })
+
+  it('should update when SSE event received', async () => {
+    render(<Component />)
+
+    fireSSEEvent({ data: JSON.stringify({ value: 'new' }) })
+
+    expect(await screen.findByText('new')).toBeInTheDocument()
+  })
+
+  it('should cleanup SSE on unmount', () => {
+    const { unmount } = render(<Component />)
+    const eventSource = mockEventSource.getInstance()
+
+    unmount()
+
+    expect(eventSource.close).toHaveBeenCalled()
+  })
+})
+```
+
+### React Query Pattern Tests (pattern-react-query-state)
+
+If using React Query for server state:
+
+**REQUIRED tests:**
+```typescript
+describe('Component (React Query)', () => {
+  it('should fetch data with useQuery', () => {
+    render(<Component />)
+    expect(mockUseQuery).toHaveBeenCalledWith(['key'], fetchFn)
+  })
+
+  it('should show loading state', () => {
+    mockUseQuery.mockReturnValue({ isLoading: true })
+    render(<Component />)
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+  })
+
+  it('should handle error state', () => {
+    mockUseQuery.mockReturnValue({ isError: true, error: new Error('Failed') })
+    render(<Component />)
+    expect(screen.getByText(/error/i)).toBeInTheDocument()
+  })
+})
+```
+
+### Zod Validation Pattern Tests (pattern-zod-validation)
+
+If API endpoint uses Zod:
+
+**REQUIRED tests:**
+```typescript
+describe('POST /api/resource (Zod Validation)', () => {
+  it('should validate required fields', async () => {
+    const response = await POST({ body: {} })
+    expect(response.status).toBe(400)
+    expect(response.error).toContain('required')
+  })
+
+  it('should validate data types', async () => {
+    const response = await POST({ body: { email: 'not-an-email' } })
+    expect(response.status).toBe(400)
+    expect(response.error).toContain('invalid email')
+  })
+
+  it('should accept valid input', async () => {
+    const response = await POST({ body: validData })
+    expect(response.status).toBe(200)
+  })
+})
+```
+
+### Before Writing Tests: Pattern Check
+
+1. Read `.sentra/memory/patterns.md`
+2. Identify which patterns apply to this code
+3. Include pattern-specific tests
+4. Verify pattern compliance in assertions
+
 ## Test Structure (AAA Pattern)
 
 ```typescript
