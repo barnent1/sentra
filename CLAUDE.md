@@ -1,0 +1,327 @@
+# Sentra Project Context
+
+This document is loaded into every Claude Code session. It provides essential context about the Sentra project to ensure consistent, high-quality development.
+
+## What is Sentra?
+
+Sentra is a **voice-first AI assistant platform** that combines:
+- **Native desktop apps** (macOS, Windows, Linux) built with Tauri 2.x
+- **Modern web interface** using Next.js 15 with App Router
+- **Cloud backend** for synchronization and collaboration
+
+### Vision
+Create the most natural way to interact with AI - through voice - while maintaining the power of traditional interfaces.
+
+## Architecture Overview
+
+### Technology Stack
+
+**Frontend (Native Apps)**
+- Tauri 2.x (Rust backend, web frontend)
+- Next.js 15 (App Router, React Server Components)
+- TypeScript (strict mode)
+- TailwindCSS for styling
+
+**Backend (Cloud Services)**
+- Node.js + Express
+- PostgreSQL (primary database)
+- Prisma ORM
+- Redis (caching, sessions)
+
+**AI/Voice**
+- OpenAI Whisper (speech-to-text)
+- OpenAI GPT-4 (language model)
+- OpenAI TTS (text-to-speech)
+
+### Project Structure
+
+```
+sentra/
+├── src/
+│   ├── app/              # Next.js App Router pages
+│   ├── components/       # React components
+│   ├── services/         # Business logic (90%+ test coverage)
+│   ├── api/              # API routes (75%+ test coverage)
+│   ├── utils/            # Utility functions (90%+ test coverage)
+│   └── lib/              # Third-party integrations
+├── src-tauri/            # Rust backend for native apps
+├── tests/
+│   ├── unit/             # Unit tests
+│   ├── integration/      # Integration tests
+│   └── e2e/              # End-to-end tests
+├── .claude/              # Claude Code configuration
+│   ├── agents/           # Specialized AI agents
+│   ├── hooks/            # Quality enforcement hooks
+│   └── commands/         # Reusable commands
+└── docs/                 # Project documentation
+```
+
+## Development Standards
+
+### TypeScript
+
+**Strict Mode is MANDATORY**
+```typescript
+// ✅ DO: Explicit types
+function calculateTotal(items: CartItem[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0)
+}
+
+// ❌ DON'T: Using 'any'
+function processData(data: any) { }
+
+// ❌ DON'T: Using @ts-ignore
+// @ts-ignore
+const value = getData()
+
+// ✅ DO: Use type guards instead
+function isCartItem(obj: unknown): obj is CartItem {
+  return typeof obj === 'object' && obj !== null && 'price' in obj
+}
+```
+
+### Testing Requirements
+
+**Coverage Thresholds**
+- **Overall**: 75%+ (enforced by CI/CD)
+- **Business Logic** (src/services/): 90%+ (enforced by CI/CD)
+- **Utilities** (src/utils/): 90%+ (enforced by CI/CD)
+- **UI Components**: 60%+ (visual components)
+
+**Test-Driven Development (TDD)**
+1. Write tests FIRST
+2. Verify tests FAIL
+3. Write implementation
+4. Verify tests PASS
+5. Refactor as needed
+
+**Test Structure (AAA Pattern)**
+```typescript
+describe('AuthService', () => {
+  describe('register', () => {
+    it('should create user with hashed password', async () => {
+      // ARRANGE: Setup test data
+      const userData = { email: 'test@example.com', password: 'Pass123!' }
+
+      // ACT: Execute the behavior
+      const result = await authService.register(userData)
+
+      // ASSERT: Verify outcome
+      expect(result.id).toBeDefined()
+      expect(result).not.toHaveProperty('password')
+    })
+  })
+})
+```
+
+### Code Quality
+
+**Linting**: ESLint with strict rules (0 errors, 0 warnings)
+
+**Formatting**: Prettier (enforced by pre-commit hooks)
+
+**No Debug Code**
+```typescript
+// ❌ DON'T: Leave console.log in production code
+console.log('User data:', user)
+
+// ✅ DO: Use proper logger
+logger.info('User registered', { userId: user.id })
+```
+
+### Security
+
+**Never commit secrets**
+```typescript
+// ❌ DON'T: Hardcoded secrets
+const apiKey = 'sk_live_abc123'
+
+// ✅ DO: Environment variables
+const apiKey = process.env.OPENAI_API_KEY
+if (!apiKey) throw new Error('OPENAI_API_KEY not configured')
+```
+
+**Input validation is mandatory**
+```typescript
+// ✅ DO: Validate all input
+function createUser(input: unknown) {
+  const validated = userSchema.parse(input) // Zod validation
+  return db.user.create({ data: validated })
+}
+```
+
+### Git Workflow
+
+**Branching Strategy**
+- `main`: Production-ready code (protected)
+- `feature/*`: New features (e.g., `feature/voice-commands`)
+- `fix/*`: Bug fixes (e.g., `fix/audio-echo`)
+
+**Commit Messages**
+```
+type(scope): Brief description (branch created by Glen Barnhardt with help from Claude Code)
+
+Detailed explanation of changes.
+Why this change was needed.
+
+🤖 Generated with Claude Code
+Co-Authored-By: Claude <noreply@anthropic.com>
+```
+
+**Pull Requests**
+- All PRs require: Tests passing, coverage ≥ thresholds, build success
+- Code review required before merge
+- Squash and merge to keep history clean
+
+## Known Gotchas
+
+### Voice Echo Prevention
+**Problem**: Sentra's voice output can trigger its own listening, causing echo loops
+
+**Solution**: 1000ms delay after Sentra finishes speaking before re-enabling listening
+
+**Location**: `src/lib/openai-voice.ts:145`
+
+```typescript
+// After TTS completes
+await new Promise(resolve => setTimeout(resolve, 1000))
+// Then resume listening
+```
+
+### Tauri IPC Serialization
+**Problem**: Complex objects don't serialize properly across Rust/JS boundary
+
+**Solution**: Use simple data structures (primitives, arrays, plain objects)
+
+**Location**: `src-tauri/src/commands.rs`
+
+```rust
+// ✅ DO: Simple types
+#[tauri::command]
+fn get_config() -> ConfigData { }
+
+// ❌ DON'T: Complex types with methods
+#[tauri::command]
+fn get_service() -> Box<dyn Service> { }
+```
+
+### Next.js Server Components
+**Problem**: Can't use client-side APIs (localStorage, window) in Server Components
+
+**Solution**: Use `'use client'` directive when needed
+
+```typescript
+// Client Component (needs browser APIs)
+'use client'
+import { useState } from 'react'
+
+export function VoiceRecorder() {
+  const [recording, setRecording] = useState(false)
+  // Can use browser APIs here
+}
+```
+
+## AI Agent Guidelines
+
+When working on Sentra with Claude Code agents:
+
+### DO:
+- **Write tests FIRST** (TDD approach)
+- **Ask for plan approval** before implementing features
+- **Use specialized agents** (test-writer, implementation, code-reviewer)
+- **Run tests after EVERY change**
+- **Verify coverage meets thresholds**
+- **Check TypeScript compilation** (npx tsc --noEmit)
+
+### DON'T:
+- **Modify tests** without explicit permission (tests are the specification)
+- **Use `any` or `@ts-ignore`** (TypeScript strict mode)
+- **Bypass git hooks** (--no-verify is BLOCKED)
+- **Commit without tests passing** (enforced by Stop hook)
+- **Skip code review** (multi-agent review is mandatory)
+
+### Multi-Agent Workflow
+
+**For new features, use orchestrator agent**:
+1. Orchestrator creates plan → gets user approval
+2. Orchestrator spawns test-writer → writes tests FIRST
+3. Orchestrator spawns implementation → makes tests pass
+4. Orchestrator spawns code-reviewer → finds bugs
+5. Orchestrator spawns test-runner → verifies all pass
+6. (Optional) Orchestrator spawns security-auditor for sensitive code
+
+**Why?** Single agents get tunnel vision. Multi-agent review catches 90.2% more issues.
+
+## Common Commands
+
+```bash
+# Development
+npm run dev              # Start dev server
+npm run tauri dev        # Start Tauri app in dev mode
+
+# Testing
+npm test                 # Run tests in watch mode
+npm test -- --run        # Run tests once
+npm test -- --coverage   # Run with coverage report
+
+# Quality Checks
+npm run type-check       # TypeScript compilation
+npm run lint             # ESLint
+npm run format           # Prettier formatting
+npm run build            # Production build
+
+# Database
+npm run db:migrate       # Run migrations
+npm run db:seed          # Seed database
+npm run db:reset         # Reset database (dev only)
+```
+
+## Environment Variables
+
+Required environment variables (create `.env.local`):
+
+```bash
+# Database
+DATABASE_URL="postgresql://user:pass@localhost:5432/sentra"
+
+# OpenAI
+OPENAI_API_KEY="sk-..."
+
+# Authentication
+JWT_SECRET="generate-random-string"
+
+# App
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+## Resources
+
+- **Repository**: https://github.com/barnent1/sentra
+- **Documentation**: `/docs` directory
+- **Issues**: GitHub Issues with `ai-feature` label trigger automation
+- **Claude Code Docs**: https://docs.claude.com/claude-code
+
+## Notes for Claude Code
+
+**This project uses the Perfect Agentic Structure**:
+- 6-layer defense system prevents bugs from being committed
+- PreToolUse hooks BLOCK dangerous operations (git --no-verify)
+- PostToolUse hooks VALIDATE every file change
+- Stop hook is UNBYPASSABLE - runs comprehensive quality gate
+
+**The 9-month bug pain will NEVER happen again** because:
+1. Git bypass is blocked at 3 layers (settings, hook, MCP)
+2. Tests must be written FIRST (enforced by workflow)
+3. Multi-agent review catches issues single agent misses
+4. Stop hook prevents finishing until ALL checks pass
+5. CI/CD enforces quality gates (cannot be bypassed)
+
+**When in doubt**:
+- Check PERFECT-AGENTIC-STRUCTURE.md for complete workflow
+- Use orchestrator agent for complex features
+- Write tests FIRST, always
+- Get code review before finishing
+
+---
+
+*Last updated: 2025-11-12 by Glen Barnhardt with help from Claude Code*

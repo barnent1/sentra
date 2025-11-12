@@ -1,0 +1,35 @@
+{
+  "description": "Claude Code settings for Sentra - Bug-proof agentic system",
+  "permission": {
+    "deny": [
+      "Bash(git commit*--no-verify*)",
+      "Bash(git commit*-n*)",
+      "Bash(git push*--force*)",
+      "Bash(git push*-f*)",
+      "Bash(rm -rf /*)",
+      "Bash(*git rebase -i*)",
+      "Bash(*git add -i*)"
+    ],
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Grep",
+      "Glob",
+      "Task",
+      "Bash",
+      "WebFetch",
+      "WebSearch"
+    ]
+  },
+  "features": {
+    "agents": true,
+    "hooks": true,
+    "commands": true,
+    "skills": true
+  },
+  "defaults": {
+    "agent_model": "sonnet",
+    "orchestrator_model": "opus"
+  }
+}

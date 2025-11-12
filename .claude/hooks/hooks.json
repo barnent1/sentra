@@ -1,0 +1,42 @@
+{
+  "description": "Sentra Bug-Proof Hook Configuration - 6-Layer Defense System",
+  "PreToolUse": [
+    {
+      "description": "Validate bash commands - BLOCKS git bypass (--no-verify)",
+      "matcher": "Bash",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 .claude/hooks/validate-bash.py",
+          "timeout": 5
+        }
+      ]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "description": "Verify all file changes - checks syntax, security, test modifications",
+      "matcher": "Write|Edit",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 .claude/hooks/verify-changes.py",
+          "timeout": 30
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "description": "UNBYPASSABLE quality gate - runs before finishing conversation",
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash .claude/hooks/quality-gate.sh",
+          "timeout": 300
+        }
+      ]
+    }
+  ]
+}

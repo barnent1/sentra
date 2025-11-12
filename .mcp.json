@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "git": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git"],
+      "description": "Git operations through MCP - cannot bypass hooks with --no-verify"
+    }
+  }
+}
