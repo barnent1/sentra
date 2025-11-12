@@ -1,0 +1,143 @@
+name: Sentra AI Agent Worker
+
+# Triggers when issue is labeled with "ai-feature"
+on:
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+
+jobs:
+  ai-agent-work:
+    # Only run if issue has "ai-feature" label
+    if: |
+      (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'ai-feature')) ||
+      (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'ai-feature'))
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 45  # Higher limit for complex Sentra tasks
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for context
+
+      - name: Setup Rust (for Tauri builds)
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          pip install anthropic requests
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install project dependencies
+        run: |
+          npm ci
+        continue-on-error: true
+
+      - name: Create feature branch
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+          BRANCH_NAME="feature/issue-${ISSUE_NUMBER}"
+
+          # Check if branch already exists
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "Branch already exists, checking out"
+            git fetch origin "$BRANCH_NAME"
+            git checkout "$BRANCH_NAME"
+          else
+            echo "Creating new branch"
+            git checkout -b "$BRANCH_NAME"
+          fi
+
+          # Configure git
+          git config user.name "Sentra AI Agent"
+          git config user.email "agent@sentra.dev"
+
+      - name: Load Sentra project context
+        run: |
+          echo "📚 Loading Sentra project context..."
+          if [ -f ".sentra/memory/project-overview.md" ]; then
+            echo "✅ Project overview loaded"
+          fi
+          if [ -f ".sentra/config.yml" ]; then
+            echo "✅ Project configuration loaded"
+          fi
+
+      - name: Run AI Agent
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLAUDE_MAX_EXECUTION_TIME: '45'
+          CLAUDE_MAX_API_CALLS_PER_ISSUE: '150'
+          CLAUDE_MAX_FILE_CHANGES: '75'
+          CLAUDE_REQUIRE_TESTS: 'false'  # No tests yet in early phase
+          CLAUDE_GITHUB_COMMENTS: 'true'
+          CLAUDE_LOG_API_CALLS: 'true'
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+
+          # Download AI agent worker script from claude-code-base
+          mkdir -p .claude/scripts
+          curl -sSL -o .claude/scripts/ai-agent-worker.py \
+            https://raw.githubusercontent.com/barnent1/claude-code-base/main/scripts/ai-agent-worker.py
+          chmod +x .claude/scripts/ai-agent-worker.py
+
+          # Download notification script
+          curl -sSL -o .claude/scripts/notify.sh \
+            https://raw.githubusercontent.com/barnent1/claude-code-base/main/scripts/notify.sh
+          chmod +x .claude/scripts/notify.sh
+
+          # Run the AI agent
+          python3 .claude/scripts/ai-agent-worker.py "$ISSUE_NUMBER" . | tee agent-output.json
+
+      - name: Upload agent logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-logs-${{ github.event.issue.number }}
+          path: |
+            ~/.claude/telemetry/agents.log
+            agent-output.json
+          retention-days: 30
+
+      - name: Report success
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+
+          gh issue comment "$ISSUE_NUMBER" --body "✅ AI agent completed this task successfully!
+
+A pull request should be created shortly. Please review the changes and merge when ready.
+
+View [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details."
+
+      - name: Report failure
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER=${{ github.event.issue.number }}
+
+          gh issue comment "$ISSUE_NUMBER" --body "❌ AI agent encountered an issue while working on this task.
+
+Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.
+
+This issue has been labeled 'needs-help' and requires human attention."
+
+          gh issue edit "$ISSUE_NUMBER" --add-label "needs-help"
