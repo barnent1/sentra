@@ -112,6 +112,10 @@ jobs:
           CLAUDE_REQUIRE_TESTS: 'false'  # No tests yet in early phase
           CLAUDE_GITHUB_COMMENTS: 'true'
           CLAUDE_LOG_API_CALLS: 'true'
+          # Rate limiting configuration (prevent 429 errors)
+          CLAUDE_RATE_LIMIT_TPM: '25000'  # 25k tokens/min (under 30k limit)
+          CLAUDE_RATE_LIMIT_RETRIES: '3'  # Retry 3 times with backoff
+          CLAUDE_RATE_LIMIT_THRESHOLD: '0.8'  # Throttle at 80% of limit
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
 

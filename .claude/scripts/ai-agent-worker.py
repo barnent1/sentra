@@ -26,6 +26,10 @@ Environment Variables:
     CLAUDE_REQUIRE_TESTS        Whether to require tests (default: false)
     CLAUDE_GITHUB_COMMENTS      Post progress comments (default: true)
     CLAUDE_LOG_API_CALLS        Log all API calls (default: true)
+    CLAUDE_RATE_LIMIT_TPM       Max tokens per minute (default: 25000)
+    CLAUDE_RATE_LIMIT_RETRIES   Max retry attempts on rate limit (default: 3)
+    CLAUDE_RATE_LIMIT_THRESHOLD Throttle at N% of limit (default: 0.8)
+    TEST_RATE_LIMIT             Enable test mode with low limits (default: false)
 
 Dependencies:
     pip install anthropic
@@ -47,6 +51,7 @@ from dataclasses import dataclass, asdict
 
 try:
     from anthropic import Anthropic
+    import anthropic
 except ImportError:
     print("ERROR: anthropic package not installed. Install with: pip install anthropic", file=sys.stderr)
     sys.exit(1)
@@ -92,6 +97,78 @@ class Config:
 
 
 # ============================================================================
+# RATE LIMITING
+# ============================================================================
+# Anthropic API has the following limits per organization:
+# - 30,000 input tokens per minute
+# - Rate limit errors (429) cause API calls to fail
+#
+# Our strategy:
+# 1. Track token usage in rolling 60-second window
+# 2. Throttle proactively at 80% of limit (configurable)
+# 3. Retry with exponential backoff on 429 errors (3 attempts)
+# 4. Clear tracking window after throttle wait
+#
+# Configuration (via environment variables):
+# - CLAUDE_RATE_LIMIT_TPM: Max tokens per minute (default: 25000)
+# - CLAUDE_RATE_LIMIT_RETRIES: Max retry attempts (default: 3)
+# - CLAUDE_RATE_LIMIT_THRESHOLD: Throttle at N% of limit (default: 0.8)
+# ============================================================================
+
+class RateLimiter:
+    """Track token usage per minute to stay within API limits"""
+
+    def __init__(self, tokens_per_minute: int = 25000, throttle_threshold: float = 0.8):
+        """
+        Initialize rate limiter
+
+        Args:
+            tokens_per_minute: Max tokens per minute (default: 25000, under 30k limit)
+            throttle_threshold: Throttle at N% of limit (default: 0.8 = 80%)
+        """
+        self.tokens_per_minute = tokens_per_minute
+        self.throttle_threshold = throttle_threshold
+        self.tokens_used: List[Tuple[float, int]] = []  # List of (timestamp, token_count) tuples
+
+    def add_usage(self, input_tokens: int, output_tokens: int) -> None:
+        """Record token usage with timestamp"""
+        now = time.time()
+        total_tokens = input_tokens + output_tokens
+        self.tokens_used.append((now, total_tokens))
+
+        # Clean up old entries (older than 60 seconds)
+        cutoff = now - 60
+        self.tokens_used = [(ts, tokens) for ts, tokens in self.tokens_used if ts > cutoff]
+
+    def get_current_usage(self) -> int:
+        """Get total tokens used in the last 60 seconds"""
+        return sum(tokens for _, tokens in self.tokens_used)
+
+    def should_throttle(self) -> bool:
+        """Check if we're approaching the rate limit"""
+        current = self.get_current_usage()
+        threshold = self.tokens_per_minute * self.throttle_threshold
+        return current >= threshold
+
+    def wait_if_needed(self, logger_func) -> None:
+        """Wait if we're approaching rate limit"""
+        if self.should_throttle():
+            # Find oldest token usage
+            if self.tokens_used:
+                oldest_time = self.tokens_used[0][0]
+                wait_time = 60 - (time.time() - oldest_time)
+                if wait_time > 0:
+                    current_usage = self.get_current_usage()
+                    logger_func(
+                        f"Rate limit approaching ({current_usage}/{self.tokens_per_minute} tokens/min, "
+                        f"{current_usage/self.tokens_per_minute*100:.1f}%), waiting {wait_time:.1f}s"
+                    )
+                    time.sleep(wait_time + 1)  # Add 1s buffer
+                    # Clear the tracking window after waiting
+                    self.tokens_used = []
+
+
+# ============================================================================
 # Main Agent Worker Class
 # ============================================================================
 
@@ -117,8 +194,26 @@ class AgentWorker:
         # Initialize Anthropic client
         self.client = Anthropic(api_key=self.config.anthropic_api_key)
 
+        # Rate limiting configuration
+        rate_limit_tpm = int(os.getenv("CLAUDE_RATE_LIMIT_TPM", "25000"))
+        rate_limit_threshold = float(os.getenv("CLAUDE_RATE_LIMIT_THRESHOLD", "0.8"))
+        self.rate_limit_retries = int(os.getenv("CLAUDE_RATE_LIMIT_RETRIES", "3"))
+
+        # Initialize rate limiter
+        self.rate_limiter = RateLimiter(
+            tokens_per_minute=rate_limit_tpm,
+            throttle_threshold=rate_limit_threshold
+        )
+
+        # Test mode for rate limiting
+        self.test_rate_limit = os.getenv("TEST_RATE_LIMIT", "false").lower() == "true"
+        if self.test_rate_limit:
+            # Use very low limit for testing
+            self.rate_limiter = RateLimiter(tokens_per_minute=1000, throttle_threshold=0.8)
+
         # Tracking
         self.start_time = time.time()
+        self.rate_limit_initialized = True  # Track that rate limiter is set up
         self.api_calls = 0
         self.estimated_cost = 0.0
         self.files_changed: set = set()
@@ -655,6 +750,75 @@ _This is an automated progress update. Updates are posted every 5 minutes._
         except Exception as e:
             return f"Error executing {tool_name}: {str(e)}"
 
+    def _call_claude_with_retry(
+        self,
+        messages: List[Dict[str, Any]],
+        tools: List[Dict[str, Any]],
+        max_tokens: int = 4096
+    ) -> Any:
+        """
+        Call Claude API with exponential backoff retry on rate limits
+
+        Args:
+            messages: Conversation messages
+            tools: Available tools
+            max_tokens: Max tokens in response
+
+        Returns:
+            API response
+
+        Raises:
+            Exception: On non-recoverable errors or after max retries
+        """
+        for attempt in range(self.rate_limit_retries):
+            try:
+                # Check rate limit before making call
+                self.rate_limiter.wait_if_needed(self.log)
+
+                response = self.client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=max_tokens,
+                    messages=messages,
+                    tools=tools,
+                    temperature=0.0
+                )
+
+                # Track usage
+                usage = response.usage
+                self.rate_limiter.add_usage(usage.input_tokens, usage.output_tokens)
+
+                return response
+
+            except anthropic.RateLimitError as e:
+                if attempt < self.rate_limit_retries - 1:
+                    # Exponential backoff: 2^attempt * 5 seconds
+                    wait_time = (2 ** attempt) * 5
+                    current_usage = self.rate_limiter.get_current_usage()
+                    self.log(
+                        f"Rate limit hit (current usage: {current_usage}/{self.rate_limiter.tokens_per_minute} tokens/min), "
+                        f"retrying in {wait_time}s (attempt {attempt+1}/{self.rate_limit_retries})",
+                        "WARNING"
+                    )
+                    time.sleep(wait_time)
+                else:
+                    # Last attempt failed
+                    current_usage = self.rate_limiter.get_current_usage()
+                    error_msg = (
+                        f"Rate limit exceeded after {self.rate_limit_retries} retries. "
+                        f"Current usage: {current_usage}/{self.rate_limiter.tokens_per_minute} tokens/min. "
+                        f"Consider: 1) Reducing max_tokens, 2) Simplifying prompts, 3) Contact Anthropic for limit increase"
+                    )
+                    self.log(error_msg, "ERROR")
+                    raise RuntimeError(error_msg) from e
+
+            except Exception as e:
+                # Non-recoverable error
+                self.log(f"API call failed: {e}", "ERROR")
+                raise
+
+        # Should never reach here
+        raise RuntimeError("Unexpected error in retry loop")
+
     def execute_claude_code(
         self,
         prompt: str,
@@ -711,14 +875,21 @@ _This is an automated progress update. Updates are posted every 5 minutes._
                 # Check constraints
                 self.check_constraints()
 
-                # Make API call
+                # Log rate limit status periodically (every 5 turns)
+                if turn % 5 == 0:
+                    current_usage = self.rate_limiter.get_current_usage()
+                    usage_percent = (current_usage / self.rate_limiter.tokens_per_minute) * 100
+                    self.log(
+                        f"Rate limit status: {current_usage}/{self.rate_limiter.tokens_per_minute} "
+                        f"tokens/min ({usage_percent:.1f}%)"
+                    )
+
+                # Make API call with retry logic
                 try:
-                    response = self.client.messages.create(
-                        model="claude-sonnet-4-20250514",
-                        max_tokens=4096,
+                    response = self._call_claude_with_retry(
                         messages=self.messages,
                         tools=tools,
-                        temperature=0.0
+                        max_tokens=4096
                     )
 
                     # Track API usage
@@ -1146,6 +1317,14 @@ Generated by Sentra AI Agent
             self.log(f"AI Agent Worker starting for issue #{self.issue_number}")
             self.log("="*80)
 
+            # Log rate limiting configuration
+            test_mode_msg = " (TEST MODE)" if self.test_rate_limit else ""
+            self.log(
+                f"Rate limiting: {self.rate_limiter.tokens_per_minute} tokens/min, "
+                f"throttle at {self.rate_limiter.throttle_threshold*100:.0f}%, "
+                f"max {self.rate_limit_retries} retries{test_mode_msg}"
+            )
+
             # Phase 0: Environment check
             self.log("Phase 0: Environment validation")
             self.check_constraints()
@@ -1349,6 +1528,10 @@ def main():
         print("  CLAUDE_REQUIRE_TESTS (default: false)", file=sys.stderr)
         print("  CLAUDE_GITHUB_COMMENTS (default: true)", file=sys.stderr)
         print("  CLAUDE_LOG_API_CALLS (default: true)", file=sys.stderr)
+        print("  CLAUDE_RATE_LIMIT_TPM (default: 25000)", file=sys.stderr)
+        print("  CLAUDE_RATE_LIMIT_RETRIES (default: 3)", file=sys.stderr)
+        print("  CLAUDE_RATE_LIMIT_THRESHOLD (default: 0.8)", file=sys.stderr)
+        print("  TEST_RATE_LIMIT (default: false)", file=sys.stderr)
         sys.exit(1)
 
     try:
