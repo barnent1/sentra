@@ -105,8 +105,8 @@ jobs:
           # Scripts are checked into the repository at .claude/scripts/
           chmod +x .claude/scripts/ai-agent-worker.py .claude/scripts/notify.sh
 
-          # Run the AI agent
-          python3 .claude/scripts/ai-agent-worker.py "$ISSUE_NUMBER" . | tee agent-output.json
+          # Run the AI agent (using python3.11 to match Dockerfile)
+          python3.11 .claude/scripts/ai-agent-worker.py "$ISSUE_NUMBER" . | tee agent-output.json
 
       - name: Upload agent logs
         if: always()

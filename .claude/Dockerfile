@@ -35,11 +35,12 @@ WORKDIR /home/claude-agent/workspace
 # Security: Install Python dependencies as non-root user
 USER claude-agent:claude-agent
 
-# Add user binaries to PATH
+# Add user binaries to PATH and Python site-packages
 ENV PATH="/home/claude-agent/.local/bin:$PATH"
+ENV PYTHONPATH="/home/claude-agent/.local/lib/python3.11/site-packages:$PYTHONPATH"
 
 # Install required Python packages
-RUN pip install --user --no-cache-dir \
+RUN python3.11 -m pip install --user --no-cache-dir \
     anthropic \
     requests \
     PyGithub
