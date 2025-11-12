@@ -29,40 +29,36 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45  # Higher limit for complex Sentra tasks
 
+    # Phase 1: Docker Containerization for Security
+    # See: ADR_0001_CONTAINER_SECURITY.md
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/sentra-agent:latest
+      options: >-
+        --cap-drop=ALL
+        --security-opt=no-new-privileges
+        --read-only
+        --tmpfs /tmp:exec,mode=1777
+        --tmpfs /home/claude-agent:exec,mode=0755
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Full history for context
 
-      - name: Setup Rust (for Tauri builds)
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
+      # Container already has Python, Node.js, and dependencies installed
+      # See: .claude/Dockerfile for complete environment setup
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install Python dependencies
+      - name: Verify container environment
         run: |
-          pip install anthropic requests
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install Claude Code CLI
-        run: |
-          npm install -g @anthropics/claude-code
-
-      - name: Install project dependencies
-        run: |
-          npm ci
-        continue-on-error: true
+          echo "🐳 Running in secure Docker container"
+          echo "Python: $(python3.11 --version)"
+          echo "Node: $(node --version)"
+          echo "User: $(whoami)"
+          echo "UID: $(id -u)"
 
       - name: Create feature branch
         run: |

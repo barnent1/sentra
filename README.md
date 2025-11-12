@@ -43,6 +43,43 @@ Sentra is a beautiful native Mac application that provides a visual interface fo
 - True Mac app experience
 - Built-in menu bar, notifications, auto-updates
 
+**AI Agent Infrastructure:**
+- GitHub Actions (Phases 1-2) → Custom runners with gVisor (Phase 3)
+- Docker containerization with security isolation
+- Credential proxy service (credentials never in agent environment)
+- Anthropic Python SDK for structured agent orchestration
+
+---
+
+## Security Architecture
+
+Sentra implements enterprise-grade security for AI agents that execute code:
+
+**Approved 3-Phase Approach (Glen Barnhardt, Nov 12, 2025):**
+
+1. **Phase 1 (THIS WEEK):** Docker containerization
+   - Isolated containers on GitHub Actions
+   - Read-only filesystem, non-root user
+   - Resource limits (2GB RAM, 2 CPU, 100 processes)
+   - 60-70% risk reduction
+
+2. **Phase 2 (Weeks 2-4):** Credential proxy service
+   - Credentials never exposed to agent processes
+   - Unix socket-based validation
+   - Complete audit trail
+   - Prevents credential theft attacks
+   - Additional 30% risk reduction (CRITICAL)
+
+3. **Phase 3 (Q1 2026):** gVisor migration
+   - Custom infrastructure with Google's gVisor runtime
+   - User-space kernel isolation
+   - Industry-leading security matching Claude Code for Web
+   - Remaining 15% risk reduction
+
+**Current Status:** Phase 1 implementation starting this week
+
+**See:** `/docs/architecture/SECURITY-ARCHITECTURE.md` for complete design
+
 ---
 
 ## Design Assets

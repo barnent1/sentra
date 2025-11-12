@@ -33,6 +33,46 @@ Create the most natural way to interact with AI - through voice - while maintain
 - OpenAI GPT-4 (language model)
 - OpenAI TTS (text-to-speech)
 
+### Security Architecture
+
+**Infrastructure:** GitHub Actions (Phases 1-2), Custom runners with gVisor (Phase 3)
+
+**Approved Security Model (Glen Barnhardt, Nov 12, 2025):**
+Sentra implements a 3-phase security architecture for AI agent isolation:
+
+**Phase 1: Docker Containerization (THIS WEEK)**
+- AI agents run in isolated Docker containers on GitHub Actions
+- Read-only root filesystem with ephemeral tmpfs mounts
+- Non-root user execution (claude-agent:claude-agent)
+- Capability dropping (CAP_DROP=ALL with minimal additions)
+- Resource limits: 2GB RAM, 2 CPU cores, 100 processes max
+- Risk reduction: 60-70%
+
+**Phase 2: Credential Proxy Service (Weeks 2-4)**
+- Credentials never exposed to agent container environment
+- Unix socket-based proxy service validates requests
+- GitHub tokens and API keys remain on host, attached by proxy
+- Full audit trail of all credential usage
+- Prevents credential theft via prompt injection attacks
+- Risk reduction: Additional 30% (CRITICAL)
+
+**Phase 3: gVisor Migration (Q1 2026)**
+- Custom infrastructure with Google's gVisor runtime
+- User-space kernel eliminates direct syscall exposure
+- Industry-leading security matching Claude Code for Web
+- Requires migration off GitHub Actions
+- Risk reduction: Remaining 15% gap
+
+**Current Status:** Phase 1 implementation starting this week
+
+**SDK Choice:** Anthropic Python SDK (direct API usage)
+- NOT using claude-code CLI subprocess approach
+- Structured tool ecosystem with automatic context management
+- Better error handling and recovery
+- Migration planned for Phase 2
+
+**See:** `/docs/architecture/SECURITY-ARCHITECTURE.md` for comprehensive design
+
 ### Project Structure
 
 ```

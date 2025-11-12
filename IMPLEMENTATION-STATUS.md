@@ -241,6 +241,119 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 
 ---
 
+## Architecture & Security Decisions
+
+**Decision Date:** November 12, 2025
+**Approved By:** Glen Barnhardt
+**Status:** Approved - Implementation Starting This Week
+
+Based on comprehensive research into Claude Code for Web's architecture, Sentra will implement a 3-phase containerization and security approach for its AI agent system.
+
+### Context
+
+Sentra's GitHub Actions-based AI agents currently have critical security gaps compared to Claude Code for Web:
+- No filesystem isolation
+- No network isolation
+- Credentials in environment variables
+- Persistent runner state
+
+**Risk Level:** CRITICAL (credential theft possible via prompt injection)
+
+### Approved 3-Phase Plan
+
+#### Phase 1: Docker Containerization (THIS WEEK - Weeks 1-2)
+**Goal:** Immediate risk reduction through container isolation
+**Timeline:** Starting this week
+**Risk Reduction:** 60-70%
+
+**Implementation:**
+- Create Dockerfile with minimal Ubuntu 22.04 base
+- Run agents in isolated Docker containers on GitHub Actions
+- Read-only root filesystem with tmpfs for /tmp
+- Drop all capabilities except essential ones
+- Process and memory limits via cgroups
+- Non-root user execution
+
+**Deliverables:**
+- [ ] Dockerfile for AI agent runtime
+- [ ] Updated workflow YAML with container directive
+- [ ] Security verification tests
+- [ ] Documentation
+
+#### Phase 2: Credential Proxy Service (Weeks 2-4)
+**Goal:** Eliminate credential exposure to agent processes
+**Timeline:** Immediately after Phase 1
+**Risk Reduction:** 30% (CRITICAL - prevents credential theft)
+
+**Implementation:**
+- Sidecar proxy service running on GitHub Actions host
+- Unix socket communication between container and proxy
+- Credentials never passed to container environment
+- Request validation before credential attachment
+- Audit log of all credential usage
+
+**Deliverables:**
+- [ ] Credential proxy service implementation
+- [ ] Integration with Docker workflow
+- [ ] Audit logging system
+- [ ] Documentation
+
+#### Phase 3: gVisor Migration (Q1 2026)
+**Goal:** Industry-leading security matching Claude Code for Web
+**Timeline:** Months 2-3 (Q1 2026)
+**Risk Reduction:** 15% (remaining gap)
+
+**Implementation:**
+- Custom infrastructure with gVisor runtime
+- User-space kernel isolation (no direct host kernel access)
+- Complete syscall interception
+- Move off GitHub Actions to custom runners
+
+**Deliverables:**
+- [ ] gVisor infrastructure design
+- [ ] Custom runner deployment
+- [ ] Migration from GitHub Actions
+- [ ] Enterprise-grade security posture
+
+### Infrastructure Decision
+
+**Approved Approach:** Run on GitHub Actions (Phases 1-2), migrate to custom infrastructure (Phase 3)
+
+**Rationale:**
+- Phase 1-2 can use existing GitHub Actions infrastructure
+- Provides 85% security posture with minimal infrastructure overhead
+- Phase 3 requires custom infrastructure but provides industry-leading security
+- Pragmatic phased approach balances risk reduction with engineering effort
+
+### SDK Decision
+
+**Approved Approach:** Use Anthropic Python SDK directly (not fake CLI wrapper)
+
+**Rationale:**
+- Current CLI subprocess approach is fragile (parsing stdout/stderr)
+- Anthropic SDK provides structured tool ecosystem
+- Automatic context management and compaction
+- Better error handling and recovery
+- Future-proof as Claude Code features evolve
+
+**Migration:** Planned for Phase 2 (Weeks 2-4)
+
+### Next Steps
+
+**This Week (Phase 1 Start):**
+1. Create Dockerfile for agent runtime
+2. Update GitHub Actions workflow with container directive
+3. Implement security verification tests
+4. Deploy to test environment
+
+**See Also:**
+- `/docs/architecture/SECURITY-ARCHITECTURE.md` - Comprehensive security design
+- `CRITICAL_SECURITY_FINDINGS.md` - Research findings
+- `ADR_0001_CONTAINER_SECURITY.md` - Architecture decision record
+- `TECHNICAL_RESEARCH_CLAUDE_CODE.md` - Deep technical analysis
+
+---
+
 ## Success Criteria (Phase 1)
 
 - [ ] Voice → Spec → Approve → GitHub Issue (full workflow)
@@ -248,3 +361,4 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 - [ ] Specs stored in `.sentra/specs/` directory
 - [ ] Native app works on Mac (Windows/Linux later)
 - [ ] Ready to use Sentra to build remaining phases
+- [ ] Docker containerization deployed (Phase 1 security)
