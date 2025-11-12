@@ -23,8 +23,12 @@ def validate_test_quality(file_path: str) -> dict:
     if not file_path.endswith(('.test.ts', '.test.tsx', '.spec.ts', '.spec.tsx')):
         return {"continue": True}
 
-    with open(file_path, 'r') as f:
-        content = f.read()
+    try:
+        with open(file_path, 'r') as f:
+            content = f.read()
+    except (FileNotFoundError, IOError):
+        # If file doesn't exist or can't be read, allow (might be deleted or binary)
+        return {"continue": True}
 
     # Check if this is a UI component test
     is_ui_component = any([
@@ -94,16 +98,38 @@ Add assertions like toHaveClass(), toBeVisible(), toHaveAttribute().
     return {"continue": True}
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print(json.dumps({"continue": True}))
-        sys.exit(0)
+    try:
+        # Read hook context from stdin (like other hooks)
+        hook_context = json.loads(sys.stdin.read())
 
-    file_path = sys.argv[1]
-    result = validate_test_quality(file_path)
+        # Extract file path from toolInput
+        tool_input = hook_context.get("toolInput", {})
+        file_path = tool_input.get("file_path", "")
 
-    print(json.dumps(result))
+        # If no file path, allow
+        if not file_path:
+            print(json.dumps({"continue": True}))
+            sys.exit(0)
 
-    if not result.get("continue", True):
-        sys.exit(2)
-    else:
+        # Validate test quality
+        result = validate_test_quality(file_path)
+
+        print(json.dumps(result))
+
+        if not result.get("continue", True):
+            sys.exit(2)
+        else:
+            sys.exit(0)
+
+    except Exception as e:
+        # On error, allow but log
+        error_result = {
+            "continue": True,
+            "stopReason": f"Hook error (allowing): {str(e)}",
+            "hookSpecificOutput": {
+                "hookEventName": "PostToolUse",
+                "error": str(e)
+            }
+        }
+        print(json.dumps(error_result))
         sys.exit(0)
