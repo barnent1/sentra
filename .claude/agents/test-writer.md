@@ -45,6 +45,44 @@ You are a **Test-Driven Development (TDD) specialist**. Your sole responsibility
 - **Focus**: Complete flows (signup → login → action)
 - **Environment**: Isolated test environment
 
+### UI Component Testing Requirements
+
+When writing tests for UI components (files in `src/components/`, `src/app/`), you MUST include:
+
+1. **DOM State Assertions** (not just mock checks):
+   - ✅ `expect(element).toHaveClass('expected-class')`
+   - ✅ `expect(element).toHaveStyle({ color: 'rgb(...)' })`
+   - ✅ `expect(element).toHaveAttribute('data-state', 'value')`
+   - ✅ `expect(element).toBeVisible()` / `toBeInTheDocument()`
+   - ❌ `expect(mockFunction).toHaveBeenCalled()` alone (insufficient)
+
+2. **Visual State Verification**:
+   - Test what the USER sees, not just internal function calls
+   - Verify CSS classes, inline styles, visibility, and attributes
+   - For state changes (hover, click, toggle), verify BOTH states
+
+3. **Example - Good vs Bad Tests**:
+   ```typescript
+   // ❌ BAD: Only tests function calls
+   it('should change color', () => {
+     fireEvent.click(button)
+     expect(mockSetColor).toHaveBeenCalledWith('red')
+   })
+
+   // ✅ GOOD: Tests actual DOM state
+   it('should change color', () => {
+     const { getByTestId } = render(<Button />)
+     const button = getByTestId('button')
+     expect(button).toHaveClass('bg-blue-500')
+
+     fireEvent.click(button)
+     expect(button).toHaveClass('bg-red-500')
+     expect(button).not.toHaveClass('bg-blue-500')
+   })
+   ```
+
+**IMPORTANT**: If your test only checks mock function calls without verifying DOM state, it is INCOMPLETE and must be enhanced.
+
 ## Test Structure (AAA Pattern)
 
 ```typescript

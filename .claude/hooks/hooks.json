@@ -24,6 +24,17 @@
           "timeout": 30
         }
       ]
+    },
+    {
+      "description": "Validate test quality - ensures UI tests include DOM assertions",
+      "matcher": "Write.*\\.(test|spec)\\.(ts|tsx)",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 .claude/hooks/validate-test-quality.py",
+          "timeout": 10
+        }
+      ]
     }
   ],
   "Stop": [

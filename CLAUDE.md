@@ -128,6 +128,12 @@ function isCartItem(obj: unknown): obj is CartItem {
 - **Utilities** (src/utils/): 90%+ (enforced by CI/CD)
 - **UI Components**: 60%+ (visual components)
 
+**E2E Tests Required For:**
+- Critical user journeys (signup, checkout, payment flows)
+- **ALL visual state changes** (color, visibility, position, animation)
+- **Multi-step interactions** (click → modal → action → result)
+- **User-facing state transitions** (loading → success, enabled → disabled)
+
 **Test-Driven Development (TDD)**
 1. Write tests FIRST
 2. Verify tests FAIL

@@ -1,0 +1,47 @@
+name: Visual Testing Metrics
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run visual test audit
+        run: |
+          echo "## Visual Testing Audit" >> $GITHUB_STEP_SUMMARY
+
+          # Count components
+          TOTAL_COMPONENTS=$(find src/components -name "*.tsx" -not -name "*.test.tsx" | wc -l)
+          echo "Total Components: $TOTAL_COMPONENTS" >> $GITHUB_STEP_SUMMARY
+
+          # Count test files
+          TOTAL_TESTS=$(find src/components -name "*.test.tsx" | wc -l)
+          echo "Total Test Files: $TOTAL_TESTS" >> $GITHUB_STEP_SUMMARY
+
+          # Count E2E tests
+          E2E_TESTS=$(find tests/e2e -name "*.spec.ts" | wc -l)
+          echo "E2E Tests: $E2E_TESTS" >> $GITHUB_STEP_SUMMARY
+
+          # Calculate coverage percentage
+          COVERAGE=$(echo "scale=2; $TOTAL_TESTS / $TOTAL_COMPONENTS * 100" | bc)
+          echo "Test Coverage: ${COVERAGE}%" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check for shallow tests
+        run: |
+          echo "## Shallow Test Detection" >> $GITHUB_STEP_SUMMARY
+
+          # Find tests that only use mock assertions
+          grep -r "expect(mock" src/components --include="*.test.tsx" || echo "No shallow mock-only tests found ✅" >> $GITHUB_STEP_SUMMARY

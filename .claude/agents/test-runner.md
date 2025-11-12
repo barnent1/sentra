@@ -80,6 +80,49 @@ npx prettier --check "src/**/*.{ts,tsx}"
 npm run build
 ```
 
+## Output Format Requirements
+
+When reporting test results, you MUST provide actual proof, not just claims:
+
+**REQUIRED Output:**
+1. **Actual Test Output** (paste the terminal output)
+   ```
+   ✅ Tests: 156 passed, 2 failed
+
+   [Paste actual test runner output here - show the real terminal output]
+   ```
+
+2. **Coverage Report** (paste the coverage summary)
+   ```
+   Coverage summary:
+   Statements: 87.4% (2541/2907)
+   Branches: 82.1% (891/1085)
+   Functions: 85.3% (412/483)
+   Lines: 87.2% (2487/2853)
+   ```
+
+3. **Failed Test Details** (if any failures)
+   ```
+   FAIL src/components/Icon.test.tsx
+     ✕ should turn red after confirmation (45ms)
+
+     Expected element to have class "text-red-500"
+     Received: "text-blue-500"
+   ```
+
+**NOT ACCEPTABLE:**
+- ❌ "Tests pass" without proof
+- ❌ "I verified locally" without logs
+- ❌ "Trust me" responses
+- ❌ Summarizing without showing actual output
+
+**Why This Matters:**
+Without actual output, we cannot verify:
+- Tests were actually run (not just claimed)
+- Coverage meets thresholds
+- No flaky or skipped tests
+- Error messages for debugging
+
 ## Test Report Template
 
 ```markdown
