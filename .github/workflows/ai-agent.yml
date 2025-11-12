@@ -6,11 +6,23 @@ on:
     types: [labeled]
   issue_comment:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to work on'
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
 
 jobs:
   ai-agent-work:
     # Only run if issue has "ai-feature" label
     if: |
+      github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'ai-feature')) ||
       (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'ai-feature'))
 
@@ -50,7 +62,7 @@ jobs:
 
       - name: Create feature branch
         run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
+          ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
           BRANCH_NAME="feature/issue-${ISSUE_NUMBER}"
 
           # Check if branch already exists
@@ -88,7 +100,7 @@ jobs:
           CLAUDE_GITHUB_COMMENTS: 'true'
           CLAUDE_LOG_API_CALLS: 'true'
         run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
+          ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
 
           # Download AI agent worker script from claude-code-base
           mkdir -p .claude/scripts
@@ -119,7 +131,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
+          ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
 
           gh issue comment "$ISSUE_NUMBER" --body "✅ AI agent completed this task successfully!
 
@@ -132,7 +144,7 @@ View [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/r
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ISSUE_NUMBER=${{ github.event.issue.number }}
+          ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
 
           gh issue comment "$ISSUE_NUMBER" --body "❌ AI agent encountered an issue while working on this task.
 
