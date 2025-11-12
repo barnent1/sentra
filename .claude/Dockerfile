@@ -24,6 +24,13 @@ RUN apt-get update && \
     apt-get install -y gh && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Python packages system-wide (before creating non-root user)
+# This ensures packages are in read-only filesystem, not ephemeral tmpfs
+RUN python3.11 -m pip install --no-cache-dir \
+    anthropic \
+    requests \
+    PyGithub
+
 # Security: Create non-root user for running agent code
 RUN useradd -m -s /bin/bash -u 1001 claude-agent && \
     mkdir -p /home/claude-agent/workspace && \
@@ -32,23 +39,8 @@ RUN useradd -m -s /bin/bash -u 1001 claude-agent && \
 # Set working directory
 WORKDIR /home/claude-agent/workspace
 
-# Security: Install Python dependencies as non-root user
+# Switch to non-root user for runtime
 USER claude-agent:claude-agent
-
-# Add user binaries to PATH and Python site-packages
-ENV PATH="/home/claude-agent/.local/bin:$PATH"
-ENV PYTHONPATH="/home/claude-agent/.local/lib/python3.11/site-packages:$PYTHONPATH"
-
-# Install required Python packages
-RUN python3.11 -m pip install --user --no-cache-dir \
-    anthropic \
-    requests \
-    PyGithub
-
-# Install Node.js dependencies globally (for user)
-RUN npm config set prefix '/home/claude-agent/.npm-global' && \
-    echo 'export PATH="/home/claude-agent/.npm-global/bin:$PATH"' >> /home/claude-agent/.bashrc
-ENV PATH="/home/claude-agent/.npm-global/bin:$PATH"
 
 # Security: Drop all capabilities by default (will be enforced in workflow)
 # Security: Read-only root filesystem (will be enforced in workflow)

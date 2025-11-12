@@ -112,8 +112,6 @@ jobs:
           CLAUDE_REQUIRE_TESTS: 'false'  # No tests yet in early phase
           CLAUDE_GITHUB_COMMENTS: 'true'
           CLAUDE_LOG_API_CALLS: 'true'
-          # Ensure Python can find user-installed packages
-          PYTHONPATH: '/home/claude-agent/.local/lib/python3.11/site-packages'
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
 
@@ -121,9 +119,7 @@ jobs:
           chmod +x .claude/scripts/ai-agent-worker.py .claude/scripts/notify.sh
 
           # Run the AI agent (using python3.11 to match Dockerfile)
-          # Use pipefail to ensure we catch errors even when piping to tee
-          set -o pipefail
-          python3.11 .claude/scripts/ai-agent-worker.py "$ISSUE_NUMBER" . | tee agent-output.json
+          python3.11 .claude/scripts/ai-agent-worker.py "$ISSUE_NUMBER" . | tee agent-output.json || exit 1
 
       - name: Upload agent logs
         if: always()
