@@ -4,7 +4,7 @@ project:
   name: sentra
   description: AI Agent Control Center - Mission Control for Your AI Agents
   version: 1.0.0
-  github_repo: "" # Will be set after GitHub repo creation
+  github_repo: "barnent1/sentra"
 
 agent_controls:
   max_execution_time: 30m
