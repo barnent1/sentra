@@ -99,6 +99,8 @@ jobs:
           CLAUDE_REQUIRE_TESTS: 'false'  # No tests yet in early phase
           CLAUDE_GITHUB_COMMENTS: 'true'
           CLAUDE_LOG_API_CALLS: 'true'
+          # Ensure Python can find user-installed packages
+          PYTHONPATH: '/home/claude-agent/.local/lib/python3.11/site-packages'
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
 
