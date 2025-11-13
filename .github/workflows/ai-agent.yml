@@ -55,14 +55,28 @@ jobs:
         with:
           fetch-depth: 0  # Full history for context
 
-      # Container already has Python, Node.js, and dependencies installed
+      # Container already has Python, Node.js, and npm installed
       # See: .claude/Dockerfile for complete environment setup
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install npm dependencies
+        run: npm ci
+        working-directory: ${{ github.workspace }}
 
       - name: Verify container environment
         run: |
           echo "🐳 Running in secure Docker container"
           echo "Python: $(python3.11 --version)"
           echo "Node: $(node --version)"
+          echo "npm: $(npm --version)"
+          echo "Next.js: $(npx next --version 2>&1 || echo 'NOT FOUND')"
           echo "User: $(whoami)"
           echo "UID: $(id -u)"
           echo "Claude Code: $(claude --version 2>&1 || echo 'NOT INSTALLED')"
