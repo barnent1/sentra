@@ -8,19 +8,22 @@ afterEach(() => {
 })
 
 // Mock window.matchMedia (used by many UI components)
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: (query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {}, // Deprecated
-    removeListener: () => {}, // Deprecated
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => true,
-  }),
-})
+// Only run in jsdom environment
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: (query: string) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {}, // Deprecated
+      removeListener: () => {}, // Deprecated
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => true,
+    }),
+  })
+}
 
 // Mock IntersectionObserver (used by lazy loading, animations)
 global.IntersectionObserver = class IntersectionObserver {

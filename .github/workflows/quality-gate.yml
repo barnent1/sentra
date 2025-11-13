@@ -1,0 +1,372 @@
+name: Quality Gate
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  quality-checks:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type checking
+        id: type-check
+        run: |
+          echo "Running TypeScript type checking..."
+          npm run type-check
+          echo "✅ TypeScript type checking passed"
+
+      - name: ESLint validation
+        id: eslint
+        run: |
+          echo "Running ESLint (0 errors required)..."
+          npm run lint -- --max-warnings=0
+          echo "✅ ESLint passed with 0 errors and 0 warnings"
+
+      - name: Run test suite
+        id: tests
+        run: |
+          echo "Running test suite..."
+          npm run test:run
+          echo "✅ All tests passed"
+
+      - name: Generate coverage report
+        id: coverage
+        run: |
+          echo "Generating coverage report..."
+          npm run test:coverage
+          echo "✅ Coverage report generated"
+
+      - name: Verify coverage thresholds
+        id: coverage-check
+        run: |
+          echo "📊 Verifying coverage thresholds..."
+
+          if [ ! -f "coverage/coverage-summary.json" ]; then
+            echo "❌ Coverage report not found"
+            exit 1
+          fi
+
+          # Extract coverage metrics
+          LINES=$(jq '.total.lines.pct' coverage/coverage-summary.json)
+          BRANCHES=$(jq '.total.branches.pct' coverage/coverage-summary.json)
+          FUNCTIONS=$(jq '.total.functions.pct' coverage/coverage-summary.json)
+          STATEMENTS=$(jq '.total.statements.pct' coverage/coverage-summary.json)
+
+          echo "Coverage Results:"
+          echo "  Lines: ${LINES}%"
+          echo "  Branches: ${BRANCHES}%"
+          echo "  Functions: ${FUNCTIONS}%"
+          echo "  Statements: ${STATEMENTS}%"
+
+          # Check overall threshold (75%)
+          THRESHOLD=75
+          FAILED=0
+
+          if (( $(echo "$LINES < $THRESHOLD" | bc -l) )); then
+            echo "❌ Line coverage below ${THRESHOLD}% threshold (current: ${LINES}%)"
+            FAILED=1
+          fi
+
+          if (( $(echo "$BRANCHES < $THRESHOLD" | bc -l) )); then
+            echo "❌ Branch coverage below ${THRESHOLD}% threshold (current: ${BRANCHES}%)"
+            FAILED=1
+          fi
+
+          if (( $(echo "$FUNCTIONS < $THRESHOLD" | bc -l) )); then
+            echo "❌ Function coverage below ${THRESHOLD}% threshold (current: ${FUNCTIONS}%)"
+            FAILED=1
+          fi
+
+          if (( $(echo "$STATEMENTS < $THRESHOLD" | bc -l) )); then
+            echo "❌ Statement coverage below ${THRESHOLD}% threshold (current: ${STATEMENTS}%)"
+            FAILED=1
+          fi
+
+          if [ $FAILED -eq 1 ]; then
+            echo ""
+            echo "Required Thresholds:"
+            echo "  Overall: 75%+"
+            echo "  Services/Utils: 90%+ (manual review required)"
+            exit 1
+          fi
+
+          echo "✅ All coverage thresholds met!"
+
+      - name: Verify build
+        id: build
+        run: |
+          echo "Building project..."
+          npm run build
+
+          if [ ! -d ".next" ]; then
+            echo "❌ Build output directory '.next' not found"
+            exit 1
+          fi
+
+          echo "✅ Build successful"
+
+      - name: Security audit
+        id: security
+        run: |
+          echo "Running security audit..."
+          npm audit --audit-level=high
+          echo "✅ No high or critical vulnerabilities found"
+        continue-on-error: false
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: .next/
+          retention-days: 7
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            if (!fs.existsSync('coverage/coverage-summary.json')) {
+              console.log('No coverage report found');
+              return;
+            }
+
+            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+            const total = coverage.total;
+
+            const formatPct = (val) => val.toFixed(2);
+            const getStatus = (val, threshold = 75) => val >= threshold ? '✅' : '❌';
+
+            const comment = `## 📊 Quality Gate Report
+
+            ### Coverage Metrics
+            | Metric | Percentage | Status | Threshold |
+            |--------|------------|--------|-----------|
+            | Lines | ${formatPct(total.lines.pct)}% | ${getStatus(total.lines.pct)} | 75% |
+            | Branches | ${formatPct(total.branches.pct)}% | ${getStatus(total.branches.pct)} | 75% |
+            | Functions | ${formatPct(total.functions.pct)}% | ${getStatus(total.functions.pct)} | 75% |
+            | Statements | ${formatPct(total.statements.pct)}% | ${getStatus(total.statements.pct)} | 75% |
+
+            ### Quality Checks
+            - ${context.payload.pull_request.head.sha.slice(0, 7)} - All checks
+
+            **Required Thresholds:**
+            - Overall: 75%+ ✓
+            - Services/Utils: 90%+ (manual review)
+
+            ${total.lines.pct >= 75 && total.branches.pct >= 75 && total.functions.pct >= 75 && total.statements.pct >= 75
+              ? '✅ **All quality gates passed!**'
+              : '❌ **Quality gates failed - coverage below threshold**'}
+
+            ---
+            *Generated by Quality Gate CI*
+            `;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Quality Gate Report')
+            );
+
+            // Update or create comment
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+
+  rust-checks:
+    name: Rust Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          override: true
+          components: rustfmt, clippy
+
+      - name: Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: src-tauri/target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev
+
+      - name: Rust format check
+        working-directory: src-tauri
+        run: |
+          echo "Checking Rust formatting..."
+          cargo fmt -- --check
+          echo "✅ Rust formatting passed"
+
+      - name: Rust clippy
+        working-directory: src-tauri
+        run: |
+          echo "Running Clippy..."
+          cargo clippy -- -D warnings
+          echo "✅ Clippy passed"
+
+      - name: Rust tests
+        working-directory: src-tauri
+        run: |
+          echo "Running Rust tests..."
+          cargo test
+          echo "✅ Rust tests passed"
+
+      - name: Rust build
+        working-directory: src-tauri
+        run: |
+          echo "Building Rust project..."
+          cargo build --release
+          echo "✅ Rust build successful"
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload E2E screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots
+          path: tests/e2e/screenshots/
+          retention-days: 7
+
+  quality-summary:
+    name: Quality Gate Summary
+    runs-on: ubuntu-latest
+    needs: [quality-checks, rust-checks, e2e-tests]
+    if: always()
+
+    steps:
+      - name: Check all jobs passed
+        run: |
+          echo "Quality Gate Summary"
+          echo "===================="
+          echo ""
+          echo "Quality Checks: ${{ needs.quality-checks.result }}"
+          echo "Rust Checks: ${{ needs.rust-checks.result }}"
+          echo "E2E Tests: ${{ needs.e2e-tests.result }}"
+          echo ""
+
+          if [ "${{ needs.quality-checks.result }}" != "success" ] || \
+             [ "${{ needs.rust-checks.result }}" != "success" ] || \
+             [ "${{ needs.e2e-tests.result }}" != "success" ]; then
+            echo "❌ Quality gate failed!"
+            echo ""
+            echo "Required checks:"
+            echo "  - TypeScript type checking (must pass)"
+            echo "  - ESLint (0 errors, 0 warnings)"
+            echo "  - Test suite (all tests passing)"
+            echo "  - Coverage (75% overall, 90% services/utils)"
+            echo "  - Build verification (must succeed)"
+            echo "  - Security audit (no high/critical issues)"
+            echo "  - Rust compilation and tests"
+            echo "  - E2E tests"
+            echo ""
+            echo "See job logs above for details."
+            exit 1
+          fi
+
+          echo "✅ All quality gates passed!"
+          echo ""
+          echo "Your PR meets all quality requirements and is ready for review."

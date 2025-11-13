@@ -1,20 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, Folder, DollarSign, TrendingUp, Loader2, Settings as SettingsIcon, UserCircle, Mic, FileText } from "lucide-react";
+import { Activity, Folder, DollarSign, TrendingUp, Loader2, Settings as SettingsIcon, UserCircle, Mic, FileText, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useDashboard } from "@/hooks/useDashboard";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { Settings } from "@/components/Settings";
 import { ArchitectChat } from "@/components/ArchitectChat";
 import { SpecViewer } from "@/components/SpecViewer";
-import { createGithubIssue, approveSpecVersion, type SpecInfo } from "@/lib/tauri";
+import { ProjectCard } from "@/components/ProjectCard";
+import { ProjectDetailPanel } from "@/components/ProjectDetailPanel";
+import { NewProjectModal } from "@/components/NewProjectModal";
+import { createGithubIssue, approveSpecVersion, setProjectMuted, type SpecInfo, type Project } from "@/lib/tauri";
+import "@/lib/i18n"; // Initialize i18n
 
 export default function Home() {
+  const { t } = useTranslation();
   const { projects, agents, stats, loading, refetch } = useDashboard();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [architectChatOpen, setArchitectChatOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<{ name: string; path: string } | null>(null);
   const [specViewerOpen, setSpecViewerOpen] = useState(false);
   const [selectedSpec, setSelectedSpec] = useState<{ spec: string; specInfo?: SpecInfo; name: string; path: string } | null>(null);
+  const [detailPanelOpen, setDetailPanelOpen] = useState(false);
+  const [detailPanelProject, setDetailPanelProject] = useState<Project | null>(null);
 
   const handleSpeakToArchitect = (project: { name: string; path: string }) => {
     console.log(`Starting voice conversation for project: ${project.name}`);
@@ -121,12 +131,55 @@ export default function Home() {
     }
   };
 
+  const handleMuteToggle = async (projectName: string, shouldMute: boolean) => {
+    try {
+      await setProjectMuted(projectName, shouldMute);
+      // Refresh to get updated mute state
+      refetch();
+    } catch (error) {
+      console.error('Failed to toggle mute:', error);
+      alert('Failed to update mute state. Please try again.');
+    }
+  };
+
+  const handleViewDetails = (project: Project) => {
+    setDetailPanelProject(project);
+    setDetailPanelOpen(true);
+  };
+
+  // Keyboard Shortcuts
+  useKeyboardShortcuts([
+    {
+      key: ',',
+      meta: true,
+      description: 'Open Settings',
+      handler: () => setSettingsOpen(true),
+    },
+    {
+      key: 'n',
+      meta: true,
+      description: 'New Project',
+      handler: () => setNewProjectOpen(true),
+    },
+    {
+      key: 'Escape',
+      description: 'Close Modal',
+      handler: () => {
+        setSettingsOpen(false);
+        setNewProjectOpen(false);
+        setArchitectChatOpen(false);
+        setSpecViewerOpen(false);
+        setDetailPanelOpen(false);
+      },
+    },
+  ], !settingsOpen && !newProjectOpen && !architectChatOpen && !specViewerOpen && !detailPanelOpen);
+
   if (loading) {
     return (
       <main className="min-h-screen bg-background p-8 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading dashboard...</p>
+          <p className="text-muted-foreground">{t('dashboard.loading')}</p>
         </div>
       </main>
     );
@@ -135,9 +188,24 @@ export default function Home() {
   const remainingBudget = stats ? stats.monthlyBudget - stats.todayCost : 0;
 
   return (
-    <main className="min-h-screen bg-background p-8">
-      {/* Header */}
-      <header className="mb-8">
+    <>
+      {/* Skip Links for Accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-violet-500 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400"
+      >
+        Skip to main content
+      </a>
+      <a
+        href="#projects-section"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-40 focus:z-50 focus:px-4 focus:py-2 focus:bg-violet-500 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400"
+      >
+        Skip to projects
+      </a>
+
+      <main id="main-content" className="min-h-screen bg-[#0A0A0B] p-8">
+        {/* Header */}
+        <header className="mb-8">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             {/* Logo */}
@@ -149,24 +217,49 @@ export default function Home() {
               />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Sentra</h1>
-              <p className="text-sm text-muted-foreground">Mission Control for Your AI Agents</p>
+              <h1 className="text-3xl font-bold text-foreground">{t('dashboard.title')}</h1>
+              <p className="text-sm text-muted-foreground">{t('dashboard.subtitle')}</p>
             </div>
           </div>
 
-          {/* Settings Button */}
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="p-3 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-lg transition-colors group"
-            title="Settings"
-          >
-            <SettingsIcon className="w-5 h-5 text-primary group-hover:rotate-90 transition-transform duration-300" />
-          </button>
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            {/* New Project Button */}
+            <button
+              data-testid="new-project-button"
+              onClick={() => setNewProjectOpen(true)}
+              className="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+              title={t('dashboard.buttons.newProject')}
+            >
+              <Plus className="w-5 h-5" />
+              {t('dashboard.buttons.newProject')}
+            </button>
+
+            {/* Settings Button */}
+            <button
+              data-testid="settings-button"
+              onClick={() => setSettingsOpen(true)}
+              className="p-3 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-lg transition-colors group"
+              title={t('dashboard.buttons.settings')}
+            >
+              <SettingsIcon className="w-5 h-5 text-primary group-hover:rotate-90 transition-transform duration-300" />
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Settings Modal */}
       <Settings isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+      {/* New Project Modal */}
+      <NewProjectModal
+        isOpen={newProjectOpen}
+        onClose={() => setNewProjectOpen(false)}
+        onSuccess={() => {
+          // Refresh projects list after creating a new project
+          refetch();
+        }}
+      />
 
       {/* Architect Chat Modal */}
       <ArchitectChat
@@ -194,59 +287,68 @@ export default function Home() {
         />
       )}
 
+      {/* Project Detail Panel */}
+      {detailPanelProject && (
+        <ProjectDetailPanel
+          project={detailPanelProject}
+          isOpen={detailPanelOpen}
+          onClose={() => setDetailPanelOpen(false)}
+        />
+      )}
+
       {/* Stats Overview */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
-        <div className="sentra-card">
+      <div data-testid="stats-grid" className="grid grid-cols-4 gap-6 mb-8">
+        <div data-testid="stat-card" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Active Agents</span>
-            <Activity className="w-4 h-4 text-primary" />
+            <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.activeAgents')}</span>
+            <Activity className="w-4 h-4 text-violet-500" />
           </div>
-          <p className="text-3xl font-bold">{stats?.activeAgents || 0}</p>
+          <p className="text-3xl font-bold text-[#FAFAFA]">{stats?.activeAgents || 0}</p>
           <p className="text-xs text-green-400 mt-1">
-            {stats?.activeAgents ? 'Running' : 'Idle'}
+            {stats?.activeAgents ? t('dashboard.stats.running') : t('dashboard.stats.idle')}
           </p>
         </div>
 
-        <div className="sentra-card">
+        <div data-testid="stat-card" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Projects</span>
-            <Folder className="w-4 h-4 text-primary" />
+            <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.projects')}</span>
+            <Folder className="w-4 h-4 text-violet-500" />
           </div>
-          <p className="text-3xl font-bold">{stats?.totalProjects || 0}</p>
-          <p className="text-xs text-muted-foreground mt-1">Tracked</p>
+          <p className="text-3xl font-bold text-[#FAFAFA]">{stats?.totalProjects || 0}</p>
+          <p className="text-xs text-[#A1A1AA] mt-1">{t('dashboard.stats.tracked')}</p>
         </div>
 
-        <div className="sentra-card">
+        <div data-testid="stat-card" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Today&apos;s Cost</span>
-            <DollarSign className="w-4 h-4 text-primary" />
+            <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.todayCost')}</span>
+            <DollarSign className="w-4 h-4 text-violet-500" />
           </div>
-          <p className="text-3xl font-bold">${stats?.todayCost.toFixed(2) || '0.00'}</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            ${remainingBudget.toFixed(2)} remaining
+          <p className="text-3xl font-bold text-[#FAFAFA]">${stats?.todayCost.toFixed(2) || '0.00'}</p>
+          <p className="text-xs text-[#A1A1AA] mt-1">
+            ${remainingBudget.toFixed(2)} {t('dashboard.stats.remaining')}
           </p>
         </div>
 
-        <div className="sentra-card">
+        <div data-testid="stat-card" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46]">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Success Rate</span>
-            <TrendingUp className="w-4 h-4 text-primary" />
+            <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.successRate')}</span>
+            <TrendingUp className="w-4 h-4 text-violet-500" />
           </div>
-          <p className="text-3xl font-bold">{stats?.successRate || 0}%</p>
+          <p className="text-3xl font-bold text-[#FAFAFA]">{stats?.successRate || 0}%</p>
           <p className="text-xs text-green-400 mt-1">
-            {stats && stats.successRate >= 90 ? '+2% this week' : 'Improving'}
+            {stats && stats.successRate >= 90 ? t('dashboard.stats.thisWeek') : t('dashboard.stats.improving')}
           </p>
         </div>
       </div>
 
       {/* Active Agents */}
       <div className="sentra-card mb-8">
-        <h2 className="text-xl font-semibold mb-4">Active Agents</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('dashboard.activeAgentsSection.title')}</h2>
         {agents.length === 0 ? (
           <div className="sentra-glass p-8 rounded-lg text-center">
-            <p className="text-muted-foreground">No agents currently running</p>
+            <p className="text-muted-foreground">{t('dashboard.activeAgentsSection.noAgents')}</p>
             <p className="text-sm text-muted-foreground mt-2">
-              Agents will appear here when processing GitHub issues
+              {t('dashboard.activeAgentsSection.noAgentsSubtext')}
             </p>
           </div>
         ) : (
@@ -270,9 +372,9 @@ export default function Home() {
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span>{agent.phase}</span>
                   <span>•</span>
-                  <span>{agent.elapsedMinutes}m elapsed</span>
+                  <span>{t('dashboard.activeAgentsSection.elapsed', { minutes: agent.elapsedMinutes })}</span>
                   <span>•</span>
-                  <span>${agent.cost.toFixed(2)} spent</span>
+                  <span>{t('dashboard.activeAgentsSection.spent', { cost: agent.cost.toFixed(2) })}</span>
                 </div>
               </div>
             ))}
@@ -281,78 +383,64 @@ export default function Home() {
       </div>
 
       {/* Projects */}
-      <div className="sentra-card">
-        <h2 className="text-xl font-semibold mb-4">Projects</h2>
+      <div id="projects-section" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-semibold text-[#FAFAFA]">{t('dashboard.projectsSection.title')}</h2>
+          {/* Voice Conversation Buttons - Keep for backward compatibility */}
+          <div className="flex gap-2">
+            {projects.map((project) => (
+              <div key={project.name} className="flex gap-2">
+                {/* Voice Conversation Button */}
+                <button
+                  onClick={() => handleSpeakToArchitect({ name: project.name, path: project.path })}
+                  className="group relative p-2 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 hover:border-violet-500/50 rounded-lg transition-all"
+                  title={t('dashboard.buttons.speakToArchitect', { projectName: project.name })}
+                >
+                  <div className="relative">
+                    <UserCircle className="w-5 h-5 text-violet-400 group-hover:text-violet-300 transition-colors" />
+                    <div className="absolute -bottom-0.5 -right-0.5">
+                      <Mic className="w-3 h-3 text-violet-400 group-hover:text-violet-300 group-hover:scale-110 transition-all" />
+                    </div>
+                  </div>
+                </button>
+
+                {/* View Spec Button - Only shown if there are unapproved specs */}
+                {project.specs && project.specs.some(spec => !spec.isApproved) && (
+                  <button
+                    onClick={() => handleViewSpec(project)}
+                    className="group relative p-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 rounded-lg transition-all"
+                    title={t('dashboard.buttons.viewSpec')}
+                  >
+                    <FileText className="w-5 h-5 text-green-400 group-hover:text-green-300 transition-colors" />
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
         {projects.length === 0 ? (
-          <div className="sentra-glass p-8 rounded-lg text-center">
-            <p className="text-muted-foreground">No projects configured</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Projects will appear here when configured in the system
+          <div className="bg-[#0A0A0B] p-8 rounded-lg text-center">
+            <p className="text-[#A1A1AA]">{t('dashboard.projectsSection.noProjects')}</p>
+            <p className="text-sm text-[#A1A1AA] mt-2">
+              {t('dashboard.projectsSection.noProjectsSubtext')}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div data-testid="projects-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project) => (
-              <div key={project.name} className="sentra-glass p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-medium">{project.name}</h3>
-
-                    {/* Voice Conversation Button */}
-                    <button
-                      onClick={() => handleSpeakToArchitect({ name: project.name, path: project.path })}
-                      className="group relative p-2 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 hover:border-violet-500/50 rounded-lg transition-all"
-                      title="Speak to Architect about this project"
-                    >
-                      <div className="relative">
-                        {/* Head Icon */}
-                        <UserCircle className="w-5 h-5 text-violet-400 group-hover:text-violet-300 transition-colors" />
-
-                        {/* Microphone Badge */}
-                        <div className="absolute -bottom-0.5 -right-0.5">
-                          <Mic className="w-3 h-3 text-violet-400 group-hover:text-violet-300 group-hover:scale-110 transition-all" />
-                        </div>
-                      </div>
-                    </button>
-
-                    {/* View Spec Button - Only shown if there are unapproved specs */}
-                    {project.specs && project.specs.some(spec => !spec.isApproved) && (
-                      <button
-                        onClick={() => handleViewSpec(project)}
-                        className="group relative p-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 rounded-lg transition-all"
-                        title="View pending specification"
-                      >
-                        <FileText className="w-5 h-5 text-green-400 group-hover:text-green-300 transition-colors" />
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                      </button>
-                    )}
-                  </div>
-
-                  <span
-                    className={`text-xs px-2 py-1 rounded ${
-                      project.status === 'active'
-                        ? 'sentra-status-running'
-                        : project.status === 'error'
-                        ? 'sentra-status-error'
-                        : 'sentra-status-idle'
-                    }`}
-                  >
-                    {project.activeAgents > 0
-                      ? `${project.activeAgents} active`
-                      : project.status}
-                  </span>
-                </div>
-                <div className="space-y-1 text-sm text-muted-foreground">
-                  <p>
-                    Issues: {project.totalIssues} total, {project.completedIssues} completed
-                  </p>
-                  <p>Cost: ${project.monthlyCost.toFixed(2)} this month</p>
-                </div>
-              </div>
+              <ProjectCard
+                key={project.name}
+                project={project}
+                onMuteToggle={handleMuteToggle}
+                onViewDetails={handleViewDetails}
+              />
             ))}
           </div>
         )}
       </div>
-    </main>
+      </main>
+    </>
   );
 }

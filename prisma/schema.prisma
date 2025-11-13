@@ -1,0 +1,120 @@
+// Sentra Database Schema
+// Manages users, projects, agents, costs, and activity tracking
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// User Model
+// ============================================================================
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String   // bcrypt hashed password
+  name         String?
+  refreshToken String?  // JWT refresh token
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  projects Project[]
+
+  @@map("users")
+}
+
+// ============================================================================
+// Project Model
+// ============================================================================
+
+model Project {
+  id        String   @id @default(cuid())
+  name      String
+  path      String
+  userId    String
+  settings  String?  // JSON string for project settings
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agents     Agent[]
+  costs      Cost[]
+  activities Activity[]
+
+  @@index([userId])
+  @@map("projects")
+}
+
+// ============================================================================
+// Agent Model
+// ============================================================================
+
+model Agent {
+  id        String   @id @default(cuid())
+  projectId String
+  status    String   // running, completed, failed
+  startTime DateTime @default(now())
+  endTime   DateTime?
+  logs      String?  // JSON string array of log lines
+  error     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([status])
+  @@map("agents")
+}
+
+// ============================================================================
+// Cost Model
+// ============================================================================
+
+model Cost {
+  id           String   @id @default(cuid())
+  projectId    String
+  amount       Float
+  model        String
+  provider     String   // openai, anthropic
+  inputTokens  Int?
+  outputTokens Int?
+  timestamp    DateTime @default(now())
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([timestamp])
+  @@index([provider])
+  @@map("costs")
+}
+
+// ============================================================================
+// Activity Model
+// ============================================================================
+
+model Activity {
+  id        String   @id @default(cuid())
+  projectId String
+  type      String   // agent_started, agent_completed, agent_failed, cost_alert, etc.
+  message   String
+  metadata  String?  // JSON string for additional data
+  timestamp DateTime @default(now())
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([timestamp])
+  @@index([type])
+  @@map("activities")
+}

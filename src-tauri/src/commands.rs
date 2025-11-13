@@ -127,12 +127,7 @@ pub fn get_projects() -> Result<Vec<Project>, String> {
     Ok(projects)
 }
 
-/// Get active agents (placeholder - will read from telemetry)
-#[tauri::command]
-pub fn get_active_agents() -> Result<Vec<Agent>, String> {
-    // TODO: Parse telemetry logs to find active agents
-    Ok(vec![])
-}
+// Note: get_active_agents is now implemented in agents.rs module
 
 /// Get dashboard statistics
 #[tauri::command]
@@ -348,7 +343,7 @@ pub fn approve_spec(project_name: String, project_path: String) -> Result<(), St
 
 /// Reject a spec and remove it
 #[tauri::command]
-pub fn reject_spec(project_name: String, project_path: String) -> Result<(), String> {
+pub fn reject_spec(_project_name: String, project_path: String) -> Result<(), String> {
     let path = PathBuf::from(shellexpand::tilde(&project_path).to_string());
     let spec_path = path.join(".sentra/specs/pending-spec.md");
 
@@ -403,4 +398,168 @@ pub fn create_github_issue(
     }
 
     Ok(issue_url)
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CostData {
+    pub calls: Vec<serde_json::Value>,
+    pub exported_at: String,
+}
+
+/// Get cost tracking data from localStorage
+/// Returns cost data stored by the frontend cost tracker
+#[tauri::command]
+pub fn get_costs(_project_id: Option<String>) -> Result<CostData, String> {
+    // This command returns a placeholder since cost data is stored in browser localStorage
+    // The actual cost tracking happens in the frontend via the CostTracker service
+    // This command is here for future backend integration if needed
+
+    Ok(CostData {
+        calls: vec![],
+        exported_at: chrono::Local::now().to_rfc3339(),
+    })
+}
+
+// ============================================================================
+// Project Management Commands
+// ============================================================================
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateProjectParams {
+    pub name: String,
+    pub path: String,
+    pub template: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreatedProject {
+    pub name: String,
+    pub path: String,
+}
+
+/// Create a new project with Sentra configuration
+#[tauri::command]
+pub fn create_project(params: CreateProjectParams) -> Result<CreatedProject, String> {
+    use std::path::PathBuf;
+    use crate::templates;
+
+    // Validate project name
+    let name_regex = regex::Regex::new(r"^[a-zA-Z0-9_-]+$")
+        .map_err(|e| format!("Regex error: {}", e))?;
+
+    if !name_regex.is_match(&params.name) {
+        return Err("Invalid project name: only letters, numbers, hyphens, and underscores are allowed".to_string());
+    }
+
+    let path = PathBuf::from(&params.path);
+
+    // Check if directory already exists
+    if path.exists() {
+        return Err(format!("Directory already exists: {}", path.display()));
+    }
+
+    // Create project directory
+    fs::create_dir_all(&path)
+        .map_err(|e| format!("Failed to create project directory: {}", e))?;
+
+    // Get and apply template
+    let template = templates::get_template(&params.template)
+        .ok_or_else(|| format!("Template not found: {}", params.template))?;
+
+    templates::apply_template(&template, &path)?;
+
+    // Create .sentra directory structure
+    let sentra_dir = path.join(".sentra");
+    fs::create_dir_all(&sentra_dir)
+        .map_err(|e| format!("Failed to create .sentra directory: {}", e))?;
+
+    // Create memory directory
+    let memory_dir = sentra_dir.join("memory");
+    fs::create_dir_all(&memory_dir)
+        .map_err(|e| format!("Failed to create memory directory: {}", e))?;
+
+    // Create memory files
+    fs::write(memory_dir.join("gotchas.md"), "# Gotchas\n\n")
+        .map_err(|e| format!("Failed to create gotchas.md: {}", e))?;
+    fs::write(memory_dir.join("patterns.md"), "# Patterns\n\n")
+        .map_err(|e| format!("Failed to create patterns.md: {}", e))?;
+    fs::write(memory_dir.join("decisions.md"), "# Architecture Decisions\n\n")
+        .map_err(|e| format!("Failed to create decisions.md: {}", e))?;
+
+    // Create specs directory
+    let specs_dir = sentra_dir.join("specs");
+    fs::create_dir_all(&specs_dir)
+        .map_err(|e| format!("Failed to create specs directory: {}", e))?;
+
+    // Create config.yml
+    let config_content = format!(
+        "name: {}\npath: {}\ntemplate: {}\ncreated: {}\n",
+        params.name,
+        path.display(),
+        params.template,
+        chrono::Local::now().to_rfc3339()
+    );
+
+    fs::write(sentra_dir.join("config.yml"), config_content)
+        .map_err(|e| format!("Failed to create config.yml: {}", e))?;
+
+    // Initialize git repository (if git is available)
+    use std::process::Command;
+    let git_result = Command::new("git")
+        .args(&["init"])
+        .current_dir(&path)
+        .output();
+
+    if let Err(e) = git_result {
+        eprintln!("Warning: Failed to initialize git repository: {}", e);
+    }
+
+    // Add project to tracked projects list
+    let home = dirs::home_dir().ok_or("Could not find home directory")?;
+    let tracked_file = home.join(".claude/tracked-projects.txt");
+
+    // Ensure .claude directory exists
+    if let Some(parent) = tracked_file.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("Failed to create .claude directory: {}", e))?;
+    }
+
+    // Read existing content
+    let mut tracked_projects = if tracked_file.exists() {
+        fs::read_to_string(&tracked_file)
+            .map_err(|e| format!("Failed to read tracked projects: {}", e))?
+    } else {
+        String::new()
+    };
+
+    // Add new project if not already tracked
+    let project_path_str = path.to_string_lossy().to_string();
+    if !tracked_projects.contains(&project_path_str) {
+        if !tracked_projects.is_empty() && !tracked_projects.ends_with('\n') {
+            tracked_projects.push('\n');
+        }
+        tracked_projects.push_str(&project_path_str);
+        tracked_projects.push('\n');
+
+        fs::write(&tracked_file, tracked_projects)
+            .map_err(|e| format!("Failed to update tracked projects: {}", e))?;
+    }
+
+    Ok(CreatedProject {
+        name: params.name,
+        path: params.path,
+    })
+}
+
+/// Open a directory picker dialog
+/// Note: In Tauri 2.x, file dialogs are handled from the frontend using @tauri-apps/plugin-dialog
+/// This command is kept for backwards compatibility but should be called from the frontend
+#[tauri::command]
+pub fn select_directory() -> Result<Option<String>, String> {
+    // In Tauri 2.x, the dialog API is handled from the frontend
+    // See: https://v2.tauri.app/plugin/dialog/
+    Err("select_directory should be called from frontend using @tauri-apps/plugin-dialog".to_string())
 }

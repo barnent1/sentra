@@ -1,0 +1,149 @@
+{
+  "dashboard": {
+    "title": "Sentra",
+    "subtitle": "Centro de Control para Tus Agentes de IA",
+    "greeting": "Hola {{name}}",
+    "loading": "Cargando panel de control...",
+    "stats": {
+      "activeAgents": "Agentes Activos",
+      "projects": "Proyectos",
+      "todayCost": "Costo de Hoy",
+      "successRate": "Tasa de Éxito",
+      "running": "Ejecutando",
+      "idle": "Inactivo",
+      "tracked": "Rastreados",
+      "remaining": "restante",
+      "thisWeek": "+2% esta semana",
+      "improving": "Mejorando"
+    },
+    "activeAgentsSection": {
+      "title": "Agentes Activos",
+      "noAgents": "No hay agentes ejecutándose actualmente",
+      "noAgentsSubtext": "Los agentes aparecerán aquí cuando procesen problemas de GitHub",
+      "elapsed": "{{minutes}}m transcurridos",
+      "spent": "${{cost}} gastados"
+    },
+    "projectsSection": {
+      "title": "Proyectos",
+      "noProjects": "No hay proyectos configurados",
+      "noProjectsSubtext": "Los proyectos aparecerán aquí cuando se configuren en el sistema"
+    },
+    "buttons": {
+      "newProject": "Nuevo Proyecto",
+      "settings": "Configuración",
+      "speakToArchitect": "Hablar con el Arquitecto sobre {{projectName}}",
+      "viewSpec": "Ver especificación pendiente"
+    }
+  },
+  "project": {
+    "progress": "Progreso",
+    "currentTask": "Tarea Actual",
+    "noActiveTasks": "Sin tareas activas",
+    "activeAgents_one": "{{count}} agente activo",
+    "activeAgents_other": "{{count}} agentes activos",
+    "issuesCompleted": "{{completed}}/{{total}} problemas completados",
+    "monthlyCost": "${{cost}} este mes",
+    "mute": "Silenciar notificaciones para {{projectName}}",
+    "unmute": "Activar notificaciones para {{projectName}}",
+    "status": {
+      "active": "Activo",
+      "idle": "Inactivo",
+      "error": "Error"
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "loading": "Cargando configuración...",
+    "saving": "Guardando...",
+    "save": "Guardar Configuración",
+    "cancel": "Cancelar",
+    "sections": {
+      "user": {
+        "title": "Tu Nombre",
+        "placeholder": "ej., Glen",
+        "description": "Usado en notificaciones de voz: \"Hola Glen, el agente completó...\""
+      },
+      "language": {
+        "title": "Idioma",
+        "description": "Selecciona tu idioma preferido",
+        "languages": {
+          "en": "English",
+          "es": "Español (Spanish)"
+        }
+      },
+      "openai": {
+        "title": "Clave de API de OpenAI",
+        "placeholder": "sk-proj-...",
+        "description": "Para transcripción de voz (Whisper) y TTS. Obtén una en platform.openai.com"
+      },
+      "anthropic": {
+        "title": "Clave de API de Anthropic",
+        "placeholder": "sk-ant-api03-...",
+        "description": "Para conversaciones con el Arquitecto IA. Obtén una en console.anthropic.com"
+      },
+      "github": {
+        "title": "Token de Acceso Personal de GitHub",
+        "placeholder": "ghp_...",
+        "description": "Para crear problemas de GitHub desde especificaciones aprobadas. Necesita alcance 'repo'. Obtén uno en github.com/settings/tokens",
+        "owner": "Propietario del Repositorio de GitHub",
+        "name": "Nombre del Repositorio de GitHub",
+        "ownerPlaceholder": "barnent1",
+        "namePlaceholder": "sentra"
+      },
+      "voice": {
+        "title": "Voz",
+        "testVoice": "Probar Voz",
+        "testing": "Probando...",
+        "voices": {
+          "alloy": {
+            "name": "Alloy",
+            "description": "Equilibrada, Neutral"
+          },
+          "echo": {
+            "name": "Echo",
+            "description": "Masculina, Clara y Directa"
+          },
+          "fable": {
+            "name": "Fable",
+            "description": "Británica, Expresiva"
+          },
+          "onyx": {
+            "name": "Onyx",
+            "description": "Masculina Profunda, Autoritativa"
+          },
+          "nova": {
+            "name": "Nova",
+            "description": "Femenina, Cálida y Amigable ⭐"
+          },
+          "shimmer": {
+            "name": "Shimmer",
+            "description": "Femenina, Suave y Gentil"
+          }
+        }
+      },
+      "notifications": {
+        "title": "Preferencias de Notificación",
+        "enabled": "Activar notificaciones de voz",
+        "onCompletion": "Notificar cuando los agentes completen",
+        "onFailure": "Notificar cuando los agentes fallen",
+        "onStart": "Notificar cuando los agentes comiencen"
+      }
+    },
+    "errors": {
+      "apiKeyRequired": "Por favor, ingresa tu clave de API de OpenAI primero",
+      "testVoiceFailed": "Error al probar la voz. Verifica tu clave de API.",
+      "saveFailed": "Error al guardar configuración: {{error}}"
+    }
+  },
+  "common": {
+    "close": "Cerrar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito"
+  }
+}

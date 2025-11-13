@@ -400,6 +400,156 @@ lsof -i :9001  # Should show Sentra process
 
 ---
 
+## Cross-Platform Audio Playback
+
+### Overview
+
+Sentra uses **rodio** for cross-platform audio playback in the Rust (Tauri) backend. This ensures voice notifications work consistently on macOS, Windows, and Linux.
+
+### Implementation
+
+**File:** `src-tauri/src/settings.rs`
+
+**How It Works:**
+1. OpenAI TTS API returns MP3 audio data
+2. Audio data is decoded using rodio's MP3 decoder
+3. Audio is played through the system's default audio device
+4. Playback blocks until audio finishes (prevents notification overlap)
+
+**Code:**
+```rust
+use rodio::{Decoder, OutputStream, Sink};
+use std::io::Cursor;
+
+fn play_audio_cross_platform(audio_data: &[u8]) -> Result<(), String> {
+    // Get system audio output
+    let (_stream, stream_handle) = OutputStream::try_default()
+        .map_err(|e| format!("Failed to get audio output: {}", e))?;
+
+    // Create audio sink
+    let sink = Sink::try_new(&stream_handle)
+        .map_err(|e| format!("Failed to create audio sink: {}", e))?;
+
+    // Decode MP3 data
+    let cursor = Cursor::new(audio_data.to_vec());
+    let source = Decoder::new(cursor)
+        .map_err(|e| format!("Failed to decode audio: {}", e))?;
+
+    // Play audio
+    sink.append(source);
+    sink.sleep_until_end();
+
+    Ok(())
+}
+```
+
+### Platform Support
+
+| Platform | Audio Backend | Status | Notes |
+|----------|--------------|--------|-------|
+| **macOS** | CoreAudio | ✅ Tested | Native support, no dependencies |
+| **Windows** | WASAPI | ✅ Supported | Native support, no dependencies |
+| **Linux** | ALSA/PulseAudio | ✅ Supported | May require audio libraries |
+
+### Linux Audio Setup
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install libasound2-dev
+```
+
+**Fedora/RHEL:**
+```bash
+sudo dnf install alsa-lib-devel
+```
+
+**Arch Linux:**
+```bash
+sudo pacman -S alsa-lib
+```
+
+### Dependencies
+
+**Cargo.toml:**
+```toml
+[dependencies]
+rodio = "0.17"
+```
+
+**Features:**
+- MP3 decoding (for OpenAI TTS output)
+- WAV support (for future use)
+- Ogg Vorbis support (for future use)
+- Cross-platform audio output
+- Low latency playback
+
+### Error Handling
+
+**Common Errors:**
+
+1. **No audio device found:**
+   - Error: "Failed to get audio output"
+   - Solution: Check system audio settings
+   - Fallback: Notification displays text only
+
+2. **Audio decode failure:**
+   - Error: "Failed to decode audio"
+   - Solution: Verify MP3 data from OpenAI API
+   - Fallback: Log error, skip audio
+
+3. **Playback interruption:**
+   - Error: Audio device disconnected during playback
+   - Solution: Rodio handles cleanup automatically
+   - Behavior: Graceful failure, no crash
+
+### Testing
+
+**Unit Tests:** `src-tauri/tests/settings_test.rs`
+
+Tests verify:
+- Rodio dependency available on all platforms
+- MP3 decoder compiled and functional
+- Audio output API accessible
+- Platform detection correct
+
+**Manual Testing:**
+1. Enable notifications in settings
+2. Complete an agent task
+3. Verify voice notification plays
+4. Test on different platforms
+
+### Browser-Side Audio (Web Audio API)
+
+**Realtime API Audio Playback:**
+
+The Realtime API plays audio directly in the browser using Web Audio API:
+
+```typescript
+// Convert PCM16 to AudioBuffer
+const audioContext = new AudioContext({ sampleRate: 24000 });
+const pcm16 = new Int16Array(audioData);
+const floatData = new Float32Array(pcm16.length);
+
+for (let i = 0; i < pcm16.length; i++) {
+  floatData[i] = pcm16[i] / (pcm16[i] < 0 ? 0x8000 : 0x7fff);
+}
+
+const audioBuffer = audioContext.createBuffer(1, floatData.length, 24000);
+audioBuffer.getChannelData(0).set(floatData);
+
+const source = audioContext.createBufferSource();
+source.buffer = audioBuffer;
+source.connect(audioContext.destination);
+source.start();
+```
+
+**Platform Support:**
+- All modern browsers (Chrome, Firefox, Safari, Edge)
+- No external dependencies required
+- Works on all desktop and mobile platforms
+
+---
+
 ## Future Improvements
 
 ### Planned

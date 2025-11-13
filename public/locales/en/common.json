@@ -1,0 +1,149 @@
+{
+  "dashboard": {
+    "title": "Sentra",
+    "subtitle": "Mission Control for Your AI Agents",
+    "greeting": "Hey {{name}}",
+    "loading": "Loading dashboard...",
+    "stats": {
+      "activeAgents": "Active Agents",
+      "projects": "Projects",
+      "todayCost": "Today's Cost",
+      "successRate": "Success Rate",
+      "running": "Running",
+      "idle": "Idle",
+      "tracked": "Tracked",
+      "remaining": "remaining",
+      "thisWeek": "+2% this week",
+      "improving": "Improving"
+    },
+    "activeAgentsSection": {
+      "title": "Active Agents",
+      "noAgents": "No agents currently running",
+      "noAgentsSubtext": "Agents will appear here when processing GitHub issues",
+      "elapsed": "{{minutes}}m elapsed",
+      "spent": "${{cost}} spent"
+    },
+    "projectsSection": {
+      "title": "Projects",
+      "noProjects": "No projects configured",
+      "noProjectsSubtext": "Projects will appear here when configured in the system"
+    },
+    "buttons": {
+      "newProject": "New Project",
+      "settings": "Settings",
+      "speakToArchitect": "Speak to Architect about {{projectName}}",
+      "viewSpec": "View pending specification"
+    }
+  },
+  "project": {
+    "progress": "Progress",
+    "currentTask": "Current Task",
+    "noActiveTasks": "No active tasks",
+    "activeAgents_one": "{{count}} active agent",
+    "activeAgents_other": "{{count}} active agents",
+    "issuesCompleted": "{{completed}}/{{total}} issues completed",
+    "monthlyCost": "${{cost}} this month",
+    "mute": "Mute notifications for {{projectName}}",
+    "unmute": "Unmute notifications for {{projectName}}",
+    "status": {
+      "active": "Active",
+      "idle": "Idle",
+      "error": "Error"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "loading": "Loading settings...",
+    "saving": "Saving...",
+    "save": "Save Settings",
+    "cancel": "Cancel",
+    "sections": {
+      "user": {
+        "title": "Your Name",
+        "placeholder": "e.g., Glen",
+        "description": "Used in voice notifications: \"Hey Glen, agent completed...\""
+      },
+      "language": {
+        "title": "Language",
+        "description": "Select your preferred language",
+        "languages": {
+          "en": "English",
+          "es": "Español (Spanish)"
+        }
+      },
+      "openai": {
+        "title": "OpenAI API Key",
+        "placeholder": "sk-proj-...",
+        "description": "For voice transcription (Whisper) and TTS. Get one at platform.openai.com"
+      },
+      "anthropic": {
+        "title": "Anthropic API Key",
+        "placeholder": "sk-ant-api03-...",
+        "description": "For Architect AI conversations. Get one at console.anthropic.com"
+      },
+      "github": {
+        "title": "GitHub Personal Access Token",
+        "placeholder": "ghp_...",
+        "description": "For creating GitHub issues from approved specs. Needs 'repo' scope. Get one at github.com/settings/tokens",
+        "owner": "GitHub Repo Owner",
+        "name": "GitHub Repo Name",
+        "ownerPlaceholder": "barnent1",
+        "namePlaceholder": "sentra"
+      },
+      "voice": {
+        "title": "Voice",
+        "testVoice": "Test Voice",
+        "testing": "Testing...",
+        "voices": {
+          "alloy": {
+            "name": "Alloy",
+            "description": "Balanced, Neutral"
+          },
+          "echo": {
+            "name": "Echo",
+            "description": "Male, Clear & Direct"
+          },
+          "fable": {
+            "name": "Fable",
+            "description": "British, Expressive"
+          },
+          "onyx": {
+            "name": "Onyx",
+            "description": "Deep Male, Authoritative"
+          },
+          "nova": {
+            "name": "Nova",
+            "description": "Female, Warm & Friendly ⭐"
+          },
+          "shimmer": {
+            "name": "Shimmer",
+            "description": "Female, Soft & Gentle"
+          }
+        }
+      },
+      "notifications": {
+        "title": "Notification Preferences",
+        "enabled": "Enable voice notifications",
+        "onCompletion": "Notify when agents complete",
+        "onFailure": "Notify when agents fail",
+        "onStart": "Notify when agents start"
+      }
+    },
+    "errors": {
+      "apiKeyRequired": "Please enter your OpenAI API key first",
+      "testVoiceFailed": "Failed to test voice. Check your API key.",
+      "saveFailed": "Failed to save settings: {{error}}"
+    }
+  },
+  "common": {
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  }
+}

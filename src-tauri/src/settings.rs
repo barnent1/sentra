@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
+use std::io::Cursor;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -114,16 +115,35 @@ pub async fn speak_notification(message: String, voice: String, api_key: String)
     let audio_data = response.bytes().await
         .map_err(|e| format!("Failed to get audio data: {}", e))?;
 
-    // Save to temp file and play
-    let temp_file = std::env::temp_dir().join("sentra-notification.mp3");
-    fs::write(&temp_file, audio_data)
-        .map_err(|e| format!("Failed to write audio file: {}", e))?;
-
-    // Play the audio file using afplay (macOS)
-    std::process::Command::new("afplay")
-        .arg(&temp_file)
-        .spawn()
+    // Play audio using rodio (cross-platform)
+    play_audio_cross_platform(&audio_data)
         .map_err(|e| format!("Failed to play audio: {}", e))?;
+
+    Ok(())
+}
+
+/// Play audio data using rodio (cross-platform audio playback)
+fn play_audio_cross_platform(audio_data: &[u8]) -> Result<(), String> {
+    use rodio::{Decoder, OutputStream, Sink};
+
+    // Get output stream and handle
+    let (_stream, stream_handle) = OutputStream::try_default()
+        .map_err(|e| format!("Failed to get audio output: {}", e))?;
+
+    // Create a sink to play the audio
+    let sink = Sink::try_new(&stream_handle)
+        .map_err(|e| format!("Failed to create audio sink: {}", e))?;
+
+    // Decode the audio (OpenAI returns MP3 format)
+    let cursor = Cursor::new(audio_data.to_vec());
+    let source = Decoder::new(cursor)
+        .map_err(|e| format!("Failed to decode audio: {}", e))?;
+
+    // Add to sink and play
+    sink.append(source);
+
+    // Wait for playback to finish
+    sink.sleep_until_end();
 
     Ok(())
 }

@@ -4,33 +4,38 @@
 
 @layer base {
   :root {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
+    /* Mission Control True Dark Theme */
+    --background: 0 0% 4%;           /* #0A0A0B - near black */
+    --foreground: 0 0% 98%;          /* #FAFAFA - off-white */
 
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
+    --card: 240 5% 10%;              /* #18181B - dark charcoal */
+    --card-foreground: 0 0% 98%;     /* #FAFAFA - off-white */
 
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 240 5% 10%;           /* #18181B - dark charcoal */
+    --popover-foreground: 0 0% 98%;  /* #FAFAFA - off-white */
 
-    --primary: 263.4 70% 50.4%;
-    --primary-foreground: 210 20% 98%;
+    --primary: 263 70% 50%;          /* #7C3AED - violet accent */
+    --primary-foreground: 0 0% 98%;  /* #FAFAFA - off-white */
 
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 240 5% 16%;         /* #27272A - subtle gray */
+    --secondary-foreground: 0 0% 98%; /* #FAFAFA - off-white */
 
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
+    --muted: 240 5% 16%;             /* #27272A - subtle gray */
+    --muted-foreground: 240 4% 65%;  /* #A1A1AA - gray */
 
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 263 70% 50%;           /* #7C3AED - violet accent */
+    --accent-foreground: 0 0% 98%;   /* #FAFAFA - off-white */
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive: 0 84% 60%;        /* #EF4444 - red */
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 263.4 70% 50.4%;
+    --border: 240 5% 16%;            /* #27272A - subtle gray (1px) */
+    --input: 240 5% 16%;             /* #27272A - subtle gray */
+    --ring: 263 70% 50%;             /* #7C3AED - violet */
+
+    --success: 142 71% 45%;          /* #10B981 - green */
+    --warning: 38 92% 50%;           /* #F59E0B - amber */
+    --error: 0 84% 60%;              /* #EF4444 - red */
 
     --radius: 0.5rem;
   }
@@ -43,16 +48,39 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Enhanced focus indicators for accessibility */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    @apply outline-none ring-2 ring-violet-400 ring-offset-2 ring-offset-[#0A0A0B];
+  }
+
+  /* Ensure interactive elements are keyboard accessible */
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    @apply transition-all duration-200;
+  }
 }
 
-/* Custom Sentra styles */
+/* Custom Sentra Mission Control styles */
 @layer utilities {
   .sentra-glass {
     @apply bg-background/80 backdrop-blur-xl border border-border/50;
   }
 
   .sentra-card {
-    @apply bg-card border border-border rounded-lg p-6;
+    @apply bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46] hover:shadow-lg;
+  }
+
+  .sentra-card-compact {
+    @apply bg-[#18181B] border border-[#27272A] rounded-lg p-5 transition-all hover:border-[#3f3f46];
   }
 
   .sentra-status-running {
@@ -65,5 +93,53 @@
 
   .sentra-status-error {
     @apply bg-destructive/20 text-red-400 border-destructive/50;
+  }
+
+  .sentra-progress-bar {
+    @apply w-full h-2 bg-[#27272A] rounded-full overflow-hidden;
+  }
+
+  .sentra-progress-fill-active {
+    @apply h-full bg-violet-600 transition-all duration-300;
+  }
+
+  .sentra-progress-fill-idle {
+    @apply h-full bg-gray-600 transition-all duration-300;
+  }
+
+  .sentra-status-dot-active {
+    @apply w-3 h-3 rounded-full bg-green-500 animate-pulse;
+  }
+
+  .sentra-status-dot-idle {
+    @apply w-3 h-3 rounded-full bg-gray-500;
+  }
+
+  .sentra-status-dot-error {
+    @apply w-3 h-3 rounded-full bg-red-500 animate-pulse;
+  }
+
+  /* Screen reader only - accessible but visually hidden */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .focus\:not-sr-only:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
   }
 }

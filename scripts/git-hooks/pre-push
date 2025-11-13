@@ -1,0 +1,104 @@
+#!/bin/sh
+
+# Sentra Pre-Push Hook
+# Runs quality checks before allowing push to remote
+#
+# Installation:
+#   cp scripts/git-hooks/pre-push .git/hooks/pre-push
+#   chmod +x .git/hooks/pre-push
+
+echo "🔍 Running pre-push quality checks..."
+echo ""
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Track if any check fails
+FAILED=0
+
+# Function to run a check
+run_check() {
+  local name=$1
+  local command=$2
+
+  echo "${BLUE}→${NC} $name..."
+
+  if eval "$command" > /dev/null 2>&1; then
+    echo "${GREEN}✅ $name passed${NC}"
+    return 0
+  else
+    echo "${RED}❌ $name failed${NC}"
+    return 1
+  fi
+}
+
+# 1. TypeScript type checking
+if ! run_check "TypeScript type checking" "npm run type-check"; then
+  FAILED=1
+fi
+
+# 2. ESLint
+if ! run_check "ESLint validation" "npm run lint -- --max-warnings=0"; then
+  FAILED=1
+fi
+
+# 3. Tests
+if ! run_check "Test suite" "npm run test:run"; then
+  FAILED=1
+fi
+
+# 4. Coverage check (optional warning, not blocking)
+echo "${BLUE}→${NC} Checking coverage..."
+if npm run test:coverage > /dev/null 2>&1; then
+  if [ -f "coverage/coverage-summary.json" ]; then
+    LINES=$(cat coverage/coverage-summary.json | grep -o '"lines":{[^}]*}' | grep -o '"pct":[0-9.]*' | cut -d':' -f2)
+    if [ -n "$LINES" ]; then
+      echo "${GREEN}✅ Coverage: ${LINES}%${NC}"
+
+      # Warn if below threshold (but don't block)
+      if [ $(echo "$LINES < 75" | bc -l 2>/dev/null || echo "0") -eq 1 ]; then
+        echo "${YELLOW}⚠️  Warning: Coverage below 75% threshold${NC}"
+      fi
+    fi
+  fi
+else
+  echo "${YELLOW}⚠️  Coverage check skipped${NC}"
+fi
+
+# 5. Build verification
+if ! run_check "Build verification" "npm run build"; then
+  FAILED=1
+fi
+
+echo ""
+
+# Exit with error if any check failed
+if [ $FAILED -eq 1 ]; then
+  echo "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo "${RED}❌ Pre-push checks FAILED!${NC}"
+  echo "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+  echo ""
+  echo "Run the following to see detailed errors:"
+  echo "  ${BLUE}npm run type-check${NC}   # TypeScript type checking"
+  echo "  ${BLUE}npm run lint${NC}         # ESLint validation"
+  echo "  ${BLUE}npm run test:run${NC}     # Test suite"
+  echo "  ${BLUE}npm run test:coverage${NC} # Coverage report"
+  echo "  ${BLUE}npm run build${NC}        # Build verification"
+  echo ""
+  echo "To skip this hook (${RED}NOT recommended${NC}):"
+  echo "  ${YELLOW}git push --no-verify${NC}"
+  echo ""
+  echo "Note: CI/CD will still enforce all checks even if you bypass this hook."
+  echo ""
+  exit 1
+fi
+
+echo "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo "${GREEN}✅ All pre-push checks PASSED!${NC}"
+echo "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+exit 0

@@ -234,6 +234,7 @@ describe('tauri.ts', () => {
         notifyOnCompletion: true,
         notifyOnFailure: true,
         notifyOnStart: false,
+        language: 'en',
       }
 
       // ACT & ASSERT
@@ -257,6 +258,7 @@ describe('tauri.ts', () => {
         notifyOnCompletion: true,
         notifyOnFailure: true,
         notifyOnStart: false,
+        language: 'en',
       }
 
       // ACT

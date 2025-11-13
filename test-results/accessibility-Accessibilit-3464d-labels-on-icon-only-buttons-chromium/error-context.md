@@ -1,0 +1,67 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e6]:
+      - heading "Welcome to the Future of Automotive Marketing" [level=1] [ref=e7]
+      - paragraph [ref=e8]: Connect with customers across Facebook and SMS. Manage conversations, book appointments, and grow your dealership with AI-powered tools.
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - img [ref=e11]
+          - heading "5M+ Messages" [level=3] [ref=e13]
+          - paragraph [ref=e14]: Processed monthly
+        - generic [ref=e15]:
+          - img [ref=e16]
+          - heading "466 Pages" [level=3] [ref=e21]
+          - paragraph [ref=e22]: Actively managed
+        - generic [ref=e23]:
+          - img [ref=e24]
+          - heading "20+ Agencies" [level=3] [ref=e28]
+          - paragraph [ref=e29]: Trust our platform
+        - generic [ref=e30]:
+          - img [ref=e31]
+          - heading "AI Powered" [level=3] [ref=e33]
+          - paragraph [ref=e34]: Smart responses
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - img "Go Auto Social" [ref=e40]
+        - paragraph [ref=e41]: Sign in to your account
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - text: Email Address
+          - generic [ref=e44]:
+            - img [ref=e46]
+            - textbox "Email Address" [ref=e49]:
+              - /placeholder: Enter your email
+        - generic [ref=e50]:
+          - text: Password
+          - generic [ref=e51]:
+            - img [ref=e53]
+            - textbox "Password" [ref=e56]:
+              - /placeholder: Enter your password
+            - button [ref=e57]:
+              - img [ref=e58]
+        - button "Sign In" [ref=e61]:
+          - generic [ref=e62]:
+            - text: Sign In
+            - img [ref=e63]
+      - generic [ref=e66]: Or continue with
+      - generic [ref=e67]:
+        - button "Google" [ref=e68]:
+          - img [ref=e69]
+          - text: Google
+        - button "Microsoft" [ref=e74]:
+          - img [ref=e75]
+          - text: Microsoft
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - img [ref=e82]
+          - text: Enhanced Security
+        - paragraph [ref=e84]: Two-factor authentication is required for all accounts. You'll be guided through setup after your first login.
+      - generic [ref=e86]:
+        - img [ref=e87]
+        - text: Enterprise-grade security
+  - region "Notifications (F8)":
+    - list
+```

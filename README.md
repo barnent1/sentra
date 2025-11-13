@@ -10,6 +10,7 @@ Created by Glen Barnhardt with the help of Claude Code
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
 [![Tauri](https://img.shields.io/badge/Tauri-2.x-orange.svg)](https://tauri.app/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5-black.svg)](https://nextjs.org/)
+[![Test Coverage](https://img.shields.io/badge/coverage-75%25+-brightgreen.svg)](docs/TESTING.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ---
@@ -476,28 +477,53 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines.
 
 ## Documentation
 
-**Getting Started**
-- [Installation Guide](docs/getting-started/installation.md)
-- [Quick Start (5 minutes)](docs/getting-started/quick-start.md)
-- [Development Setup](docs/getting-started/development-setup.md)
+### Quick Links
 
-**Architecture**
-- [System Design](docs/architecture/system-design.md)
-- [Security Architecture](docs/architecture/SECURITY-ARCHITECTURE.md)
-- [Data Fetching Patterns](docs/architecture/DATA-FETCHING.md)
+📚 **[Complete Documentation Hub](docs/README.md)** - Everything in one place
+
+🚀 **[Installation Guide](docs/getting-started/installation.md)** - Get running in 10 minutes
+
+🧪 **[Testing Guide](docs/TESTING.md)** - TDD workflow, coverage, E2E tests
+
+🚢 **[Deployment Guide](docs/DEPLOYMENT.md)** - Production setup and configuration
+
+🤝 **[Contributing Guide](CONTRIBUTING.md)** - Development standards and best practices
+
+### Documentation Structure
+
+**Getting Started**
+- [Installation Guide](docs/getting-started/installation.md) - Prerequisites, setup, first run
+- [Development Guide](DEVELOPMENT.md) - Setup and development workflow
+
+**Development**
+- [Testing Guide](docs/TESTING.md) - TDD, coverage requirements, E2E tests
+- [Contributing Guide](CONTRIBUTING.md) - Standards, Git workflow, quality hooks
+- [Project Structure](#project-structure) - File organization
+
+**Deployment**
+- [Deployment Guide](docs/DEPLOYMENT.md) - Production setup, environment variables
+- [Security Architecture](docs/architecture/SECURITY-ARCHITECTURE.md) - 3-phase security model
+
+**Architecture & Design**
+- [System Design](docs/architecture/system-design.md) - Complete architecture overview
+- [Security Architecture](docs/architecture/SECURITY-ARCHITECTURE.md) - Docker, credential proxy, gVisor
+- [Data Fetching Patterns](docs/architecture/DATA-FETCHING.md) - Next.js App Router patterns
+- [Spec Versioning](docs/architecture/SPEC-VERSIONING-SYSTEM.md) - Specification management
+- [Agent Architecture](.claude/docs/ARCHITECTURE-AGENT-WORKER.md) - Claude Code CLI approach
 
 **Features**
-- [Voice Interface](docs/features/voice-interface.md)
-- [Spec Approval Workflow](docs/features/spec-approval.md)
-- [Agent Automation](docs/features/agent-automation.md)
-- [Dashboard](docs/features/dashboard.md)
+- [Voice Interface](docs/features/voice-interface.md) - HTTP and Realtime API implementations
+- [Spec Approval](docs/features/pr-approval.md) - Versioning and approval workflow
+- [Dashboard](docs/features/dashboard.md) - Mission control interface
+- [Project Creation](docs/features/project-creation.md) - Creating new projects
+- [AI Agent Automation](docs/AI-AGENT-AUTOMATION-STATUS.md) - GitHub Actions integration
 
 **Roadmap**
-- [Unfinished Features](docs/roadmap/unfinished-features.md) - What's not done yet
+- [Unfinished Features](docs/roadmap/unfinished-features.md) - What's not done yet (honest status)
 - [Dashboard Redesign](docs/roadmap/dashboard-redesign.md) - Mission control vision
-- [Platform Support](docs/roadmap/platform-support.md) - Linux/Windows plans
+- [Observability](docs/roadmap/observability.md) - Monitoring, logs, costs
 
-Full documentation: [docs/README.md](docs/README.md)
+**Browse All Docs:** [docs/README.md](docs/README.md)
 
 ---
 
@@ -658,6 +684,8 @@ npm run tauri:dev
 **Questions?** Open a [GitHub Issue](https://github.com/barnent1/sentra/issues)
 
 **Want to contribute?** Read [CONTRIBUTING.md](CONTRIBUTING.md)
+
+**Releasing?** See [Release Process](docs/RELEASE-PROCESS.md) or [Quick Reference](docs/RELEASE-QUICKSTART.md)
 
 **Follow progress:** Star this repo and watch for updates
 

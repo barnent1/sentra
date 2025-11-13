@@ -2,6 +2,31 @@
 
 This document is loaded into every Claude Code session. It provides essential context about the Sentra project to ensure consistent, high-quality development.
 
+---
+
+## Table of Contents
+
+- [What is Sentra?](#what-is-sentra)
+- [Architecture Overview](#architecture-overview)
+  - [Technology Stack](#technology-stack)
+  - [Security Architecture](#security-architecture)
+  - [Project Structure](#project-structure)
+- [Development Standards](#development-standards)
+  - [TypeScript](#typescript)
+  - [Testing Requirements](#testing-requirements)
+  - [Code Quality](#code-quality)
+  - [Security](#security)
+  - [Git Workflow](#git-workflow)
+- [Known Gotchas](#known-gotchas)
+- [AI Agent Guidelines](#ai-agent-guidelines)
+  - [Multi-Agent Workflow](#multi-agent-workflow)
+- [Common Commands](#common-commands)
+- [Environment Variables](#environment-variables)
+- [Resources](#resources)
+- [Notes for Claude Code](#notes-for-claude-code)
+
+---
+
 ## What is Sentra?
 
 Sentra is a **voice-first AI assistant platform** that combines:
@@ -339,20 +364,21 @@ npm run db:reset         # Reset database (dev only)
 
 ## Environment Variables
 
-Required environment variables (create `.env.local`):
+Required environment variables (create `.env` file in project root):
 
 ```bash
-# Database
-DATABASE_URL="postgresql://user:pass@localhost:5432/sentra"
+# Database (SQLite for dev, PostgreSQL for production)
+DATABASE_URL="file:./prisma/dev.db"
+# Production: DATABASE_URL="postgresql://user:pass@host:5432/sentra"
 
-# OpenAI
-OPENAI_API_KEY="sk-..."
+# OpenAI (optional for Phase 1)
+# OPENAI_API_KEY="sk-..."
 
-# Authentication
-JWT_SECRET="generate-random-string"
+# Authentication (optional for Phase 1)
+# JWT_SECRET="generate-random-string"
 
 # App
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
+# NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
 ## Resources

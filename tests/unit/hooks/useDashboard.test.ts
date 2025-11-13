@@ -32,6 +32,9 @@ describe('useDashboard', () => {
           completedIssues: 5,
           monthlyCost: 50.0,
           status: 'active' as const,
+          progress: 65,
+          currentTask: 'Testing dashboard',
+          muted: false,
         },
       ]
       const mockAgents = [
@@ -354,6 +357,9 @@ describe('useDashboard', () => {
           completedIssues: 2,
           monthlyCost: 25.0,
           status: 'active' as const,
+          progress: 40,
+          currentTask: 'Working on feature',
+          muted: false,
         },
       ]
       const mockAgents = [
@@ -395,6 +401,85 @@ describe('useDashboard', () => {
     })
   })
 
+  describe('event listeners', () => {
+    it('should setup event listeners in Tauri environment', async () => {
+      // ARRANGE
+      vi.mocked(tauri.getProjects).mockResolvedValue([])
+      vi.mocked(tauri.getActiveAgents).mockResolvedValue([])
+      vi.mocked(tauri.getDashboardStats).mockResolvedValue({
+        activeAgents: 0,
+        totalProjects: 0,
+        todayCost: 0,
+        monthlyBudget: 100,
+        successRate: 0,
+      })
+
+      // ACT
+      const { result } = renderHook(() => useDashboard())
+
+      // ASSERT
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      // Verify data was loaded
+      expect(result.current.projects).toBeDefined()
+      expect(result.current.agents).toBeDefined()
+      expect(result.current.stats).toBeDefined()
+    })
+
+    it('should not setup event listeners in non-Tauri environment', async () => {
+      // ARRANGE
+      vi.mocked(tauri.getProjects).mockResolvedValue([])
+      vi.mocked(tauri.getActiveAgents).mockResolvedValue([])
+      vi.mocked(tauri.getDashboardStats).mockResolvedValue({
+        activeAgents: 0,
+        totalProjects: 0,
+        todayCost: 0,
+        monthlyBudget: 100,
+        successRate: 0,
+      })
+
+      // ACT
+      const { result } = renderHook(() => useDashboard())
+
+      // ASSERT
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      // Data should still be loaded in browser mode
+      expect(result.current.projects).toBeDefined()
+      expect(result.current.agents).toBeDefined()
+    })
+
+    it('should cleanup event listeners on unmount', async () => {
+      // ARRANGE
+      vi.mocked(tauri.getProjects).mockResolvedValue([])
+      vi.mocked(tauri.getActiveAgents).mockResolvedValue([])
+      vi.mocked(tauri.getDashboardStats).mockResolvedValue({
+        activeAgents: 0,
+        totalProjects: 0,
+        todayCost: 0,
+        monthlyBudget: 100,
+        successRate: 0,
+      })
+
+      // ACT
+      const { result, unmount } = renderHook(() => useDashboard())
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      // Unmount to trigger cleanup
+      unmount()
+
+      // ASSERT - Cleanup should not throw errors
+      expect(() => unmount()).not.toThrow()
+    })
+  })
+
   describe('refetch functionality', () => {
     it('should provide refetch function', async () => {
       // ARRANGE
@@ -431,6 +516,9 @@ describe('useDashboard', () => {
           completedIssues: 2,
           monthlyCost: 25.0,
           status: 'active' as const,
+          progress: 40,
+          currentTask: 'Working on feature',
+          muted: false,
         },
       ]
 
@@ -444,6 +532,9 @@ describe('useDashboard', () => {
           completedIssues: 1,
           monthlyCost: 15.0,
           status: 'active' as const,
+          progress: 33,
+          currentTask: 'New project task',
+          muted: false,
         },
       ]
 

@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Settings as SettingsIcon, Volume2 } from 'lucide-react';
+import { X, Settings as SettingsIcon, Volume2, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { getSettings, saveSettings, speakNotification, type Settings as SettingsType } from '@/lib/tauri';
+import '@/lib/i18n'; // Initialize i18n
 
 const VOICES = [
   { id: 'alloy', name: 'Alloy', description: 'Balanced, Neutral' },
@@ -13,12 +15,18 @@ const VOICES = [
   { id: 'shimmer', name: 'Shimmer', description: 'Female, Soft & Gentle' },
 ];
 
+const LANGUAGES = [
+  { id: 'en', name: 'English', nativeName: 'English' },
+  { id: 'es', name: 'Spanish', nativeName: 'Español' },
+];
+
 interface SettingsProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function Settings({ isOpen, onClose }: SettingsProps) {
+  const { t, i18n } = useTranslation();
   const [settings, setSettings] = useState<SettingsType>({
     userName: '',
     voice: 'nova',
@@ -31,6 +39,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
     notifyOnCompletion: true,
     notifyOnFailure: true,
     notifyOnStart: false,
+    language: 'en',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -47,6 +56,10 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
       setLoading(true);
       const data = await getSettings();
       setSettings(data);
+      // Update i18n language if it differs from current
+      if (data.language && data.language !== i18n.language) {
+        await i18n.changeLanguage(data.language);
+      }
     } catch (error) {
       console.error('Failed to load settings:', error);
     } finally {
@@ -58,13 +71,19 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
     try {
       setSaving(true);
       console.log('Saving settings:', settings);
+
+      // Update i18n language before saving
+      if (settings.language && settings.language !== i18n.language) {
+        await i18n.changeLanguage(settings.language);
+      }
+
       await saveSettings(settings);
       console.log('Settings saved successfully');
       onClose();
     } catch (error) {
       console.error('Failed to save settings:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`Failed to save settings: ${errorMessage}`);
+      alert(t('settings.errors.saveFailed', { error: errorMessage }));
     } finally {
       setSaving(false);
     }
@@ -105,6 +124,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
+            aria-label="Close settings modal"
           >
             <X className="w-6 h-6" />
           </button>
@@ -128,6 +148,45 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
               />
               <p className="text-xs text-slate-500 mt-1">
                 Used in voice notifications: &quot;Hey Glen, agent completed...&quot;
+              </p>
+            </div>
+
+            {/* Language Selection */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-4 h-4 text-violet-400" />
+                  <span>Language</span>
+                </div>
+              </label>
+              <div className="space-y-2">
+                {LANGUAGES.map((language) => (
+                  <label
+                    key={language.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                      settings.language === language.id
+                        ? 'bg-violet-500/10 border-violet-500/50'
+                        : 'bg-slate-800/50 border-slate-700/50 hover:border-violet-500/30'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="language"
+                      value={language.id}
+                      checked={settings.language === language.id}
+                      onChange={(e) => setSettings({ ...settings, language: e.target.value })}
+                      className="text-violet-500 focus:ring-violet-500"
+                      aria-label={language.name}
+                    />
+                    <div className="flex-1">
+                      <div className="text-white font-medium">{language.nativeName}</div>
+                      <div className="text-xs text-slate-400">{language.name}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-slate-500 mt-2">
+                Select your preferred language for the interface
               </p>
             </div>
 

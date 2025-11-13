@@ -23,6 +23,7 @@ describe('Settings', () => {
     notifyOnCompletion: true,
     notifyOnFailure: true,
     notifyOnStart: false,
+    language: 'en',
   }
 
   const mockOnClose = vi.fn()

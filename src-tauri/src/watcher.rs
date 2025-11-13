@@ -4,6 +4,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use tauri::{AppHandle, Emitter};
 
+use crate::agents;
 use crate::commands;
 
 /// Start watching Claude directories for changes
@@ -83,7 +84,7 @@ fn handle_file_event(app_handle: &AppHandle, event: &Event) {
 
     // Telemetry log changed
     if path_str.contains("telemetry") && path_str.ends_with(".log") {
-        if let Ok(agents) = commands::get_active_agents() {
+        if let Ok(agents) = agents::get_active_agents() {
             let _ = app_handle.emit("agents-updated", agents);
             println!("🤖 Emitted agents-updated event");
         }

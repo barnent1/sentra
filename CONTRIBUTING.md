@@ -4,6 +4,28 @@ Thank you for your interest in contributing to Sentra! This document provides gu
 
 ---
 
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [Development Standards](#development-standards)
+  - [TypeScript Strict Mode](#typescript-strict-mode-mandatory)
+  - [Test-Driven Development](#test-driven-development-tdd)
+  - [Code Quality](#code-quality)
+  - [Security](#security)
+- [Git Workflow](#git-workflow)
+  - [Branching Strategy](#branching-strategy)
+  - [Commit Messages](#commit-messages)
+  - [Pull Requests](#pull-requests)
+- [Quality Hooks](#quality-hooks)
+- [Project Structure](#project-structure)
+- [Testing Guidelines](#testing-guidelines)
+- [Common Tasks](#common-tasks)
+- [Known Gotchas](#known-gotchas)
+- [Getting Help](#getting-help)
+- [Code of Conduct](#code-of-conduct)
+
+---
+
 ## Quick Start
 
 1. **Fork and clone**
@@ -291,6 +313,54 @@ Before/after screenshots
 - Address review comments
 - Squash and merge to keep history clean
 
+**Automated Quality Gates:**
+
+Every PR runs through comprehensive quality checks via GitHub Actions. All checks must pass before merging.
+
+**Quality Gate Checks:**
+1. **TypeScript Type Checking** - Strict mode validation, no `any`, no `@ts-ignore`
+2. **ESLint** - 0 errors, 0 warnings required
+3. **Test Suite** - All unit and integration tests must pass
+4. **Coverage Thresholds** - 75% overall, 90% for services/utils
+5. **Build Verification** - Production build must succeed
+6. **Security Audit** - No high or critical vulnerabilities
+7. **Rust Checks** - Format, Clippy, tests, and build
+8. **E2E Tests** - Playwright tests for user journeys
+
+**Local Pre-Push Checks:**
+
+Before pushing, run the same checks locally to catch issues early:
+
+```bash
+# Run all quality checks (recommended before push)
+npm run type-check && \
+npm run lint -- --max-warnings=0 && \
+npm run test:coverage && \
+npm run build && \
+npm audit --audit-level=high
+
+# Or use pre-push hook (see Git Hooks section)
+```
+
+**Coverage Report:**
+
+The quality gate automatically comments on your PR with coverage metrics:
+
+```
+📊 Quality Gate Report
+
+Coverage Metrics
+Metric      | Percentage | Status | Threshold
+Lines       | 87.45%     | ✅     | 75%
+Branches    | 82.33%     | ✅     | 75%
+Functions   | 90.12%     | ✅     | 75%
+Statements  | 88.76%     | ✅     | 75%
+
+✅ All quality gates passed!
+```
+
+If checks fail, the comment shows which thresholds were not met and links to detailed logs.
+
 ---
 
 ## Quality Hooks
@@ -337,6 +407,149 @@ Sentra has **3 hooks** that automatically enforce quality:
 - Git status checks (no sensitive files, not on main)
 
 **This is UNBYPASSABLE. All checks must pass before you can finish work.**
+
+### 4. Pre-Push Hook (Optional but Recommended)
+
+**Prevents pushing failing code to remote:**
+
+Install the pre-push hook to run quality checks before every push:
+
+```bash
+# Install pre-push hook
+cp .git/hooks/pre-push.sample .git/hooks/pre-push
+chmod +x .git/hooks/pre-push
+
+# Or create it manually (see Git Hooks section below)
+```
+
+The hook runs the same checks as CI/CD, catching issues before they reach GitHub Actions.
+
+**What it checks:**
+- TypeScript type checking
+- ESLint (0 errors, 0 warnings)
+- Test suite
+- Coverage thresholds
+- Build verification
+
+**Skipping the hook (NOT recommended):**
+
+```bash
+# Only use in emergencies
+git push --no-verify
+
+# Note: This only bypasses the local hook
+# CI/CD will still enforce all checks
+```
+
+---
+
+## Git Hooks
+
+### Installing Pre-Push Hook
+
+Create `.git/hooks/pre-push` to run quality checks before pushing:
+
+```bash
+#!/bin/sh
+
+# Sentra Pre-Push Hook
+# Runs quality checks before allowing push to remote
+
+echo "🔍 Running pre-push quality checks..."
+echo ""
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Track if any check fails
+FAILED=0
+
+# 1. TypeScript type checking
+echo "📘 TypeScript type checking..."
+if ! npm run type-check > /dev/null 2>&1; then
+  echo "${RED}❌ TypeScript type checking failed${NC}"
+  FAILED=1
+else
+  echo "${GREEN}✅ TypeScript type checking passed${NC}"
+fi
+
+# 2. ESLint
+echo "🔍 Running ESLint..."
+if ! npm run lint -- --max-warnings=0 > /dev/null 2>&1; then
+  echo "${RED}❌ ESLint failed (errors or warnings found)${NC}"
+  FAILED=1
+else
+  echo "${GREEN}✅ ESLint passed${NC}"
+fi
+
+# 3. Tests
+echo "🧪 Running tests..."
+if ! npm run test:run > /dev/null 2>&1; then
+  echo "${RED}❌ Tests failed${NC}"
+  FAILED=1
+else
+  echo "${GREEN}✅ Tests passed${NC}"
+fi
+
+# 4. Build
+echo "🏗️  Building project..."
+if ! npm run build > /dev/null 2>&1; then
+  echo "${RED}❌ Build failed${NC}"
+  FAILED=1
+else
+  echo "${GREEN}✅ Build successful${NC}"
+fi
+
+echo ""
+
+# Exit with error if any check failed
+if [ $FAILED -eq 1 ]; then
+  echo "${RED}❌ Pre-push checks failed!${NC}"
+  echo ""
+  echo "Run the following to see detailed errors:"
+  echo "  npm run type-check"
+  echo "  npm run lint"
+  echo "  npm run test:run"
+  echo "  npm run build"
+  echo ""
+  echo "To skip this hook (NOT recommended):"
+  echo "  git push --no-verify"
+  echo ""
+  exit 1
+fi
+
+echo "${GREEN}✅ All pre-push checks passed!${NC}"
+echo ""
+exit 0
+```
+
+**Installation:**
+
+```bash
+# Navigate to project root
+cd /path/to/sentra
+
+# Create the hook file
+cat > .git/hooks/pre-push << 'EOF'
+[paste the script above]
+EOF
+
+# Make it executable
+chmod +x .git/hooks/pre-push
+```
+
+**Testing the hook:**
+
+```bash
+# Make a change and try to push
+git push
+
+# You should see the quality checks run
+# If any fail, the push is blocked
+```
 
 ---
 

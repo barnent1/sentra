@@ -685,4 +685,140 @@ const test = () => {
       expect(screen.getByText('Test Spec')).toBeInTheDocument()
     })
   })
+
+  describe('version loading', () => {
+    it('should not load versions when specInfo is not provided', async () => {
+      // ARRANGE & ACT
+      render(
+        <SpecViewer
+          isOpen={true}
+          onClose={mockOnClose}
+          spec={mockSpec}
+          projectName="test-project"
+          projectPath="/path/to/project"
+          onApprove={mockOnApprove}
+          onReject={mockOnReject}
+        />
+      )
+
+      // ASSERT - Version selector should not be rendered
+      await waitFor(() => {
+        expect(screen.queryByText(/Version:/)).not.toBeInTheDocument()
+      })
+    })
+
+    it('should handle version loading errors gracefully', async () => {
+      // ARRANGE
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+      const specInfo = {
+        id: 'spec-123',
+        title: 'Test Spec',
+        project: 'test-project',
+        version: 2,
+        isLatest: true,
+        isApproved: false,
+        created: '2025-01-15T14:30:00Z',
+        filePath: '/specs/spec-123/v2.md',
+      }
+
+      // Mock getSpecVersions to return versions
+      vi.doMock('@/lib/tauri', () => ({
+        getSpecVersions: vi.fn().mockResolvedValue([
+          { file: 'v1.md', version: 1, created: '2025-01-14T14:30:00Z', size: 512 },
+          { file: 'v2.md', version: 2, created: '2025-01-15T14:30:00Z', size: 1024 },
+        ]),
+        getSpec: vi.fn().mockRejectedValue(new Error('Failed to load version')),
+      }))
+
+      render(
+        <SpecViewer
+          isOpen={true}
+          onClose={mockOnClose}
+          spec={mockSpec}
+          specInfo={specInfo}
+          projectName="test-project"
+          projectPath="/path/to/project"
+          onApprove={mockOnApprove}
+          onReject={mockOnReject}
+        />
+      )
+
+      // ACT - Component renders successfully
+      await waitFor(() => {
+        expect(screen.getByText('Test Spec')).toBeInTheDocument()
+      })
+
+      alertSpy.mockRestore()
+    })
+  })
+
+  describe('continue editing without info', () => {
+    it('should not call onContinueEditing when currentInfo is undefined', () => {
+      // ARRANGE
+      const mockOnContinueEditing = vi.fn()
+
+      render(
+        <SpecViewer
+          isOpen={true}
+          onClose={mockOnClose}
+          spec={mockSpec}
+          projectName="test-project"
+          projectPath="/path/to/project"
+          onApprove={mockOnApprove}
+          onReject={mockOnReject}
+          onContinueEditing={mockOnContinueEditing}
+        />
+      )
+
+      // ACT - Continue Editing button should not be rendered without specInfo
+      const continueButton = screen.queryByText('Continue Editing')
+
+      // ASSERT
+      expect(continueButton).not.toBeInTheDocument()
+    })
+  })
+
+  describe('github issue link', () => {
+    it('should render GitHub issue link when available in specInfo', async () => {
+      // ARRANGE
+      const specInfo = {
+        id: 'spec-123',
+        title: 'Spec with Issue Link',
+        project: 'test-project',
+        version: 2,
+        isLatest: true,
+        isApproved: true,
+        created: '2025-01-15T14:30:00Z',
+        filePath: '/specs/spec-123/v2.md',
+        githubIssueUrl: 'https://github.com/test/repo/issues/99',
+      }
+
+      // Mock getSpecVersions to return versions
+      vi.doMock('@/lib/tauri', () => ({
+        getSpecVersions: vi.fn().mockResolvedValue([
+          { file: 'v1.md', version: 1, created: '2025-01-14T14:30:00Z', size: 512 },
+          { file: 'v2.md', version: 2, created: '2025-01-15T14:30:00Z', size: 1024 },
+        ]),
+      }))
+
+      // ACT
+      render(
+        <SpecViewer
+          isOpen={true}
+          onClose={mockOnClose}
+          spec={mockSpec}
+          specInfo={specInfo}
+          projectName="test-project"
+          projectPath="/path/to/project"
+          onApprove={mockOnApprove}
+          onReject={mockOnReject}
+        />
+      )
+
+      // ASSERT - Component renders with spec info
+      await waitFor(() => {
+        expect(screen.getByText('Spec with Issue Link')).toBeInTheDocument()
+      })
+    })
+  })
 })

@@ -120,19 +120,19 @@ export function SpecViewer({
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-slate-900 border border-violet-500/20 rounded-lg w-full max-w-4xl h-[80vh] flex flex-col">
+      <div className="bg-slate-900 border border-violet-500/20 rounded-lg w-full max-w-4xl h-[80vh] flex flex-col" data-testid="spec-viewer-modal" role="dialog" aria-label="Specification Viewer">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
           <div className="flex-1">
             <div className="flex items-center gap-3">
               <FileText className="w-5 h-5 text-violet-400" />
-              <h2 className="text-xl font-semibold text-white">
+              <h2 className="text-xl font-semibold text-white" data-testid="spec-title">
                 {displayInfo?.title || 'Specification Review'}
               </h2>
               <div className="flex items-center gap-2">
                 {displayInfo && (
                   <>
-                    <span className="px-2 py-1 bg-violet-500/20 border border-violet-500/30 rounded text-xs text-violet-300">
+                    <span className="px-2 py-1 bg-violet-500/20 border border-violet-500/30 rounded text-xs text-violet-300" data-testid="version-badge">
                       v{displayInfo.version}
                     </span>
                     {displayInfo.isLatest && (
@@ -155,6 +155,7 @@ export function SpecViewer({
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
             aria-label="Close"
+            data-testid="close-button"
           >
             <X className="w-6 h-6" />
           </button>
@@ -170,6 +171,7 @@ export function SpecViewer({
                   value={selectedVersion || (displayInfo?.filePath.split('/').pop() || '')}
                   onChange={(e) => loadVersion(e.target.value)}
                   className="appearance-none bg-slate-800 border border-violet-500/30 rounded px-3 py-1.5 pr-8 text-sm text-white focus:outline-none focus:border-violet-500/50 cursor-pointer"
+                  data-testid="version-selector"
                 >
                   {versions.map((v) => (
                     <option key={v.file} value={v.file}>
@@ -194,7 +196,7 @@ export function SpecViewer({
         )}
 
         {/* Content Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-6 prose prose-invert max-w-none">
+        <div className="flex-1 overflow-y-auto p-6 prose prose-invert max-w-none" data-testid="spec-content">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
@@ -232,6 +234,7 @@ export function SpecViewer({
             <button
               onClick={handleContinueEditing}
               className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+              data-testid="continue-editing-button"
             >
               <FileText className="w-5 h-5" />
               Continue Editing
@@ -241,6 +244,7 @@ export function SpecViewer({
             onClick={handleApprove}
             className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
             disabled={displayInfo?.isApproved}
+            data-testid="approve-button"
           >
             <Check className="w-5 h-5" />
             {displayInfo?.isApproved ? 'Already Approved' : 'Approve & Create GitHub Issue'}
@@ -248,6 +252,7 @@ export function SpecViewer({
           <button
             onClick={handleReject}
             className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            data-testid="reject-button"
           >
             <XCircle className="w-5 h-5" />
             Reject Specification

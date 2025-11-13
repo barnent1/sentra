@@ -8,7 +8,10 @@ Get Sentra running on your Mac in 10 minutes.
 
 ### System Requirements
 
-- **Operating System:** macOS 10.15+ (Catalina or later)
+- **Operating System:**
+  - macOS 10.15+ (Catalina or later)
+  - Windows 10+ (64-bit)
+  - Linux (Ubuntu 20.04+, Fedora 35+, or equivalent)
 - **Memory:** 4GB RAM minimum (8GB recommended)
 - **Disk Space:** 500MB for app + dependencies
 - **Internet:** Required for AI services
@@ -16,12 +19,37 @@ Get Sentra running on your Mac in 10 minutes.
 ### Software Requirements
 
 1. **Node.js 18+**
+
+   **macOS:**
    ```bash
    # Check version
    node --version  # Should be >= 18.0.0
 
    # Install if needed (using Homebrew)
    brew install node
+   ```
+
+   **Windows:**
+   ```powershell
+   # Download installer from nodejs.org
+   # Or use Chocolatey
+   choco install nodejs
+
+   # Verify
+   node --version
+   ```
+
+   **Linux:**
+   ```bash
+   # Ubuntu/Debian
+   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+   sudo apt-get install -y nodejs
+
+   # Fedora
+   sudo dnf install nodejs
+
+   # Verify
+   node --version
    ```
 
 2. **Rust** (installed automatically by Tauri)
@@ -33,9 +61,25 @@ Get Sentra running on your Mac in 10 minutes.
    - Create API key in dashboard
    - Keep it safe - you'll need it shortly
 
+4. **Platform-Specific Audio Libraries**
+
+   **Linux Only:** Audio libraries required for voice notifications
+   ```bash
+   # Ubuntu/Debian
+   sudo apt-get install libasound2-dev
+
+   # Fedora/RHEL
+   sudo dnf install alsa-lib-devel
+
+   # Arch Linux
+   sudo pacman -S alsa-lib
+   ```
+
+   **macOS/Windows:** No additional audio libraries needed
+
 ### Optional (for development)
 
-4. **Git** (for cloning repository)
+5. **Git** (for cloning repository)
    ```bash
    # Check if installed
    git --version
@@ -44,10 +88,37 @@ Get Sentra running on your Mac in 10 minutes.
    xcode-select --install
    ```
 
-5. **GitHub CLI** (for automation features)
+6. **GitHub CLI** (for automation features)
+
+   **macOS:**
    ```bash
    # Install
    brew install gh
+
+   # Authenticate
+   gh auth login
+   ```
+
+   **Windows:**
+   ```powershell
+   # Download installer from cli.github.com
+   # Or use Chocolatey
+   choco install gh
+
+   # Authenticate
+   gh auth login
+   ```
+
+   **Linux:**
+   ```bash
+   # Ubuntu/Debian
+   curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+   sudo apt update
+   sudo apt install gh
+
+   # Fedora
+   sudo dnf install gh
 
    # Authenticate
    gh auth login
@@ -181,6 +252,42 @@ If error persists:
 - Check key hasn't expired (OpenAI dashboard)
 - Verify billing is set up (OpenAI requires payment method)
 - Create new key and update `.env.local`
+
+### Voice Notifications Not Working
+
+**Problem:** No audio when voice notifications are enabled
+
+**macOS:**
+1. Open **System Preferences** → **Security & Privacy** → **Microphone**
+2. Enable microphone for "Sentra" (or your terminal/browser)
+3. Check system volume is not muted
+4. Restart Sentra app
+
+**Windows:**
+1. Open **Settings** → **Privacy** → **Microphone**
+2. Enable microphone access for Sentra
+3. Check system volume and audio device
+4. Restart Sentra app
+
+**Linux:**
+```bash
+# Check audio system is running
+systemctl --user status pulseaudio
+
+# Or for ALSA
+aplay -l
+
+# Test audio output
+speaker-test -t wav -c 2
+
+# If no sound, check volume
+alsamixer
+```
+
+If issues persist:
+- Verify audio libraries are installed (see Prerequisites)
+- Check application logs for audio errors
+- Try a different audio device
 
 ### Port Already in Use
 

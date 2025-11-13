@@ -5,11 +5,15 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   test: {
-    // Environment
+    // Environment (can be overridden per-file with @vitest-environment comment)
     environment: 'jsdom',
 
-    // Setup files
+    // Setup files (only for frontend tests - backend tests use @vitest-environment node)
     setupFiles: ['./tests/setup/vitest.setup.ts'],
+    environmentMatchGlobs: [
+      // Backend tests use node environment and skip jsdom setup
+      ['backend/**', 'node'],
+    ],
 
     // Globals (enables describe, it, expect without imports)
     globals: true,
@@ -53,6 +57,7 @@ export default defineConfig({
       'tests/unit/**/*.{test,spec}.{js,ts,jsx,tsx}',
       'tests/integration/**/*.{test,spec}.{js,ts,jsx,tsx}',
       'src/**/*.{test,spec}.{js,ts,jsx,tsx}', // Allow co-located tests
+      'backend/**/*.{test,spec}.{js,ts,jsx,tsx}', // Backend API tests
     ],
 
     // Exclude patterns

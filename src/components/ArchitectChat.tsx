@@ -339,8 +339,8 @@ Please provide a technical specification summarizing the requirements and implem
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-slate-900 border border-violet-500/20 rounded-lg w-full max-w-3xl h-[600px] flex flex-col">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50" data-testid="modal-backdrop">
+      <div className="bg-slate-900 border border-violet-500/20 rounded-lg w-full max-w-3xl h-[600px] flex flex-col" data-testid="architect-chat-modal" role="dialog" aria-label="Architect Chat">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
           <div className="flex items-center gap-3">
@@ -359,10 +359,12 @@ Please provide a technical specification summarizing the requirements and implem
               onClick={toggleTextMode}
               className="text-slate-400 hover:text-white transition-colors p-2"
               title={textMode ? 'Switch to voice mode' : 'Switch to text mode'}
+              data-testid="toggle-text-mode"
+              aria-label={textMode ? 'Switch to voice mode' : 'Switch to text mode'}
             >
               {textMode ? <Mic className="w-5 h-5" /> : <Keyboard className="w-5 h-5" />}
             </button>
-            <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+            <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors" data-testid="close-button" aria-label="Close">
               <X className="w-6 h-6" />
             </button>
           </div>
@@ -377,6 +379,7 @@ Please provide a technical specification summarizing the requirements and implem
                 <div
                   key={index}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                  data-testid="chat-message"
                 >
                   <div
                     className={`max-w-[80%] p-3 rounded-lg ${
@@ -393,7 +396,7 @@ Please provide a technical specification summarizing the requirements and implem
                 </div>
               ))}
               {isProcessing && (
-                <div className="flex justify-start">
+                <div className="flex justify-start" data-testid="processing-indicator">
                   <div className="bg-slate-800 border border-slate-700 p-3 rounded-lg">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-violet-400 rounded-full animate-pulse"></div>
@@ -416,7 +419,7 @@ Please provide a technical specification summarizing the requirements and implem
                 </div>
               ) : (
                 <>
-                  <div className="mb-8">
+                  <div className="mb-8" data-testid="voice-indicator">
                     {isListening && (
                       <div className="relative">
                         <div className="w-32 h-32 rounded-full bg-green-500/20 border-4 border-green-500/50 flex items-center justify-center">
@@ -443,7 +446,7 @@ Please provide a technical specification summarizing the requirements and implem
                   <div className="text-center">
                     {isListening && (
                       <>
-                        <div className="text-green-400 text-xl font-medium mb-2">Listening...</div>
+                        <div className="text-green-400 text-xl font-medium mb-2" data-testid="listening-status">Listening...</div>
                         <p className="text-slate-400 text-sm max-w-md">
                           Speak naturally. I&apos;ll detect when you stop automatically.
                         </p>
@@ -451,7 +454,7 @@ Please provide a technical specification summarizing the requirements and implem
                     )}
                     {isProcessing && !isListening && (
                       <>
-                        <div className="text-violet-400 text-xl font-medium mb-2">
+                        <div className="text-violet-400 text-xl font-medium mb-2" data-testid="listening-status">
                           Sentra is thinking...
                         </div>
                         <p className="text-slate-400 text-sm max-w-md">Processing your message</p>
@@ -459,7 +462,7 @@ Please provide a technical specification summarizing the requirements and implem
                     )}
                     {!isListening && !isProcessing && (
                       <>
-                        <div className="text-slate-400 text-xl font-medium mb-2">Sentra is ready</div>
+                        <div className="text-slate-400 text-xl font-medium mb-2" data-testid="listening-status">Sentra is ready</div>
                         <p className="text-slate-400 text-sm max-w-md">
                           Starting conversation...
                         </p>
@@ -475,7 +478,7 @@ Please provide a technical specification summarizing the requirements and implem
         {/* Controls */}
         <div className="p-4 border-t border-slate-700">
           {errorMessage && (
-            <div className="mb-3 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 text-sm">
+            <div className="mb-3 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 text-sm" data-testid="error-message">
               {errorMessage}
             </div>
           )}
@@ -491,11 +494,13 @@ Please provide a technical specification summarizing the requirements and implem
                 placeholder="Type your message..."
                 className="flex-1 bg-slate-800 border border-violet-500/20 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50"
                 disabled={isProcessing}
+                data-testid="text-input"
               />
               <button
                 onClick={handleSendText}
                 disabled={isProcessing || !currentInput.trim()}
                 className="px-6 py-2 bg-violet-500 hover:bg-violet-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                data-testid="send-button"
               >
                 Send
               </button>
