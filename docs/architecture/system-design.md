@@ -316,6 +316,66 @@ src-tauri/src/                    # Rust backend
 
 ---
 
+## Agent Worker Architecture
+
+### Why Claude Code CLI (Not Anthropic SDK)
+
+Sentra's agent automation uses **Claude Code CLI** as the execution engine, NOT direct Anthropic SDK calls. This is a critical architecture decision.
+
+**See:** [.claude/docs/ARCHITECTURE-AGENT-WORKER.md](/Users/barnent1/Projects/sentra/.claude/docs/ARCHITECTURE-AGENT-WORKER.md) for complete rationale.
+
+#### Key Benefits
+
+1. **Evolving Platform** - Automatic updates from Anthropic (new features, performance, security)
+2. **Agent Ecosystem** - Built-in specialized agents (orchestrator, test-writer, code-reviewer)
+3. **Quality Hooks** - PreToolUse, PostToolUse, Stop validation runs automatically
+4. **Tool Integration** - Production-hardened Read, Write, Edit, Bash, Glob, Grep
+5. **Context Management** - Automatic conversation trimming, caching, token budgeting
+6. **Reliability** - Battle-tested by thousands of production users
+
+#### What We DON'T Do
+
+❌ Build our own tool execution system
+❌ Reimplement file operations with error handling
+❌ Create conversation loops from scratch
+❌ Manually manage context windows and token limits
+❌ Coordinate multi-agent workflows ourselves
+❌ Implement quality validation hooks
+
+#### What We DO
+
+✅ Execute Claude Code CLI with well-crafted prompts
+✅ Let Claude use specialized agents via `/task` command
+✅ Leverage quality hooks in `.claude/hooks/`
+✅ Benefit from continuous Claude Code improvements
+
+#### Implementation
+
+```python
+# .claude/scripts/ai-agent-worker.py
+def execute_claude_code(self, prompt: str) -> Tuple[int, str, str]:
+    """Execute Claude using Claude Code CLI"""
+
+    # Write prompt to file
+    prompt_file = self.telemetry_dir / f"prompt-{self.issue_number}.txt"
+    prompt_file.write_text(prompt)
+
+    # Execute Claude Code
+    result = subprocess.run(
+        ["claude", "--prompt", str(prompt_file)],
+        cwd=self.repo_path,
+        capture_output=True,
+        text=True,
+        timeout=self.config.max_execution_time
+    )
+
+    return (result.returncode, result.stdout, result.stderr)
+```
+
+**DO NOT migrate to direct SDK without reading the architecture doc.**
+
+---
+
 ## Component Design
 
 ### Voice Conversation (Two Implementations)

@@ -31,6 +31,23 @@ jobs:
 
     # Phase 1: Docker Containerization for Security
     # See: ADR_0001_CONTAINER_SECURITY.md
+    #
+    # Security measures:
+    # - Read-only root filesystem (--read-only)
+    # - No Linux capabilities (--cap-drop=ALL)
+    # - No privilege escalation (--security-opt=no-new-privileges)
+    # - Resource limits (2GB RAM, 2 CPU cores, 100 processes)
+    #
+    # Tmpfs mounts (ephemeral, cleared after run):
+    # - /tmp: Standard temporary files
+    # - ~/.cache: Python pip cache, npm cache
+    # - ~/workspace: Working directory for git operations
+    # - ~/.claude/telemetry: Claude Code logs (write access needed)
+    #
+    # Read-only access (baked into image):
+    # - ~/.claude/bin/claude: Claude Code CLI binary
+    # - ~/.claude/: Claude Code installation directory
+    # - <workspace>/.claude/: Project-specific hooks and agents
     container:
       image: ghcr.io/${{ github.repository_owner }}/sentra-agent:latest
       options: >-
@@ -40,6 +57,7 @@ jobs:
         --tmpfs /tmp:exec,mode=1777
         --tmpfs /home/claude-agent/.cache:exec,mode=0755
         --tmpfs /home/claude-agent/workspace:exec,mode=0755
+        --tmpfs /home/claude-agent/.claude/telemetry:exec,mode=0755
         --memory=2g
         --memory-swap=2g
         --cpus=2
@@ -73,14 +91,33 @@ jobs:
       - name: Verify container environment
         run: |
           echo "🐳 Running in secure Docker container"
+          echo ""
+          echo "=== Runtime Versions ==="
           echo "Python: $(python3.11 --version)"
           echo "Node: $(node --version)"
           echo "npm: $(npm --version)"
           echo "Next.js: $(npx next --version 2>&1 || echo 'NOT FOUND')"
+          echo ""
+          echo "=== User Context ==="
           echo "User: $(whoami)"
           echo "UID: $(id -u)"
-          echo "Claude Code: $(claude --version 2>&1 || echo 'NOT INSTALLED')"
-          echo "PATH: $PATH"
+          echo "GID: $(id -g)"
+          echo "Home: $HOME"
+          echo ""
+          echo "=== Claude Code CLI ==="
+          if command -v claude &> /dev/null; then
+            echo "✅ Claude Code CLI: $(claude --version)"
+            echo "✅ Binary location: $(which claude)"
+            echo "✅ Claude directory exists: $(ls -la ~/.claude/ | head -5)"
+          else
+            echo "❌ Claude Code CLI NOT FOUND in PATH"
+            echo "PATH: $PATH"
+            exit 1
+          fi
+          echo ""
+          echo "=== Project Structure ==="
+          echo "Workspace: $(pwd)"
+          echo "Project .claude/: $(ls -la .claude/ | head -10 || echo 'NOT FOUND')"
 
       - name: Create feature branch
         run: |

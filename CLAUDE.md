@@ -12,6 +12,8 @@ Sentra is a **voice-first AI assistant platform** that combines:
 ### Vision
 Create the most natural way to interact with AI - through voice - while maintaining the power of traditional interfaces.
 
+**Dashboard Vision:** Mission control center for managing multiple AI-powered projects simultaneously. Users should see all project activity at a glance, create new projects without touching the terminal, review PRs in-app, and control voice notifications per-project. The dashboard uses a true dark theme with professional dark cards, violet accents, and actionable intelligence.
+
 ## Architecture Overview
 
 ### Technology Stack
@@ -65,13 +67,21 @@ Sentra implements a 3-phase security architecture for AI agent isolation:
 
 **Current Status:** Phase 1 implementation starting this week
 
-**SDK Choice:** Anthropic Python SDK (direct API usage)
-- NOT using claude-code CLI subprocess approach
-- Structured tool ecosystem with automatic context management
-- Better error handling and recovery
-- Migration planned for Phase 2
+**Agent Execution Engine:** Claude Code CLI (NOT Anthropic SDK)
+- We use `claude` CLI command to execute GitHub issues
+- DO NOT migrate to direct Anthropic SDK without reading architecture doc
+- See: `.claude/docs/ARCHITECTURE-AGENT-WORKER.md` for complete rationale
+- Benefits: agent ecosystem, quality hooks, auto-updates, proven reliability
 
-**See:** `/docs/architecture/SECURITY-ARCHITECTURE.md` for comprehensive design
+**Why NOT direct SDK?**
+- Would lose specialized agents (orchestrator, test-writer, code-reviewer)
+- Would lose quality hooks (PreToolUse, PostToolUse, Stop validation)
+- Would lose automatic updates from Anthropic
+- Would need to build tool execution, context management ourselves
+- 2-4 weeks development + ongoing maintenance for no real benefit
+
+**See:** `/docs/architecture/SECURITY-ARCHITECTURE.md` for security design
+**See:** `.claude/docs/ARCHITECTURE-AGENT-WORKER.md` for agent architecture
 
 ### Project Structure
 
@@ -278,6 +288,8 @@ When working on Sentra with Claude Code agents:
 - **Run tests after EVERY change**
 - **Verify coverage meets thresholds**
 - **Check TypeScript compilation** (npx tsc --noEmit)
+- **Follow dashboard design** (true dark theme, mission control layout)
+- **Support multi-project workflows** (grid layout, per-project controls)
 
 ### DON'T:
 - **Modify tests** without explicit permission (tests are the specification)
@@ -285,6 +297,9 @@ When working on Sentra with Claude Code agents:
 - **Bypass git hooks** (--no-verify is BLOCKED)
 - **Commit without tests passing** (enforced by Stop hook)
 - **Skip code review** (multi-agent review is mandatory)
+- **Create minimalistic UIs** (use mission control design with rich features)
+- **Use light colors** (true dark theme is mandatory)
+- **Migrate to Anthropic SDK** (we use Claude Code CLI - see architecture doc)
 
 ### Multi-Agent Workflow
 
@@ -344,6 +359,8 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 - **Repository**: https://github.com/barnent1/sentra
 - **Documentation**: `/docs` directory
+- **Dashboard Design**: `/docs/roadmap/dashboard-redesign.md`
+- **Observability Vision**: `/docs/roadmap/observability.md`
 - **Issues**: GitHub Issues with `ai-feature` label trigger automation
 - **Claude Code Docs**: https://docs.claude.com/claude-code
 
@@ -362,8 +379,15 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 4. Stop hook prevents finishing until ALL checks pass
 5. CI/CD enforces quality gates (cannot be bypassed)
 
+**Agent Architecture (CRITICAL)**:
+- We use Claude Code CLI for agent execution, NOT Anthropic SDK
+- DO NOT migrate to SDK - it would lose agent ecosystem, quality hooks, auto-updates
+- See `.claude/docs/ARCHITECTURE-AGENT-WORKER.md` for complete rationale
+- This decision is final unless ALL criteria in architecture doc are met (they won't be)
+
 **When in doubt**:
 - Check PERFECT-AGENTIC-STRUCTURE.md for complete workflow
+- Check `.claude/docs/ARCHITECTURE-AGENT-WORKER.md` before changing agent execution
 - Use orchestrator agent for complex features
 - Write tests FIRST, always
 - Get code review before finishing

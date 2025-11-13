@@ -50,16 +50,29 @@ USER claude-agent:claude-agent
 
 # Install Claude Code CLI via official installation script
 # This installs to ~/.claude/ directory with the binary at ~/.claude/bin/claude
+#
+# WHY Claude Code CLI?
+# - Evolving platform with agent ecosystem support
+# - Native tool implementations (Bash, Read, Write, Edit, Glob, Grep)
+# - Automatic context management for long conversations
+# - Better error handling and recovery than raw API calls
+# - Future-proof: benefits from platform improvements automatically
+#
+# The CLI binary location: /home/claude-agent/.claude/bin/claude
+# Agent configurations: /home/claude-agent/.claude/agents/
+# Project hooks: <workspace>/.claude/hooks/
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Add Claude Code to PATH (installed to ~/.claude/bin by install script)
 ENV PATH="/home/claude-agent/.claude/bin:/home/claude-agent/.local/bin:${PATH}"
 
 # Disable Claude Code auto-updater and telemetry for containerized environment
+# These settings prevent network calls during CI/CD execution
 ENV DISABLE_AUTOUPDATER=true
 ENV DISABLE_TELEMETRY=true
 
 # Verify Claude Code installation
+# This ensures the binary is executable and responds correctly
 RUN claude --version
 
 # Set working directory
