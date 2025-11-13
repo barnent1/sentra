@@ -329,5 +329,260 @@ describe('Settings', () => {
       })
     })
 
+    it('should handle test voice error', async () => {
+      // ARRANGE
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+      vi.mocked(tauri.speakNotification).mockRejectedValue(new Error('Voice test failed'))
+
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const testButton = screen.getByText('Test Voice')
+      fireEvent.click(testButton)
+
+      // ASSERT
+      await waitFor(() => {
+        expect(alertSpy).toHaveBeenCalledWith('Failed to test voice. Check your API key.')
+      })
+
+      alertSpy.mockRestore()
+    })
+
+    it('should disable test voice button when API key is missing', async () => {
+      // ARRANGE
+      vi.mocked(tauri.getSettings).mockResolvedValue({
+        ...mockSettings,
+        openaiApiKey: '',
+      })
+
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ASSERT
+      const testButton = screen.getByText('Test Voice')
+      expect(testButton).toBeDisabled()
+    })
+
+    it('should show testing state when testing voice', async () => {
+      // ARRANGE
+      vi.mocked(tauri.speakNotification).mockImplementation(
+        () => new Promise((resolve) => setTimeout(resolve, 100))
+      )
+
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const testButton = screen.getByText('Test Voice')
+      fireEvent.click(testButton)
+
+      // ASSERT
+      expect(screen.getByText('Testing...')).toBeInTheDocument()
+    })
+
+    it('should include user name in test voice message', async () => {
+      // ARRANGE
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const testButton = screen.getByText('Test Voice')
+      fireEvent.click(testButton)
+
+      // ASSERT
+      await waitFor(() => {
+        expect(tauri.speakNotification).toHaveBeenCalledWith(
+          expect.stringContaining('Test User'),
+          'nova',
+          'sk-test-key'
+        )
+      })
+    })
+
+    it('should use "there" when user name is not set', async () => {
+      // ARRANGE
+      vi.mocked(tauri.getSettings).mockResolvedValue({
+        ...mockSettings,
+        userName: '',
+      })
+
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const testButton = screen.getByText('Test Voice')
+      fireEvent.click(testButton)
+
+      // ASSERT
+      await waitFor(() => {
+        expect(tauri.speakNotification).toHaveBeenCalledWith(
+          expect.stringContaining('Hey there'),
+          'nova',
+          'sk-test-key'
+        )
+      })
+    })
+  })
+
+  describe('GitHub settings', () => {
+    it('should update GitHub repo owner when input changes', async () => {
+      // ARRANGE
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const ownerInput = screen.getByPlaceholderText('barnent1') as HTMLInputElement
+      fireEvent.change(ownerInput, { target: { value: 'newowner' } })
+
+      // ASSERT
+      expect(ownerInput.value).toBe('newowner')
+    })
+
+    it('should update GitHub repo name when input changes', async () => {
+      // ARRANGE
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const repoInput = screen.getByPlaceholderText('sentra') as HTMLInputElement
+      fireEvent.change(repoInput, { target: { value: 'newrepo' } })
+
+      // ASSERT
+      expect(repoInput.value).toBe('newrepo')
+    })
+  })
+
+  describe('notification checkboxes', () => {
+    it('should disable sub-checkboxes when notifications are disabled', async () => {
+      // ARRANGE
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const notificationCheckbox = screen.getByRole('checkbox', {
+        name: 'Enable voice notifications',
+      })
+      fireEvent.click(notificationCheckbox)
+
+      // ASSERT
+      const completionCheckbox = screen.getByRole('checkbox', {
+        name: 'Notify when agents complete',
+      })
+      const failureCheckbox = screen.getByRole('checkbox', {
+        name: 'Notify when agents fail',
+      })
+      const startCheckbox = screen.getByRole('checkbox', {
+        name: 'Notify when agents start',
+      })
+
+      expect(completionCheckbox).toBeDisabled()
+      expect(failureCheckbox).toBeDisabled()
+      expect(startCheckbox).toBeDisabled()
+    })
+
+    it('should toggle failure notifications', async () => {
+      // ARRANGE
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const failureCheckbox = screen.getByRole('checkbox', {
+        name: 'Notify when agents fail',
+      })
+      fireEvent.click(failureCheckbox)
+
+      // ASSERT
+      expect(failureCheckbox).not.toBeChecked()
+    })
+
+    it('should toggle start notifications', async () => {
+      // ARRANGE
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const startCheckbox = screen.getByRole('checkbox', {
+        name: 'Notify when agents start',
+      })
+      fireEvent.click(startCheckbox)
+
+      // ASSERT
+      expect(startCheckbox).toBeChecked()
+    })
+  })
+
+  describe('error handling', () => {
+    it('should handle loading settings error gracefully', async () => {
+      // ARRANGE
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      vi.mocked(tauri.getSettings).mockRejectedValue(new Error('Load failed'))
+
+      // ACT
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      // ASSERT
+      await waitFor(() => {
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Failed to load settings:',
+          expect.any(Error)
+        )
+      })
+
+      consoleErrorSpy.mockRestore()
+    })
+
+    it('should handle non-Error save failures', async () => {
+      // ARRANGE
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+      vi.mocked(tauri.saveSettings).mockRejectedValue('String error')
+
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const saveButton = screen.getByText('Save Settings')
+      fireEvent.click(saveButton)
+
+      // ASSERT
+      await waitFor(() => {
+        expect(alertSpy).toHaveBeenCalledWith('Failed to save settings: Unknown error')
+      })
+
+      alertSpy.mockRestore()
+    })
   })
 })

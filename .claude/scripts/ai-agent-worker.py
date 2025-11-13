@@ -2,10 +2,10 @@
 """
 ai-agent-worker.py - Production AI Agent Worker for GitHub Issues
 
-This script uses the Anthropic Python SDK directly to create an AI agent that
+This script uses the Claude Code CLI to create an AI agent that
 automatically works on GitHub issues through GitHub Actions automation.
 
-The agent uses Claude with tool calling to:
+The agent uses Claude Code's native tools to:
 - Read, write, and edit files
 - Execute bash commands
 - Search the codebase (glob, grep)
@@ -32,7 +32,7 @@ Environment Variables:
     TEST_RATE_LIMIT             Enable test mode with low limits (default: false)
 
 Dependencies:
-    pip install anthropic
+    Claude Code CLI: curl -fsSL https://claude.ai/install.sh | bash
 """
 
 import os
@@ -49,12 +49,8 @@ from pathlib import Path
 from typing import Optional, Dict, Any, Tuple, List
 from dataclasses import dataclass, asdict
 
-try:
-    from anthropic import Anthropic
-    import anthropic
-except ImportError:
-    print("ERROR: anthropic package not installed. Install with: pip install anthropic", file=sys.stderr)
-    sys.exit(1)
+# No longer using Anthropic SDK directly - using Claude Code CLI instead
+# SDK imports removed as they're not needed for CLI-based approach
 
 
 # ============================================================================
@@ -234,9 +230,9 @@ class RateLimiter:
 
 class AgentWorker:
     """
-    Production-ready AI agent worker that executes GitHub issues using Anthropic Python SDK.
+    Production-ready AI agent worker that executes GitHub issues using Claude Code CLI.
 
-    Uses Claude with tool calling to autonomously:
+    Uses Claude Code's native tools to autonomously:
     - Analyze GitHub issues
     - Search and understand the codebase
     - Make code changes (read, write, edit files)
@@ -250,9 +246,6 @@ class AgentWorker:
         self.issue_number = issue_number
         self.repo_path = Path(repo_path).resolve()
         self.config = Config.from_env()
-
-        # Initialize Anthropic client
-        self.client = Anthropic(api_key=self.config.anthropic_api_key)
 
         # Rate limiting configuration
         # REDUCED from 25k to 20k for more safety buffer (30k org limit)
@@ -280,9 +273,6 @@ class AgentWorker:
         self.files_changed: set = set()
         self.progress_updates = []
         self.last_progress_time = time.time()
-
-        # Conversation history
-        self.messages: List[Dict[str, Any]] = []
 
         # GitHub API base URL
         self.github_api = "https://api.github.com"
@@ -661,257 +651,6 @@ _This is an automated progress update. Updates are posted every 5 minutes._
 
         return "\n".join(prompt_parts)
 
-    def _define_tools(self) -> List[Dict[str, Any]]:
-        """Define tools for Claude to use"""
-        return [
-            {
-                "name": "read_file",
-                "description": "Read contents of a file from the filesystem",
-                "input_schema": {
-                    "type": "object",
-                    "properties": {
-                        "file_path": {
-                            "type": "string",
-                            "description": "Absolute or relative path to the file"
-                        }
-                    },
-                    "required": ["file_path"]
-                }
-            },
-            {
-                "name": "write_file",
-                "description": "Write content to a file (creates or overwrites)",
-                "input_schema": {
-                    "type": "object",
-                    "properties": {
-                        "file_path": {
-                            "type": "string",
-                            "description": "Absolute or relative path to the file"
-                        },
-                        "content": {
-                            "type": "string",
-                            "description": "Content to write to the file"
-                        }
-                    },
-                    "required": ["file_path", "content"]
-                }
-            },
-            {
-                "name": "edit_file",
-                "description": "Edit a file by replacing old string with new string",
-                "input_schema": {
-                    "type": "object",
-                    "properties": {
-                        "file_path": {
-                            "type": "string",
-                            "description": "Path to the file to edit"
-                        },
-                        "old_string": {
-                            "type": "string",
-                            "description": "String to replace (must match exactly)"
-                        },
-                        "new_string": {
-                            "type": "string",
-                            "description": "String to replace it with"
-                        }
-                    },
-                    "required": ["file_path", "old_string", "new_string"]
-                }
-            },
-            {
-                "name": "bash",
-                "description": "Execute a bash command",
-                "input_schema": {
-                    "type": "object",
-                    "properties": {
-                        "command": {
-                            "type": "string",
-                            "description": "Bash command to execute"
-                        }
-                    },
-                    "required": ["command"]
-                }
-            },
-            {
-                "name": "glob",
-                "description": "Search for files matching a pattern",
-                "input_schema": {
-                    "type": "object",
-                    "properties": {
-                        "pattern": {
-                            "type": "string",
-                            "description": "Glob pattern (e.g., '**/*.py')"
-                        }
-                    },
-                    "required": ["pattern"]
-                }
-            },
-            {
-                "name": "grep",
-                "description": "Search for pattern in files",
-                "input_schema": {
-                    "type": "object",
-                    "properties": {
-                        "pattern": {
-                            "type": "string",
-                            "description": "Pattern to search for"
-                        },
-                        "path": {
-                            "type": "string",
-                            "description": "Path to search in (optional)"
-                        }
-                    },
-                    "required": ["pattern"]
-                }
-            }
-        ]
-
-    def _execute_tool(self, tool_name: str, tool_input: Dict[str, Any]) -> str:
-        """Execute a tool and return result"""
-        try:
-            if tool_name == "read_file":
-                file_path = Path(self.repo_path) / tool_input["file_path"]
-                if not file_path.exists():
-                    return f"Error: File not found: {file_path}"
-                content = file_path.read_text()
-                return content
-
-            elif tool_name == "write_file":
-                file_path = Path(self.repo_path) / tool_input["file_path"]
-                file_path.parent.mkdir(parents=True, exist_ok=True)
-                file_path.write_text(tool_input["content"])
-                self.files_changed.add(str(file_path.relative_to(self.repo_path)))
-                return f"Successfully wrote to {file_path}"
-
-            elif tool_name == "edit_file":
-                file_path = Path(self.repo_path) / tool_input["file_path"]
-                if not file_path.exists():
-                    return f"Error: File not found: {file_path}"
-                content = file_path.read_text()
-                old_string = tool_input["old_string"]
-                new_string = tool_input["new_string"]
-
-                if old_string not in content:
-                    return f"Error: Could not find string to replace in {file_path}"
-
-                new_content = content.replace(old_string, new_string, 1)
-                file_path.write_text(new_content)
-                self.files_changed.add(str(file_path.relative_to(self.repo_path)))
-                return f"Successfully edited {file_path}"
-
-            elif tool_name == "bash":
-                result = subprocess.run(
-                    tool_input["command"],
-                    shell=True,
-                    cwd=self.repo_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=300  # 5 minute timeout for individual commands
-                )
-                output = result.stdout
-                if result.stderr:
-                    output += f"\nSTDERR: {result.stderr}"
-                if result.returncode != 0:
-                    output = f"Command failed with exit code {result.returncode}\n{output}"
-                return output
-
-            elif tool_name == "glob":
-                pattern = tool_input["pattern"]
-                files = glob.glob(str(self.repo_path / pattern), recursive=True)
-                files = [str(Path(f).relative_to(self.repo_path)) for f in files]
-                return "\n".join(files) if files else "No files found"
-
-            elif tool_name == "grep":
-                pattern = tool_input["pattern"]
-                path = tool_input.get("path", ".")
-                result = subprocess.run(
-                    ["grep", "-r", "-n", pattern, path],
-                    cwd=self.repo_path,
-                    capture_output=True,
-                    text=True,
-                    timeout=60
-                )
-                return result.stdout if result.stdout else "No matches found"
-
-            else:
-                return f"Error: Unknown tool {tool_name}"
-
-        except Exception as e:
-            return f"Error executing {tool_name}: {str(e)}"
-
-    def _call_claude_with_retry(
-        self,
-        messages: List[Dict[str, Any]],
-        tools: List[Dict[str, Any]],
-        max_tokens: int = 4096,
-        conversation_turns: int = 0
-    ) -> Any:
-        """
-        Call Claude API with exponential backoff retry on rate limits
-
-        Args:
-            messages: Conversation messages
-            tools: Available tools
-            max_tokens: Max tokens in response
-            conversation_turns: Current turn number (for token estimation)
-
-        Returns:
-            API response
-
-        Raises:
-            Exception: On non-recoverable errors or after max retries
-        """
-        for attempt in range(self.rate_limit_retries):
-            try:
-                # Check rate limit before making call (proactive throttling)
-                self.rate_limiter.wait_if_needed(self.log, conversation_turns=conversation_turns)
-
-                response = self.client.messages.create(
-                    model="claude-sonnet-4-20250514",
-                    max_tokens=max_tokens,
-                    messages=messages,
-                    tools=tools,
-                    temperature=0.0
-                )
-
-                # Track usage
-                usage = response.usage
-                self.rate_limiter.add_usage(usage.input_tokens, usage.output_tokens)
-
-                return response
-
-            except anthropic.RateLimitError as e:
-                if attempt < self.rate_limit_retries - 1:
-                    # BUG FIX #5: Proper exponential backoff starting at 60s
-                    # Wait time: 60s, 120s, 240s (ensures full window reset)
-                    wait_time = 60 * (2 ** attempt)
-                    current_usage = self.rate_limiter.get_current_usage()
-                    self.log(
-                        f"Rate limit 429 error (current usage: {current_usage}/{self.rate_limiter.tokens_per_minute} INPUT tokens/min), "
-                        f"waiting {wait_time}s for rate limit window to reset (attempt {attempt+1}/{self.rate_limit_retries})",
-                        "WARNING"
-                    )
-                    time.sleep(wait_time)
-                    # Clear tracking after long wait
-                    self.rate_limiter.tokens_used = []
-                else:
-                    # Last attempt failed
-                    current_usage = self.rate_limiter.get_current_usage()
-                    error_msg = (
-                        f"Rate limit exceeded after {self.rate_limit_retries} retries. "
-                        f"Current usage: {current_usage}/{self.rate_limiter.tokens_per_minute} INPUT tokens/min. "
-                        f"Consider: 1) Reducing conversation turns (trim history), 2) Lower CLAUDE_RATE_LIMIT_TPM, 3) Contact Anthropic for limit increase"
-                    )
-                    self.log(error_msg, "ERROR")
-                    raise RuntimeError(error_msg) from e
-
-            except Exception as e:
-                # Non-recoverable error
-                self.log(f"API call failed: {e}", "ERROR")
-                raise
-
-        # Should never reach here
-        raise RuntimeError("Unexpected error in retry loop")
 
     def execute_claude_code(
         self,
@@ -919,7 +658,11 @@ _This is an automated progress update. Updates are posted every 5 minutes._
         timeout: Optional[int] = None
     ) -> Tuple[int, str, str]:
         """
-        Execute Claude using Anthropic Python SDK with tool use
+        Execute Claude using Claude Code CLI
+
+        This uses the native Claude Code CLI installed in the container,
+        which provides better tool integration and error handling than
+        the raw Anthropic SDK.
 
         Returns:
             (returncode, stdout, stderr)
@@ -927,174 +670,106 @@ _This is an automated progress update. Updates are posted every 5 minutes._
         if timeout is None:
             timeout = self.config.max_execution_time
 
-        self.log("Executing Claude with Anthropic SDK...")
+        self.log("Executing Claude Code CLI...")
         self.log_structured("claude_execution_start", {
             "prompt_length": len(prompt),
             "timeout": timeout
         })
 
-        # Write prompt to temporary file
+        # Write prompt to temporary file for logging
         prompt_file = self.telemetry_dir / f"prompt-{self.issue_number}.txt"
         prompt_file.write_text(prompt)
         self.log(f"Prompt written to: {prompt_file}")
 
-        # Set up timeout handler
-        execution_complete = False
-        def timeout_handler(signum, frame):
-            if not execution_complete:
-                self.log("Execution timeout - stopping", "WARNING")
-                raise TimeoutError(f"Claude execution exceeded {timeout}s timeout")
-
-        old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(timeout)
-
-        all_output = []
-        all_errors = []
-
         try:
-            # Initialize conversation
-            self.messages = [{"role": "user", "content": prompt}]
+            # Build Claude Code CLI command
+            # Format: claude -p "prompt" --permission-mode acceptEdits --allowedTools "tool1(*) tool2(*)"
+            #
+            # Permission mode "acceptEdits" allows Claude to make file changes automatically
+            # Allowed tools give Claude access to:
+            # - Bash: Execute commands (git, build, test, etc.)
+            # - Read: Read files from the codebase
+            # - Edit: Make precise edits to existing files
+            # - Write: Create new files
+            # - Glob: Search for files by pattern
+            # - Grep: Search file contents
+            claude_cmd = [
+                "claude",
+                "-p", prompt,
+                "--permission-mode", "acceptEdits",
+                "--allowedTools", "Bash(*) Read(*) Edit(*) Write(*) Glob(*) Grep(*)"
+            ]
 
-            # Define tools
-            tools = self._define_tools()
+            self.log(f"Running: claude -p <prompt> --permission-mode acceptEdits --allowedTools ...")
 
-            # Conversation loop
-            max_turns = 50  # Prevent infinite loops
-            turn = 0
+            # Execute Claude Code CLI
+            # Important: Pass ANTHROPIC_API_KEY via environment
+            env = os.environ.copy()
+            env["ANTHROPIC_API_KEY"] = self.config.anthropic_api_key
 
-            while turn < max_turns:
-                turn += 1
-                self.log(f"Conversation turn {turn}")
+            # Disable auto-updater and telemetry in containerized environment
+            env["DISABLE_AUTOUPDATER"] = "true"
+            env["DISABLE_TELEMETRY"] = "true"
 
-                # Check constraints
-                self.check_constraints()
+            result = subprocess.run(
+                claude_cmd,
+                cwd=self.repo_path,
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+                env=env
+            )
 
-                # BUG FIX #3: Trim conversation history after 20 turns to prevent unbounded growth
-                # Keep: initial prompt + last 10 turns (20 messages)
-                if len(self.messages) > 21:  # 1 initial + 20 recent
-                    self.log(f"Trimming conversation history (was {len(self.messages)} messages)", "INFO")
-                    initial_prompt = self.messages[0]  # Keep the initial user prompt
-                    recent_messages = self.messages[-20:]  # Keep last 20 messages (10 turns)
-                    self.messages = [initial_prompt] + recent_messages
-                    self.log(f"Trimmed to {len(self.messages)} messages (initial + last 10 turns)", "INFO")
+            # Log output
+            if result.stdout:
+                self.log(f"Claude output:\n{result.stdout[:500]}")
 
-                # Log rate limit status periodically (every 5 turns)
-                if turn % 5 == 0:
-                    current_usage = self.rate_limiter.get_current_usage()
-                    usage_percent = (current_usage / self.rate_limiter.tokens_per_minute) * 100
-                    self.log(
-                        f"Rate limit status: {current_usage}/{self.rate_limiter.tokens_per_minute} "
-                        f"tokens/min ({usage_percent:.1f}%)"
-                    )
+            if result.stderr:
+                self.log(f"Claude stderr:\n{result.stderr[:500]}", "WARNING" if result.returncode == 0 else "ERROR")
 
-                # Make API call with retry logic
-                try:
-                    response = self._call_claude_with_retry(
-                        messages=self.messages,
-                        tools=tools,
-                        max_tokens=4096,
-                        conversation_turns=turn
-                    )
+            # Track API usage (approximate from output)
+            # Claude Code CLI doesn't provide detailed token counts, so we estimate
+            # based on prompt length and output length
+            estimated_input_tokens = len(prompt) // 4  # Rough estimate: 4 chars per token
+            estimated_output_tokens = len(result.stdout) // 4
 
-                    # Track API usage
-                    self.api_calls += 1
-                    input_tokens = response.usage.input_tokens
-                    output_tokens = response.usage.output_tokens
+            # Track for rate limiting (approximate)
+            self.rate_limiter.add_usage(estimated_input_tokens, estimated_output_tokens)
 
-                    # Calculate cost (Claude Sonnet 4.5 pricing: $3/MTok input, $15/MTok output)
-                    cost = (input_tokens * 3 / 1_000_000) + (output_tokens * 15 / 1_000_000)
-                    self.estimated_cost += cost
+            # Estimate cost
+            cost = (estimated_input_tokens * 3 / 1_000_000) + (estimated_output_tokens * 15 / 1_000_000)
+            self.estimated_cost += cost
+            self.api_calls += 1
 
-                    if self.config.log_api_calls:
-                        self.log(f"API call {self.api_calls}: {input_tokens} in, {output_tokens} out, ${cost:.4f}")
-
-                    # Process response
-                    assistant_message = {"role": "assistant", "content": response.content}
-                    self.messages.append(assistant_message)
-
-                    # Check if Claude is done (no tool use)
-                    has_tool_use = any(block.type == "tool_use" for block in response.content)
-
-                    # Collect text output
-                    for block in response.content:
-                        if block.type == "text":
-                            all_output.append(block.text)
-                            self.log(f"Claude: {block.text[:200]}")
-
-                    if not has_tool_use:
-                        # Claude is done
-                        self.log("Claude has completed the task")
-                        break
-
-                    # Execute tool calls
-                    tool_results = []
-                    for block in response.content:
-                        if block.type == "tool_use":
-                            tool_name = block.name
-                            tool_input = block.input
-                            tool_use_id = block.id
-
-                            self.log(f"Executing tool: {tool_name}")
-                            self.log(f"Tool input: {json.dumps(tool_input)[:200]}")
-
-                            # Execute tool
-                            result = self._execute_tool(tool_name, tool_input)
-
-                            self.log(f"Tool result: {result[:200]}")
-
-                            tool_results.append({
-                                "type": "tool_result",
-                                "tool_use_id": tool_use_id,
-                                "content": result
-                            })
-
-                    # Add tool results to conversation
-                    if tool_results:
-                        self.messages.append({
-                            "role": "user",
-                            "content": tool_results
-                        })
-
-                except Exception as e:
-                    error_msg = f"API error: {str(e)}"
-                    self.log(error_msg, "ERROR")
-                    all_errors.append(error_msg)
-                    raise
-
-            if turn >= max_turns:
-                all_errors.append("Reached maximum conversation turns")
-                self.log("Reached maximum conversation turns", "WARNING")
-
-            # Success
-            execution_complete = True
-            signal.alarm(0)
-            signal.signal(signal.SIGALRM, old_handler)
-
-            stdout = "\n".join(all_output)
-            stderr = "\n".join(all_errors) if all_errors else ""
+            self.log(f"Estimated: {estimated_input_tokens} in, {estimated_output_tokens} out, ${cost:.4f}")
 
             self.log_structured("claude_execution_complete", {
-                "returncode": 0 if not all_errors else 1,
-                "turns": turn,
+                "returncode": result.returncode,
                 "api_calls": self.api_calls,
                 "cost": self.estimated_cost,
-                "stdout_length": len(stdout),
-                "stderr_length": len(stderr)
+                "stdout_length": len(result.stdout),
+                "stderr_length": len(result.stderr)
             })
 
-            return (0 if not all_errors else 1, stdout, stderr)
+            return (result.returncode, result.stdout, result.stderr)
 
-        except TimeoutError as e:
-            execution_complete = True
-            signal.alarm(0)
-            signal.signal(signal.SIGALRM, old_handler)
-            raise RuntimeError(f"Claude execution exceeded {timeout}s timeout")
+        except subprocess.TimeoutExpired:
+            error_msg = f"Claude Code execution exceeded {timeout}s timeout"
+            self.log(error_msg, "ERROR")
+            raise RuntimeError(error_msg)
+
+        except FileNotFoundError:
+            error_msg = (
+                "Claude Code CLI not found. Ensure 'claude' is installed and in PATH. "
+                "Installation: curl -fsSL https://claude.ai/install.sh | bash"
+            )
+            self.log(error_msg, "ERROR")
+            raise RuntimeError(error_msg)
+
         except Exception as e:
-            execution_complete = True
-            signal.alarm(0)
-            signal.signal(signal.SIGALRM, old_handler)
-            self.log(f"Claude execution error: {e}", "ERROR")
-            raise
+            error_msg = f"Claude Code execution error: {str(e)}"
+            self.log(error_msg, "ERROR")
+            raise RuntimeError(error_msg) from e
 
 
     # ========================================================================
@@ -1465,7 +1140,7 @@ Generated by Sentra AI Agent
             prompt = self.build_claude_prompt(issue, context)
 
             # Phase 4: Execute Claude
-            self.log("Phase 4: Executing Claude with Anthropic SDK")
+            self.log("Phase 4: Executing Claude Code CLI")
             self.update_issue_progress("Implementing changes with Claude...")
 
             returncode, stdout, stderr = self.execute_claude_code(prompt)

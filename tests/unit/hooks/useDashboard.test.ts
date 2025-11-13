@@ -394,4 +394,152 @@ describe('useDashboard', () => {
       expect(result.current.stats?.activeAgents).toBe(1)
     })
   })
+
+  describe('refetch functionality', () => {
+    it('should provide refetch function', async () => {
+      // ARRANGE
+      vi.mocked(tauri.getProjects).mockResolvedValue([])
+      vi.mocked(tauri.getActiveAgents).mockResolvedValue([])
+      vi.mocked(tauri.getDashboardStats).mockResolvedValue({
+        activeAgents: 0,
+        totalProjects: 0,
+        todayCost: 0,
+        monthlyBudget: 100,
+        successRate: 0,
+      })
+
+      // ACT
+      const { result } = renderHook(() => useDashboard())
+
+      // ASSERT
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(result.current.refetch).toBeDefined()
+      expect(typeof result.current.refetch).toBe('function')
+    })
+
+    it('should refetch all data when refetch is called', async () => {
+      // ARRANGE
+      const mockProjects = [
+        {
+          name: 'project1',
+          path: '/path1',
+          activeAgents: 1,
+          totalIssues: 5,
+          completedIssues: 2,
+          monthlyCost: 25.0,
+          status: 'active' as const,
+        },
+      ]
+
+      const updatedProjects = [
+        ...mockProjects,
+        {
+          name: 'project2',
+          path: '/path2',
+          activeAgents: 0,
+          totalIssues: 3,
+          completedIssues: 1,
+          monthlyCost: 15.0,
+          status: 'active' as const,
+        },
+      ]
+
+      vi.mocked(tauri.getProjects).mockResolvedValueOnce(mockProjects)
+      vi.mocked(tauri.getActiveAgents).mockResolvedValue([])
+      vi.mocked(tauri.getDashboardStats).mockResolvedValue({
+        activeAgents: 0,
+        totalProjects: 1,
+        todayCost: 0,
+        monthlyBudget: 100,
+        successRate: 0,
+      })
+
+      // ACT
+      const { result } = renderHook(() => useDashboard())
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(result.current.projects).toHaveLength(1)
+
+      // Mock updated data
+      vi.mocked(tauri.getProjects).mockResolvedValueOnce(updatedProjects)
+
+      // Call refetch
+      await result.current.refetch()
+
+      // ASSERT
+      await waitFor(() => {
+        expect(result.current.projects).toHaveLength(2)
+      })
+    })
+
+    it('should clear error on successful refetch', async () => {
+      // ARRANGE
+      vi.mocked(tauri.getProjects).mockRejectedValueOnce(new Error('Initial error'))
+      vi.mocked(tauri.getActiveAgents).mockResolvedValue([])
+      vi.mocked(tauri.getDashboardStats).mockResolvedValue({
+        activeAgents: 0,
+        totalProjects: 0,
+        todayCost: 0,
+        monthlyBudget: 100,
+        successRate: 0,
+      })
+
+      // ACT
+      const { result } = renderHook(() => useDashboard())
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(result.current.error).toBe('Initial error')
+
+      // Mock successful refetch
+      vi.mocked(tauri.getProjects).mockResolvedValueOnce([])
+
+      await result.current.refetch()
+
+      // ASSERT
+      await waitFor(() => {
+        expect(result.current.error).toBeNull()
+      })
+    })
+
+    it('should handle refetch errors', async () => {
+      // ARRANGE
+      vi.mocked(tauri.getProjects).mockResolvedValueOnce([])
+      vi.mocked(tauri.getActiveAgents).mockResolvedValue([])
+      vi.mocked(tauri.getDashboardStats).mockResolvedValue({
+        activeAgents: 0,
+        totalProjects: 0,
+        todayCost: 0,
+        monthlyBudget: 100,
+        successRate: 0,
+      })
+
+      // ACT
+      const { result } = renderHook(() => useDashboard())
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false)
+      })
+
+      expect(result.current.error).toBeNull()
+
+      // Mock error on refetch
+      vi.mocked(tauri.getProjects).mockRejectedValueOnce(new Error('Refetch failed'))
+
+      await result.current.refetch()
+
+      // ASSERT
+      await waitFor(() => {
+        expect(result.current.error).toBe('Refetch failed')
+      })
+    })
+  })
 })

@@ -44,11 +44,26 @@ RUN useradd -m -s /bin/bash -u 1001 claude-agent && \
     mkdir -p /home/claude-agent/workspace && \
     chown -R claude-agent:claude-agent /home/claude-agent
 
+# Switch to non-root user BEFORE installing Claude Code
+# (installation must run as the user who will use it)
+USER claude-agent:claude-agent
+
+# Install Claude Code CLI via official installation script
+# This installs to ~/.claude/ directory with the binary at ~/.claude/bin/claude
+RUN curl -fsSL https://claude.ai/install.sh | bash
+
+# Add Claude Code to PATH
+ENV PATH="/home/claude-agent/.claude/bin:${PATH}"
+
+# Disable Claude Code auto-updater and telemetry for containerized environment
+ENV DISABLE_AUTOUPDATER=true
+ENV DISABLE_TELEMETRY=true
+
+# Verify Claude Code installation
+RUN claude --version || echo "WARNING: Claude Code installation verification failed"
+
 # Set working directory
 WORKDIR /home/claude-agent/workspace
-
-# Switch to non-root user for runtime
-USER claude-agent:claude-agent
 
 # Security: Drop all capabilities by default (will be enforced in workflow)
 # Security: Read-only root filesystem (will be enforced in workflow)

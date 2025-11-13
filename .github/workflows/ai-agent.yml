@@ -59,6 +59,8 @@ jobs:
           echo "Node: $(node --version)"
           echo "User: $(whoami)"
           echo "UID: $(id -u)"
+          echo "Claude Code: $(claude --version 2>&1 || echo 'NOT INSTALLED')"
+          echo "PATH: $PATH"
 
       - name: Create feature branch
         run: |
@@ -106,6 +108,10 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Claude Code CLI configuration
+          DISABLE_AUTOUPDATER: 'true'
+          DISABLE_TELEMETRY: 'true'
+          # Agent constraints
           CLAUDE_MAX_EXECUTION_TIME: '45'
           CLAUDE_MAX_API_CALLS_PER_ISSUE: '150'
           CLAUDE_MAX_FILE_CHANGES: '75'
