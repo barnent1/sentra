@@ -60,7 +60,7 @@ ENV DISABLE_AUTOUPDATER=true
 ENV DISABLE_TELEMETRY=true
 
 # Verify Claude Code installation
-RUN claude --version || echo "WARNING: Claude Code installation verification failed"
+RUN claude --version
 
 # Set working directory
 WORKDIR /home/claude-agent/workspace
