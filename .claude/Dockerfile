@@ -10,18 +10,26 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     python3.11 \
     python3-pip \
-    nodejs \
-    npm \
     git \
     curl \
     ca-certificates \
     wget \
     gnupg && \
-    # Install GitHub CLI
-    wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Node.js 20 LTS from NodeSource repository
+# Next.js 15.5 requires Node.js 18+, Node.js 20 is current LTS
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y --no-install-recommends \
+    nodejs && \
+    npm install -g npm@latest && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install GitHub CLI
+RUN wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list && \
     apt-get update && \
-    apt-get install -y gh && \
+    apt-get install -y --no-install-recommends gh && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Python packages system-wide (before creating non-root user)
