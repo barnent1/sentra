@@ -25,7 +25,7 @@ Sentra is a cross-platform application (Mac, Windows, Linux, Web) that provides 
 ## Tech Stack
 
 **Frontend:**
-- Next.js 14 (App Router)
+- Next.js 15.x (App Router)
 - Tailwind CSS + shadcn/ui
 - TypeScript
 - Zustand (state management)

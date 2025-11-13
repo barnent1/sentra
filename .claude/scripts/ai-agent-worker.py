@@ -26,7 +26,7 @@ Environment Variables:
     CLAUDE_REQUIRE_TESTS        Whether to require tests (default: false)
     CLAUDE_GITHUB_COMMENTS      Post progress comments (default: true)
     CLAUDE_LOG_API_CALLS        Log all API calls (default: true)
-    CLAUDE_RATE_LIMIT_TPM       Max tokens per minute (default: 25000)
+    CLAUDE_RATE_LIMIT_TPM       Max INPUT tokens per minute (default: 20000)
     CLAUDE_RATE_LIMIT_RETRIES   Max retry attempts on rate limit (default: 3)
     CLAUDE_RATE_LIMIT_THRESHOLD Throttle at N% of limit (default: 0.8)
     TEST_RATE_LIMIT             Enable test mode with low limits (default: false)
@@ -100,48 +100,64 @@ class Config:
 # RATE LIMITING
 # ============================================================================
 # Anthropic API has the following limits per organization:
-# - 30,000 input tokens per minute
+# - 30,000 INPUT tokens per minute (output tokens don't count)
 # - Rate limit errors (429) cause API calls to fail
 #
-# Our strategy:
-# 1. Track token usage in rolling 60-second window
-# 2. Throttle proactively at 80% of limit (configurable)
-# 3. Retry with exponential backoff on 429 errors (3 attempts)
-# 4. Clear tracking window after throttle wait
+# Our strategy (FIXED to prevent 429 errors):
+# 1. Track INPUT token usage in rolling 60-second window (not output tokens)
+# 2. Enforce minimum 2.5s between requests (prevents bursts)
+# 3. Throttle PROACTIVELY before requests (estimate next token usage)
+# 4. Retry with exponential backoff on 429 errors (60s, 120s, 240s)
+# 5. Trim conversation history after 20 messages (prevents unbounded growth)
 #
 # Configuration (via environment variables):
-# - CLAUDE_RATE_LIMIT_TPM: Max tokens per minute (default: 25000)
+# - CLAUDE_RATE_LIMIT_TPM: Max INPUT tokens per minute (default: 20000)
 # - CLAUDE_RATE_LIMIT_RETRIES: Max retry attempts (default: 3)
 # - CLAUDE_RATE_LIMIT_THRESHOLD: Throttle at N% of limit (default: 0.8)
 # ============================================================================
 
 class RateLimiter:
-    """Track token usage per minute to stay within API limits"""
+    """Track INPUT token usage per minute to stay within API limits"""
 
-    def __init__(self, tokens_per_minute: int = 25000, throttle_threshold: float = 0.8):
+    def __init__(self, tokens_per_minute: int = 20000, throttle_threshold: float = 0.8, min_request_interval: float = 2.5):
         """
         Initialize rate limiter
 
         Args:
-            tokens_per_minute: Max tokens per minute (default: 25000, under 30k limit)
+            tokens_per_minute: Max INPUT tokens per minute (default: 20000, 10k buffer under 30k limit)
             throttle_threshold: Throttle at N% of limit (default: 0.8 = 80%)
+            min_request_interval: Minimum seconds between requests (default: 2.5)
         """
         self.tokens_per_minute = tokens_per_minute
         self.throttle_threshold = throttle_threshold
-        self.tokens_used: List[Tuple[float, int]] = []  # List of (timestamp, token_count) tuples
+        self.min_request_interval = min_request_interval
+        self.tokens_used: List[Tuple[float, int]] = []  # List of (timestamp, INPUT_token_count) tuples
+        self.last_request_time: float = 0.0  # Track last request for pacing
 
     def add_usage(self, input_tokens: int, output_tokens: int) -> None:
-        """Record token usage with timestamp"""
+        """
+        Record INPUT token usage with timestamp
+
+        CRITICAL: Only input_tokens count against Anthropic's rate limit.
+        Output tokens are tracked separately and don't affect rate limiting.
+        """
         now = time.time()
-        total_tokens = input_tokens + output_tokens
-        self.tokens_used.append((now, total_tokens))
+        # BUG FIX #1: Only count INPUT tokens (output tokens don't count against limit)
+        self.tokens_used.append((now, input_tokens))
 
         # Clean up old entries (older than 60 seconds)
         cutoff = now - 60
         self.tokens_used = [(ts, tokens) for ts, tokens in self.tokens_used if ts > cutoff]
 
+        # Update last request time
+        self.last_request_time = now
+
     def get_current_usage(self) -> int:
-        """Get total tokens used in the last 60 seconds"""
+        """Get total INPUT tokens used in the last 60 seconds"""
+        now = time.time()
+        cutoff = now - 60
+        # Clean up stale entries
+        self.tokens_used = [(ts, tokens) for ts, tokens in self.tokens_used if ts > cutoff]
         return sum(tokens for _, tokens in self.tokens_used)
 
     def should_throttle(self) -> bool:
@@ -150,22 +166,66 @@ class RateLimiter:
         threshold = self.tokens_per_minute * self.throttle_threshold
         return current >= threshold
 
-    def wait_if_needed(self, logger_func) -> None:
-        """Wait if we're approaching rate limit"""
-        if self.should_throttle():
-            # Find oldest token usage
+    def estimate_next_request_tokens(self, conversation_turns: int) -> int:
+        """
+        Estimate token usage for next request based on conversation history growth
+
+        Conversation history grows roughly 200-400 tokens per turn.
+        Conservative estimate to prevent exceeding limits.
+        """
+        # Base prompt: ~500 tokens
+        # Each turn adds ~300 tokens average (tools, responses, etc.)
+        return 500 + (conversation_turns * 300)
+
+    def wait_if_needed(self, logger_func, conversation_turns: int = 0) -> None:
+        """
+        Wait if we're approaching rate limit OR need request pacing
+
+        BUG FIX #2: Add minimum request pacing
+        BUG FIX #4: Proactive throttling BEFORE request, not after
+        """
+        now = time.time()
+
+        # 1. Enforce minimum request interval (prevents bursts)
+        time_since_last = now - self.last_request_time
+        if self.last_request_time > 0 and time_since_last < self.min_request_interval:
+            wait_for_pacing = self.min_request_interval - time_since_last
+            logger_func(f"Request pacing: waiting {wait_for_pacing:.1f}s (min interval: {self.min_request_interval}s)")
+            time.sleep(wait_for_pacing)
+
+        # 2. Check if next request would exceed threshold (proactive)
+        current_usage = self.get_current_usage()
+        estimated_next = self.estimate_next_request_tokens(conversation_turns)
+        projected_usage = current_usage + estimated_next
+        threshold = self.tokens_per_minute * self.throttle_threshold
+
+        if projected_usage >= threshold:
+            # Wait for oldest tokens to age out of 60-second window
             if self.tokens_used:
                 oldest_time = self.tokens_used[0][0]
-                wait_time = 60 - (time.time() - oldest_time)
+                wait_time = 60 - (now - oldest_time) + 2  # +2s buffer
                 if wait_time > 0:
-                    current_usage = self.get_current_usage()
                     logger_func(
-                        f"Rate limit approaching ({current_usage}/{self.tokens_per_minute} tokens/min, "
-                        f"{current_usage/self.tokens_per_minute*100:.1f}%), waiting {wait_time:.1f}s"
+                        f"Rate limit PROACTIVE throttle (current: {current_usage}, "
+                        f"projected: {projected_usage}, threshold: {threshold:.0f} tokens/min) - "
+                        f"waiting {wait_time:.1f}s for window reset"
                     )
-                    time.sleep(wait_time + 1)  # Add 1s buffer
-                    # Clear the tracking window after waiting
-                    self.tokens_used = []
+                    time.sleep(wait_time)
+                    # Clean up old entries after wait
+                    now = time.time()
+                    cutoff = now - 60
+                    self.tokens_used = [(ts, tokens) for ts, tokens in self.tokens_used if ts > cutoff]
+
+        # 3. Double-check we're under threshold after waiting
+        current_usage = self.get_current_usage()
+        if current_usage >= threshold:
+            # Emergency wait - clear the entire window
+            logger_func(
+                f"EMERGENCY throttle: usage {current_usage}/{self.tokens_per_minute}, "
+                f"waiting 65s to fully reset window"
+            )
+            time.sleep(65)
+            self.tokens_used = []
 
 
 # ============================================================================
@@ -195,7 +255,8 @@ class AgentWorker:
         self.client = Anthropic(api_key=self.config.anthropic_api_key)
 
         # Rate limiting configuration
-        rate_limit_tpm = int(os.getenv("CLAUDE_RATE_LIMIT_TPM", "25000"))
+        # REDUCED from 25k to 20k for more safety buffer (30k org limit)
+        rate_limit_tpm = int(os.getenv("CLAUDE_RATE_LIMIT_TPM", "20000"))
         rate_limit_threshold = float(os.getenv("CLAUDE_RATE_LIMIT_THRESHOLD", "0.8"))
         self.rate_limit_retries = int(os.getenv("CLAUDE_RATE_LIMIT_RETRIES", "3"))
 
@@ -782,7 +843,8 @@ _This is an automated progress update. Updates are posted every 5 minutes._
         self,
         messages: List[Dict[str, Any]],
         tools: List[Dict[str, Any]],
-        max_tokens: int = 4096
+        max_tokens: int = 4096,
+        conversation_turns: int = 0
     ) -> Any:
         """
         Call Claude API with exponential backoff retry on rate limits
@@ -791,6 +853,7 @@ _This is an automated progress update. Updates are posted every 5 minutes._
             messages: Conversation messages
             tools: Available tools
             max_tokens: Max tokens in response
+            conversation_turns: Current turn number (for token estimation)
 
         Returns:
             API response
@@ -800,8 +863,8 @@ _This is an automated progress update. Updates are posted every 5 minutes._
         """
         for attempt in range(self.rate_limit_retries):
             try:
-                # Check rate limit before making call
-                self.rate_limiter.wait_if_needed(self.log)
+                # Check rate limit before making call (proactive throttling)
+                self.rate_limiter.wait_if_needed(self.log, conversation_turns=conversation_turns)
 
                 response = self.client.messages.create(
                     model="claude-sonnet-4-20250514",
@@ -819,22 +882,25 @@ _This is an automated progress update. Updates are posted every 5 minutes._
 
             except anthropic.RateLimitError as e:
                 if attempt < self.rate_limit_retries - 1:
-                    # Exponential backoff: 2^attempt * 5 seconds
-                    wait_time = (2 ** attempt) * 5
+                    # BUG FIX #5: Proper exponential backoff starting at 60s
+                    # Wait time: 60s, 120s, 240s (ensures full window reset)
+                    wait_time = 60 * (2 ** attempt)
                     current_usage = self.rate_limiter.get_current_usage()
                     self.log(
-                        f"Rate limit hit (current usage: {current_usage}/{self.rate_limiter.tokens_per_minute} tokens/min), "
-                        f"retrying in {wait_time}s (attempt {attempt+1}/{self.rate_limit_retries})",
+                        f"Rate limit 429 error (current usage: {current_usage}/{self.rate_limiter.tokens_per_minute} INPUT tokens/min), "
+                        f"waiting {wait_time}s for rate limit window to reset (attempt {attempt+1}/{self.rate_limit_retries})",
                         "WARNING"
                     )
                     time.sleep(wait_time)
+                    # Clear tracking after long wait
+                    self.rate_limiter.tokens_used = []
                 else:
                     # Last attempt failed
                     current_usage = self.rate_limiter.get_current_usage()
                     error_msg = (
                         f"Rate limit exceeded after {self.rate_limit_retries} retries. "
-                        f"Current usage: {current_usage}/{self.rate_limiter.tokens_per_minute} tokens/min. "
-                        f"Consider: 1) Reducing max_tokens, 2) Simplifying prompts, 3) Contact Anthropic for limit increase"
+                        f"Current usage: {current_usage}/{self.rate_limiter.tokens_per_minute} INPUT tokens/min. "
+                        f"Consider: 1) Reducing conversation turns (trim history), 2) Lower CLAUDE_RATE_LIMIT_TPM, 3) Contact Anthropic for limit increase"
                     )
                     self.log(error_msg, "ERROR")
                     raise RuntimeError(error_msg) from e
@@ -903,6 +969,15 @@ _This is an automated progress update. Updates are posted every 5 minutes._
                 # Check constraints
                 self.check_constraints()
 
+                # BUG FIX #3: Trim conversation history after 20 turns to prevent unbounded growth
+                # Keep: initial prompt + last 10 turns (20 messages)
+                if len(self.messages) > 21:  # 1 initial + 20 recent
+                    self.log(f"Trimming conversation history (was {len(self.messages)} messages)", "INFO")
+                    initial_prompt = self.messages[0]  # Keep the initial user prompt
+                    recent_messages = self.messages[-20:]  # Keep last 20 messages (10 turns)
+                    self.messages = [initial_prompt] + recent_messages
+                    self.log(f"Trimmed to {len(self.messages)} messages (initial + last 10 turns)", "INFO")
+
                 # Log rate limit status periodically (every 5 turns)
                 if turn % 5 == 0:
                     current_usage = self.rate_limiter.get_current_usage()
@@ -917,7 +992,8 @@ _This is an automated progress update. Updates are posted every 5 minutes._
                     response = self._call_claude_with_retry(
                         messages=self.messages,
                         tools=tools,
-                        max_tokens=4096
+                        max_tokens=4096,
+                        conversation_turns=turn
                     )
 
                     # Track API usage
@@ -1556,7 +1632,7 @@ def main():
         print("  CLAUDE_REQUIRE_TESTS (default: false)", file=sys.stderr)
         print("  CLAUDE_GITHUB_COMMENTS (default: true)", file=sys.stderr)
         print("  CLAUDE_LOG_API_CALLS (default: true)", file=sys.stderr)
-        print("  CLAUDE_RATE_LIMIT_TPM (default: 25000)", file=sys.stderr)
+        print("  CLAUDE_RATE_LIMIT_TPM (default: 20000)", file=sys.stderr)
         print("  CLAUDE_RATE_LIMIT_RETRIES (default: 3)", file=sys.stderr)
         print("  CLAUDE_RATE_LIMIT_THRESHOLD (default: 0.8)", file=sys.stderr)
         print("  TEST_RATE_LIMIT (default: false)", file=sys.stderr)

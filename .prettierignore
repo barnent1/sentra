@@ -1,0 +1,10 @@
+node_modules
+out
+.next
+coverage
+dist
+build
+*.lock
+*.log
+.tauri
+target

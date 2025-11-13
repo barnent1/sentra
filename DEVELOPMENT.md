@@ -58,7 +58,7 @@ Then open http://localhost:3000 in your browser.
 ### Configuration
 
 **Tech Stack:**
-- Next.js 14 (App Router)
+- Next.js 15.x (App Router)
 - TypeScript
 - Tailwind CSS
 - shadcn/ui components

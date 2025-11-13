@@ -68,7 +68,7 @@ Copy-paste test patterns for:
 - Common test utilities (providers, factories, MSW setup)
 
 **Tech stack covered:**
-- Next.js 14 (App Router)
+- Next.js 15.x (App Router)
 - React 18
 - TypeScript
 - Tauri

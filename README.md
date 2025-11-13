@@ -33,7 +33,7 @@ Sentra is a beautiful native Mac application that provides a visual interface fo
 
 **Framework:**
 - Tauri 2.x (Rust backend)
-- Next.js 14 (React frontend)
+- Next.js 15.x (React frontend)
 - shadcn/ui (Beautiful components)
 - Tailwind CSS (Styling)
 

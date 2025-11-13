@@ -80,9 +80,9 @@ echo ""
 # 3. Tests with Coverage
 # ============================================================================
 echo "→ [3/6] Running tests with coverage..."
-if [ -f "package.json" ] && grep -q "\"test\"" package.json; then
-    # Run tests with coverage
-    if npm test -- --coverage --passWithNoTests 2>&1 | tee /tmp/test.log; then
+if [ -f "package.json" ] && grep -q "\"test:coverage\"" package.json; then
+    # Run tests with coverage using Vitest
+    if npm run test:coverage 2>&1 | tee /tmp/test.log; then
         echo "   ✅ Tests passed"
 
         # Check coverage threshold
@@ -103,6 +103,9 @@ if [ -f "package.json" ] && grep -q "\"test\"" package.json; then
             else
                 echo "   ⊘  Coverage check skipped (jq not installed)"
             fi
+        else
+            echo "   ⚠️  No coverage report found" >&2
+            WARNINGS=$((WARNINGS + 1))
         fi
     else
         echo "   ❌ Tests FAILED" >&2
@@ -112,7 +115,7 @@ if [ -f "package.json" ] && grep -q "\"test\"" package.json; then
         FAILED=1
     fi
 else
-    echo "   ⊘  Skipped (no test script found)"
+    echo "   ⊘  Skipped (no test:coverage script found)"
 fi
 echo ""
 

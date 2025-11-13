@@ -1,0 +1,182 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: write  # For coverage comments
+
+jobs:
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript type check
+        run: npm run type-check
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Check coverage thresholds
+        run: |
+          # Extract coverage from coverage-summary.json
+          if [ -f "coverage/coverage-summary.json" ]; then
+            echo "📊 Coverage Report:"
+            cat coverage/coverage-summary.json | jq '.total'
+
+            # Check if meets 75% threshold
+            LINES=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+            echo "Line coverage: $LINES%"
+
+            if [ $(echo "$LINES < 75" | bc) -eq 1 ]; then
+              echo "❌ Coverage below 75% threshold (current: $LINES%)"
+              exit 1
+            fi
+
+            echo "✅ Coverage meets 75% threshold"
+          else
+            echo "⚠️  No coverage report found"
+            exit 1
+          fi
+
+      - name: Upload coverage to Codecov (optional)
+        if: always()
+        uses: codecov/codecov-action@v4
+        continue-on-error: true
+        with:
+          files: ./coverage/coverage-final.json
+          fail_ci_if_error: false
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        continue-on-error: true
+        with:
+          script: |
+            const fs = require('fs');
+
+            if (!fs.existsSync('coverage/coverage-summary.json')) {
+              return;
+            }
+
+            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'));
+            const total = coverage.total;
+
+            const comment = `## 📊 Test Coverage Report
+
+            | Metric | Percentage | Status |
+            |--------|------------|--------|
+            | Lines | ${total.lines.pct.toFixed(2)}% | ${total.lines.pct >= 75 ? '✅' : '❌'} |
+            | Branches | ${total.branches.pct.toFixed(2)}% | ${total.branches.pct >= 75 ? '✅' : '❌'} |
+            | Functions | ${total.functions.pct.toFixed(2)}% | ${total.functions.pct >= 75 ? '✅' : '❌'} |
+            | Statements | ${total.statements.pct.toFixed(2)}% | ${total.statements.pct >= 75 ? '✅' : '❌'} |
+
+            **Required Threshold:** 75% (Overall), 90% (Services/Utils)
+
+            ${total.lines.pct >= 75 ? '✅ Coverage meets requirements!' : '❌ Coverage below threshold'}
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+  e2e:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Upload E2E screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots
+          path: tests/e2e/screenshots/
+          retention-days: 7
+
+  build:
+    name: Build Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Check build output
+        run: |
+          if [ ! -d "out" ]; then
+            echo "❌ Build output directory 'out' not found"
+            exit 1
+          fi
+          echo "✅ Build successful"
