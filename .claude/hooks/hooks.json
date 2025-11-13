@@ -14,7 +14,7 @@
     },
     {
       "description": "Validate architectural patterns BEFORE code is written",
-      "matcher": "Write|Edit",
+      "matcher": "^(Write|Edit)$",
       "hooks": [
         {
           "type": "command",
@@ -27,7 +27,7 @@
   "PostToolUse": [
     {
       "description": "Verify all file changes - checks syntax, security, test modifications",
-      "matcher": "Write|Edit",
+      "matcher": "^(Write|Edit)$",
       "hooks": [
         {
           "type": "command",
