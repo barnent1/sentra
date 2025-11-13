@@ -43,6 +43,7 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
     } else {
       cleanupVoiceMode();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, projectName]);
 
   useEffect(() => {
@@ -444,7 +445,7 @@ Please provide a technical specification summarizing the requirements and implem
                       <>
                         <div className="text-green-400 text-xl font-medium mb-2">Listening...</div>
                         <p className="text-slate-400 text-sm max-w-md">
-                          Speak naturally. I'll detect when you stop automatically.
+                          Speak naturally. I&apos;ll detect when you stop automatically.
                         </p>
                       </>
                     )}

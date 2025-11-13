@@ -97,7 +97,7 @@ export default function Home() {
 
         <div className="sentra-card">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Today's Cost</span>
+            <span className="text-sm text-muted-foreground">Today&apos;s Cost</span>
             <DollarSign className="w-4 h-4 text-primary" />
           </div>
           <p className="text-3xl font-bold">${stats?.todayCost.toFixed(2) || '0.00'}</p>

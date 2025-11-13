@@ -18,7 +18,7 @@ Create the most natural way to interact with AI - through voice - while maintain
 
 **Frontend (Native Apps)**
 - Tauri 2.x (Rust backend, web frontend)
-- Next.js 15 (App Router, React Server Components)
+- Next.js 15.5 with React 19 (App Router, React Server Components)
 - TypeScript (strict mode)
 - TailwindCSS for styling
 
@@ -370,4 +370,4 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 
 ---
 
-*Last updated: 2025-11-12 by Glen Barnhardt with help from Claude Code*
+*Last updated: 2025-11-13 by Glen Barnhardt with help from Claude Code*

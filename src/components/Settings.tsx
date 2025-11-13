@@ -124,7 +124,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 className="w-full bg-slate-800 border border-violet-500/20 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50"
               />
               <p className="text-xs text-slate-500 mt-1">
-                Used in voice notifications: "Hey Glen, agent completed..."
+                Used in voice notifications: &quot;Hey Glen, agent completed...&quot;
               </p>
             </div>
 
