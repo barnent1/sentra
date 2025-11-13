@@ -34,3 +34,6 @@ next-env.d.ts
 
 # tauri
 /src-tauri/target
+
+# AI Agent runtime artifacts
+agent-output.json
