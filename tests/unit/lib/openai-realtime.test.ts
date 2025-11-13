@@ -73,9 +73,12 @@ global.AudioContext = MockAudioContext as any
 
 // Mock navigator.mediaDevices
 const mockGetUserMedia = vi.fn()
-global.navigator.mediaDevices = {
-  getUserMedia: mockGetUserMedia,
-} as any
+Object.defineProperty(global.navigator, 'mediaDevices', {
+  writable: true,
+  value: {
+    getUserMedia: mockGetUserMedia,
+  },
+})
 
 // Mock atob and btoa
 global.atob = (str: string) => Buffer.from(str, 'base64').toString('binary')

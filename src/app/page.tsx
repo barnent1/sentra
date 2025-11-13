@@ -1,21 +1,81 @@
 "use client";
 
 import { useState } from "react";
-import { Activity, Folder, DollarSign, TrendingUp, Loader2, Settings as SettingsIcon, UserCircle, Mic } from "lucide-react";
+import { Activity, Folder, DollarSign, TrendingUp, Loader2, Settings as SettingsIcon, UserCircle, Mic, FileText } from "lucide-react";
 import { useDashboard } from "@/hooks/useDashboard";
 import { Settings } from "@/components/Settings";
 import { ArchitectChat } from "@/components/ArchitectChat";
+import { SpecViewer } from "@/components/SpecViewer";
+import { approveSpec, rejectSpec, createGithubIssue, getSettings } from "@/lib/tauri";
 
 export default function Home() {
-  const { projects, agents, stats, loading } = useDashboard();
+  const { projects, agents, stats, loading, refetch } = useDashboard();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [architectChatOpen, setArchitectChatOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<{ name: string; path: string } | null>(null);
+  const [specViewerOpen, setSpecViewerOpen] = useState(false);
+  const [selectedSpec, setSelectedSpec] = useState<{ spec: string; name: string; path: string } | null>(null);
 
   const handleSpeakToArchitect = (project: { name: string; path: string }) => {
     console.log(`Starting voice conversation for project: ${project.name}`);
     setSelectedProject(project);
     setArchitectChatOpen(true);
+  };
+
+  const handleViewSpec = (project: { name: string; path: string; pendingSpec?: string }) => {
+    if (project.pendingSpec) {
+      setSelectedSpec({ spec: project.pendingSpec, name: project.name, path: project.path });
+      setSpecViewerOpen(true);
+    }
+  };
+
+  const handleApproveSpec = async () => {
+    if (!selectedSpec) return;
+
+    try {
+      console.log(`Approving spec for ${selectedSpec.name}`);
+
+      // Get settings for GitHub credentials
+      const settings = await getSettings();
+
+      if (!settings.githubToken || !settings.githubRepoOwner || !settings.githubRepoName) {
+        alert('GitHub credentials not configured. Please configure GitHub settings first.');
+        return;
+      }
+
+      // Create GitHub issue
+      const title = `[AI Feature] Spec for ${selectedSpec.name}`;
+      const issueUrl = await createGithubIssue(
+        settings.githubRepoOwner,
+        settings.githubRepoName,
+        title,
+        selectedSpec.spec,
+        settings.githubToken
+      );
+
+      console.log(`✅ GitHub issue created: ${issueUrl}`);
+
+      // Approve the spec (moves it to approved)
+      await approveSpec(selectedSpec.name, selectedSpec.path);
+
+      // Refresh the projects list
+      refetch();
+
+      alert(`Spec approved and GitHub issue created:\n${issueUrl}`);
+    } catch (error) {
+      console.error('Failed to approve spec:', error);
+      alert('Failed to approve spec and create GitHub issue. Please try again.');
+    }
+  };
+
+  const handleRejectSpec = async () => {
+    if (!selectedSpec) return;
+
+    console.log(`Rejecting spec for ${selectedSpec.name}`);
+    await rejectSpec(selectedSpec.name, selectedSpec.path);
+
+    // Refresh the projects list
+    refetch();
   };
 
   if (loading) {
@@ -68,10 +128,27 @@ export default function Home() {
       {/* Architect Chat Modal */}
       <ArchitectChat
         isOpen={architectChatOpen}
-        onClose={() => setArchitectChatOpen(false)}
+        onClose={() => {
+          setArchitectChatOpen(false);
+          // Refresh projects to pick up any new pending specs
+          refetch();
+        }}
         projectName={selectedProject?.name || ''}
         projectPath={selectedProject?.path}
       />
+
+      {/* Spec Viewer Modal */}
+      {selectedSpec && (
+        <SpecViewer
+          isOpen={specViewerOpen}
+          onClose={() => setSpecViewerOpen(false)}
+          spec={selectedSpec.spec}
+          projectName={selectedSpec.name}
+          projectPath={selectedSpec.path}
+          onApprove={handleApproveSpec}
+          onReject={handleRejectSpec}
+        />
+      )}
 
       {/* Stats Overview */}
       <div className="grid grid-cols-4 gap-4 mb-8">
@@ -193,6 +270,18 @@ export default function Home() {
                         </div>
                       </div>
                     </button>
+
+                    {/* View Spec Button - Only shown if pendingSpec exists */}
+                    {project.pendingSpec && (
+                      <button
+                        onClick={() => handleViewSpec(project)}
+                        className="group relative p-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 rounded-lg transition-all"
+                        title="View pending specification"
+                      >
+                        <FileText className="w-5 h-5 text-green-400 group-hover:text-green-300 transition-colors" />
+                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                      </button>
+                    )}
                   </div>
 
                   <span

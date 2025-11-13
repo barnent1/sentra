@@ -227,6 +227,9 @@ describe('tauri.ts', () => {
         voice: 'nova',
         openaiApiKey: 'sk-test',
         anthropicApiKey: 'sk-ant-test',
+        githubToken: 'ghp-test',
+        githubRepoOwner: 'testowner',
+        githubRepoName: 'testrepo',
         notificationsEnabled: true,
         notifyOnCompletion: true,
         notifyOnFailure: true,
@@ -247,6 +250,9 @@ describe('tauri.ts', () => {
         voice: 'nova',
         openaiApiKey: 'sk-test',
         anthropicApiKey: 'sk-ant-test',
+        githubToken: 'ghp-test',
+        githubRepoOwner: 'testowner',
+        githubRepoName: 'testrepo',
         notificationsEnabled: true,
         notifyOnCompletion: true,
         notifyOnFailure: true,
@@ -294,7 +300,7 @@ describe('tauri.ts', () => {
       // ARRANGE
       const projectName = 'test-project'
       const message = 'Hello, Architect'
-      const conversationHistory = []
+      const conversationHistory: Array<{ role: string; content: string }> = []
       const apiKey = 'sk-ant-test'
 
       // ACT

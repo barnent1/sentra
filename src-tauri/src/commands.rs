@@ -91,8 +91,8 @@ pub fn get_projects() -> Result<Vec<Project>, String> {
             let path = PathBuf::from(line.trim());
             path.file_name().and_then(|name| {
                 let project_name = name.to_string_lossy().to_string();
-                // Check if there's a pending spec
-                let spec_path = path.join(".claude/pending-spec.md");
+                // Check if there's a pending spec in .sentra/specs/
+                let spec_path = path.join(".sentra/specs/pending-spec.md");
                 let pending_spec = if spec_path.exists() {
                     fs::read_to_string(&spec_path).ok()
                 } else {
@@ -297,12 +297,12 @@ pub fn get_project_context(project_path: String) -> Result<String, String> {
 #[tauri::command]
 pub fn save_pending_spec(project_name: String, project_path: String, spec: String) -> Result<(), String> {
     let path = PathBuf::from(shellexpand::tilde(&project_path).to_string());
-    let claude_dir = path.join(".claude");
-    let spec_path = claude_dir.join("pending-spec.md");
+    let specs_dir = path.join(".sentra/specs");
+    let spec_path = specs_dir.join("pending-spec.md");
 
-    // Create .claude directory if it doesn't exist
-    fs::create_dir_all(&claude_dir)
-        .map_err(|e| format!("Failed to create .claude directory: {}", e))?;
+    // Create .sentra/specs directory if it doesn't exist
+    fs::create_dir_all(&specs_dir)
+        .map_err(|e| format!("Failed to create .sentra/specs directory: {}", e))?;
 
     // Write the spec
     fs::write(&spec_path, spec)
@@ -311,17 +311,25 @@ pub fn save_pending_spec(project_name: String, project_path: String, spec: Strin
     Ok(())
 }
 
-/// Approve a spec and remove pending status
+/// Approve a spec and archive it with timestamp
 #[tauri::command]
 pub fn approve_spec(project_name: String, project_path: String) -> Result<(), String> {
     let path = PathBuf::from(shellexpand::tilde(&project_path).to_string());
-    let spec_path = path.join(".claude/pending-spec.md");
-    let approved_path = path.join(".claude/approved-spec.md");
+    let spec_path = path.join(".sentra/specs/pending-spec.md");
+    let archive_dir = path.join(".sentra/specs/archive");
 
-    // Move pending spec to approved spec
+    // Create archive directory if it doesn't exist
+    fs::create_dir_all(&archive_dir)
+        .map_err(|e| format!("Failed to create archive directory: {}", e))?;
+
+    // Move pending spec to archive with timestamp
     if spec_path.exists() {
-        fs::rename(&spec_path, &approved_path)
-            .map_err(|e| format!("Failed to approve spec: {}", e))?;
+        // Generate timestamp
+        let timestamp = chrono::Local::now().format("%Y-%m-%d-%H-%M").to_string();
+        let archive_path = archive_dir.join(format!("{}.md", timestamp));
+
+        fs::rename(&spec_path, &archive_path)
+            .map_err(|e| format!("Failed to archive spec: {}", e))?;
     }
 
     Ok(())
@@ -331,7 +339,7 @@ pub fn approve_spec(project_name: String, project_path: String) -> Result<(), St
 #[tauri::command]
 pub fn reject_spec(project_name: String, project_path: String) -> Result<(), String> {
     let path = PathBuf::from(shellexpand::tilde(&project_path).to_string());
-    let spec_path = path.join(".claude/pending-spec.md");
+    let spec_path = path.join(".sentra/specs/pending-spec.md");
 
     // Delete pending spec
     if spec_path.exists() {
@@ -340,4 +348,66 @@ pub fn reject_spec(project_name: String, project_path: String) -> Result<(), Str
     }
 
     Ok(())
+}
+
+/// Create a GitHub issue from a spec
+#[tauri::command]
+pub async fn create_github_issue(
+    repo_owner: String,
+    repo_name: String,
+    title: String,
+    body: String,
+    github_token: String,
+) -> Result<String, String> {
+    use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT, ACCEPT};
+
+    let client = reqwest::Client::new();
+    let url = format!("https://api.github.com/repos/{}/{}/issues", repo_owner, repo_name);
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        AUTHORIZATION,
+        HeaderValue::from_str(&format!("Bearer {}", github_token))
+            .map_err(|e| format!("Invalid token: {}", e))?,
+    );
+    headers.insert(
+        USER_AGENT,
+        HeaderValue::from_static("Sentra-AI-Agent"),
+    );
+    headers.insert(
+        ACCEPT,
+        HeaderValue::from_static("application/vnd.github.v3+json"),
+    );
+
+    let payload = serde_json::json!({
+        "title": title,
+        "body": body,
+        "labels": ["ai-feature"]
+    });
+
+    let response = client
+        .post(&url)
+        .headers(headers)
+        .json(&payload)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to create issue: {}", e))?;
+
+    if !response.status().is_success() {
+        let status = response.status();
+        let error_text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
+        return Err(format!("GitHub API error ({}): {}", status, error_text));
+    }
+
+    let issue_data: serde_json::Value = response
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse response: {}", e))?;
+
+    let issue_url = issue_data["html_url"]
+        .as_str()
+        .unwrap_or("")
+        .to_string();
+
+    Ok(issue_url)
 }

@@ -58,6 +58,7 @@ pub fn run() {
       commands::save_pending_spec,
       commands::approve_spec,
       commands::reject_spec,
+      commands::create_github_issue,
       settings::get_settings,
       settings::save_settings,
       settings::speak_notification,

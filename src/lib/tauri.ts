@@ -62,6 +62,9 @@ export interface Settings {
   voice: string;
   openaiApiKey: string;
   anthropicApiKey: string;
+  githubToken: string;
+  githubRepoOwner: string;
+  githubRepoName: string;
   notificationsEnabled: boolean;
   notifyOnCompletion: boolean;
   notifyOnFailure: boolean;
@@ -287,6 +290,9 @@ export async function getSettings(): Promise<Settings> {
       voice: 'nova',
       openaiApiKey: '',
       anthropicApiKey: '',
+      githubToken: '',
+      githubRepoOwner: '',
+      githubRepoName: '',
       notificationsEnabled: true,
       notifyOnCompletion: true,
       notifyOnFailure: true,
@@ -301,6 +307,9 @@ export async function getSettings(): Promise<Settings> {
       voice: 'nova',
       openaiApiKey: '',
       anthropicApiKey: '',
+      githubToken: '',
+      githubRepoOwner: '',
+      githubRepoName: '',
       notificationsEnabled: true,
       notifyOnCompletion: true,
       notifyOnFailure: true,
@@ -519,6 +528,41 @@ export async function rejectSpec(projectName: string, projectPath: string): Prom
     await tauriInvoke('reject_spec', { projectName, projectPath });
   } catch (error) {
     console.error('Failed to reject spec:', error);
+    throw error;
+  }
+}
+
+/**
+ * Create a GitHub issue from a spec
+ */
+export async function createGithubIssue(
+  repoOwner: string,
+  repoName: string,
+  title: string,
+  body: string,
+  githubToken: string
+): Promise<string> {
+  if (MOCK_MODE) {
+    console.log(`[Mock] Creating GitHub issue in ${repoOwner}/${repoName}: ${title}`);
+    return 'https://github.com/example/repo/issues/123';
+  }
+
+  if (!tauriInvoke) {
+    console.warn('Tauri not initialized yet');
+    throw new Error('Tauri not initialized');
+  }
+
+  try {
+    const issueUrl = await tauriInvoke('create_github_issue', {
+      repoOwner,
+      repoName,
+      title,
+      body,
+      githubToken,
+    });
+    return issueUrl as string;
+  } catch (error) {
+    console.error('Failed to create GitHub issue:', error);
     throw error;
   }
 }

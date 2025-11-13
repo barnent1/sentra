@@ -31,3 +31,4 @@ tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = { version = "0.21", features = ["native-tls"] }
 futures-util = "0.3"
 shellexpand = "3.1"
+chrono = "0.4"

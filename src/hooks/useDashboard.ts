@@ -15,6 +15,28 @@ export function useDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  async function fetchData() {
+    try {
+      // Fetch data
+      const [projectsData, agentsData, statsData] = await Promise.all([
+        getProjects(),
+        getActiveAgents(),
+        getDashboardStats(),
+      ]);
+
+      setProjects(projectsData);
+      setAgents(agentsData);
+      setStats(statsData);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data');
+    }
+  }
+
+  const refetch = async () => {
+    await fetchData();
+  };
+
   useEffect(() => {
     let unlistenProjects: (() => void) | null = null;
     let unlistenAgents: (() => void) | null = null;
@@ -25,16 +47,7 @@ export function useDashboard() {
         setLoading(true);
 
         // Initial data fetch
-        const [projectsData, agentsData, statsData] = await Promise.all([
-          getProjects(),
-          getActiveAgents(),
-          getDashboardStats(),
-        ]);
-
-        setProjects(projectsData);
-        setAgents(agentsData);
-        setStats(statsData);
-        setError(null);
+        await fetchData();
         setLoading(false);
 
         // Only set up event listeners in Tauri environment
@@ -75,5 +88,5 @@ export function useDashboard() {
     };
   }, []);
 
-  return { projects, agents, stats, loading, error };
+  return { projects, agents, stats, loading, error, refetch };
 }

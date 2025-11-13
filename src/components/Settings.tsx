@@ -24,6 +24,9 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
     voice: 'nova',
     openaiApiKey: '',
     anthropicApiKey: '',
+    githubToken: '',
+    githubRepoOwner: '',
+    githubRepoName: '',
     notificationsEnabled: true,
     notifyOnCompletion: true,
     notifyOnFailure: true,
@@ -176,6 +179,59 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                   console.anthropic.com
                 </a>
               </p>
+            </div>
+
+            {/* GitHub Token */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                GitHub Personal Access Token
+              </label>
+              <input
+                type="password"
+                value={settings.githubToken}
+                onChange={(e) => setSettings({ ...settings, githubToken: e.target.value })}
+                placeholder="ghp_..."
+                className="w-full bg-slate-800 border border-violet-500/20 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50 font-mono text-sm"
+              />
+              <p className="text-xs text-slate-500 mt-1">
+                For creating GitHub issues from approved specs. Needs &apos;repo&apos; scope. Get one at{' '}
+                <a
+                  href="https://github.com/settings/tokens"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-violet-400 hover:text-violet-300"
+                >
+                  github.com/settings/tokens
+                </a>
+              </p>
+            </div>
+
+            {/* GitHub Repo */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  GitHub Repo Owner
+                </label>
+                <input
+                  type="text"
+                  value={settings.githubRepoOwner}
+                  onChange={(e) => setSettings({ ...settings, githubRepoOwner: e.target.value })}
+                  placeholder="barnent1"
+                  className="w-full bg-slate-800 border border-violet-500/20 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">
+                  GitHub Repo Name
+                </label>
+                <input
+                  type="text"
+                  value={settings.githubRepoName}
+                  onChange={(e) => setSettings({ ...settings, githubRepoName: e.target.value })}
+                  placeholder="sentra"
+                  className="w-full bg-slate-800 border border-violet-500/20 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50"
+                />
+              </div>
             </div>
 
             {/* Voice Selection */}
