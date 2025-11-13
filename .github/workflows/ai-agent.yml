@@ -39,6 +39,11 @@ jobs:
         --read-only
         --tmpfs /tmp:exec,mode=1777
         --tmpfs /home/claude-agent:exec,mode=0755
+        --memory=2g
+        --memory-swap=2g
+        --cpus=2
+        --pids-limit=100
+        --oom-kill-disable=false
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
