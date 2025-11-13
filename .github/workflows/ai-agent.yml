@@ -168,8 +168,23 @@ jobs:
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          BODY="✅ AI agent completed this task successfully!\n\nA pull request should be created shortly. Please review the changes and merge when ready.\n\nView [workflow logs]($WORKFLOW_URL) for details."
-          gh issue comment "$ISSUE_NUMBER" --body "$BODY"
+
+          # Parse the agent output to get PR URL (if created)
+          # Note: agent already posts comment with PR URL in Phase 8, so this is just a backup
+          if [ -f agent-output.json ]; then
+            PR_URL=$(grep -o '"pr_url": "[^"]*"' agent-output.json | cut -d'"' -f4 | tail -1)
+
+            if [ -n "$PR_URL" ] && [ "$PR_URL" != "null" ]; then
+              echo "PR was created successfully: $PR_URL"
+              # Agent already posted comment with PR URL, so we don't need to duplicate
+            else
+              echo "PR creation may have failed - check agent logs"
+              BODY="✅ AI agent completed this task!\n\n⚠️ Note: Pull request creation encountered an issue. The changes have been pushed to the branch, but you may need to create the PR manually.\n\nView [workflow logs]($WORKFLOW_URL) for details."
+              gh issue comment "$ISSUE_NUMBER" --body "$BODY"
+            fi
+          else
+            echo "Could not find agent output file"
+          fi
 
       - name: Report failure
         if: failure()
