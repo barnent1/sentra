@@ -6,7 +6,7 @@ import { useDashboard } from "@/hooks/useDashboard";
 import { Settings } from "@/components/Settings";
 import { ArchitectChat } from "@/components/ArchitectChat";
 import { SpecViewer } from "@/components/SpecViewer";
-import { approveSpec, rejectSpec, createGithubIssue, getSettings } from "@/lib/tauri";
+import { createGithubIssue, approveSpecVersion, type SpecInfo } from "@/lib/tauri";
 
 export default function Home() {
   const { projects, agents, stats, loading, refetch } = useDashboard();
@@ -14,7 +14,7 @@ export default function Home() {
   const [architectChatOpen, setArchitectChatOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<{ name: string; path: string } | null>(null);
   const [specViewerOpen, setSpecViewerOpen] = useState(false);
-  const [selectedSpec, setSelectedSpec] = useState<{ spec: string; name: string; path: string } | null>(null);
+  const [selectedSpec, setSelectedSpec] = useState<{ spec: string; specInfo?: SpecInfo; name: string; path: string } | null>(null);
 
   const handleSpeakToArchitect = (project: { name: string; path: string }) => {
     console.log(`Starting voice conversation for project: ${project.name}`);
@@ -22,41 +22,64 @@ export default function Home() {
     setArchitectChatOpen(true);
   };
 
-  const handleViewSpec = (project: { name: string; path: string; pendingSpec?: string }) => {
-    if (project.pendingSpec) {
-      setSelectedSpec({ spec: project.pendingSpec, name: project.name, path: project.path });
-      setSpecViewerOpen(true);
+  const handleViewSpec = async (project: { name: string; path: string; specs?: SpecInfo[] }) => {
+    // Find the first unapproved spec (pending spec)
+    const pendingSpec = project.specs?.find(spec => !spec.isApproved);
+
+    if (pendingSpec) {
+      try {
+        const { listSpecs, getSpec } = await import('@/lib/tauri');
+
+        // Get the full spec content and metadata
+        const { content, info } = await getSpec(
+          project.name,
+          project.path,
+          pendingSpec.id
+        );
+
+        setSelectedSpec({
+          spec: content,
+          specInfo: info,
+          name: project.name,
+          path: project.path
+        });
+        setSpecViewerOpen(true);
+      } catch (error) {
+        console.error('Failed to load spec:', error);
+        alert('Failed to load specification. Please try again.');
+      }
     }
   };
 
   const handleApproveSpec = async () => {
-    if (!selectedSpec) return;
+    if (!selectedSpec || !selectedSpec.specInfo) return;
 
     try {
       console.log(`Approving spec for ${selectedSpec.name}`);
 
-      // Get settings for GitHub credentials
-      const settings = await getSettings();
-
-      if (!settings.githubToken || !settings.githubRepoOwner || !settings.githubRepoName) {
-        alert('GitHub credentials not configured. Please configure GitHub settings first.');
-        return;
-      }
-
-      // Create GitHub issue
-      const title = `[AI Feature] Spec for ${selectedSpec.name}`;
+      // Create GitHub issue using gh CLI
+      const title = `[AI Feature] ${selectedSpec.specInfo.title}`;
+      const body = `${selectedSpec.spec}\n\n---\nSpec file: ${selectedSpec.specInfo.filePath}`;
       const issueUrl = await createGithubIssue(
-        settings.githubRepoOwner,
-        settings.githubRepoName,
         title,
-        selectedSpec.spec,
-        settings.githubToken
+        body,
+        ['ai-feature']
       );
 
       console.log(`✅ GitHub issue created: ${issueUrl}`);
 
-      // Approve the spec (moves it to approved)
-      await approveSpec(selectedSpec.name, selectedSpec.path);
+      // Approve the spec version (new versioning system)
+      const versionFile = selectedSpec.specInfo.filePath.split('/').pop() || '';
+      await approveSpecVersion(
+        selectedSpec.name,
+        selectedSpec.path,
+        selectedSpec.specInfo.id,
+        versionFile,
+        issueUrl
+      );
+
+      // Close the modal
+      setSpecViewerOpen(false);
 
       // Refresh the projects list
       refetch();
@@ -69,13 +92,33 @@ export default function Home() {
   };
 
   const handleRejectSpec = async () => {
-    if (!selectedSpec) return;
+    if (!selectedSpec || !selectedSpec.specInfo) return;
 
-    console.log(`Rejecting spec for ${selectedSpec.name}`);
-    await rejectSpec(selectedSpec.name, selectedSpec.path);
+    try {
+      console.log(`Rejecting spec for ${selectedSpec.name}`);
 
-    // Refresh the projects list
-    refetch();
+      // Delete the spec (or specific version)
+      const { deleteSpec } = await import('@/lib/tauri');
+      const versionFile = selectedSpec.specInfo.filePath.split('/').pop() || '';
+
+      await deleteSpec(
+        selectedSpec.name,
+        selectedSpec.path,
+        selectedSpec.specInfo.id,
+        versionFile
+      );
+
+      // Close the modal
+      setSpecViewerOpen(false);
+
+      // Refresh the projects list
+      refetch();
+
+      alert('Specification rejected and deleted.');
+    } catch (error) {
+      console.error('Failed to reject spec:', error);
+      alert('Failed to reject specification. Please try again.');
+    }
   };
 
   if (loading) {
@@ -143,6 +186,7 @@ export default function Home() {
           isOpen={specViewerOpen}
           onClose={() => setSpecViewerOpen(false)}
           spec={selectedSpec.spec}
+          specInfo={selectedSpec.specInfo}
           projectName={selectedSpec.name}
           projectPath={selectedSpec.path}
           onApprove={handleApproveSpec}
@@ -271,8 +315,8 @@ export default function Home() {
                       </div>
                     </button>
 
-                    {/* View Spec Button - Only shown if pendingSpec exists */}
-                    {project.pendingSpec && (
+                    {/* View Spec Button - Only shown if there are unapproved specs */}
+                    {project.specs && project.specs.some(spec => !spec.isApproved) && (
                       <button
                         onClick={() => handleViewSpec(project)}
                         className="group relative p-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 rounded-lg transition-all"

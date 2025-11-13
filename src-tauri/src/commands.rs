@@ -361,64 +361,46 @@ pub fn reject_spec(project_name: String, project_path: String) -> Result<(), Str
     Ok(())
 }
 
-/// Create a GitHub issue from a spec
+/// Create a GitHub issue from a spec using gh CLI
 #[tauri::command]
-pub async fn create_github_issue(
-    repo_owner: String,
-    repo_name: String,
-    title: String,
-    body: String,
-    github_token: String,
+pub fn create_github_issue(
+    spec_title: String,
+    spec_body: String,
+    labels: Vec<String>,
 ) -> Result<String, String> {
-    use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT, ACCEPT};
+    use std::process::Command;
 
-    let client = reqwest::Client::new();
-    let url = format!("https://api.github.com/repos/{}/{}/issues", repo_owner, repo_name);
+    // Build the labels argument
+    let labels_arg = labels.join(",");
 
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        AUTHORIZATION,
-        HeaderValue::from_str(&format!("Bearer {}", github_token))
-            .map_err(|e| format!("Invalid token: {}", e))?,
-    );
-    headers.insert(
-        USER_AGENT,
-        HeaderValue::from_static("Sentra-AI-Agent"),
-    );
-    headers.insert(
-        ACCEPT,
-        HeaderValue::from_static("application/vnd.github.v3+json"),
-    );
+    // Create the issue using gh CLI
+    let output = Command::new("gh")
+        .args(&[
+            "issue",
+            "create",
+            "--title",
+            &spec_title,
+            "--body",
+            &spec_body,
+            "--label",
+            &labels_arg,
+        ])
+        .output()
+        .map_err(|e| format!("Failed to execute gh command: {}. Make sure gh CLI is installed and authenticated.", e))?;
 
-    let payload = serde_json::json!({
-        "title": title,
-        "body": body,
-        "labels": ["ai-feature"]
-    });
-
-    let response = client
-        .post(&url)
-        .headers(headers)
-        .json(&payload)
-        .send()
-        .await
-        .map_err(|e| format!("Failed to create issue: {}", e))?;
-
-    if !response.status().is_success() {
-        let status = response.status();
-        let error_text = response.text().await.unwrap_or_else(|_| "Unknown error".to_string());
-        return Err(format!("GitHub API error ({}): {}", status, error_text));
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("gh issue create failed: {}", stderr));
     }
 
-    let issue_data: serde_json::Value = response
-        .json()
-        .await
-        .map_err(|e| format!("Failed to parse response: {}", e))?;
-
-    let issue_url = issue_data["html_url"]
-        .as_str()
-        .unwrap_or("")
+    // gh issue create returns the issue URL
+    let issue_url = String::from_utf8_lossy(&output.stdout)
+        .trim()
         .to_string();
+
+    if issue_url.is_empty() {
+        return Err("gh command succeeded but returned no URL".to_string());
+    }
 
     Ok(issue_url)
 }

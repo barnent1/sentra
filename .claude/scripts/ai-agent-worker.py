@@ -661,25 +661,309 @@ _This is an automated progress update. Updates are posted every 5 minutes._
         return "\n".join(prompt_parts)
 
 
+    def define_tools(self) -> List[Dict[str, Any]]:
+        """
+        Define tools available to Claude agent
+
+        Returns list of tool definitions in Anthropic format
+        """
+        return [
+            {
+                "name": "bash",
+                "description": "Execute shell commands. Use for git operations, running builds/tests, etc.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "The shell command to execute"
+                        }
+                    },
+                    "required": ["command"]
+                }
+            },
+            {
+                "name": "read_file",
+                "description": "Read contents of a file",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Absolute or relative path to the file"
+                        }
+                    },
+                    "required": ["file_path"]
+                }
+            },
+            {
+                "name": "write_file",
+                "description": "Create or overwrite a file with new contents",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Absolute or relative path to the file"
+                        },
+                        "content": {
+                            "type": "string",
+                            "description": "Full content to write to the file"
+                        }
+                    },
+                    "required": ["file_path", "content"]
+                }
+            },
+            {
+                "name": "edit_file",
+                "description": "Make precise edits to an existing file using find/replace",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Absolute or relative path to the file"
+                        },
+                        "old_string": {
+                            "type": "string",
+                            "description": "Exact string to find and replace (must be unique in file)"
+                        },
+                        "new_string": {
+                            "type": "string",
+                            "description": "New string to replace with"
+                        }
+                    },
+                    "required": ["file_path", "old_string", "new_string"]
+                }
+            },
+            {
+                "name": "glob",
+                "description": "Find files matching a glob pattern (e.g., '**/*.py', 'src/**/*.ts')",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "pattern": {
+                            "type": "string",
+                            "description": "Glob pattern to match files"
+                        },
+                        "path": {
+                            "type": "string",
+                            "description": "Directory to search in (default: current directory)"
+                        }
+                    },
+                    "required": ["pattern"]
+                }
+            },
+            {
+                "name": "grep",
+                "description": "Search file contents using ripgrep (fast regex search)",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "pattern": {
+                            "type": "string",
+                            "description": "Regex pattern to search for"
+                        },
+                        "path": {
+                            "type": "string",
+                            "description": "File or directory to search in (default: current directory)"
+                        },
+                        "case_insensitive": {
+                            "type": "boolean",
+                            "description": "Case-insensitive search (default: false)"
+                        }
+                    },
+                    "required": ["pattern"]
+                }
+            }
+        ]
+
+    def execute_tool(self, tool_name: str, tool_input: Dict[str, Any]) -> str:
+        """
+        Execute a tool and return the result
+
+        Args:
+            tool_name: Name of tool to execute
+            tool_input: Input parameters for the tool
+
+        Returns:
+            Tool execution result as string
+        """
+        self.log(f"Executing tool: {tool_name}")
+
+        try:
+            if tool_name == "bash":
+                # Execute shell command
+                command = tool_input["command"]
+                self.log(f"Running: {command}")
+
+                result = subprocess.run(
+                    command,
+                    shell=True,
+                    cwd=self.repo_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=300  # 5 minute timeout
+                )
+
+                output = f"Exit code: {result.returncode}\n"
+                if result.stdout:
+                    output += f"STDOUT:\n{result.stdout}\n"
+                if result.stderr:
+                    output += f"STDERR:\n{result.stderr}\n"
+
+                return output
+
+            elif tool_name == "read_file":
+                # Read file contents
+                file_path = Path(self.repo_path) / tool_input["file_path"]
+
+                if not file_path.exists():
+                    return f"Error: File not found: {file_path}"
+
+                if not file_path.is_file():
+                    return f"Error: Not a file: {file_path}"
+
+                content = file_path.read_text()
+                return content
+
+            elif tool_name == "write_file":
+                # Write file (create or overwrite)
+                file_path = Path(self.repo_path) / tool_input["file_path"]
+                content = tool_input["content"]
+
+                # Create parent directories if needed
+                file_path.parent.mkdir(parents=True, exist_ok=True)
+
+                # Write file
+                file_path.write_text(content)
+
+                # Track file change
+                self.files_changed.add(str(file_path.relative_to(self.repo_path)))
+
+                return f"Successfully wrote {len(content)} characters to {file_path}"
+
+            elif tool_name == "edit_file":
+                # Edit file using find/replace
+                file_path = Path(self.repo_path) / tool_input["file_path"]
+                old_string = tool_input["old_string"]
+                new_string = tool_input["new_string"]
+
+                if not file_path.exists():
+                    return f"Error: File not found: {file_path}"
+
+                content = file_path.read_text()
+
+                # Check if old_string exists
+                if old_string not in content:
+                    return f"Error: String not found in file:\n{old_string[:100]}"
+
+                # Check if old_string is unique
+                if content.count(old_string) > 1:
+                    return f"Error: String appears {content.count(old_string)} times in file (must be unique)"
+
+                # Perform replacement
+                new_content = content.replace(old_string, new_string)
+                file_path.write_text(new_content)
+
+                # Track file change
+                self.files_changed.add(str(file_path.relative_to(self.repo_path)))
+
+                return f"Successfully edited {file_path}"
+
+            elif tool_name == "glob":
+                # Find files by pattern
+                pattern = tool_input["pattern"]
+                search_path = tool_input.get("path", ".")
+                full_path = Path(self.repo_path) / search_path
+
+                matches = list(full_path.glob(pattern))
+
+                if not matches:
+                    return f"No files found matching pattern: {pattern}"
+
+                # Return relative paths
+                relative_matches = [str(m.relative_to(self.repo_path)) for m in matches]
+                return "\n".join(relative_matches)
+
+            elif tool_name == "grep":
+                # Search file contents using ripgrep
+                pattern = tool_input["pattern"]
+                search_path = tool_input.get("path", ".")
+                case_insensitive = tool_input.get("case_insensitive", False)
+
+                # Build ripgrep command
+                cmd = ["rg", "--json", pattern]
+
+                if case_insensitive:
+                    cmd.append("-i")
+
+                cmd.append(search_path)
+
+                result = subprocess.run(
+                    cmd,
+                    cwd=self.repo_path,
+                    capture_output=True,
+                    text=True,
+                    timeout=60
+                )
+
+                if result.returncode == 1:
+                    return f"No matches found for pattern: {pattern}"
+
+                if result.returncode > 1:
+                    return f"Error running ripgrep: {result.stderr}"
+
+                # Parse JSON output
+                matches = []
+                for line in result.stdout.strip().split("\n"):
+                    if not line:
+                        continue
+                    try:
+                        data = json.loads(line)
+                        if data["type"] == "match":
+                            match_data = data["data"]
+                            file_path = match_data["path"]["text"]
+                            line_number = match_data["line_number"]
+                            line_text = match_data["lines"]["text"].strip()
+                            matches.append(f"{file_path}:{line_number}: {line_text}")
+                    except (json.JSONDecodeError, KeyError):
+                        continue
+
+                if not matches:
+                    return f"No matches found for pattern: {pattern}"
+
+                return "\n".join(matches[:50])  # Limit to first 50 matches
+
+            else:
+                return f"Error: Unknown tool: {tool_name}"
+
+        except subprocess.TimeoutExpired:
+            return f"Error: Tool execution timed out"
+        except Exception as e:
+            return f"Error executing tool: {str(e)}"
+
     def execute_claude_code(
         self,
         prompt: str,
         timeout: Optional[int] = None
     ) -> Tuple[int, str, str]:
         """
-        Execute Claude using Claude Code CLI
+        Execute Claude using Anthropic Python SDK with tool calling
 
-        This uses the native Claude Code CLI installed in the container,
-        which provides better tool integration and error handling than
-        the raw Anthropic SDK.
+        This uses the Anthropic Messages API with tools to implement
+        an agentic workflow where Claude can:
+        - Read, write, and edit files
+        - Execute bash commands
+        - Search the codebase (glob, grep)
 
         Returns:
-            (returncode, stdout, stderr)
+            (returncode, stdout, stderr) for compatibility
         """
         if timeout is None:
             timeout = self.config.max_execution_time
 
-        self.log("Executing Claude Code CLI...")
+        self.log("Executing Claude via Anthropic SDK...")
         self.log_structured("claude_execution_start", {
             "prompt_length": len(prompt),
             "timeout": timeout
@@ -690,95 +974,130 @@ _This is an automated progress update. Updates are posted every 5 minutes._
         prompt_file.write_text(prompt)
         self.log(f"Prompt written to: {prompt_file}")
 
+        # Initialize conversation
+        messages = [{"role": "user", "content": prompt}]
+        tools = self.define_tools()
+        max_turns = 50
+        conversation_log = []
+
+        start_time = time.time()
+
         try:
-            # Build Claude Code CLI command
-            # Format: claude -p "prompt" --permission-mode acceptEdits --allowedTools "tool1(*) tool2(*)"
-            #
-            # Permission mode "acceptEdits" allows Claude to make file changes automatically
-            # Allowed tools give Claude access to:
-            # - Bash: Execute commands (git, build, test, etc.)
-            # - Read: Read files from the codebase
-            # - Edit: Make precise edits to existing files
-            # - Write: Create new files
-            # - Glob: Search for files by pattern
-            # - Grep: Search file contents
-            claude_cmd = [
-                "claude",
-                "-p", prompt,
-                "--permission-mode", "acceptEdits",
-                "--allowedTools", "Bash(*) Read(*) Edit(*) Write(*) Glob(*) Grep(*)"
-            ]
+            for turn in range(max_turns):
+                # Check timeout
+                if time.time() - start_time > timeout:
+                    raise RuntimeError(f"Execution exceeded {timeout}s timeout")
 
-            self.log(f"Running: claude -p <prompt> --permission-mode acceptEdits --allowedTools ...")
+                # Check constraints
+                self.check_constraints()
 
-            # Execute Claude Code CLI
-            # Important: Pass ANTHROPIC_API_KEY via environment
-            env = os.environ.copy()
-            env["ANTHROPIC_API_KEY"] = self.config.anthropic_api_key
+                # Wait if needed for rate limiting
+                self.rate_limiter.wait_if_needed(self.log, conversation_turns=len(messages))
 
-            # Disable auto-updater and telemetry in containerized environment
-            env["DISABLE_AUTOUPDATER"] = "true"
-            env["DISABLE_TELEMETRY"] = "true"
+                # Make API call
+                self.log(f"Turn {turn + 1}/{max_turns}: Calling Claude API...")
 
-            result = subprocess.run(
-                claude_cmd,
-                cwd=self.repo_path,
-                capture_output=True,
-                text=True,
-                timeout=timeout,
-                env=env
-            )
+                response = self.anthropic.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=8192,
+                    messages=messages,
+                    tools=tools
+                )
 
-            # Log output
-            if result.stdout:
-                self.log(f"Claude output:\n{result.stdout[:500]}")
+                # Track API usage
+                input_tokens = response.usage.input_tokens
+                output_tokens = response.usage.output_tokens
+                self.rate_limiter.add_usage(input_tokens, output_tokens)
 
-            if result.stderr:
-                self.log(f"Claude stderr:\n{result.stderr[:500]}", "WARNING" if result.returncode == 0 else "ERROR")
+                # Calculate cost (Claude Sonnet 4: $3/MTok input, $15/MTok output)
+                cost = (input_tokens * 3 / 1_000_000) + (output_tokens * 15 / 1_000_000)
+                self.estimated_cost += cost
+                self.api_calls += 1
 
-            # Track API usage (approximate from output)
-            # Claude Code CLI doesn't provide detailed token counts, so we estimate
-            # based on prompt length and output length
-            estimated_input_tokens = len(prompt) // 4  # Rough estimate: 4 chars per token
-            estimated_output_tokens = len(result.stdout) // 4
+                self.log(f"Turn {turn + 1}: {input_tokens} in, {output_tokens} out, ${cost:.4f}")
 
-            # Track for rate limiting (approximate)
-            self.rate_limiter.add_usage(estimated_input_tokens, estimated_output_tokens)
+                # Log response content
+                for block in response.content:
+                    if isinstance(block, TextBlock):
+                        text = block.text
+                        conversation_log.append(f"[Assistant]: {text}")
+                        self.log(f"Claude: {text[:200]}")
 
-            # Estimate cost
-            cost = (estimated_input_tokens * 3 / 1_000_000) + (estimated_output_tokens * 15 / 1_000_000)
-            self.estimated_cost += cost
-            self.api_calls += 1
+                # Check stop reason
+                if response.stop_reason == "end_turn":
+                    # Claude is done
+                    self.log("Claude finished (end_turn)")
 
-            self.log(f"Estimated: {estimated_input_tokens} in, {estimated_output_tokens} out, ${cost:.4f}")
+                    # Collect all text output
+                    output_text = "\n".join([
+                        block.text for block in response.content
+                        if isinstance(block, TextBlock)
+                    ])
 
-            self.log_structured("claude_execution_complete", {
-                "returncode": result.returncode,
-                "api_calls": self.api_calls,
-                "cost": self.estimated_cost,
-                "stdout_length": len(result.stdout),
-                "stderr_length": len(result.stderr)
-            })
+                    conversation_file = self.telemetry_dir / f"conversation-{self.issue_number}.txt"
+                    conversation_file.write_text("\n".join(conversation_log))
 
-            return (result.returncode, result.stdout, result.stderr)
+                    return (0, output_text, "")
 
-        except subprocess.TimeoutExpired:
-            error_msg = f"Claude Code execution exceeded {timeout}s timeout"
-            self.log(error_msg, "ERROR")
-            raise RuntimeError(error_msg)
+                elif response.stop_reason == "tool_use":
+                    # Claude wants to use tools
+                    self.log(f"Claude requesting tool use")
 
-        except FileNotFoundError:
-            error_msg = (
-                "Claude Code CLI not found. Ensure 'claude' is installed and in PATH. "
-                "Installation: curl -fsSL https://claude.ai/install.sh | bash"
-            )
-            self.log(error_msg, "ERROR")
-            raise RuntimeError(error_msg)
+                    # Add assistant message to conversation
+                    messages.append({"role": "assistant", "content": response.content})
+
+                    # Execute each tool
+                    tool_results = []
+                    for block in response.content:
+                        if isinstance(block, ToolUseBlock):
+                            tool_name = block.name
+                            tool_input = block.input
+                            tool_id = block.id
+
+                            self.log(f"Executing tool: {tool_name}")
+                            conversation_log.append(f"[Tool Call]: {tool_name}({json.dumps(tool_input, indent=2)})")
+
+                            # Execute tool
+                            tool_result = self.execute_tool(tool_name, tool_input)
+
+                            conversation_log.append(f"[Tool Result]: {tool_result[:500]}")
+
+                            tool_results.append({
+                                "type": "tool_result",
+                                "tool_use_id": tool_id,
+                                "content": tool_result
+                            })
+
+                    # Add tool results to conversation
+                    messages.append({"role": "user", "content": tool_results})
+
+                    # Continue loop to get next response
+                    continue
+
+                elif response.stop_reason == "max_tokens":
+                    self.log("Claude hit max_tokens limit", "WARNING")
+                    # Continue conversation to let Claude finish
+                    messages.append({"role": "assistant", "content": response.content})
+                    messages.append({"role": "user", "content": "Please continue (you hit max_tokens)"})
+                    continue
+
+                else:
+                    # Unexpected stop reason
+                    self.log(f"Unexpected stop_reason: {response.stop_reason}", "WARNING")
+                    break
+
+            # Max turns reached
+            raise RuntimeError(f"Exceeded maximum conversation turns ({max_turns})")
 
         except Exception as e:
-            error_msg = f"Claude Code execution error: {str(e)}"
+            error_msg = f"Claude execution error: {str(e)}"
             self.log(error_msg, "ERROR")
-            raise RuntimeError(error_msg) from e
+
+            # Save conversation log
+            conversation_file = self.telemetry_dir / f"conversation-{self.issue_number}-error.txt"
+            conversation_file.write_text("\n".join(conversation_log))
+
+            return (1, "", error_msg)
 
 
     # ========================================================================

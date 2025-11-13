@@ -553,17 +553,15 @@ export async function rejectSpec(projectName: string, projectPath: string): Prom
 }
 
 /**
- * Create a GitHub issue from a spec
+ * Create a GitHub issue from a spec using gh CLI
  */
 export async function createGithubIssue(
-  repoOwner: string,
-  repoName: string,
-  title: string,
-  body: string,
-  githubToken: string
+  specTitle: string,
+  specBody: string,
+  labels: string[] = ['ai-feature']
 ): Promise<string> {
   if (MOCK_MODE) {
-    console.log(`[Mock] Creating GitHub issue in ${repoOwner}/${repoName}: ${title}`);
+    console.log(`[Mock] Creating GitHub issue: ${specTitle}`);
     return 'https://github.com/example/repo/issues/123';
   }
 
@@ -574,11 +572,9 @@ export async function createGithubIssue(
 
   try {
     const issueUrl = await tauriInvoke('create_github_issue', {
-      repoOwner,
-      repoName,
-      title,
-      body,
-      githubToken,
+      specTitle,
+      specBody,
+      labels,
     });
     return issueUrl as string;
   } catch (error) {

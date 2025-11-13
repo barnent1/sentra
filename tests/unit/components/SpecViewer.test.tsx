@@ -352,6 +352,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Custom Spec Title',
+        project: 'test-project',
         version: 3,
         isLatest: true,
         isApproved: false,
@@ -384,6 +385,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Approved Spec',
+        project: 'test-project',
         version: 2,
         isLatest: true,
         isApproved: true,
@@ -414,6 +416,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Approved Spec',
+        project: 'test-project',
         version: 2,
         isLatest: true,
         isApproved: true,
@@ -445,6 +448,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Spec with Issue',
+        project: 'test-project',
         version: 1,
         isLatest: true,
         isApproved: true,
@@ -479,6 +483,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Spec with Versions',
+        project: 'test-project',
         version: 2,
         isLatest: true,
         isApproved: false,
@@ -512,6 +517,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Editable Spec',
+        project: 'test-project',
         version: 1,
         isLatest: true,
         isApproved: false,
@@ -544,6 +550,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Editable Spec',
+        project: 'test-project',
         version: 1,
         isLatest: true,
         isApproved: false,
@@ -579,6 +586,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Non-Editable Spec',
+        project: 'test-project',
         version: 1,
         isLatest: true,
         isApproved: false,
@@ -611,6 +619,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Test Spec',
+        project: 'test-project',
         version: 1,
         isLatest: true,
         isApproved: false,
@@ -651,6 +660,7 @@ const test = () => {
       const specInfo = {
         id: 'spec-123',
         title: 'Test Spec',
+        project: 'test-project',
         version: 1,
         isLatest: true,
         isApproved: false,
