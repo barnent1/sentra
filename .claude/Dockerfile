@@ -53,7 +53,7 @@ USER claude-agent:claude-agent
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Add Claude Code to PATH
-ENV PATH="/home/claude-agent/.claude/bin:${PATH}"
+ENV PATH="/home/claude-agent/.local/bin:${PATH}"
 
 # Disable Claude Code auto-updater and telemetry for containerized environment
 ENV DISABLE_AUTOUPDATER=true
