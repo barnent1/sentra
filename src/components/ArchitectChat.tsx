@@ -311,12 +311,12 @@ Please provide a technical specification summarizing the requirements and implem
       console.log('✅ Spec created');
       console.log('Spec:', spec);
 
-      // Save the spec as pending
+      // Save the spec using new versioning system
       if (projectPath) {
-        console.log('💾 Saving pending spec...');
-        const { savePendingSpec } = await import('@/lib/tauri');
-        await savePendingSpec(projectName, projectPath, spec);
-        console.log('✅ Spec saved - waiting for approval');
+        console.log('💾 Saving spec...');
+        const { saveSpec } = await import('@/lib/tauri');
+        const specInfo = await saveSpec(projectName, projectPath, spec);
+        console.log(`✅ Spec saved: ${specInfo.title} (v${specInfo.version})`);
       }
 
       // Clean up voice mode first

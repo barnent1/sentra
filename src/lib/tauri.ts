@@ -26,6 +26,25 @@ if (typeof window !== 'undefined') {
   }
 }
 
+export interface SpecInfo {
+  id: string;
+  title: string;
+  project: string;
+  filePath: string;
+  version: number;
+  created: string;
+  isLatest: boolean;
+  isApproved: boolean;
+  githubIssueUrl?: string;
+}
+
+export interface SpecVersion {
+  version: number;
+  file: string;
+  created: string;
+  size: number;
+}
+
 export interface Project {
   name: string;
   path: string;
@@ -35,6 +54,7 @@ export interface Project {
   monthlyCost: number;
   status: 'active' | 'idle' | 'error';
   pendingSpec?: string;
+  specs?: SpecInfo[];
 }
 
 export interface Agent {
@@ -564,5 +584,248 @@ export async function createGithubIssue(
   } catch (error) {
     console.error('Failed to create GitHub issue:', error);
     throw error;
+  }
+}
+
+/**
+ * Save a spec (creates new version or new spec)
+ */
+export async function saveSpec(
+  projectName: string,
+  projectPath: string,
+  specContent: string,
+  specTitle?: string
+): Promise<SpecInfo> {
+  if (MOCK_MODE) {
+    console.log(`[Mock] Saving spec for ${projectName}:`, specTitle);
+    return {
+      id: 'mock-spec',
+      title: specTitle || 'Mock Spec',
+      project: projectName,
+      filePath: `${projectPath}/.sentra/specs/mock-spec.spec.20251113.md`,
+      version: 1,
+      created: new Date().toISOString(),
+      isLatest: true,
+      isApproved: false,
+    };
+  }
+
+  if (!tauriInvoke) {
+    console.warn('Tauri not initialized yet');
+    throw new Error('Tauri not initialized');
+  }
+
+  try {
+    const specInfo = await tauriInvoke('save_spec', {
+      projectName,
+      projectPath,
+      specContent,
+      specTitle,
+    });
+    return specInfo as SpecInfo;
+  } catch (error) {
+    console.error('Failed to save spec:', error);
+    throw error;
+  }
+}
+
+/**
+ * List all specs for a project
+ */
+export async function listSpecs(projectName: string, projectPath: string): Promise<SpecInfo[]> {
+  if (MOCK_MODE) {
+    console.log(`[Mock] Listing specs for ${projectName}`);
+    return [];
+  }
+
+  if (!tauriInvoke) {
+    console.warn('Tauri not initialized yet');
+    return [];
+  }
+
+  try {
+    const specs = await tauriInvoke('list_specs', { projectName, projectPath });
+    return specs as SpecInfo[];
+  } catch (error) {
+    console.error('Failed to list specs:', error);
+    return [];
+  }
+}
+
+/**
+ * Get a specific spec (content + metadata)
+ */
+export async function getSpec(
+  projectName: string,
+  projectPath: string,
+  specId: string,
+  versionFile?: string
+): Promise<{ content: string; info: SpecInfo }> {
+  if (MOCK_MODE) {
+    console.log(`[Mock] Getting spec ${specId} for ${projectName}`);
+    return {
+      content: '# Mock Spec\n\nThis is a mock specification.',
+      info: {
+        id: specId,
+        title: 'Mock Spec',
+        project: projectName,
+        filePath: `${projectPath}/.sentra/specs/mock-spec.spec.20251113.md`,
+        version: 1,
+        created: new Date().toISOString(),
+        isLatest: true,
+        isApproved: false,
+      },
+    };
+  }
+
+  if (!tauriInvoke) {
+    console.warn('Tauri not initialized yet');
+    throw new Error('Tauri not initialized');
+  }
+
+  try {
+    const [content, info] = await tauriInvoke('get_spec', {
+      projectName,
+      projectPath,
+      specId,
+      versionFile,
+    });
+    return { content: content as string, info: info as SpecInfo };
+  } catch (error) {
+    console.error('Failed to get spec:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get all versions for a specific spec
+ */
+export async function getSpecVersions(
+  projectName: string,
+  projectPath: string,
+  specId: string
+): Promise<SpecVersion[]> {
+  if (MOCK_MODE) {
+    console.log(`[Mock] Getting versions for spec ${specId}`);
+    return [
+      {
+        version: 1,
+        file: 'mock-spec.spec.20251113.md',
+        created: new Date().toISOString(),
+        size: 1024,
+      },
+    ];
+  }
+
+  if (!tauriInvoke) {
+    console.warn('Tauri not initialized yet');
+    return [];
+  }
+
+  try {
+    const versions = await tauriInvoke('get_spec_versions', {
+      projectName,
+      projectPath,
+      specId,
+    });
+    return versions as SpecVersion[];
+  } catch (error) {
+    console.error('Failed to get spec versions:', error);
+    return [];
+  }
+}
+
+/**
+ * Approve a specific version of a spec
+ */
+export async function approveSpecVersion(
+  projectName: string,
+  projectPath: string,
+  specId: string,
+  versionFile: string,
+  githubIssueUrl?: string
+): Promise<void> {
+  if (MOCK_MODE) {
+    console.log(`[Mock] Approving spec ${specId} version ${versionFile}`);
+    return;
+  }
+
+  if (!tauriInvoke) {
+    console.warn('Tauri not initialized yet');
+    throw new Error('Tauri not initialized');
+  }
+
+  try {
+    await tauriInvoke('approve_spec_version', {
+      projectName,
+      projectPath,
+      specId,
+      versionFile,
+      githubIssueUrl,
+    });
+  } catch (error) {
+    console.error('Failed to approve spec version:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a spec or specific version
+ */
+export async function deleteSpec(
+  projectName: string,
+  projectPath: string,
+  specId: string,
+  versionFile?: string
+): Promise<void> {
+  if (MOCK_MODE) {
+    console.log(`[Mock] Deleting spec ${specId}${versionFile ? ` version ${versionFile}` : ''}`);
+    return;
+  }
+
+  if (!tauriInvoke) {
+    console.warn('Tauri not initialized yet');
+    throw new Error('Tauri not initialized');
+  }
+
+  try {
+    await tauriInvoke('delete_spec', {
+      projectName,
+      projectPath,
+      specId,
+      versionFile,
+    });
+  } catch (error) {
+    console.error('Failed to delete spec:', error);
+    throw error;
+  }
+}
+
+/**
+ * Migrate old pending-spec.md to new versioned structure
+ */
+export async function migratePendingSpec(
+  projectName: string,
+  projectPath: string
+): Promise<SpecInfo | null> {
+  if (MOCK_MODE) {
+    console.log(`[Mock] Migrating pending spec for ${projectName}`);
+    return null;
+  }
+
+  if (!tauriInvoke) {
+    console.warn('Tauri not initialized yet');
+    return null;
+  }
+
+  try {
+    const result = await tauriInvoke('migrate_pending_spec', {
+      projectName,
+      projectPath,
+    });
+    return result as SpecInfo | null;
+  } catch (error) {
+    console.error('Failed to migrate pending spec:', error);
+    return null;
   }
 }

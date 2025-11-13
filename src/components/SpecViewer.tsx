@@ -1,27 +1,69 @@
 'use client';
 
-import { X, Check, XCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Check, XCircle, ChevronDown, FileText } from 'lucide-react';
+import type { SpecInfo, SpecVersion } from '@/lib/tauri';
 
 interface SpecViewerProps {
   isOpen: boolean;
   onClose: () => void;
   spec: string;
+  specInfo?: SpecInfo; // New: full spec metadata
   projectName: string;
   projectPath: string;
   onApprove: () => Promise<void>;
   onReject: () => Promise<void>;
+  onContinueEditing?: (specInfo: SpecInfo) => void; // New: callback to continue editing
 }
 
 export function SpecViewer({
   isOpen,
   onClose,
   spec,
+  specInfo,
   projectName,
   projectPath,
   onApprove,
-  onReject
+  onReject,
+  onContinueEditing
 }: SpecViewerProps) {
-  if (!isOpen) return null;
+  const [versions, setVersions] = useState<SpecVersion[]>([]);
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
+  const [currentContent, setCurrentContent] = useState<string>(spec);
+  const [currentInfo, setCurrentInfo] = useState<SpecInfo | undefined>(specInfo);
+
+  useEffect(() => {
+    if (isOpen && specInfo) {
+      loadVersions();
+    }
+  }, [isOpen, specInfo]);
+
+  const loadVersions = async () => {
+    if (!specInfo) return;
+
+    try {
+      const { getSpecVersions } = await import('@/lib/tauri');
+      const versionList = await getSpecVersions(projectName, projectPath, specInfo.id);
+      setVersions(versionList);
+    } catch (error) {
+      console.error('Failed to load versions:', error);
+    }
+  };
+
+  const loadVersion = async (versionFile: string) => {
+    if (!specInfo) return;
+
+    try {
+      const { getSpec } = await import('@/lib/tauri');
+      const { content, info } = await getSpec(projectName, projectPath, specInfo.id, versionFile);
+      setCurrentContent(content);
+      setCurrentInfo(info);
+      setSelectedVersion(versionFile);
+    } catch (error) {
+      console.error('Failed to load version:', error);
+      alert('Failed to load version. Please try again.');
+    }
+  };
 
   const handleApprove = async () => {
     try {
@@ -41,6 +83,30 @@ export function SpecViewer({
       console.error('Failed to reject spec:', error);
       alert('Failed to reject spec. Please try again.');
     }
+  };
+
+  const handleContinueEditing = () => {
+    if (currentInfo && onContinueEditing) {
+      onContinueEditing(currentInfo);
+      onClose();
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   // Simple markdown-to-HTML renderer (basic support)
@@ -79,14 +145,43 @@ export function SpecViewer({
     return html;
   };
 
+  if (!isOpen) return null;
+
+  const displayInfo = currentInfo || specInfo;
+  const displayContent = currentContent || spec;
+
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-slate-900 border border-violet-500/20 rounded-lg w-full max-w-4xl h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-700">
-          <div>
-            <h2 className="text-xl font-semibold text-white">Specification Review</h2>
-            <p className="text-sm text-slate-400">{projectName}</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <FileText className="w-5 h-5 text-violet-400" />
+              <h2 className="text-xl font-semibold text-white">
+                {displayInfo?.title || 'Specification Review'}
+              </h2>
+              <div className="flex items-center gap-2">
+                {displayInfo && (
+                  <>
+                    <span className="px-2 py-1 bg-violet-500/20 border border-violet-500/30 rounded text-xs text-violet-300">
+                      v{displayInfo.version}
+                    </span>
+                    {displayInfo.isLatest && (
+                      <span className="px-2 py-1 bg-blue-500/20 border border-blue-500/30 rounded text-xs text-blue-300">
+                        Latest
+                      </span>
+                    )}
+                    {displayInfo.isApproved && (
+                      <span className="px-2 py-1 bg-green-500/20 border border-green-500/30 rounded text-xs text-green-300">
+                        Approved
+                      </span>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+            <p className="text-sm text-slate-400 mt-1">{projectName}</p>
           </div>
           <button
             onClick={onClose}
@@ -97,22 +192,65 @@ export function SpecViewer({
           </button>
         </div>
 
+        {/* Version Selector */}
+        {versions.length > 0 && (
+          <div className="px-4 py-3 bg-slate-800/50 border-b border-slate-700">
+            <div className="flex items-center gap-3">
+              <label className="text-sm text-slate-400">Version:</label>
+              <div className="relative">
+                <select
+                  value={selectedVersion || (displayInfo?.filePath.split('/').pop() || '')}
+                  onChange={(e) => loadVersion(e.target.value)}
+                  className="appearance-none bg-slate-800 border border-violet-500/30 rounded px-3 py-1.5 pr-8 text-sm text-white focus:outline-none focus:border-violet-500/50 cursor-pointer"
+                >
+                  {versions.map((v) => (
+                    <option key={v.file} value={v.file}>
+                      Version {v.version} - {formatDate(v.created)} ({formatFileSize(v.size)})
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              </div>
+              {displayInfo && displayInfo.githubIssueUrl && (
+                <a
+                  href={displayInfo.githubIssueUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-auto text-sm text-violet-400 hover:text-violet-300 transition-colors"
+                >
+                  View GitHub Issue →
+                </a>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Content Area - Scrollable */}
         <div className="flex-1 overflow-y-auto p-6">
           <div
             className="prose prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(spec) }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdown(displayContent) }}
           />
         </div>
 
         {/* Action Buttons */}
         <div className="p-4 border-t border-slate-700 flex gap-3">
+          {onContinueEditing && displayInfo && (
+            <button
+              onClick={handleContinueEditing}
+              className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            >
+              <FileText className="w-5 h-5" />
+              Continue Editing
+            </button>
+          )}
           <button
             onClick={handleApprove}
             className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            disabled={displayInfo?.isApproved}
           >
             <Check className="w-5 h-5" />
-            Approve & Create GitHub Issue
+            {displayInfo?.isApproved ? 'Already Approved' : 'Approve & Create GitHub Issue'}
           </button>
           <button
             onClick={handleReject}

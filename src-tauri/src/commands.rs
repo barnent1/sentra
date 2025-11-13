@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
+use crate::specs::{list_specs, SpecInfo};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -13,6 +14,7 @@ pub struct Project {
     pub monthly_cost: f64,
     pub status: String,
     pub pending_spec: Option<String>,
+    pub specs: Option<Vec<SpecInfo>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -57,6 +59,7 @@ pub fn get_projects() -> Result<Vec<Project>, String> {
                 monthly_cost: 0.0,
                 status: "idle".to_string(),
                 pending_spec: None,
+                specs: None,
             },
             Project {
                 name: "aidio".to_string(),
@@ -67,6 +70,7 @@ pub fn get_projects() -> Result<Vec<Project>, String> {
                 monthly_cost: 45.20,
                 status: "active".to_string(),
                 pending_spec: None,
+                specs: None,
             },
             Project {
                 name: "workcell".to_string(),
@@ -77,6 +81,7 @@ pub fn get_projects() -> Result<Vec<Project>, String> {
                 monthly_cost: 28.60,
                 status: "idle".to_string(),
                 pending_spec: None,
+                specs: None,
             },
         ]);
     }
@@ -91,7 +96,9 @@ pub fn get_projects() -> Result<Vec<Project>, String> {
             let path = PathBuf::from(line.trim());
             path.file_name().and_then(|name| {
                 let project_name = name.to_string_lossy().to_string();
-                // Check if there's a pending spec in .sentra/specs/
+                let project_path = path.to_string_lossy().to_string();
+
+                // Check for old pending spec (for backward compatibility)
                 let spec_path = path.join(".sentra/specs/pending-spec.md");
                 let pending_spec = if spec_path.exists() {
                     fs::read_to_string(&spec_path).ok()
@@ -99,15 +106,19 @@ pub fn get_projects() -> Result<Vec<Project>, String> {
                     None
                 };
 
+                // Load new versioned specs
+                let specs = list_specs(project_name.clone(), project_path.clone()).ok();
+
                 Some(Project {
                     name: project_name,
-                    path: path.to_string_lossy().to_string(),
+                    path: project_path,
                     active_agents: 0, // TODO: Calculate from actual agents
                     total_issues: 0,  // TODO: Read from telemetry
                     completed_issues: 0,
                     monthly_cost: 0.0,
                     status: "idle".to_string(),
                     pending_spec,
+                    specs,
                 })
             })
         })

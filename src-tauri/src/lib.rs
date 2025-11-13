@@ -3,6 +3,7 @@ mod watcher;
 mod settings;
 mod architect;
 mod realtime_proxy;
+mod specs;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -64,6 +65,13 @@ pub fn run() {
       settings::speak_notification,
       architect::chat_with_architect,
       architect::transcribe_audio,
+      specs::save_spec,
+      specs::list_specs,
+      specs::get_spec,
+      specs::get_spec_versions,
+      specs::approve_spec_version,
+      specs::delete_spec,
+      specs::migrate_pending_spec,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
