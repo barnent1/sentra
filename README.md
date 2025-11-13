@@ -1,4 +1,5 @@
 # Sentra - AI Agent Control Center
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 
 **Mission Control for Your AI Agents**
 
