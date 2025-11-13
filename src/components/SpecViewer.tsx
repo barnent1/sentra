@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { X, Check, XCircle, ChevronDown, FileText } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { SpecInfo, SpecVersion } from '@/lib/tauri';
 
 interface SpecViewerProps {
@@ -32,12 +34,6 @@ export function SpecViewer({
   const [currentContent, setCurrentContent] = useState<string>(spec);
   const [currentInfo, setCurrentInfo] = useState<SpecInfo | undefined>(specInfo);
 
-  useEffect(() => {
-    if (isOpen && specInfo) {
-      loadVersions();
-    }
-  }, [isOpen, specInfo]);
-
   const loadVersions = async () => {
     if (!specInfo) return;
 
@@ -49,6 +45,13 @@ export function SpecViewer({
       console.error('Failed to load versions:', error);
     }
   };
+
+  useEffect(() => {
+    if (isOpen && specInfo) {
+      loadVersions();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, specInfo]);
 
   const loadVersion = async (versionFile: string) => {
     if (!specInfo) return;
@@ -109,41 +112,6 @@ export function SpecViewer({
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  // Simple markdown-to-HTML renderer (basic support)
-  const renderMarkdown = (markdown: string) => {
-    let html = markdown;
-
-    // Headers
-    html = html.replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold text-white mt-4 mb-2">$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2 class="text-xl font-semibold text-white mt-6 mb-3">$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold text-white mt-8 mb-4">$1</h1>');
-
-    // Bold
-    html = html.replace(/\*\*(.*?)\*\*/gim, '<strong class="font-semibold text-white">$1</strong>');
-
-    // Italic
-    html = html.replace(/\*(.*?)\*/gim, '<em class="italic">$1</em>');
-
-    // Code blocks
-    html = html.replace(/```(\w+)?\n([\s\S]*?)```/gim, '<pre class="bg-slate-950 border border-slate-700 rounded p-3 my-3 overflow-x-auto"><code class="text-sm text-slate-300">$2</code></pre>');
-
-    // Inline code
-    html = html.replace(/`(.*?)`/gim, '<code class="bg-slate-800 px-1.5 py-0.5 rounded text-sm text-violet-300">$1</code>');
-
-    // Unordered lists
-    html = html.replace(/^\- (.*$)/gim, '<li class="ml-4 text-slate-300">$1</li>');
-
-    // Ordered lists
-    html = html.replace(/^\d+\. (.*$)/gim, '<li class="ml-4 text-slate-300">$1</li>');
-
-    // Paragraphs
-    html = html.replace(/^(?!<[h|u|l|p|c])(.*$)/gim, '<p class="text-slate-300 my-2">$1</p>');
-
-    // Line breaks
-    html = html.replace(/\n/g, '<br/>');
-
-    return html;
-  };
 
   if (!isOpen) return null;
 
@@ -226,11 +194,36 @@ export function SpecViewer({
         )}
 
         {/* Content Area - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div
-            className="prose prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(displayContent) }}
-          />
+        <div className="flex-1 overflow-y-auto p-6 prose prose-invert max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              h1: ({...props}) => <h1 className="text-2xl font-bold text-white mt-8 mb-4" {...props} />,
+              h2: ({...props}) => <h2 className="text-xl font-semibold text-white mt-6 mb-3" {...props} />,
+              h3: ({...props}) => <h3 className="text-lg font-semibold text-white mt-4 mb-2" {...props} />,
+              p: ({...props}) => <p className="text-slate-300 my-2" {...props} />,
+              ul: ({...props}) => <ul className="list-disc ml-6 my-2 text-slate-300" {...props} />,
+              ol: ({...props}) => <ol className="list-decimal ml-6 my-2 text-slate-300" {...props} />,
+              li: ({...props}) => <li className="ml-2 text-slate-300" {...props} />,
+              code: ({className, children, ...props}) => {
+                const isInline = !className?.includes('language-');
+                return isInline ?
+                  <code className="bg-slate-800 px-1.5 py-0.5 rounded text-sm text-violet-300" {...props}>{children}</code> :
+                  <code className="text-sm text-slate-300" {...props}>{children}</code>;
+              },
+              pre: ({...props}) => <pre className="bg-slate-950 border border-slate-700 rounded p-3 my-3 overflow-x-auto" {...props} />,
+              strong: ({...props}) => <strong className="font-semibold text-white" {...props} />,
+              em: ({...props}) => <em className="italic text-slate-300" {...props} />,
+              a: ({...props}) => <a className="text-violet-400 hover:text-violet-300 underline" {...props} />,
+              blockquote: ({...props}) => <blockquote className="border-l-4 border-violet-500 pl-4 italic text-slate-400 my-2" {...props} />,
+              table: ({...props}) => <table className="border-collapse border border-slate-700 my-4" {...props} />,
+              thead: ({...props}) => <thead className="bg-slate-800" {...props} />,
+              th: ({...props}) => <th className="border border-slate-700 px-4 py-2 text-white font-semibold" {...props} />,
+              td: ({...props}) => <td className="border border-slate-700 px-4 py-2 text-slate-300" {...props} />,
+            }}
+          >
+            {displayContent}
+          </ReactMarkdown>
         </div>
 
         {/* Action Buttons */}
