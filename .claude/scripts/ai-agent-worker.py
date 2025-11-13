@@ -2,10 +2,10 @@
 """
 ai-agent-worker.py - Production AI Agent Worker for GitHub Issues
 
-This script uses the Claude Code CLI to create an AI agent that
+This script uses the Anthropic Python SDK to create an AI agent that
 automatically works on GitHub issues through GitHub Actions automation.
 
-The agent uses Claude Code's native tools to:
+The agent uses the Anthropic Messages API with tool calling to:
 - Read, write, and edit files
 - Execute bash commands
 - Search the codebase (glob, grep)
@@ -32,7 +32,9 @@ Environment Variables:
     TEST_RATE_LIMIT             Enable test mode with low limits (default: false)
 
 Dependencies:
-    Claude Code CLI: curl -fsSL https://claude.ai/install.sh | bash
+    anthropic>=0.70.0
+    PyGithub>=2.0.0
+    requests>=2.14.0
 """
 
 import os
@@ -52,8 +54,9 @@ from dataclasses import dataclass, asdict
 # GitHub API integration
 from github import Github, GithubException
 
-# No longer using Anthropic SDK directly - using Claude Code CLI instead
-# SDK imports removed as they're not needed for CLI-based approach
+# Anthropic SDK for Claude API
+from anthropic import Anthropic, AnthropicBedrock, HUMAN_PROMPT, AI_PROMPT
+from anthropic.types import Message, TextBlock, ToolUseBlock
 
 
 # ============================================================================
@@ -284,6 +287,9 @@ class AgentWorker:
         self.telemetry_dir = Path.home() / ".claude" / "telemetry"
         self.telemetry_dir.mkdir(parents=True, exist_ok=True)
         self.log_file = self.telemetry_dir / "agents.log"
+
+        # Initialize Anthropic client
+        self.anthropic = Anthropic(api_key=self.config.anthropic_api_key)
 
         # Validate environment
         self._validate_environment()
