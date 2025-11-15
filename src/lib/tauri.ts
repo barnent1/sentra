@@ -327,7 +327,7 @@ export async function getSettings(): Promise<Settings> {
   if (MOCK_MODE) {
     return {
       userName: 'Glen',
-      voice: 'nova',
+      voice: 'alloy',  // Default voice - works with both TTS and Realtime APIs
       openaiApiKey: '',
       anthropicApiKey: '',
       githubToken: '',
@@ -345,7 +345,7 @@ export async function getSettings(): Promise<Settings> {
     console.warn('Tauri not initialized yet');
     return {
       userName: '',
-      voice: 'nova',
+      voice: 'alloy',  // Default voice - works with both TTS and Realtime APIs
       openaiApiKey: '',
       anthropicApiKey: '',
       githubToken: '',

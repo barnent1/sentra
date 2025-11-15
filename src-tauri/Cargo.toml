@@ -39,6 +39,7 @@ git2 = "0.18"
 rodio = "0.17"
 uuid = { version = "1.6", features = ["v4"] }
 lazy_static = "1.4"
+base64 = "0.21"
 
 [dev-dependencies]
 tempfile = "3.8"

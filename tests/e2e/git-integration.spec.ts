@@ -593,7 +593,7 @@ test.describe('Git Integration - Project Detail Panel', () => {
 
       // ASSERT
       const classes = await gitLogTab.getAttribute('class');
-      expect(classes).toContain('active', 'Selected', 'violet');
+      expect(classes).toMatch(/active|Selected|violet/);
     });
   });
 

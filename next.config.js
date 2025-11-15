@@ -6,6 +6,8 @@ const nextConfig = {
   },
   // Tauri expects output in 'out' directory
   distDir: 'out',
+  // Explicitly set workspace root to silence warning
+  outputFileTracingRoot: require('path').join(__dirname),
 }
 
 module.exports = nextConfig

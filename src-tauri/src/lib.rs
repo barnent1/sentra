@@ -77,6 +77,7 @@ pub fn run() {
       commands::get_costs,
       commands::create_project,
       commands::select_directory,
+      commands::set_project_muted,
       settings::get_settings,
       settings::save_settings,
       settings::speak_notification,

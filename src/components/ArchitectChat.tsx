@@ -28,9 +28,6 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
   const [currentInput, setCurrentInput] = useState('');
 
   const voiceConversationRef = useRef<RealtimeConversation | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const audioQueueRef = useRef<ArrayBuffer[]>([]);
-  const isPlayingRef = useRef(false);
   const conversationTextRef = useRef<string>('');
 
   useEffect(() => {
@@ -73,8 +70,8 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
 
       console.log('🎙️ Starting Realtime voice mode for:', projectName);
 
-      // Initialize audio context for playback
-      audioContextRef.current = new AudioContext({ sampleRate: 24000 });
+      // Note: With WebRTC, audio playback is handled automatically through the remote track
+      // No need to create AudioContext for playback anymore
 
       // Get project context if path is available
       let projectContext = '';
@@ -91,6 +88,7 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
       const conversation = new RealtimeConversation({
         projectName,
         projectContext,
+        voice: settings.voice,  // Use user's voice preference from settings
         onUserTranscript: (text) => {
           console.log('📝 User transcript received:', text);
           // Add user message to ref
@@ -117,13 +115,9 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
           });
         },
         onAudioPlay: (audioData) => {
-          // Queue audio for playback
-          console.log('🔊 Audio chunk received, queue length:', audioQueueRef.current.length);
-          audioQueueRef.current.push(audioData);
-          if (!isPlayingRef.current) {
-            console.log('🎵 Starting audio playback');
-            playNextAudio();
-          }
+          // With WebRTC, audio plays automatically through the remote track
+          // This callback is kept for logging/monitoring purposes
+          console.log('🔊 Audio chunk received:', audioData.byteLength, 'bytes');
         },
         onError: (error) => {
           console.error('Voice error:', error);
@@ -140,74 +134,21 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
 
       voiceConversationRef.current = conversation;
 
-      // Connect to WebSocket proxy
+      // Connect via WebRTC
       setIsProcessing(true);
       await conversation.connect();
 
-      // Get greeting from Sentra FIRST
-      await conversation.getGreeting();
+      // Get greeting from Sentra (with user's name)
+      await conversation.getGreeting(settings.userName);
 
-      // Wait for greeting audio to finish playing (4 second delay to prevent echo)
-      await new Promise(resolve => setTimeout(resolve, 4000));
-
-      // Now start recording - the RealtimeConversation class will automatically:
-      // - Pause recording when Sentra speaks (to prevent echo)
-      // - Resume recording after she finishes (with 1.5 second buffer)
-      // - Use VAD (Voice Activity Detection) to detect when you're speaking
-      setIsListening(true);
+      // Start recording - WebRTC with echo cancellation handles everything
       await conversation.startRecording();
-
+      setIsListening(true);
       setIsProcessing(false);
     } catch (error) {
       console.error('Failed to start voice mode:', error);
-      setErrorMessage('Failed to start voice conversation. Check that the proxy is running.');
+      setErrorMessage('Failed to start voice conversation. Please check your network connection.');
       setIsProcessing(false);
-    }
-  };
-
-  const playNextAudio = async () => {
-    console.log('🎵 playNextAudio called, queue length:', audioQueueRef.current.length);
-
-    if (!audioContextRef.current || audioQueueRef.current.length === 0) {
-      console.log('🔇 Stopping playback - no context or empty queue');
-      isPlayingRef.current = false;
-      return;
-    }
-
-    isPlayingRef.current = true;
-    const audioData = audioQueueRef.current.shift()!;
-    console.log('🎵 Playing audio chunk, size:', audioData.byteLength);
-
-    try {
-      // Convert PCM16 to AudioBuffer
-      const pcm16 = new Int16Array(audioData);
-      const floatData = new Float32Array(pcm16.length);
-
-      // Convert Int16 to Float32
-      for (let i = 0; i < pcm16.length; i++) {
-        floatData[i] = pcm16[i] / (pcm16[i] < 0 ? 0x8000 : 0x7fff);
-      }
-
-      const audioBuffer = audioContextRef.current.createBuffer(1, floatData.length, 24000);
-      audioBuffer.getChannelData(0).set(floatData);
-
-      const source = audioContextRef.current.createBufferSource();
-      source.buffer = audioBuffer;
-      source.connect(audioContextRef.current.destination);
-
-      source.onended = () => {
-        console.log('✅ Audio chunk finished');
-        // Play next audio chunk immediately
-        playNextAudio();
-      };
-
-      // Start immediately without delay
-      console.log('▶️ Starting audio source');
-      source.start(0);
-    } catch (error) {
-      console.error('❌ Failed to play audio:', error);
-      isPlayingRef.current = false;
-      playNextAudio(); // Try next chunk
     }
   };
 
@@ -217,11 +158,7 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
       voiceConversationRef.current = null;
     }
 
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-
+    // With WebRTC, audio cleanup is handled by the RealtimeConversation class
     setIsListening(false);
     setIsProcessing(false);
   };

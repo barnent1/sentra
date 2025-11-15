@@ -38,7 +38,7 @@ global.AudioContext = MockAudioContext as any
 describe('ArchitectChat', () => {
   const mockSettings = {
     userName: 'Test User',
-    voice: 'nova',
+    voice: 'alloy',  // Default voice - works with both TTS and Realtime APIs
     openaiApiKey: 'sk-test-key',
     anthropicApiKey: 'sk-ant-test',
     githubToken: 'ghp-test',

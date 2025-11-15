@@ -13,7 +13,7 @@ vi.mock('@/lib/tauri', () => ({
 describe('Settings', () => {
   const mockSettings = {
     userName: 'Test User',
-    voice: 'nova',
+    voice: 'alloy',  // Default voice - works with both TTS and Realtime APIs
     openaiApiKey: 'sk-test-key',
     anthropicApiKey: 'sk-ant-test',
     githubToken: 'ghp-test',
@@ -251,13 +251,20 @@ describe('Settings', () => {
         expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
       })
 
-      // ASSERT
+      // ASSERT - All 13 voices should be displayed
       expect(screen.getByText('Alloy')).toBeInTheDocument()
+      expect(screen.getByText('Ash')).toBeInTheDocument()
+      expect(screen.getByText('Ballad')).toBeInTheDocument()
+      expect(screen.getByText('Cedar')).toBeInTheDocument()
+      expect(screen.getByText('Coral')).toBeInTheDocument()
       expect(screen.getByText('Echo')).toBeInTheDocument()
       expect(screen.getByText('Fable')).toBeInTheDocument()
-      expect(screen.getByText('Onyx')).toBeInTheDocument()
+      expect(screen.getByText('Marin')).toBeInTheDocument()
       expect(screen.getByText('Nova')).toBeInTheDocument()
+      expect(screen.getByText('Onyx')).toBeInTheDocument()
+      expect(screen.getByText('Sage')).toBeInTheDocument()
       expect(screen.getByText('Shimmer')).toBeInTheDocument()
+      expect(screen.getByText('Verse')).toBeInTheDocument()
     })
   })
 
@@ -438,6 +445,47 @@ describe('Settings', () => {
           'sk-test-key'
         )
       })
+    })
+
+    it('should block preview for Realtime-only voices', async () => {
+      // ARRANGE
+      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
+      vi.mocked(tauri.getSettings).mockResolvedValue({
+        ...mockSettings,
+        voice: 'ballad', // Realtime-only voice
+      })
+
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const testButton = screen.getByText('Test Voice')
+      fireEvent.click(testButton)
+
+      // ASSERT
+      await waitFor(() => {
+        expect(alertSpy).toHaveBeenCalledWith(
+          expect.stringContaining('Ballad voice is only available in the Realtime API')
+        )
+        expect(tauri.speakNotification).not.toHaveBeenCalled()
+      })
+
+      alertSpy.mockRestore()
+    })
+
+    it('should show Realtime-only indicator for non-TTS voices', async () => {
+      // ARRANGE & ACT
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ASSERT - Check that Realtime-only voices have the indicator
+      expect(screen.getAllByText(/Realtime only - no preview/i).length).toBeGreaterThan(0)
     })
   })
 

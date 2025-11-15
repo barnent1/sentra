@@ -8,7 +8,7 @@ vi.mock('@/lib/tauri', () => ({
   getSettings: vi.fn(() =>
     Promise.resolve({
       userName: 'Test User',
-      voice: 'nova',
+      voice: 'alloy',  // Default voice - works with both TTS and Realtime APIs
       openaiApiKey: '',
       anthropicApiKey: '',
       githubToken: '',

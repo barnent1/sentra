@@ -211,7 +211,7 @@ describe('tauri.ts', () => {
       const result = await getSettings()
 
       // ASSERT
-      expect(result.voice).toBe('nova')
+      expect(result.voice).toBe('alloy')  // Default voice - works with both TTS and Realtime APIs
       expect(result.notificationsEnabled).toBe(true)
       expect(result.notifyOnCompletion).toBe(true)
       expect(result.notifyOnFailure).toBe(true)
@@ -224,7 +224,7 @@ describe('tauri.ts', () => {
       // ARRANGE
       const settings: Settings = {
         userName: 'Test User',
-        voice: 'nova',
+        voice: 'alloy',
         openaiApiKey: 'sk-test',
         anthropicApiKey: 'sk-ant-test',
         githubToken: 'ghp-test',
@@ -248,7 +248,7 @@ describe('tauri.ts', () => {
       const consoleLogSpy = vi.spyOn(console, 'log')
       const settings: Settings = {
         userName: 'Test User',
-        voice: 'nova',
+        voice: 'alloy',
         openaiApiKey: 'sk-test',
         anthropicApiKey: 'sk-ant-test',
         githubToken: 'ghp-test',
@@ -281,7 +281,7 @@ describe('tauri.ts', () => {
       // ARRANGE
       const consoleLogSpy = vi.spyOn(console, 'log')
       const message = 'Test notification'
-      const voice = 'nova'
+      const voice = 'alloy'  // Use Realtime-compatible voice
       const apiKey = 'sk-test'
 
       // ACT

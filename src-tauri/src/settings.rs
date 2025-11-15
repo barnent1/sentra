@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::io::Cursor;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", default)]
 pub struct Settings {
     pub user_name: String,
     pub voice: String,
@@ -23,7 +23,10 @@ impl Default for Settings {
     fn default() -> Self {
         Settings {
             user_name: "".to_string(),
-            voice: "nova".to_string(),
+            // Default to 'alloy' - works with both TTS API and Realtime API
+            // Realtime API only supports: alloy, ash, ballad, coral, echo, sage, shimmer, verse, marin, cedar
+            // 'nova' is NOT supported by Realtime API (TTS only)
+            voice: "alloy".to_string(),
             openai_api_key: "".to_string(),
             anthropic_api_key: "".to_string(),
             github_token: "".to_string(),

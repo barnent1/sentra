@@ -318,7 +318,7 @@ test.describe('Settings Modal', () => {
   });
 
   test.describe('Voice Selection', () => {
-    test('should display all six voice options', async ({ page }) => {
+    test('should display all thirteen voice options', async ({ page }) => {
       // ARRANGE
       const settingsButton = page.locator('button[data-testid="settings-button"], button:has([class*="Settings"])').first();
 
@@ -328,7 +328,7 @@ test.describe('Settings Modal', () => {
 
       // ASSERT
       const voiceOptions = page.locator('input[type="radio"][name="voice"]');
-      expect(await voiceOptions.count()).toBeGreaterThanOrEqual(6);
+      expect(await voiceOptions.count()).toBeGreaterThanOrEqual(13);
     });
 
     test('should show voice descriptions', async ({ page }) => {

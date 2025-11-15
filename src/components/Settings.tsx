@@ -6,13 +6,26 @@ import { useTranslation } from 'react-i18next';
 import { getSettings, saveSettings, speakNotification, type Settings as SettingsType } from '@/lib/tauri';
 import '@/lib/i18n'; // Initialize i18n
 
+// Voice compatibility:
+// TTS API (/v1/audio/speech) - 9 voices: alloy, ash, coral, echo, fable, nova, onyx, sage, shimmer
+// Realtime API (/v1/realtime) - 10 voices: alloy, ash, ballad, coral, echo, sage, shimmer, verse, marin, cedar
+// Shared voices (work with both): alloy, ash, coral, echo, sage, shimmer
+// TTS only: fable, nova, onyx
+// Realtime only: ballad, verse, marin, cedar
 const VOICES = [
-  { id: 'alloy', name: 'Alloy', description: 'Balanced, Neutral' },
-  { id: 'echo', name: 'Echo', description: 'Male, Clear & Direct' },
-  { id: 'fable', name: 'Fable', description: 'British, Expressive' },
-  { id: 'onyx', name: 'Onyx', description: 'Deep Male, Authoritative' },
-  { id: 'nova', name: 'Nova', description: 'Female, Warm & Friendly ⭐' },
-  { id: 'shimmer', name: 'Shimmer', description: 'Female, Soft & Gentle' },
+  { id: 'alloy', name: 'Alloy', description: 'Balanced, Neutral ⭐', ttsCompatible: true, realtimeCompatible: true },
+  { id: 'ash', name: 'Ash', description: 'Expressive, Emotional Range', ttsCompatible: true, realtimeCompatible: true },
+  { id: 'ballad', name: 'Ballad', description: 'Expressive, Warm Tones', ttsCompatible: false, realtimeCompatible: true },
+  { id: 'cedar', name: 'Cedar', description: 'Natural, Conversational', ttsCompatible: false, realtimeCompatible: true },
+  { id: 'coral', name: 'Coral', description: 'Expressive, Tuneable Emotions', ttsCompatible: true, realtimeCompatible: true },
+  { id: 'echo', name: 'Echo', description: 'Male, Clear & Direct', ttsCompatible: true, realtimeCompatible: true },
+  { id: 'fable', name: 'Fable', description: 'British, Expressive', ttsCompatible: true, realtimeCompatible: false },
+  { id: 'marin', name: 'Marin', description: 'Professional, Clear', ttsCompatible: false, realtimeCompatible: true },
+  { id: 'nova', name: 'Nova', description: 'Female, Warm & Friendly', ttsCompatible: true, realtimeCompatible: false },
+  { id: 'onyx', name: 'Onyx', description: 'Deep Male, Authoritative', ttsCompatible: true, realtimeCompatible: false },
+  { id: 'sage', name: 'Sage', description: 'Expressive, Accent Control', ttsCompatible: true, realtimeCompatible: true },
+  { id: 'shimmer', name: 'Shimmer', description: 'Female, Soft & Gentle', ttsCompatible: true, realtimeCompatible: true },
+  { id: 'verse', name: 'Verse', description: 'Expressive, Enhanced Tones', ttsCompatible: false, realtimeCompatible: true },
 ];
 
 const LANGUAGES = [
@@ -29,7 +42,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
   const { t, i18n } = useTranslation();
   const [settings, setSettings] = useState<SettingsType>({
     userName: '',
-    voice: 'nova',
+    voice: 'alloy',  // Default to 'alloy' - works with both TTS and Realtime APIs
     openaiApiKey: '',
     anthropicApiKey: '',
     githubToken: '',
@@ -95,10 +108,17 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
       return;
     }
 
+    // Check if selected voice is TTS-compatible
+    const selectedVoice = VOICES.find((v) => v.id === settings.voice);
+    if (!selectedVoice?.ttsCompatible) {
+      alert(`The ${selectedVoice?.name} voice is only available in the Realtime API and cannot be previewed. It will work during actual voice conversations.`);
+      return;
+    }
+
     try {
       setTestingVoice(true);
       const message = `Hey ${settings.userName || 'there'}, this is a test of the ${
-        VOICES.find((v) => v.id === settings.voice)?.name || 'selected'
+        selectedVoice.name
       } voice. Agent forty-two just completed a task successfully.`;
 
       await speakNotification(message, settings.voice, settings.openaiApiKey);
@@ -315,9 +335,22 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                       checked={settings.voice === voice.id}
                       onChange={(e) => setSettings({ ...settings, voice: e.target.value })}
                       className="text-violet-500 focus:ring-violet-500"
+                      aria-label={voice.name}
                     />
                     <div className="flex-1">
-                      <div className="text-white font-medium">{voice.name}</div>
+                      <div className="text-white font-medium">
+                        {voice.name}
+                        {!voice.realtimeCompatible && (
+                          <span className="ml-2 text-xs text-amber-400/80 font-normal">
+                            (TTS only - not for voice chat)
+                          </span>
+                        )}
+                        {!voice.ttsCompatible && voice.realtimeCompatible && (
+                          <span className="ml-2 text-xs text-violet-400/80 font-normal">
+                            (Voice chat only - no preview)
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs text-slate-400">{voice.description}</div>
                     </div>
                   </label>
@@ -331,6 +364,9 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 <Volume2 className="w-4 h-4" />
                 {testingVoice ? 'Testing...' : 'Test Voice'}
               </button>
+              <p className="text-xs text-slate-500 mt-2">
+                Some voices are only available in real-time conversations and cannot be previewed.
+              </p>
             </div>
 
             {/* Notification Preferences */}

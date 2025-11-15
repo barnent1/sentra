@@ -67,7 +67,7 @@ describe('GET /api/projects', () => {
     // Create another user with projects
     const user2 = await prisma.user.create({
       data: {
-        email: `other_${Date.now()}@example.com`,
+        email: 'other@example.com',
         password: 'hashed-password-placeholder',
         name: 'Other User',
       },
@@ -251,8 +251,7 @@ describe('GET /api/projects/:id', () => {
     // Create another user with a project
     const otherUser = await prisma.user.create({
       data: {
-        email: `other_${Date.now()}@example.com`,
-        password: 'hashed-password-placeholder',
+        email: 'other@example.com',
         name: 'Other User',
       },
     })
@@ -329,8 +328,7 @@ describe('DELETE /api/projects/:id', () => {
     // Create another user with a project
     const otherUser = await prisma.user.create({
       data: {
-        email: `other_${Date.now()}@example.com`,
-        password: 'hashed-password-placeholder',
+        email: 'other@example.com',
         name: 'Other User',
       },
     })

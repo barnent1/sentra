@@ -5,8 +5,8 @@
   "identifier": "com.glenbarnhardt.sentra",
   "build": {
     "frontendDist": "../out",
-    "devUrl": "http://localhost:3002",
-    "beforeDevCommand": "npm run dev -- -p 3002",
+    "devUrl": "http://localhost:37002",
+    "beforeDevCommand": "npm run dev -- -p 37002",
     "beforeBuildCommand": "npm run build"
   },
   "app": {
@@ -52,6 +52,7 @@
     "active": true,
     "targets": "all",
     "icon": [
+      "icons/sentra-translucent.png",
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",

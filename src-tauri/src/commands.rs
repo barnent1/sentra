@@ -563,3 +563,13 @@ pub fn select_directory() -> Result<Option<String>, String> {
     // See: https://v2.tauri.app/plugin/dialog/
     Err("select_directory should be called from frontend using @tauri-apps/plugin-dialog".to_string())
 }
+
+/// Set the muted state for a project
+#[tauri::command]
+pub fn set_project_muted(project_name: String, muted: bool) -> Result<(), String> {
+    // For now, just return Ok - mute state is managed in frontend
+    // In the future, this could persist to a configuration file
+    println!("Project '{}' muted state set to: {}", project_name, muted);
+    Ok(())
+}
+

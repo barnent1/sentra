@@ -102,8 +102,7 @@ describe('POST /api/costs', () => {
     // Create another user with a project
     const otherUser = await prisma.user.create({
       data: {
-        email: `other_${Date.now()}@example.com`,
-        password: 'hashed-password-placeholder',
+        email: 'other@example.com',
         name: 'Other User',
       },
     })
@@ -270,8 +269,7 @@ describe('GET /api/costs', () => {
     // Create another user with project and costs
     const otherUser = await prisma.user.create({
       data: {
-        email: `other_${Date.now()}@example.com`,
-        password: 'hashed-password-placeholder',
+        email: 'other@example.com',
         name: 'Other User',
       },
     })
@@ -383,8 +381,7 @@ describe('POST /api/activity', () => {
     // Create another user with a project
     const otherUser = await prisma.user.create({
       data: {
-        email: `other_${Date.now()}@example.com`,
-        password: 'hashed-password-placeholder',
+        email: 'other@example.com',
         name: 'Other User',
       },
     })

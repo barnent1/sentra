@@ -6,9 +6,14 @@ use tauri_plugin_positioner::{Position, WindowExt};
 
 /// Setup system tray icon with menu
 pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
+    // For now, use the default icon and template mode for proper macOS rendering
+    // The sentra-translucent.png can be set as the app icon in tauri.conf.json
+    let icon = app.default_window_icon().unwrap().clone();
+
     // Build the tray icon
     let _tray = TrayIconBuilder::new()
-        .icon(app.default_window_icon().unwrap().clone())
+        .icon(icon)
+        .icon_as_template(true)  // macOS: render as template (adapts to light/dark mode)
         .tooltip("Sentra - AI Agent Control Center")
         .on_tray_icon_event(|tray, event| {
             tauri_plugin_positioner::on_tray_event(tray.app_handle(), &event);

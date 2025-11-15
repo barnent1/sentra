@@ -1,21 +1,33 @@
 "use client";
 
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { Project } from "@/lib/tauri";
+import type { Project, SpecInfo } from "@/lib/tauri";
 import "@/lib/i18n"; // Initialize i18n
 
 interface ProjectCardProps {
   project: Project;
   onMuteToggle: (projectName: string, shouldMute: boolean) => void;
   onViewDetails: (project: Project) => void;
+  onSpeakToArchitect?: (project: { name: string; path: string }) => void;
+  onViewSpec?: (project: { name: string; path: string; specs?: SpecInfo[] }) => void;
 }
 
-export function ProjectCard({ project, onMuteToggle, onViewDetails }: ProjectCardProps) {
+export function ProjectCard({ project, onMuteToggle, onViewDetails, onSpeakToArchitect, onViewSpec }: ProjectCardProps) {
   const { t } = useTranslation();
-  const handleMuteClick = (e: React.MouseEvent) => {
+
+  const handleArchitectClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click event from firing
-    onMuteToggle(project.name, !project.muted);
+    if (onSpeakToArchitect) {
+      onSpeakToArchitect({ name: project.name, path: project.path });
+    }
+  };
+
+  const handleSpecClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click event from firing
+    if (onViewSpec) {
+      onViewSpec(project);
+    }
   };
 
   // Determine status indicator color and animation
@@ -71,20 +83,17 @@ export function ProjectCard({ project, onMuteToggle, onViewDetails }: ProjectCar
           </h3>
         </div>
 
-        {/* Mute Button */}
-        <button
-          data-testid="mute-button"
-          data-muted={project.muted}
-          onClick={handleMuteClick}
-          aria-label={project.muted ? t('project.unmute', { projectName: project.name }) : t('project.mute', { projectName: project.name })}
-          className="p-2 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 hover:border-violet-500/50 transition-colors"
-        >
-          {project.muted ? (
-            <VolumeX className="w-4 h-4 text-violet-400" />
-          ) : (
+        {/* Talk to Architect Button */}
+        {onSpeakToArchitect && (
+          <button
+            data-testid="architect-button"
+            onClick={handleArchitectClick}
+            aria-label={t('dashboard.buttons.speakToArchitect', { projectName: project.name })}
+            className="p-2 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 hover:border-violet-500/50 transition-colors"
+          >
             <Volume2 className="w-4 h-4 text-violet-400" />
-          )}
-        </button>
+          </button>
+        )}
       </div>
 
       {/* Current Task */}

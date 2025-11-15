@@ -386,38 +386,6 @@ export default function Home() {
       <div id="projects-section" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-[#FAFAFA]">{t('dashboard.projectsSection.title')}</h2>
-          {/* Voice Conversation Buttons - Keep for backward compatibility */}
-          <div className="flex gap-2">
-            {projects.map((project) => (
-              <div key={project.name} className="flex gap-2">
-                {/* Voice Conversation Button */}
-                <button
-                  onClick={() => handleSpeakToArchitect({ name: project.name, path: project.path })}
-                  className="group relative p-2 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 hover:border-violet-500/50 rounded-lg transition-all"
-                  title={t('dashboard.buttons.speakToArchitect', { projectName: project.name })}
-                >
-                  <div className="relative">
-                    <UserCircle className="w-5 h-5 text-violet-400 group-hover:text-violet-300 transition-colors" />
-                    <div className="absolute -bottom-0.5 -right-0.5">
-                      <Mic className="w-3 h-3 text-violet-400 group-hover:text-violet-300 group-hover:scale-110 transition-all" />
-                    </div>
-                  </div>
-                </button>
-
-                {/* View Spec Button - Only shown if there are unapproved specs */}
-                {project.specs && project.specs.some(spec => !spec.isApproved) && (
-                  <button
-                    onClick={() => handleViewSpec(project)}
-                    className="group relative p-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/30 hover:border-green-500/50 rounded-lg transition-all"
-                    title={t('dashboard.buttons.viewSpec')}
-                  >
-                    <FileText className="w-5 h-5 text-green-400 group-hover:text-green-300 transition-colors" />
-                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
 
         {projects.length === 0 ? (
@@ -435,6 +403,8 @@ export default function Home() {
                 project={project}
                 onMuteToggle={handleMuteToggle}
                 onViewDetails={handleViewDetails}
+                onSpeakToArchitect={handleSpeakToArchitect}
+                onViewSpec={handleViewSpec}
               />
             ))}
           </div>

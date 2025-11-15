@@ -9,9 +9,17 @@ import { z } from 'zod'
 // Settings Validation
 // ============================================================================
 
+// Voice compatibility by API:
+// TTS API (/v1/audio/speech): alloy, ash, coral, echo, fable, nova, onyx, sage, shimmer
+// Realtime API (/v1/realtime): alloy, ash, ballad, coral, echo, sage, shimmer, verse, marin, cedar
+// All voices (union of both APIs):
+export const AllVoices = ['alloy', 'ash', 'ballad', 'cedar', 'coral', 'echo', 'fable', 'marin', 'nova', 'onyx', 'sage', 'shimmer', 'verse'] as const;
+export const TTSVoices = ['alloy', 'ash', 'coral', 'echo', 'fable', 'nova', 'onyx', 'sage', 'shimmer'] as const;
+export const RealtimeVoices = ['alloy', 'ash', 'ballad', 'coral', 'echo', 'sage', 'shimmer', 'verse', 'marin', 'cedar'] as const;
+
 export const SettingsSchema = z.object({
   userName: z.string().min(1, 'Name is required').max(100, 'Name too long'),
-  voice: z.enum(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']),
+  voice: z.enum(AllVoices),  // Allow all voices in settings, validation happens at usage time
   openaiApiKey: z.string().regex(/^sk-[a-zA-Z0-9-_]+$/, 'Invalid OpenAI API key format').or(z.literal('')),
   anthropicApiKey: z.string().regex(/^sk-ant-api[a-zA-Z0-9-_]+$/, 'Invalid Anthropic API key format').or(z.literal('')),
   githubToken: z.string().regex(/^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9_]+)$/, 'Invalid GitHub token format').or(z.literal('')),
