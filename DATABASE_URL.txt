@@ -1,0 +1,1 @@
+postgres://postgres.vmrmllmmmzwyigfqjcrc:PV0Hq3slVhw1MWnG@aws-1-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true&connect_timeout=15

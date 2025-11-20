@@ -63,13 +63,21 @@ function getDb() {
   console.log('[Database] DATABASE_URL (first 60 chars):', databaseUrl.substring(0, 60));
   console.log('[Database] DATABASE_URL (last 20 chars):', databaseUrl.substring(databaseUrl.length - 20));
 
-  // Create postgres client with connection pooling
-  _client = postgres(databaseUrl, {
-    prepare: false, // Required for pgBouncer/Supabase pooler
-  });
+  try {
+    // Create postgres client with connection pooling
+    _client = postgres(databaseUrl, {
+      prepare: false, // Required for pgBouncer/Supabase pooler
+    });
 
-  _db = drizzle(_client, { schema });
-  return _db;
+    _db = drizzle(_client, { schema });
+    console.log('[Database] Client created successfully');
+    return _db;
+  } catch (err) {
+    console.error('[Database] Error creating postgres client:', err);
+    console.error('[Database] Error details:', err instanceof Error ? err.message : String(err));
+    console.error('[Database] Error stack:', err instanceof Error ? err.stack : 'No stack');
+    throw err;
+  }
 }
 
 // Helper to get database instance
