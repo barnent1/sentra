@@ -2,18 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Activity, Folder, DollarSign, TrendingUp, ExternalLink, X, Power } from "lucide-react";
-import { invoke } from "@tauri-apps/api/core";
-
-interface Stats {
-  activeAgents: number;
-  totalProjects: number;
-  todayCost: number;
-  successRate: number;
-  monthlyBudget: number;
-}
+import { getDashboardStats, type DashboardStats } from "@/services/sentra-api";
 
 export default function MenubarPage() {
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,7 +19,7 @@ export default function MenubarPage() {
 
   const loadStats = async () => {
     try {
-      const dashboardStats = await invoke<Stats>("get_dashboard_stats");
+      const dashboardStats = await getDashboardStats();
       setStats(dashboardStats);
       setLoading(false);
     } catch (error) {
@@ -36,28 +28,19 @@ export default function MenubarPage() {
     }
   };
 
-  const handleOpenDashboard = async () => {
-    try {
-      await invoke("show_main_window");
-    } catch (error) {
-      console.error("Failed to open dashboard:", error);
-    }
+  const handleOpenDashboard = () => {
+    // Open dashboard in same window
+    window.location.href = '/';
   };
 
-  const handleQuit = async () => {
-    try {
-      await invoke("quit_app");
-    } catch (error) {
-      console.error("Failed to quit app:", error);
-    }
+  const handleQuit = () => {
+    console.log('[Web] Quit requested - closing window');
+    window.close();
   };
 
-  const handleClose = async () => {
-    try {
-      await invoke("hide_menubar_window");
-    } catch (error) {
-      console.error("Failed to hide menubar window:", error);
-    }
+  const handleClose = () => {
+    console.log('[Web] Close requested - hiding menubar');
+    window.close();
   };
 
   const remainingBudget = stats ? stats.monthlyBudget - stats.todayCost : 0;

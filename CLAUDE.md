@@ -29,10 +29,11 @@ This document is loaded into every Claude Code session. It provides essential co
 
 ## What is Sentra?
 
-Sentra is a **voice-first AI assistant platform** that combines:
-- **Native desktop apps** (macOS, Windows, Linux) built with Tauri 2.x
+Sentra is a **voice-first AI assistant web application** that provides:
 - **Modern web interface** using Next.js 15 with App Router
+- **Universal browser access** on any platform (macOS, Windows, Linux)
 - **Cloud backend** for synchronization and collaboration
+- **Perfect voice support** with browser echo cancellation
 
 ### Vision
 Create the most natural way to interact with AI - through voice - while maintaining the power of traditional interfaces.
@@ -43,16 +44,16 @@ Create the most natural way to interact with AI - through voice - while maintain
 
 ### Technology Stack
 
-**Frontend (Native Apps)**
-- Tauri 2.x (Rust backend, web frontend)
+**Frontend (Web Application)**
 - Next.js 15.5 with React 19 (App Router, React Server Components)
 - TypeScript (strict mode)
 - TailwindCSS for styling
+- React Query for data fetching
 
 **Backend (Cloud Services)**
 - Node.js + Express
 - PostgreSQL (primary database)
-- Prisma ORM
+- Drizzle ORM (edge-compatible)
 - Redis (caching, sessions)
 
 **AI/Voice**
@@ -118,8 +119,8 @@ sentra/
 │   ├── services/         # Business logic (90%+ test coverage)
 │   ├── api/              # API routes (75%+ test coverage)
 │   ├── utils/            # Utility functions (90%+ test coverage)
-│   └── lib/              # Third-party integrations
-├── src-tauri/            # Rust backend for native apps
+│   ├── lib/              # Third-party integrations
+│   └── hooks/            # Custom React hooks
 ├── tests/
 │   ├── unit/             # Unit tests
 │   ├── integration/      # Integration tests
@@ -129,6 +130,9 @@ sentra/
 │   ├── hooks/            # Quality enforcement hooks
 │   └── commands/         # Reusable commands
 └── docs/                 # Project documentation
+    ├── architecture/     # System design
+    ├── deployment/       # Deployment guides
+    └── features/         # Feature docs
 ```
 
 ## Development Standards
@@ -256,35 +260,48 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Known Gotchas
 
-### Voice Echo Prevention
-**Problem**: Sentra's voice output can trigger its own listening, causing echo loops
+### Voice System Architecture
+**Pattern**: Always-on microphone with browser echo cancellation (WebRTC mode)
 
-**Solution**: 1000ms delay after Sentra finishes speaking before re-enabling listening
+**CRITICAL DECISION (November 2025):**
+We chose **Option A: Trust Industry Pattern** for voice echo cancellation. This is documented in:
+- `/docs/architecture/VOICE-SYSTEM.md` - Decision 4
+- `/docs/decisions/ADR-001-VOICE-ECHO-CANCELLATION.md` - Full decision record
 
-**Location**: `src/lib/openai-voice.ts:145`
+**How it works**:
+- Microphone track remains enabled throughout the conversation
+- Browser's native echo cancellation (`echoCancellation: true`) prevents feedback loops
+- Audio playback stays in browser pipeline (HTMLAudioElement only)
+- Server-side VAD (Voice Activity Detection) handles turn detection
+- No manual track toggling needed - this is the industry standard used by ChatGPT voice
 
-```typescript
-// After TTS completes
-await new Promise(resolve => setTimeout(resolve, 1000))
-// Then resume listening
+**Why AudioWorklet was never needed:**
+- Web application runs natively in browser (Chrome, Safari, Firefox, Edge)
+- Browser's native echo cancellation works perfectly across all platforms
+- No desktop Tauri WKWebView limitations - we're 100% web-based now
+
+**Architecture:**
+```
+✅ CORRECT (echo cancellation works in all browsers):
+Microphone → getUserMedia → RTCPeerConnection → OpenAI
+    ↑ AEC compares signals ↓
+HTMLAudioElement ← RTCPeerConnection (browser sees both)
 ```
 
-### Tauri IPC Serialization
-**Problem**: Complex objects don't serialize properly across Rust/JS boundary
+**Location**: `src/lib/openai-realtime.ts`
 
-**Solution**: Use simple data structures (primitives, arrays, plain objects)
+**DO NOT**:
+- Implement AudioWorklet bypass to native audio
+- Manually toggle microphone (pauseRecording/resumeRecording)
+- Add artificial delays for echo prevention
+- Try to "improve" browser echo cancellation
 
-**Location**: `src-tauri/src/commands.rs`
-
-```rust
-// ✅ DO: Simple types
-#[tauri::command]
-fn get_config() -> ConfigData { }
-
-// ❌ DON'T: Complex types with methods
-#[tauri::command]
-fn get_service() -> Box<dyn Service> { }
-```
+**Why web-only is better**:
+- Echo cancellation works perfectly on all platforms (macOS, Windows, Linux, mobile)
+- No WKWebView audio limitations
+- No Tauri desktop integration complexity
+- Universal access - just open URL, no installation needed
+- Easier deployment and updates
 
 ### Next.js Server Components
 **Problem**: Can't use client-side APIs (localStorage, window) in Server Components
@@ -343,7 +360,9 @@ When working on Sentra with Claude Code agents:
 ```bash
 # Development
 npm run dev              # Start dev server
-npm run tauri dev        # Start Tauri app in dev mode
+npm run dev:safe         # Start dev server with crash recovery
+npm run build            # Production build
+npm run start            # Start production server
 
 # Testing
 npm test                 # Run tests in watch mode
@@ -354,12 +373,15 @@ npm test -- --coverage   # Run with coverage report
 npm run type-check       # TypeScript compilation
 npm run lint             # ESLint
 npm run format           # Prettier formatting
-npm run build            # Production build
 
-# Database
+# Database (Drizzle)
+npm run db:generate      # Generate migrations
 npm run db:migrate       # Run migrations
 npm run db:seed          # Seed database
-npm run db:reset         # Reset database (dev only)
+npm run db:studio        # Open Drizzle Studio (dev only)
+
+# Deployment
+# See docs/deployment/WEB-DEPLOYMENT.md
 ```
 
 ## Environment Variables
@@ -367,9 +389,9 @@ npm run db:reset         # Reset database (dev only)
 Required environment variables (create `.env` file in project root):
 
 ```bash
-# Database (SQLite for dev, PostgreSQL for production)
-DATABASE_URL="file:./prisma/dev.db"
-# Production: DATABASE_URL="postgresql://user:pass@host:5432/sentra"
+# Database (PostgreSQL - edge-compatible with Drizzle)
+DATABASE_URL="postgresql://user:pass@localhost:5432/sentra"
+# Vercel deployment: Uses @vercel/postgres automatically
 
 # OpenAI (optional for Phase 1)
 # OPENAI_API_KEY="sk-..."
@@ -420,4 +442,19 @@ DATABASE_URL="file:./prisma/dev.db"
 
 ---
 
-*Last updated: 2025-11-13 by Glen Barnhardt with help from Claude Code*
+*Last updated: 2025-11-19 by Glen Barnhardt with help from Claude Code*
+
+---
+
+## Edge-First Architecture
+
+**ORM Decision:** Drizzle (not Prisma)
+
+Sentra uses Drizzle ORM to enable Vercel Edge Runtime capabilities:
+- **Vercel Edge Functions** - Ultra-low latency globally
+- **Next.js 15 Server Actions** - Full support without limitations
+- **Edge Runtime** - 0ms cold starts worldwide
+
+Prisma 6.19.0 blocks Vercel Edge Runtime due to Node.js dependencies. Drizzle is edge-first and works everywhere.
+
+**See:** `docs/decisions/ADR-002-DRIZZLE-ORM-MIGRATION.md` for complete rationale

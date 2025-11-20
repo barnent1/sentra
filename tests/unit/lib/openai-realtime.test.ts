@@ -1,6 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { RealtimeConversation, type RealtimeConfig } from '@/lib/openai-realtime'
 
+/**
+ * NOTE: These tests document the current implementation which includes DEPRECATED
+ * pauseRecording() and resumeRecording() methods.
+ *
+ * The correct approach (industry standard) is:
+ * - Always-on microphone (track.enabled stays true)
+ * - Browser echo cancellation prevents feedback
+ * - Server-side VAD handles turn detection
+ *
+ * Tests that verify pauseRecording()/resumeRecording() behavior should eventually
+ * be updated or removed as the implementation moves to the always-on pattern.
+ */
+
 // Mock WebSocket
 class MockWebSocket {
   url: string
@@ -253,8 +266,10 @@ describe('RealtimeConversation', () => {
       expect((conversation as any).isRecording).toBe(false)
     })
 
-    it('should pause recording', async () => {
-      // ARRANGE
+    it.skip('should pause recording', async () => {
+      // DEPRECATED (ADR-001): Manual toggling no longer used
+      // pauseRecording() is now a no-op that just logs a warning
+      // This test documents old behavior and will be removed
       conversation = new RealtimeConversation(realtimeConfig)
       await conversation.connect()
       await conversation.startRecording()
@@ -266,8 +281,10 @@ describe('RealtimeConversation', () => {
       expect((conversation as any).isRecording).toBe(false)
     })
 
-    it('should resume recording', async () => {
-      // ARRANGE
+    it.skip('should resume recording', async () => {
+      // DEPRECATED (ADR-001): Manual toggling no longer used
+      // resumeRecording() is now a no-op that just logs a warning
+      // This test documents old behavior and will be removed
       conversation = new RealtimeConversation(realtimeConfig)
       await conversation.connect()
       await conversation.startRecording()
@@ -280,8 +297,10 @@ describe('RealtimeConversation', () => {
       expect((conversation as any).isRecording).toBe(true)
     })
 
-    it('should not resume if never started recording', () => {
-      // ARRANGE
+    it.skip('should not resume if never started recording', () => {
+      // DEPRECATED (ADR-001): Manual toggling no longer used
+      // resumeRecording() is now a no-op that just logs a warning
+      // This test documents old behavior and will be removed
       conversation = new RealtimeConversation(realtimeConfig)
 
       // ACT

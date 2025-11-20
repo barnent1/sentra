@@ -6,17 +6,21 @@
  */
 
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
 
-  // Create users
+  // Create users (password: demo123)
+  const hashedPassword = await bcrypt.hash('demo123', 10);
+
   const user1 = await prisma.user.create({
     data: {
       email: 'glen@sentra.ai',
       name: 'Glen Barnhardt',
+      password: hashedPassword,
     },
   });
 
@@ -24,6 +28,7 @@ async function main() {
     data: {
       email: 'demo@sentra.ai',
       name: 'Demo User',
+      password: hashedPassword,
     },
   });
 

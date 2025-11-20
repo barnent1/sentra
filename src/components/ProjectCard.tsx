@@ -2,7 +2,7 @@
 
 import { Volume2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { Project, SpecInfo } from "@/lib/tauri";
+import type { Project, SpecInfo } from "@/services/sentra-api";
 import "@/lib/i18n"; // Initialize i18n
 
 interface ProjectCardProps {

@@ -6,9 +6,8 @@ A voice-first AI control center that lets you talk to your codebase and watch AI
 
 Created by Glen Barnhardt with the help of Claude Code
 
-[![macOS](https://img.shields.io/badge/macOS-10.15+-blue.svg)](https://www.apple.com/macos)
+[![Web App](https://img.shields.io/badge/Web%20App-Live-blue.svg)](https://sentra.app)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
-[![Tauri](https://img.shields.io/badge/Tauri-2.x-orange.svg)](https://tauri.app/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5-black.svg)](https://nextjs.org/)
 [![Test Coverage](https://img.shields.io/badge/coverage-75%25+-brightgreen.svg)](docs/TESTING.md)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -231,11 +230,11 @@ Let's be honest about what's done and what's coming.
 - Stop hook prevents finishing with failures
 - Git bypass is impossible
 
-**Native macOS App**
-- Tauri 2.x (95% smaller than Electron)
+**Web Application**
 - Next.js 15 + React 19
 - TypeScript strict mode
-- Fast, native, beautiful
+- Fast, responsive, works everywhere
+- Progressive Web App (PWA) support
 
 ### 🚧 What's In Progress
 
@@ -253,19 +252,19 @@ Let's be honest about what's done and what's coming.
 
 ### 📋 What's Planned
 
-**Phase 2: Cross-Platform** (Months 3-4)
-- Linux desktop support
-- Windows desktop support
+**Phase 2: Enhanced Features** (Months 3-4)
 - Database layer (PostgreSQL + Prisma)
-- Cloud sync between devices
-- Credential proxy service (Security Phase 2)
-
-**Phase 3: Web Application** (Months 5-6)
-- Browser-based version (Vercel/Railway)
-- TOTP 2FA authentication
-- OAuth (GitHub, Google)
 - Multi-user teams
 - Real-time collaboration
+- Credential proxy service (Security Phase 2)
+- Mobile-responsive design
+
+**Phase 3: Enterprise Features** (Months 5-6)
+- TOTP 2FA authentication
+- OAuth (GitHub, Google)
+- SSO integration
+- Advanced analytics
+- Team management dashboards
 
 **Phase 4: Enterprise** (Months 7-12)
 - gVisor security (Phase 3)
@@ -280,14 +279,9 @@ See [Roadmap](docs/roadmap/) for detailed plans.
 
 ## Quick Start
 
-### Prerequisites
+**Live Demo:** https://sentra.vercel.app
 
-- macOS 10.15+ (Catalina or later)
-- Node.js 18+
-- OpenAI API key
-- Anthropic API key (for automation)
-
-### Installation (5 Minutes)
+### Local Development (5 Minutes)
 
 ```bash
 # 1. Clone repository
@@ -303,9 +297,21 @@ cp .env.example .env.local
 #   OPENAI_API_KEY=sk-...
 #   ANTHROPIC_API_KEY=sk-ant-...
 
-# 4. Start the app
-npm run tauri:dev
+# 4. Start the dev server
+npm run dev
+
+# 5. Open http://localhost:3000 in your browser
 ```
+
+### Web Deployment
+
+**Deploy to Vercel (Recommended):**
+```bash
+npm install -g vercel
+vercel
+```
+
+See [Web Deployment Guide](docs/deployment/WEB-DEPLOYMENT.md) for Netlify, Railway, or custom server deployments.
 
 ### First Conversation
 
@@ -323,12 +329,12 @@ That's it. The agent takes over from there.
 
 ## Technology Stack
 
-**Frontend (Native App)**
-- [Tauri 2.x](https://tauri.app/) - Rust backend, native WebView
+**Frontend (Web Application)**
 - [Next.js 15.5](https://nextjs.org/) - React 19, App Router, Server Components
 - [TypeScript 5.6](https://www.typescriptlang.org/) - Strict mode (no `any`, no `@ts-ignore`)
 - [TailwindCSS](https://tailwindcss.com/) - Utility-first styling
 - [shadcn/ui](https://ui.shadcn.com/) - Beautiful components
+- [React Query](https://tanstack.com/query) - Data fetching and caching
 
 **AI Services**
 - [OpenAI Whisper](https://openai.com/research/whisper) - Speech-to-text
@@ -353,18 +359,13 @@ That's it. The agent takes over from there.
 
 ```
 sentra/
-├── src/                      # Next.js frontend
+├── src/                      # Next.js application
 │   ├── app/                  # App Router pages
 │   ├── components/           # React components
-│   ├── lib/                  # OpenAI integration, Tauri IPC
-│   └── hooks/                # Custom React hooks
-│
-├── src-tauri/                # Rust backend
-│   └── src/
-│       ├── commands.rs       # Dashboard data (specs, projects)
-│       ├── specs.rs          # Spec management (save, version)
-│       ├── realtime_proxy.rs # WebSocket proxy for Realtime API
-│       └── settings.rs       # Settings storage
+│   ├── lib/                  # OpenAI integration, utilities
+│   ├── hooks/                # Custom React hooks
+│   ├── services/             # Business logic
+│   └── api/                  # API routes
 │
 ├── .github/workflows/        # GitHub Actions
 │   └── ai-agent.yml          # Agent automation workflow
@@ -386,26 +387,26 @@ sentra/
 └── docs/                     # Documentation
     ├── architecture/         # System design, security
     ├── features/             # Feature documentation
+    ├── deployment/           # Deployment guides
     └── roadmap/              # Future plans
 ```
 
 ---
 
-## Why Tauri?
+## Why Web Application?
 
-**vs Electron:**
-- **95% smaller bundle** (~600KB vs 100MB+)
-- **50% less memory usage**
-- **Better security** (no Node.js in renderer)
-- **Native OS integration** (menu bar, notifications)
-- **Rust performance** + safety
+**Decision:** November 2025 - Converted from Tauri desktop to web application
 
-**Trade-offs:**
-- macOS-first development (Linux/Windows coming in Phase 2)
-- Smaller ecosystem than Electron
-- Rust learning curve for contributors
+**Reason:** WKWebView on macOS cannot play WebRTC audio (Apple platform bug). Browser echo cancellation works perfectly in Chrome/Safari/Firefox. Voice is the core product.
 
-We prioritize **native experience** and **low resource usage** over broad platform support initially.
+**Advantages:**
+- **Universal access** - Works on any device with a browser
+- **No installation** - Instant access via URL
+- **Perfect voice** - Browser echo cancellation works flawlessly
+- **Easy updates** - Deploy once, everyone gets the update
+- **Cross-platform** - macOS, Windows, Linux, tablets, phones
+
+**Result:** Echo cancellation now works reliably on all platforms. No more WKWebView limitations. Voice-first AI works perfectly.
 
 ---
 
@@ -415,8 +416,10 @@ We prioritize **native experience** and **low resource usage** over broad platfo
 
 ```bash
 # Development
-npm run dev              # Start Next.js dev server (web preview)
-npm run tauri:dev        # Start Tauri app (native)
+npm run dev              # Start Next.js dev server
+npm run dev:safe         # Start dev server with crash recovery
+npm run build            # Production build
+npm run start            # Start production server
 
 # Testing
 npm test                 # Run tests in watch mode
@@ -428,10 +431,6 @@ npm test:e2e             # Run E2E tests (Playwright)
 npm run type-check       # TypeScript compilation (strict mode)
 npm run lint             # ESLint (0 errors, 0 warnings required)
 npm run format           # Prettier formatting
-npm run build            # Production build
-
-# Tauri
-npm run tauri:build      # Build native app for distribution
 ```
 
 ### Development Standards
@@ -607,15 +606,15 @@ We welcome contributions! This is an early-stage project with lots of opportunit
 
 **We're building the operating system for AI-powered development.**
 
-Today, Sentra is a macOS app that helps you build features faster with voice and automation.
+Today, Sentra is a web application that helps you build features faster with voice and automation.
 
-Tomorrow, Sentra will be:
-- **Cross-platform** (macOS, Linux, Windows, Web)
+Future planned features:
 - **Multi-user** (teams, real-time collaboration)
 - **Fully voice-controlled** (never touch keyboard)
 - **Hyper-personalized** (learns your patterns, your style)
 - **Cost-optimized** (AI model selection, caching, smart retries)
 - **Enterprise-ready** (SSO, audit logs, compliance)
+- **Mobile-optimized** (iOS, Android PWA support)
 
 **The goal:** Make building software as easy as having a conversation.
 
@@ -642,8 +641,8 @@ A: Yes. See [Security Architecture](docs/architecture/SECURITY-ARCHITECTURE.md).
 **Q: Can I use this in production?**
 A: Sentra itself is early-stage (use at your own risk). But the code Sentra generates? Absolutely - just review it carefully like you would any PR.
 
-**Q: Linux/Windows support?**
-A: Planned for Phase 2 (Months 3-4). Tauri supports all platforms, we just need to test and package for each one.
+**Q: Does it work on mobile?**
+A: The web interface is responsive and works on tablets. Full mobile optimization is planned for Phase 3.
 
 ---
 
@@ -658,16 +657,16 @@ MIT License - See [LICENSE](LICENSE) file for details.
 **Created by:** [Glen Barnhardt](https://github.com/barnent1) with the help of [Claude Code](https://claude.com/claude-code)
 
 **Powered by:**
-- [Tauri](https://tauri.app/) - Native app framework
 - [Next.js](https://nextjs.org/) - React framework
 - [OpenAI](https://openai.com/) - Voice and language models
 - [Anthropic](https://anthropic.com/) - Claude AI for agent execution
 - [shadcn/ui](https://ui.shadcn.com/) - Beautiful UI components
+- [Vercel](https://vercel.com/) - Deployment platform
 
 **Special Thanks:**
-- The Tauri team for building an amazing framework
 - Anthropic for Claude and the vision of helpful, honest, and harmless AI
 - OpenAI for pushing the boundaries of what's possible with voice
+- Vercel for making deployment effortless
 - The open-source community for inspiration and building blocks
 
 ---
@@ -678,14 +677,14 @@ MIT License - See [LICENSE](LICENSE) file for details.
 git clone https://github.com/barnent1/sentra.git
 cd sentra
 npm install
-npm run tauri:dev
+npm run dev
 ```
 
 **Questions?** Open a [GitHub Issue](https://github.com/barnent1/sentra/issues)
 
 **Want to contribute?** Read [CONTRIBUTING.md](CONTRIBUTING.md)
 
-**Releasing?** See [Release Process](docs/RELEASE-PROCESS.md) or [Quick Reference](docs/RELEASE-QUICKSTART.md)
+**Deploying?** See [Web Deployment Guide](docs/deployment/WEB-DEPLOYMENT.md)
 
 **Follow progress:** Star this repo and watch for updates
 
@@ -695,4 +694,4 @@ npm run tauri:dev
 
 Talk to your codebase. Watch AI implement features. Review in-app. Merge with one click.
 
-**[Download for macOS](#quick-start)** | **[Read the Docs](docs/)** | **[View Roadmap](docs/roadmap/)**
+**[Try Live Demo](#quick-start)** | **[Read the Docs](docs/)** | **[View Roadmap](docs/roadmap/)**

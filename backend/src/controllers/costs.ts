@@ -1,9 +1,7 @@
 // Cost tracking controller
 import { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { drizzleDb } from '@/services/database-drizzle'
 import type { CreateCostRequest, CostResponse } from '../types'
-
-const prisma = new PrismaClient()
 
 /**
  * Serialize cost for API response
@@ -53,9 +51,7 @@ export async function createCost(req: Request, res: Response): Promise<void> {
     }
 
     // Verify project exists and user has access
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-    })
+    const project = await drizzleDb.getProjectById(projectId)
 
     if (!project) {
       res.status(404).json({ error: 'Project not found' })
@@ -67,16 +63,14 @@ export async function createCost(req: Request, res: Response): Promise<void> {
       return
     }
 
-    // Create cost entry
-    const cost = await prisma.cost.create({
-      data: {
-        projectId,
-        amount,
-        model,
-        provider,
-        inputTokens: inputTokens ?? null,
-        outputTokens: outputTokens ?? null,
-      },
+    // Create cost entry (Drizzle service handles validation and defaults)
+    const cost = await drizzleDb.createCost({
+      projectId,
+      amount,
+      model,
+      provider: provider as any, // Provider is validated by Drizzle service
+      inputTokens,
+      outputTokens,
     })
 
     res.status(201).json({
@@ -103,22 +97,37 @@ export async function getCosts(req: Request, res: Response): Promise<void> {
 
     const { projectId } = req.query
 
-    // Build where clause
-    let whereClause: {
-      project: { userId: string }
-      projectId?: string
-    } = {
-      project: { userId: req.user.userId },
-    }
-
+    // If projectId specified, verify user owns it and get costs for that project
     if (projectId && typeof projectId === 'string') {
-      whereClause.projectId = projectId
+      const project = await drizzleDb.getProjectById(projectId)
+
+      if (!project) {
+        res.status(404).json({ error: 'Project not found' })
+        return
+      }
+
+      if (project.userId !== req.user.userId) {
+        res.status(403).json({ error: 'Access denied' })
+        return
+      }
+
+      const costs = await drizzleDb.getCostsByProject(projectId)
+      res.status(200).json({
+        costs: costs.map(serializeCost),
+      })
+      return
     }
 
-    const costs = await prisma.cost.findMany({
-      where: whereClause,
-      orderBy: { timestamp: 'desc' },
-    })
+    // Otherwise, get costs for all user's projects
+    const projects = await drizzleDb.listProjectsByUser(req.user.userId)
+    const allCosts = await Promise.all(
+      projects.map(p => drizzleDb.getCostsByProject(p.id))
+    )
+
+    // Flatten and sort by timestamp desc
+    const costs = allCosts
+      .flat()
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 
     res.status(200).json({
       costs: costs.map(serializeCost),

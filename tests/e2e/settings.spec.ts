@@ -344,7 +344,7 @@ test.describe('Settings Modal', () => {
       await expect(novaDescription).toBeVisible();
     });
 
-    test('should have Nova voice as recommended', async ({ page }) => {
+    test('should have Alloy voice as recommended', async ({ page }) => {
       // ARRANGE
       const settingsButton = page.locator('button[data-testid="settings-button"], button:has([class*="Settings"])').first();
 
@@ -353,8 +353,8 @@ test.describe('Settings Modal', () => {
       await page.waitForTimeout(200);
 
       // ASSERT
-      const novaLabel = page.locator('label:has-text("Nova")');
-      const labelText = await novaLabel.textContent();
+      const alloyLabel = page.locator('label:has-text("Alloy")');
+      const labelText = await alloyLabel.textContent();
       expect(labelText).toContain('⭐'); // Recommended star
     });
 
@@ -506,8 +506,8 @@ test.describe('Settings Modal', () => {
       await expect(saveButton).toBeVisible();
     });
 
-    test('should display error message in browser mode', async ({ page }) => {
-      // Note: This only applies when running in browser (not Tauri)
+    test('should save settings successfully in browser mode', async ({ page }) => {
+      // Note: Now browser mode uses localStorage and should work
       const isTauri = await page.evaluate(() => '__TAURI_INTERNALS__' in window);
       if (isTauri) {
         test.skip();
@@ -522,18 +522,16 @@ test.describe('Settings Modal', () => {
       const nameInput = page.locator('input[placeholder*="Glen"], input[type="text"]').first();
       await nameInput.fill('Test User');
 
-      // Setup dialog handler
-      page.on('dialog', async dialog => {
-        expect(dialog.message()).toContain('browser mode');
-        await dialog.accept();
-      });
-
       // ACT
       const saveButton = page.locator('button:has-text("Save Settings")');
       await saveButton.click();
 
-      // Wait for dialog
+      // Wait for save to complete
       await page.waitForTimeout(500);
+
+      // ASSERT - Modal should close (indicating success)
+      const modal = page.locator('text=Your Name').first();
+      await expect(modal).not.toBeVisible();
     });
 
     test('should maintain form state when reopening modal', async ({ page }) => {

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test localStorage Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        button {
+            background: #8b5cf6;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #7c3aed;
+        }
+        pre {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        input {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background: #2d2d2d;
+            color: #fff;
+            margin: 5px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Sentra localStorage Settings</h1>
+
+    <div>
+        <h2>Save Settings</h2>
+        <input type="text" id="userName" placeholder="User Name (e.g. Glen)" />
+        <input type="text" id="openaiKey" placeholder="OpenAI API Key" />
+        <input type="text" id="anthropicKey" placeholder="Anthropic API Key" />
+        <br/>
+        <button onclick="saveTestSettings()">Save to localStorage</button>
+    </div>
+
+    <div>
+        <h2>Load Settings</h2>
+        <button onclick="loadTestSettings()">Load from localStorage</button>
+        <button onclick="clearTestSettings()">Clear localStorage</button>
+    </div>
+
+    <div>
+        <h2>Output</h2>
+        <pre id="output">Click "Load from localStorage" to see stored settings</pre>
+    </div>
+
+    <script>
+        function saveTestSettings() {
+            const settings = {
+                userName: document.getElementById('userName').value || 'Glen',
+                voice: 'alloy',
+                openaiApiKey: document.getElementById('openaiKey').value || '',
+                anthropicApiKey: document.getElementById('anthropicKey').value || '',
+                githubToken: '',
+                githubRepoOwner: '',
+                githubRepoName: '',
+                notificationsEnabled: true,
+                notifyOnCompletion: true,
+                notifyOnFailure: true,
+                notifyOnStart: false,
+                language: 'en',
+            };
+
+            localStorage.setItem('sentra_settings', JSON.stringify(settings));
+            document.getElementById('output').textContent =
+                'Settings saved to localStorage:\n\n' + JSON.stringify(settings, null, 2);
+        }
+
+        function loadTestSettings() {
+            const stored = localStorage.getItem('sentra_settings');
+            if (stored) {
+                const settings = JSON.parse(stored);
+                document.getElementById('output').textContent =
+                    'Settings loaded from localStorage:\n\n' + JSON.stringify(settings, null, 2);
+            } else {
+                document.getElementById('output').textContent =
+                    'No settings found in localStorage';
+            }
+        }
+
+        function clearTestSettings() {
+            localStorage.removeItem('sentra_settings');
+            document.getElementById('output').textContent =
+                'Settings cleared from localStorage';
+        }
+
+        // Load on page load
+        loadTestSettings();
+    </script>
+</body>
+</html>

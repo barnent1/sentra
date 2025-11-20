@@ -5,13 +5,14 @@ import { Activity, Folder, DollarSign, TrendingUp, Loader2, Settings as Settings
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Settings } from "@/components/Settings";
 import { ArchitectChat } from "@/components/ArchitectChat";
 import { SpecViewer } from "@/components/SpecViewer";
 import { ProjectCard } from "@/components/ProjectCard";
 import { ProjectDetailPanel } from "@/components/ProjectDetailPanel";
 import { NewProjectModal } from "@/components/NewProjectModal";
-import { createGithubIssue, approveSpecVersion, setProjectMuted, type SpecInfo, type Project } from "@/lib/tauri";
+import { createGithubIssue, approveSpecVersion, setProjectMuted, type SpecInfo, type Project } from "@/services/sentra-api";
 import "@/lib/i18n"; // Initialize i18n
 
 export default function Home() {
@@ -38,7 +39,7 @@ export default function Home() {
 
     if (pendingSpec) {
       try {
-        const { listSpecs, getSpec } = await import('@/lib/tauri');
+        const { listSpecs, getSpec } = await import('@/services/sentra-api');
 
         // Get the full spec content and metadata
         const { content, info } = await getSpec(
@@ -108,7 +109,7 @@ export default function Home() {
       console.log(`Rejecting spec for ${selectedSpec.name}`);
 
       // Delete the spec (or specific version)
-      const { deleteSpec } = await import('@/lib/tauri');
+      const { deleteSpec } = await import('@/services/sentra-api');
       const versionFile = selectedSpec.specInfo.filePath.split('/').pop() || '';
 
       await deleteSpec(
@@ -185,10 +186,10 @@ export default function Home() {
     );
   }
 
-  const remainingBudget = stats ? stats.monthlyBudget - stats.todayCost : 0;
+  const remainingBudget = stats ? (stats.monthlyBudget ?? 100) - (stats.todayCost ?? 0) : 0;
 
   return (
-    <>
+    <ProtectedRoute>
       {/* Skip Links for Accessibility */}
       <a
         href="#main-content"
@@ -323,7 +324,7 @@ export default function Home() {
             <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.todayCost')}</span>
             <DollarSign className="w-4 h-4 text-violet-500" />
           </div>
-          <p className="text-3xl font-bold text-[#FAFAFA]">${stats?.todayCost.toFixed(2) || '0.00'}</p>
+          <p className="text-3xl font-bold text-[#FAFAFA]">${(stats?.todayCost ?? 0).toFixed(2)}</p>
           <p className="text-xs text-[#A1A1AA] mt-1">
             ${remainingBudget.toFixed(2)} {t('dashboard.stats.remaining')}
           </p>
@@ -334,9 +335,9 @@ export default function Home() {
             <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.successRate')}</span>
             <TrendingUp className="w-4 h-4 text-violet-500" />
           </div>
-          <p className="text-3xl font-bold text-[#FAFAFA]">{stats?.successRate || 0}%</p>
+          <p className="text-3xl font-bold text-[#FAFAFA]">{stats?.successRate ?? 0}%</p>
           <p className="text-xs text-green-400 mt-1">
-            {stats && stats.successRate >= 90 ? t('dashboard.stats.thisWeek') : t('dashboard.stats.improving')}
+            {stats && (stats.successRate ?? 0) >= 90 ? t('dashboard.stats.thisWeek') : t('dashboard.stats.improving')}
           </p>
         </div>
       </div>
@@ -374,7 +375,7 @@ export default function Home() {
                   <span>•</span>
                   <span>{t('dashboard.activeAgentsSection.elapsed', { minutes: agent.elapsedMinutes })}</span>
                   <span>•</span>
-                  <span>{t('dashboard.activeAgentsSection.spent', { cost: agent.cost.toFixed(2) })}</span>
+                  <span>{t('dashboard.activeAgentsSection.spent', { cost: (agent.cost ?? 0).toFixed(2) })}</span>
                 </div>
               </div>
             ))}
@@ -411,6 +412,6 @@ export default function Home() {
         )}
       </div>
       </main>
-    </>
+    </ProtectedRoute>
   );
 }

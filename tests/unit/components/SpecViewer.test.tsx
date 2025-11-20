@@ -722,7 +722,7 @@ const test = () => {
       }
 
       // Mock getSpecVersions to return versions
-      vi.doMock('@/lib/tauri', () => ({
+      vi.doMock('@/services/sentra-api', () => ({
         getSpecVersions: vi.fn().mockResolvedValue([
           { file: 'v1.md', version: 1, created: '2025-01-14T14:30:00Z', size: 512 },
           { file: 'v2.md', version: 2, created: '2025-01-15T14:30:00Z', size: 1024 },
@@ -794,7 +794,7 @@ const test = () => {
       }
 
       // Mock getSpecVersions to return versions
-      vi.doMock('@/lib/tauri', () => ({
+      vi.doMock('@/services/sentra-api', () => ({
         getSpecVersions: vi.fn().mockResolvedValue([
           { file: 'v1.md', version: 1, created: '2025-01-14T14:30:00Z', size: 512 },
           { file: 'v2.md', version: 2, created: '2025-01-15T14:30:00Z', size: 1024 },

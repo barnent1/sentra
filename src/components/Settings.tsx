@@ -1,10 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Settings as SettingsIcon, Volume2, Globe } from 'lucide-react';
+import { X, Settings as SettingsIcon, Volume2, Globe, CheckCircle, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getSettings, saveSettings, speakNotification, type Settings as SettingsType } from '@/lib/tauri';
+import { getSettings, saveSettings, type Settings as SettingsType } from '@/lib/settings';
+import { speakNotification } from '@/services/sentra-api';
 import '@/lib/i18n'; // Initialize i18n
+
+// Toast notification types
+type ToastType = 'success' | 'error';
+interface Toast {
+  type: ToastType;
+  message: string;
+}
 
 // Voice compatibility:
 // TTS API (/v1/audio/speech) - 9 voices: alloy, ash, coral, echo, fable, nova, onyx, sage, shimmer
@@ -57,6 +65,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [testingVoice, setTestingVoice] = useState(false);
+  const [toast, setToast] = useState<Toast | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -83,7 +92,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
   async function handleSave() {
     try {
       setSaving(true);
-      console.log('Saving settings:', settings);
+      setToast(null);
 
       // Update i18n language before saving
       if (settings.language && settings.language !== i18n.language) {
@@ -91,12 +100,26 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
       }
 
       await saveSettings(settings);
-      console.log('Settings saved successfully');
-      onClose();
+
+      // Show success toast
+      setToast({
+        type: 'success',
+        message: 'Settings saved successfully',
+      });
+
+      // Close modal after short delay to show success message
+      setTimeout(() => {
+        onClose();
+      }, 1500);
     } catch (error) {
       console.error('Failed to save settings:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(t('settings.errors.saveFailed', { error: errorMessage }));
+
+      // Show error toast
+      setToast({
+        type: 'error',
+        message: `Failed to save settings: ${errorMessage}`,
+      });
     } finally {
       setSaving(false);
     }
@@ -444,6 +467,30 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 Cancel
               </button>
             </div>
+
+            {/* Toast Notification */}
+            {toast && (
+              <div
+                className={`mt-4 p-4 rounded-lg flex items-center gap-3 ${
+                  toast.type === 'success'
+                    ? 'bg-green-500/10 border border-green-500/50'
+                    : 'bg-red-500/10 border border-red-500/50'
+                }`}
+              >
+                {toast.type === 'success' ? (
+                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                )}
+                <span
+                  className={`text-sm ${
+                    toast.type === 'success' ? 'text-green-300' : 'text-red-300'
+                  }`}
+                >
+                  {toast.message}
+                </span>
+              </div>
+            )}
           </div>
         )}
       </div>

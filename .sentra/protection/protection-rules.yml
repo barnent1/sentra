@@ -1,0 +1,145 @@
+# Protection Rules for Existing Codebase
+#
+# These rules protect existing functionality from accidental breaking changes.
+# Meta Orchestrator and Implementation agents must follow these rules.
+#
+# Generated: 2025-11-17T14:11:38.988349
+
+version: 1.0
+
+# Critical paths that must not be broken
+critical_paths:
+  - path: src/services/
+    reason: Business logic layer - breaking changes affect core functionality
+    protection: require_tests
+    min_coverage: 90
+
+  - path: backend/src/
+    reason: Backend API layer - breaking changes affect client applications
+    protection: require_tests
+    min_coverage: 90
+
+  - path: prisma/schema.prisma
+    reason: Database schema - changes require migrations
+    protection: require_migration
+    review_required: true
+
+  - path: src/app/
+    reason: Next.js pages - breaking changes affect user-facing routes
+    protection: require_e2e_tests
+
+# Detected frameworks and patterns
+detected_frameworks:
+  - Next.js
+  - React
+  - Express.js
+  - Prisma ORM
+  - TailwindCSS
+  - Vitest
+  - React Query
+
+# Pattern preservation rules
+patterns:
+  - name: TypeScript Strict Mode
+    description: All code must use TypeScript strict mode
+    validation: tsc --noEmit
+    enforce: true
+
+  - name: Test Coverage Thresholds
+    description: Maintain minimum test coverage
+    thresholds:
+      overall: 75
+      services: 90
+      utils: 90
+    enforce: true
+
+  - name: No Bypassing Git Hooks
+    description: Git hooks enforce quality gates
+    blocked_commands:
+      - git commit --no-verify
+      - git push --no-verify
+    enforce: true
+
+# Change restrictions
+change_restrictions:
+  database_schema:
+    - Must create migration file
+    - Must update seed data if needed
+    - Must verify backward compatibility
+
+  api_endpoints:
+    - Must maintain backward compatibility
+    - Must update API documentation
+    - Must add integration tests
+
+  authentication:
+    - Requires security review
+    - Must not expose credentials
+    - Must maintain session compatibility
+
+# Required reviews for sensitive changes
+review_required:
+  - pattern: "src/services/auth"
+    reason: Authentication changes are security-sensitive
+    reviewers: ["security-auditor"]
+
+  - pattern: "prisma/schema.prisma"
+    reason: Database schema changes require careful review
+    reviewers: ["code-reviewer"]
+
+  - pattern: "backend/src/middleware/auth"
+    reason: Authorization middleware is security-critical
+    reviewers: ["security-auditor", "code-reviewer"]
+
+# Safe modification zones
+safe_zones:
+  - path: docs/
+    reason: Documentation changes are low-risk
+    protection: none
+
+  - path: tests/
+    reason: Test additions are encouraged
+    protection: none
+
+  - path: .sentra/
+    reason: Sentra configuration updates are safe
+    protection: none
+
+# Breaking change detection
+breaking_changes:
+  detect:
+    - Removing exported functions
+    - Changing function signatures (parameters, return types)
+    - Removing database columns
+    - Changing API response formats
+    - Removing environment variables
+
+  action: block_and_notify
+
+# Migration requirements
+migrations:
+  database:
+    tool: prisma
+    command: npm run db:migrate
+    verify: Run seed to ensure data compatibility
+
+  environment:
+    file: .env.example
+    action: Update .env.example with new variables
+
+# Monitoring
+monitoring:
+  track_changes:
+    - File modifications in critical paths
+    - Test coverage changes
+    - Migration files created
+    - Breaking changes detected
+
+  alerts:
+    - Coverage drops below threshold
+    - Breaking change detected in critical path
+    - Migration required but not created
+
+---
+# Auto-generated from codebase analysis
+# Do not manually edit this file - regenerate with init-existing-project.py

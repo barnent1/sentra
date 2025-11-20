@@ -35,7 +35,25 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# tauri
-/src-tauri/target
-
 /src/generated/prisma
+
+# dev server
+.dev-server.pid
+.dev-server.log
+
+# Sentra runtime files
+.sentra/progress.json
+.sentra/dependency-graph.yml  # Test file only - projects will have their own
+.sentra/architect-sessions/*/session-*.md
+.sentra/metrics/*.json
+.sentra/telemetry/*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+.venv/
+env/
+ENV/

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { GitCommit, Play, CheckCircle, AlertTriangle, Wrench, RefreshCw } from 'lucide-react';
-import { getActivityEvents, type ActivityEvent } from '@/lib/tauri';
+import { getActivityEvents, type ActivityEvent } from '@/services/sentra-api';
 
 interface ActivityFeedProps {
   project?: string;

@@ -32,7 +32,7 @@ Sentra uses a comprehensive testing strategy with **mandatory coverage requireme
 - **Playwright** - End-to-end tests
 - **Testing Library** - React component tests
 - **Coverage: V8** - Code coverage reporting
-- **Cargo Test** - Rust tests for Tauri backend
+- **Cargo Test** - (No longer applicable - Sentra is now a web application)
 
 ### Why Testing Matters
 

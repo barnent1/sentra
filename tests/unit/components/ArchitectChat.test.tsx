@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ArchitectChat } from '@/components/ArchitectChat'
-import * as tauri from '@/lib/tauri'
+import * as tauri from '@/services/sentra-api'
 import { RealtimeConversation } from '@/lib/openai-realtime'
 
 // Mock the tauri module
-vi.mock('@/lib/tauri', () => ({
+vi.mock('@/services/sentra-api', () => ({
   getSettings: vi.fn(),
   chatWithArchitect: vi.fn(),
   getProjectContext: vi.fn(),
@@ -291,7 +291,7 @@ describe('ArchitectChat', () => {
       // ASSERT
       await waitFor(() => {
         expect(
-          screen.getByText('Failed to start voice conversation. Check that the proxy is running.')
+          screen.getByText('Failed to start voice conversation. Please check your network connection.')
         ).toBeInTheDocument()
       })
     })
@@ -516,7 +516,7 @@ describe('ArchitectChat', () => {
       // ASSERT
       await waitFor(() => {
         expect(
-          screen.getByText('Failed to get response. Please check your API key.')
+          screen.getByText('Failed to get response: API error')
         ).toBeInTheDocument()
       })
     })

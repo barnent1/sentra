@@ -10,10 +10,6 @@ export default defineConfig({
 
     // Setup files (only for frontend tests - backend tests use @vitest-environment node)
     setupFiles: ['./tests/setup/vitest.setup.ts'],
-    environmentMatchGlobs: [
-      // Backend tests use node environment and skip jsdom setup
-      ['backend/**', 'node'],
-    ],
 
     // Globals (enables describe, it, expect without imports)
     globals: true,

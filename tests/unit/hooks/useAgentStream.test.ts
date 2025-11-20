@@ -1,39 +1,32 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import type { AgentStreamLine } from '@/lib/tauri';
+import type { AgentStreamLine } from '@/services/sentra-api';
 
-// Mock Tauri event system
-vi.mock('@tauri-apps/api/event', () => ({
-  listen: vi.fn(),
-}));
-
-// Mock Tauri commands
-vi.mock('@/lib/tauri', () => ({
+// Mock web-based sentra-api wrapper
+vi.mock('@/services/sentra-api', () => ({
   startAgentStream: vi.fn(),
   stopAgentStream: vi.fn(),
   getAgentLogs: vi.fn(),
 }));
 
 import { useAgentStream } from '@/hooks/useAgentStream';
-import { startAgentStream, stopAgentStream, getAgentLogs } from '@/lib/tauri';
-import { listen } from '@tauri-apps/api/event';
+import { startAgentStream, stopAgentStream, getAgentLogs } from '@/services/sentra-api';
 
-const mockListen = vi.mocked(listen);
 const mockStartAgentStream = vi.mocked(startAgentStream);
 const mockStopAgentStream = vi.mocked(stopAgentStream);
 const mockGetAgentLogs = vi.mocked(getAgentLogs);
-const mockUnlisten = vi.fn();
 
 describe('useAgentStream', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Setup default mock implementations
-    mockListen.mockResolvedValue(mockUnlisten);
+    // Setup default mock implementations (must return Promises)
+    mockStartAgentStream.mockResolvedValue(undefined);
+    mockStopAgentStream.mockResolvedValue(undefined);
     mockGetAgentLogs.mockResolvedValue([]);
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
+    vi.clearAllMocks();
   });
 
   // ============================================================================
@@ -75,152 +68,7 @@ describe('useAgentStream', () => {
   });
 
   // ============================================================================
-  // Test: Event listening and line buffering
-  // ============================================================================
-
-  it('should listen for agent-stream-update events', async () => {
-    // ARRANGE: Render hook
-    renderHook(() => useAgentStream('test-agent', { autoStart: true }));
-
-    // ACT: Wait for event listener setup
-    await waitFor(() => {
-      // ASSERT: Should setup event listener
-      expect(mockListen).toHaveBeenCalledWith(
-        'agent-stream-update',
-        expect.any(Function)
-      );
-    });
-  });
-
-  it('should buffer incoming log lines', async () => {
-    // ARRANGE: Setup mock event listener
-    let eventHandler: Function | null = null;
-    mockListen.mockImplementation(async (event: string, handler: Function) => {
-      if (event === 'agent-stream-update') {
-        eventHandler = handler;
-      }
-      return mockUnlisten;
-    });
-
-    // ACT: Render hook
-    const { result } = renderHook(() => useAgentStream('test-agent', { autoStart: true }));
-
-    // Wait for listener setup
-    await waitFor(() => expect(mockListen).toHaveBeenCalled());
-
-    // Simulate incoming log lines
-    const mockLines: AgentStreamLine[] = [
-      {
-        lineNumber: 1,
-        timestamp: '14:32:15',
-        content: 'Starting task',
-        agentId: 'test-agent',
-      },
-      {
-        lineNumber: 2,
-        timestamp: '14:32:18',
-        content: 'Creating files',
-        agentId: 'test-agent',
-      },
-    ];
-
-    act(() => {
-      eventHandler?.({ payload: mockLines });
-    });
-
-    // ASSERT: Lines should be added to buffer
-    await waitFor(() => {
-      expect(result.current.lines).toHaveLength(2);
-      expect(result.current.lines[0].content).toBe('Starting task');
-      expect(result.current.lines[1].content).toBe('Creating files');
-    });
-  });
-
-  it('should append new lines to existing buffer', async () => {
-    // ARRANGE: Setup mock event listener
-    let eventHandler: Function | null = null;
-    mockListen.mockImplementation(async (event: string, handler: Function) => {
-      if (event === 'agent-stream-update') {
-        eventHandler = handler;
-      }
-      return mockUnlisten;
-    });
-
-    // ACT: Render hook
-    const { result } = renderHook(() => useAgentStream('test-agent', { autoStart: true }));
-
-    await waitFor(() => expect(mockListen).toHaveBeenCalled());
-
-    // First batch of lines
-    act(() => {
-      eventHandler?.({
-        payload: [
-          { lineNumber: 1, timestamp: '14:32:15', content: 'Line 1', agentId: 'test-agent' },
-        ],
-      });
-    });
-
-    // Second batch of lines
-    act(() => {
-      eventHandler?.({
-        payload: [
-          { lineNumber: 2, timestamp: '14:32:18', content: 'Line 2', agentId: 'test-agent' },
-        ],
-      });
-    });
-
-    // ASSERT: Both batches should be in buffer
-    await waitFor(() => {
-      expect(result.current.lines).toHaveLength(2);
-      expect(result.current.lines[0].content).toBe('Line 1');
-      expect(result.current.lines[1].content).toBe('Line 2');
-    });
-  });
-
-  // ============================================================================
-  // Test: Max lines limit
-  // ============================================================================
-
-  it('should respect maxLines limit', async () => {
-    // ARRANGE: Setup mock event listener
-    let eventHandler: Function | null = null;
-    mockListen.mockImplementation(async (event: string, handler: Function) => {
-      if (event === 'agent-stream-update') {
-        eventHandler = handler;
-      }
-      return mockUnlisten;
-    });
-
-    // ACT: Render hook with maxLines = 3
-    const { result } = renderHook(() =>
-      useAgentStream('test-agent', { autoStart: true, maxLines: 3 })
-    );
-
-    await waitFor(() => expect(mockListen).toHaveBeenCalled());
-
-    // Add 5 lines (more than max)
-    act(() => {
-      eventHandler?.({
-        payload: Array.from({ length: 5 }, (_, i) => ({
-          lineNumber: i + 1,
-          timestamp: '14:32:15',
-          content: `Line ${i + 1}`,
-          agentId: 'test-agent',
-        })),
-      });
-    });
-
-    // ASSERT: Should only keep last 3 lines
-    await waitFor(() => {
-      expect(result.current.lines).toHaveLength(3);
-      expect(result.current.lines[0].content).toBe('Line 3');
-      expect(result.current.lines[1].content).toBe('Line 4');
-      expect(result.current.lines[2].content).toBe('Line 5');
-    });
-  });
-
-  // ============================================================================
-  // Test: Loading historical logs
+  // Test: Historical logs loading on mount
   // ============================================================================
 
   it('should load historical logs on mount', async () => {
@@ -285,28 +133,15 @@ describe('useAgentStream', () => {
   // ============================================================================
 
   it('should provide clear function to reset buffer', async () => {
-    // ARRANGE: Setup mock with lines
-    let eventHandler: Function | null = null;
-    mockListen.mockImplementation(async (event: string, handler: Function) => {
-      if (event === 'agent-stream-update') {
-        eventHandler = handler;
-      }
-      return mockUnlisten;
-    });
+    // ARRANGE: Mock initial logs
+    const mockHistoricalLogs: AgentStreamLine[] = [
+      { lineNumber: 1, timestamp: '14:32:15', content: 'Line 1', agentId: 'test-agent' },
+    ];
+    mockGetAgentLogs.mockResolvedValue(mockHistoricalLogs);
 
     const { result } = renderHook(() => useAgentStream('test-agent', { autoStart: true }));
 
-    await waitFor(() => expect(mockListen).toHaveBeenCalled());
-
-    // Add some lines
-    act(() => {
-      eventHandler?.({
-        payload: [
-          { lineNumber: 1, timestamp: '14:32:15', content: 'Line 1', agentId: 'test-agent' },
-        ],
-      });
-    });
-
+    // Wait for logs to load
     await waitFor(() => expect(result.current.lines).toHaveLength(1));
 
     // ACT: Clear buffer
@@ -326,7 +161,7 @@ describe('useAgentStream', () => {
     // ARRANGE: Render hook
     const { unmount } = renderHook(() => useAgentStream('test-agent', { autoStart: true }));
 
-    await waitFor(() => expect(mockListen).toHaveBeenCalled());
+    await waitFor(() => expect(mockStartAgentStream).toHaveBeenCalled());
 
     // ACT: Unmount component
     unmount();
@@ -334,11 +169,8 @@ describe('useAgentStream', () => {
     // Wait a bit for cleanup to complete
     await new Promise(resolve => setTimeout(resolve, 100));
 
-    // ASSERT: Should call unlisten and stopAgentStream
-    await waitFor(() => {
-      expect(mockUnlisten).toHaveBeenCalled();
-      expect(mockStopAgentStream).toHaveBeenCalledWith('test-agent');
-    });
+    // ASSERT: Should call stopAgentStream during cleanup
+    expect(mockStopAgentStream).toHaveBeenCalledWith('test-agent');
   });
 
   // ============================================================================

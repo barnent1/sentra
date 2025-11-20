@@ -2,7 +2,7 @@
 import { Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
-import { PrismaClient } from '@prisma/client'
+import { drizzleDb } from '@/services/database-drizzle'
 import type {
   RegisterRequest,
   LoginRequest,
@@ -11,15 +11,13 @@ import type {
   JWTPayload,
 } from '../types'
 
-const prisma = new PrismaClient()
-
 // Get JWT secrets from environment
-const JWT_SECRET = process.env.JWT_SECRET
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || JWT_SECRET
-
-if (!JWT_SECRET) {
+if (!process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET environment variable is not set')
 }
+
+const JWT_SECRET: string = process.env.JWT_SECRET
+const JWT_REFRESH_SECRET: string = process.env.JWT_REFRESH_SECRET || JWT_SECRET
 
 const SALT_ROUNDS = 10
 const TOKEN_EXPIRY = '1h'
@@ -55,7 +53,7 @@ function generateTokens(userId: string, email: string) {
   const payload: JWTPayload = { userId, email }
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRY })
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET!, {
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRY,
   })
 
@@ -92,9 +90,7 @@ export async function register(req: Request, res: Response): Promise<void> {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    })
+    const existingUser = await drizzleDb.getUserByEmail(email)
 
     if (existingUser) {
       res.status(400).json({ error: 'User with this email already exists' })
@@ -104,28 +100,18 @@ export async function register(req: Request, res: Response): Promise<void> {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS)
 
-    // Generate tokens
-    const tempUserId = 'temp' // Will be replaced with actual ID
-    const { token, refreshToken } = generateTokens(tempUserId, email)
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name: name || null,
-        refreshToken,
-      },
+    // Create user (Drizzle service handles user creation)
+    const user = await drizzleDb.createUser({
+      email,
+      password: hashedPassword,
+      name: name || undefined,
     })
 
-    // Generate real tokens with actual user ID
+    // Generate tokens with actual user ID
     const tokens = generateTokens(user.id, user.email)
 
     // Update user with refresh token
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken: tokens.refreshToken },
-    })
+    await drizzleDb.updateUserRefreshToken(user.id, tokens.refreshToken)
 
     const response: AuthResponse = {
       token: tokens.token,
@@ -159,9 +145,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     }
 
     // Find user
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
+    const user = await drizzleDb.getUserByEmail(email)
 
     if (!user) {
       res.status(401).json({ error: 'Invalid credentials' })
@@ -180,10 +164,7 @@ export async function login(req: Request, res: Response): Promise<void> {
     const { token, refreshToken } = generateTokens(user.id, user.email)
 
     // Update refresh token in database
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken },
-    })
+    await drizzleDb.updateUserRefreshToken(user.id, refreshToken)
 
     const response: AuthResponse = {
       token,
@@ -228,9 +209,7 @@ export async function refreshToken(
     }
 
     // Find user and verify refresh token matches
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-    })
+    const user = await drizzleDb.getUserById(decoded.userId)
 
     if (!user || user.refreshToken !== refreshToken) {
       res.status(401).json({ error: 'Invalid refresh token' })
@@ -241,10 +220,7 @@ export async function refreshToken(
     const tokens = generateTokens(user.id, user.email)
 
     // Update refresh token in database
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { refreshToken: tokens.refreshToken },
-    })
+    await drizzleDb.updateUserRefreshToken(user.id, tokens.refreshToken)
 
     const response: AuthResponse = {
       token: tokens.token,
@@ -278,9 +254,7 @@ export async function getCurrentUser(
     }
 
     // Find user
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.userId },
-    })
+    const user = await drizzleDb.getUserById(req.user.userId)
 
     if (!user) {
       res.status(404).json({ error: 'User not found' })

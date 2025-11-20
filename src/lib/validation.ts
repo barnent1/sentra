@@ -144,7 +144,7 @@ export const AudioDataSchema = z.instanceof(Uint8Array)
 export function validateOrThrow<T>(schema: z.ZodSchema<T>, data: unknown): T {
   const result = schema.safeParse(data)
   if (!result.success) {
-    const errors = result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
+    const errors = result.error.issues.map(e => `${e.path.join('.')}: ${e.message}`).join(', ')
     throw new Error(`Validation failed: ${errors}`)
   }
   return result.data
@@ -156,7 +156,7 @@ export function validateOrThrow<T>(schema: z.ZodSchema<T>, data: unknown): T {
  * @param data Data to validate
  * @returns Validation result
  */
-export function validate<T>(schema: z.ZodSchema<T>, data: unknown): z.SafeParseReturnType<unknown, T> {
+export function validate<T>(schema: z.ZodSchema<T>, data: unknown) {
   return schema.safeParse(data)
 }
 

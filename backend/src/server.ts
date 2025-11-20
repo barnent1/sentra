@@ -9,12 +9,16 @@ import { errorHandler, notFoundHandler } from './middleware/error-handler'
 
 // Routes
 import authRoutes from './routes/auth'
+import dashboardRoutes from './routes/dashboard'
 import projectRoutes from './routes/projects'
+import agentRoutes from './routes/agents'
 import costRoutes from './routes/costs'
 import activityRoutes from './routes/activity'
+import settingsRoutes from './routes/settings'
+import githubRoutes from './routes/github'
 
 // Environment validation
-const requiredEnvVars = ['JWT_SECRET', 'DATABASE_URL']
+const requiredEnvVars = ['JWT_SECRET', 'DATABASE_URL', 'ENCRYPTION_SECRET']
 for (const envVar of requiredEnvVars) {
   if (!process.env[envVar]) {
     console.error(`Error: ${envVar} environment variable is required`)
@@ -54,9 +58,13 @@ export function createApp(): Express {
 
   // API routes
   app.use('/api/auth', authRoutes)
+  app.use('/api/dashboard', dashboardRoutes)
   app.use('/api/projects', projectRoutes)
+  app.use('/api/agents', agentRoutes)
   app.use('/api/costs', costRoutes)
   app.use('/api/activity', activityRoutes)
+  app.use('/api/settings', settingsRoutes)
+  app.use('/api/github', githubRoutes)
 
   // Error handling
   app.use(notFoundHandler)

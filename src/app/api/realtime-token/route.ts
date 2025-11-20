@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+// Enable Vercel Edge Runtime for faster response times
+export const runtime = 'edge';
+
 export async function POST(request: NextRequest) {
   try {
     // Get OpenAI API key from request body (passed from Tauri settings)

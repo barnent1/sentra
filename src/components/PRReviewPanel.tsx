@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { X, GitBranch, Check, AlertCircle, Clock } from 'lucide-react';
-import type { PullRequestData } from '@/lib/tauri';
-import { getPullRequest, getPRDiff, approvePullRequest, requestChangesPullRequest, mergePullRequest } from '@/lib/tauri';
+import { X, GitBranch, Check, AlertCircle, Clock, AlertTriangle } from 'lucide-react';
+import type { PullRequestData } from '@/services/sentra-api';
+import { getPullRequest, getPRDiff, approvePullRequest, requestChangesPullRequest, mergePullRequest, getSettings } from '@/services/sentra-api';
 
 interface PRReviewPanelProps {
   isOpen: boolean;
@@ -26,10 +26,28 @@ export function PRReviewPanel({ isOpen, onClose, owner, repo, prNumber }: PRRevi
   const [isRequestingChanges, setIsRequestingChanges] = useState(false);
   const [showMergeOptions, setShowMergeOptions] = useState(false);
   const [isMerging, setIsMerging] = useState(false);
+  const [hasGitHubToken, setHasGitHubToken] = useState(true);
+
+  // Check for GitHub token
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const checkGitHubToken = async () => {
+      try {
+        const settings = await getSettings();
+        setHasGitHubToken(!!settings.githubToken);
+      } catch (err) {
+        console.error('Failed to fetch settings:', err);
+        setHasGitHubToken(false);
+      }
+    };
+
+    checkGitHubToken();
+  }, [isOpen]);
 
   // Fetch PR data and diff
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !hasGitHubToken) return;
 
     const fetchPRData = async () => {
       setIsLoading(true);
@@ -43,14 +61,28 @@ export function PRReviewPanel({ isOpen, onClose, owner, repo, prNumber }: PRRevi
         setDiff(diffResponse);
       } catch (err) {
         console.error('Failed to fetch PR data:', err);
-        setError('Failed to load pull request data');
+        if (err instanceof Error) {
+          if (err.message.includes('GitHub token not configured')) {
+            setError('GitHub token not configured. Please configure it in Settings.');
+          } else if (err.message.includes('Invalid GitHub token')) {
+            setError('Invalid GitHub token. Please check your settings.');
+          } else if (err.message.includes('Pull request not found')) {
+            setError('Pull request not found.');
+          } else if (err.message.includes('Insufficient permissions')) {
+            setError('Insufficient permissions to access this pull request.');
+          } else {
+            setError(err.message || 'Failed to load pull request data');
+          }
+        } else {
+          setError('Failed to load pull request data');
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchPRData();
-  }, [isOpen, owner, repo, prNumber]);
+  }, [isOpen, hasGitHubToken, owner, repo, prNumber]);
 
   // Handle Escape key to close panel
   useEffect(() => {
@@ -192,13 +224,36 @@ export function PRReviewPanel({ isOpen, onClose, owner, repo, prNumber }: PRRevi
 
         {/* Content */}
         <div className="p-6">
-          {isLoading ? (
+          {!hasGitHubToken ? (
+            <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
+              <div className="flex items-start gap-4">
+                <AlertTriangle className="w-6 h-6 text-orange-400 flex-shrink-0 mt-1" />
+                <div>
+                  <h3 className="text-lg font-semibold text-orange-400 mb-2">
+                    GitHub Token Required
+                  </h3>
+                  <p className="text-[#FAFAFA] mb-4">
+                    You need to configure a GitHub token to review pull requests. The token is used to fetch PR data and perform actions like approving, requesting changes, and merging.
+                  </p>
+                  <p className="text-sm text-[#A1A1AA]">
+                    Go to Settings and add your GitHub Personal Access Token with the following scopes:
+                  </p>
+                  <ul className="list-disc list-inside text-sm text-[#A1A1AA] mt-2 space-y-1">
+                    <li>repo (full control of private repositories)</li>
+                    <li>pull_request (read and write pull requests)</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : isLoading ? (
             <div className="text-center py-12">
               <p className="text-[#A1A1AA]">Loading pull request...</p>
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <p className="text-red-400">Error: {error}</p>
+              <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
+              <p className="text-red-400 text-lg font-medium mb-2">Error</p>
+              <p className="text-[#A1A1AA]">{error}</p>
             </div>
           ) : prData ? (
             <div className="space-y-6">

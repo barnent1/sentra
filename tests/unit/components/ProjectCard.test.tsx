@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ProjectCard } from '@/components/ProjectCard'
-import type { Project } from '@/lib/tauri'
+import type { Project } from '@/services/sentra-api'
 
 // Mock the tauri module
-vi.mock('@/lib/tauri', () => ({
+vi.mock('@/services/sentra-api', () => ({
   setProjectMuted: vi.fn(),
 }))
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createGithubIssue } from '@/lib/tauri';
+import { createGithubIssue } from '@/services/sentra-api';
 
 export interface CreateIssueOptions {
   title: string;

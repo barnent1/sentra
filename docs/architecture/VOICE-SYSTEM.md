@@ -14,12 +14,11 @@
 3. [Two-Approach Strategy](#two-approach-strategy)
 4. [WebRTC Approach (Primary)](#webrtc-approach-primary)
 5. [HTTP API Approach (Fallback)](#http-api-approach-fallback)
-6. [WKWebView Audio Limitations](#wkwebview-audio-limitations)
-7. [Component Deep Dive](#component-deep-dive)
-8. [Data Flow Diagrams](#data-flow-diagrams)
-9. [Technical Decisions](#technical-decisions)
-10. [Debugging Guide](#debugging-guide)
-11. [Future Considerations](#future-considerations)
+6. [Component Deep Dive](#component-deep-dive)
+7. [Data Flow Diagrams](#data-flow-diagrams)
+8. [Technical Decisions](#technical-decisions)
+9. [Debugging Guide](#debugging-guide)
+10. [Future Considerations](#future-considerations)
 
 ---
 
@@ -35,16 +34,15 @@ Sentra implements a sophisticated dual-approach voice system that enables natura
 - Real-time bidirectional voice conversation
 - Automatic interruption handling (user can interrupt AI)
 - Voice Activity Detection (VAD) for natural conversation flow
-- Echo cancellation and noise suppression
+- **Always-on microphone with browser echo cancellation** (industry standard)
 - Conversation context management
 - Graceful degradation to fallback mode
 
 ### Technology Stack
 
-- **Frontend:** TypeScript, Web Audio API, WebRTC
-- **Backend (Tauri):** Rust, rodio (audio playback)
+- **Frontend:** TypeScript, Web Audio API, WebRTC, Next.js 15
 - **AI Services:** OpenAI Realtime API, Whisper, GPT-4, TTS
-- **Audio Processing:** MediaStream API, AudioWorklet (planned)
+- **Audio Processing:** MediaStream API, browser echo cancellation
 
 ---
 
@@ -76,10 +74,9 @@ Sentra implements a sophisticated dual-approach voice system that enables natura
 
 | Component | File Path | Purpose |
 |-----------|-----------|---------|
-| WebRTC Implementation | `/src/lib/openai-realtime.ts` | Low-latency realtime voice |
+| WebRTC Implementation | `/src/lib/openai-realtime.ts` | Low-latency realtime voice (primary) |
 | HTTP API Implementation | `/src/lib/openai-voice.ts` | Fallback voice system |
-| Rust Audio Commands | `/src-tauri/src/commands.rs` | Native audio playback |
-| AudioWorklet Processor | `/public/webrtc-audio-processor.js` | Planned: Audio processing |
+| Architect Chat Component | `/src/components/ArchitectChat.tsx` | Voice conversation UI |
 
 ---
 
@@ -92,21 +89,16 @@ Sentra uses a dual-approach strategy to balance performance with reliability:
 1. **WebRTC (Primary)** - Best user experience when it works
 2. **HTTP API (Fallback)** - Guaranteed to work everywhere
 
-### Automatic Selection Logic
+### Selection Strategy
+
+Sentra uses the **WebRTC (Realtime) approach by default** for all browsers:
 
 ```typescript
-// Simplified selection logic
-if (isWKWebViewWithAudioLimitations()) {
-  // Use HTTP API fallback
-  useHTTPVoiceMode();
-} else if (supportsWebRTC()) {
-  // Use WebRTC for best performance
-  useRealtimeMode();
-} else {
-  // Use HTTP API fallback
-  useHTTPVoiceMode();
-}
+// Primary: Use WebRTC for best performance
+useRealtimeMode(); // 100-200ms latency, real-time interruption
 ```
+
+The **HTTP API fallback** is available as an alternative if needed for specific use cases.
 
 ### Comparison Matrix
 
@@ -114,11 +106,10 @@ if (isWKWebViewWithAudioLimitations()) {
 |---------|----------------|-------------------|
 | **Latency** | 100-200ms | 3-5 seconds |
 | **User Can Interrupt AI** | ✅ Yes (instant) | ❌ No |
-| **Echo Cancellation** | ✅ Native WebRTC | ⚠️ Manual (delays) |
-| **Browser Compatibility** | ⚠️ Requires modern browser | ✅ All browsers |
-| **WKWebView Support** | ⚠️ Audio limitations | ✅ Works perfectly |
+| **Echo Cancellation** | ✅ Native browser AEC | ✅ Works with delays |
+| **Browser Compatibility** | ✅ All modern browsers | ✅ All browsers |
 | **Complexity** | High | Low |
-| **Reliability** | Medium | High |
+| **Reliability** | High | Very High |
 | **Cost per minute** | ~$0.06 | ~$0.08 |
 | **Setup Time** | ~500ms | ~100ms |
 
@@ -136,13 +127,15 @@ User Microphone
       ▼
 ┌─────────────────────────────────────────────────┐
 │  MediaStream (echoCancellation: true)           │
+│  - Browser native echo cancellation             │
+│  - Noise suppression + auto gain control        │
 └─────────────────────────────────────────────────┘
       │
       ▼
 ┌─────────────────────────────────────────────────┐
 │  RTCPeerConnection                              │
-│  - Local track: User audio                     │
-│  - Remote track: AI audio (broken in WKWebView)│
+│  - Local track: User audio (with AEC)          │
+│  - Remote track: AI audio response             │
 │  - Data channel: Events & transcripts          │
 └─────────────────────────────────────────────────┘
       │
@@ -154,10 +147,10 @@ User Microphone
       │
       ▼
 ┌─────────────────────────────────────────────────┐
-│  HTMLAudioElement (WKWebView limitation)        │
+│  HTMLAudioElement                               │
 │  - autoplay: true                               │
-│  - srcObject: MediaStream                       │
-│  - Problem: No audio in macOS 13.1+             │
+│  - srcObject: RemoteStream                      │
+│  - Works perfectly in all browsers              │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -247,10 +240,10 @@ dataChannel.send(JSON.stringify({
 - Noise suppression and auto gain control
 - Single channel (mono) for efficiency
 
-#### 4. HTMLAudioElement (Problematic)
-- Intended to play remote audio stream
-- **BROKEN in WKWebView on macOS 13.1+**
-- See [WKWebView Audio Limitations](#wkwebview-audio-limitations)
+#### 4. HTMLAudioElement
+- Plays remote audio stream from OpenAI
+- Works perfectly in all modern browsers
+- Supports autoplay and streaming playback
 
 ### Server Events (Data Channel)
 
@@ -267,82 +260,30 @@ dataChannel.send(JSON.stringify({
 | `response.cancelled` | Response interrupted | AI stopped mid-sentence |
 | `error` | Error occurred | Handle gracefully |
 
-### Critical Bug Fixes Implemented
+### Interruption Handling
 
-#### Bug #2: Interruption Handling
-**Problem:** User couldn't interrupt AI mid-response
-**Solution:** On `input_audio_buffer.speech_started`, pause audio and send `response.cancel`
+**How it works:**
+When user starts speaking while AI is responding, OpenAI's server-side VAD detects the user's speech and automatically handles the interruption. The client receives an `input_audio_buffer.speech_started` event.
 
 ```typescript
 case 'input_audio_buffer.speech_started':
-  if (this.isPlayingAudio) {
+  // User started speaking - interrupt AI if currently responding
+  if (this.isAIResponding && this.currentResponseId) {
     // Pause audio playback
     this.remoteAudioElement?.pause();
 
-    // Cancel AI response
-    if (this.isAIResponding && this.currentResponseId) {
+    // Cancel AI response (with race condition protection)
+    const timeSinceStart = Date.now() - this.responseStartTime;
+    if (timeSinceStart >= 100) {
+      // Safe to cancel (response is active)
       this.send({ type: 'response.cancel' });
     }
   }
   break;
 ```
 
-#### Bug #3: Microphone Hardware Muting
-**Problem:** Pausing didn't actually disable microphone (software flag only)
-**Solution:** Disable/enable the MediaStreamTrack directly
-
-```typescript
-pauseRecording(): void {
-  if (this.stream) {
-    const audioTrack = this.stream.getAudioTracks()[0];
-    if (audioTrack) {
-      audioTrack.enabled = false; // Hardware level
-    }
-  }
-}
-```
-
-#### Bug #5: Audio Playback Echo
-**Problem:** AI audio finished server-side but still playing locally, causing echo
-**Solution:** Wait for HTMLAudioElement 'ended' event + 800ms safety delay
-
-```typescript
-case 'response.audio.done':
-  if (!this.remoteAudioElement.paused) {
-    this.remoteAudioElement.onended = () => {
-      setTimeout(() => {
-        // Now safe to resume microphone
-        this.config.onAudioPlaybackComplete();
-      }, 800); // Safety delay
-    };
-  }
-  break;
-```
-
-#### Bug #7: Response Cancel Race Condition
-**Problem:** Sending `response.cancel` before OpenAI activates response causes error
-**Solution:** Track response state and add 100ms timing threshold
-
-```typescript
-case 'response.created':
-  this.isAIResponding = true;
-  this.currentResponseId = event.response.id;
-  this.responseStartTime = Date.now();
-  break;
-
-// Later, when interrupting:
-if (this.isAIResponding && this.currentResponseId) {
-  const timeSinceStart = Date.now() - this.responseStartTime;
-
-  if (timeSinceStart >= 100) {
-    // Safe to cancel
-    this.send({ type: 'response.cancel' });
-  } else {
-    // Too early, will stop naturally
-    console.log('Response too new, skipping cancel');
-  }
-}
-```
+**Race Condition Protection:**
+We wait at least 100ms after `response.created` before allowing cancellation. This prevents errors from trying to cancel a response that hasn't fully activated yet.
 
 ---
 
@@ -527,136 +468,6 @@ conversationHistory.push({
 3. **No Streaming** - Response comes as single blob
 4. **More API Calls** - 3 separate requests per turn
 5. **Manual VAD** - Client-side silence detection needed
-
----
-
-## WKWebView Audio Limitations
-
-### The Problem
-
-**WKWebView on macOS 13.1+ cannot play WebRTC remote audio through HTMLAudioElement.**
-
-This is a platform limitation, not a bug in our code. Here's what happens:
-
-```typescript
-// This code works in Chrome/Safari, but NOT in Tauri (WKWebView):
-const audioElement = new Audio();
-audioElement.autoplay = true;
-audioElement.srcObject = remoteMediaStream; // From WebRTC
-await audioElement.play(); // ❌ No sound!
-```
-
-### Root Cause
-
-1. **WKWebView Architecture** - Apple's embedded browser engine
-2. **AVAudioSession Access** - WKWebView cannot access macOS audio session
-3. **Remote Track Routing** - Remote audio tracks don't route to system speakers
-4. **Scope** - macOS 13.1+ (Ventura and later)
-
-### Research Evidence
-
-- **Apple Developer Forums** - Threads #723763, #649486, #764453
-- **Tauri Issue #13143** - "WebRTC audio not working"
-- **WRY Issue #85** - "WebRTC support limitations"
-- **WebKit Bug #230922** - "MediaStream autoplay issues"
-
-### Confirmed Symptoms
-
-- ✅ WebRTC peer connection establishes successfully
-- ✅ Data channel communicates bidirectionally
-- ✅ Remote audio track events fire
-- ✅ User microphone works perfectly
-- ❌ **No audio plays through speakers**
-
-### Attempted Solutions (All Failed)
-
-```typescript
-// ❌ Attempt 1: Explicit play() call
-audioElement.play(); // Promise resolves, but no sound
-
-// ❌ Attempt 2: Set volume and unmute
-audioElement.volume = 1.0;
-audioElement.muted = false;
-
-// ❌ Attempt 3: Attach to DOM
-document.body.appendChild(audioElement);
-
-// ❌ Attempt 4: User interaction first
-button.addEventListener('click', async () => {
-  await audioElement.play(); // Still no sound
-});
-
-// ❌ Attempt 5: Different audio element
-const audio = document.createElement('audio');
-// Still doesn't work
-```
-
-### Proposed Solutions
-
-#### Solution 1: AudioWorklet Bridge (Planned)
-
-Route audio through Web Audio API → Native Rust playback:
-
-```
-WebRTC Remote Stream
-  ↓
-MediaStreamAudioSourceNode
-  ↓
-AudioWorkletNode (capture audio chunks)
-  ↓
-Tauri IPC (base64 PCM data)
-  ↓
-Rust rodio playback
-  ↓
-CoreAudio → SPEAKERS ✅
-```
-
-**Status:** Designed in handover document, not yet implemented
-**Complexity:** Medium
-**Expected Latency:** 100-200ms (acceptable)
-
-#### Solution 2: Native Rust WebRTC (Rejected)
-
-Implement WebRTC entirely in Rust using `webrtc-rs`:
-
-**Pros:**
-- Complete control over audio playback
-- No WKWebView limitations
-
-**Cons:**
-- 2-4 weeks development time
-- High complexity
-- Duplicate WebRTC implementation
-- Overkill for the problem
-
-#### Solution 3: Electron Migration (Nuclear Option)
-
-Migrate from Tauri to Electron:
-
-**Pros:**
-- Chromium has full WebRTC support
-- No WKWebView limitations
-
-**Cons:**
-- Abandons Tauri investment
-- Much larger bundle size (~100MB vs ~10MB)
-- Slower startup time
-- Requires complete rewrite
-
-#### Solution 4: HTTP API Fallback (Current Approach)
-
-Use `openai-voice.ts` instead of `openai-realtime.ts`:
-
-**Pros:**
-- ✅ Already implemented and working
-- ✅ 100% reliable
-- ✅ No platform-specific issues
-
-**Cons:**
-- ⚠️ 3-5 second latency
-- ⚠️ No real-time interruption
-
-**Status:** **ACTIVE** - Currently shipping this approach
 
 ---
 
@@ -1011,54 +822,171 @@ turn_detection: {
 
 ---
 
-### Decision 3: Echo Cancellation Strategy
+### Decision 3: Microphone Management Strategy
 
-**Decision:** Multi-layered echo prevention:
-1. WebRTC native echo cancellation
-2. Pause microphone when AI speaks
-3. 800ms safety delay after AI finishes
+**Decision:** Always-on microphone with browser echo cancellation
+
+**Approach:**
+- Microphone track remains enabled (`track.enabled = true`) throughout the entire conversation
+- Browser's native echo cancellation prevents feedback loops
+- Server-side VAD handles turn detection (when user stops speaking)
+- No manual track toggling between AI/user turns
 
 **Rationale:**
-- Echo is the #1 voice UX killer
-- Single approach isn't enough in edge cases
-- Defense in depth → better reliability
+- **Industry standard:** This is the pattern used by ChatGPT voice and all production WebRTC voice applications
+- **Native echo cancellation works:** Modern browsers (Chrome, Safari, Firefox) have excellent AEC (Acoustic Echo Cancellation)
+- **Simpler state management:** No complex pause/resume logic needed
+- **Better UX:** No delays between turns, users can interrupt AI naturally
+- **Server handles complexity:** OpenAI's server-side VAD detects when user starts/stops speaking
 
 **Implementation:**
 ```typescript
-// Layer 1: Native echo cancellation
-navigator.mediaDevices.getUserMedia({
-  audio: { echoCancellation: true }
+// Get microphone access with echo cancellation
+const stream = await navigator.mediaDevices.getUserMedia({
+  audio: {
+    echoCancellation: true,  // ← Critical for preventing feedback
+    noiseSuppression: true,
+    autoGainControl: true,
+    channelCount: 1,
+  }
 });
 
-// Layer 2: Pause mic during AI speech
-case 'output_audio_buffer.started':
-  this.pauseRecording();
-  break;
+// Add track to peer connection - it stays enabled
+peerConnection.addTrack(stream.getAudioTracks()[0], stream);
 
-// Layer 3: Safety delay
-case 'response.audio.done':
-  await waitForAudioComplete();
-  setTimeout(() => {
-    this.resumeRecording();
-  }, 800);
-  break;
+// Server-side VAD configuration
+session: {
+  turn_detection: {
+    type: 'server_vad',        // ← Server detects turns
+    threshold: 0.5,
+    silence_duration_ms: 1200  // 1.2s silence = user finished
+  }
+}
+
+// No manual track.enabled toggling needed!
 ```
 
+**Why This Works:**
+1. **Browser AEC:** Prevents microphone from picking up speaker output
+2. **Server VAD:** OpenAI detects when user speaks vs AI speaks
+3. **WebRTC transport:** Low latency, bidirectional audio
+4. **No echo loops:** Browser filters out AI's voice before it reaches the microphone input
+
 **Trade-offs:**
-- **Pro:** Eliminates echo in 99% of cases
-- **Con:** Adds 800ms delay to conversation flow
-- **Con:** User cannot speak immediately after AI
+- **Pro:** Industry-proven approach (ChatGPT, Google Meet, Zoom all use this)
+- **Pro:** No artificial delays between conversation turns
+- **Pro:** Simpler code, fewer edge cases
+- **Pro:** Users can interrupt AI naturally
+- **Con:** Requires modern browser with good AEC implementation
+- **Con:** May not work on very old hardware/browsers
 
-**Alternatives Considered:**
-- Echo cancellation only → Still had echo in testing
-- Longer delay (1500ms) → Felt unnatural
-- No delay → Echo loops occurred
+**Previous Approach (Deprecated):**
+We previously tried manually toggling `track.enabled` on every turn (pause when AI speaks, resume when AI finishes). This caused bugs and is NOT the industry pattern.
 
-**Status:** ✅ Accepted, working well
+**Status:** ✅ Accepted, this is the correct approach going forward
 
 ---
 
-### Decision 4: Conversation History Management
+### Decision 4: Audio Playback and Echo Cancellation (November 2025)
+
+**Decision:** Convert to web application to enable perfect echo cancellation
+
+**Problem:**
+Echo cancellation was breaking when audio was played through alternative pathways (AudioWorklet bypass to native Rust audio). WKWebView on macOS cannot play WebRTC audio. The browser's echo cancellation only works when it can "see" both the microphone input AND the speaker output in its processing pipeline.
+
+**Root Cause:**
+Modern browsers implement Acoustic Echo Cancellation (AEC) by comparing the microphone input signal against the speaker output signal. When audio is played through:
+- **HTMLAudioElement** → Browser can see the output → AEC works perfectly
+- **Native Rust/CoreAudio** → Browser cannot see the output → AEC breaks → Echo loops
+
+**The AudioWorklet Bypass Problem:**
+We attempted to solve WKWebView audio limitations by routing WebRTC audio through an AudioWorklet processor to native Rust playback. While this technically worked for audio output, it completely broke echo cancellation because:
+
+1. WebRTC remote audio → AudioWorklet → Tauri IPC → Rust rodio → CoreAudio
+2. Browser's AEC module only sees microphone input, NOT the speaker output
+3. AI's voice gets picked up by microphone → sent back to OpenAI → creates echo loop
+4. Manual microphone toggling was attempted to compensate but this is NOT the industry pattern
+
+**Solution Chosen: Convert to Web Application**
+
+Deploy as a web application instead of desktop:
+- Use HTMLAudioElement for all audio playback
+- Rely on browser's native echo cancellation (echoCancellation: true)
+- Works perfectly in all modern browsers (Chrome, Safari, Firefox, Edge)
+- No WKWebView limitations - runs directly in browser
+- Universal access on any platform
+
+**Why This Works:**
+```
+Browser Pipeline (✅ Echo cancellation works):
+Microphone → getUserMedia → RTCPeerConnection → OpenAI
+                ↑                                    ↓
+            AEC compares                    RTCPeerConnection → HTMLAudioElement → Speakers
+                                            (browser sees both signals)
+
+AudioWorklet Bypass (❌ Echo cancellation broken):
+Microphone → getUserMedia → RTCPeerConnection → OpenAI
+                ↑                                    ↓
+            AEC only sees mic           RTCPeerConnection → AudioWorklet → Rust → Speakers
+            (cannot compare!)           (browser doesn't see speaker output)
+```
+
+**Tradeoffs:**
+- **Pro:** Echo cancellation works perfectly (industry standard approach)
+- **Pro:** Simpler architecture (no IPC audio streaming)
+- **Pro:** Works in all browsers (Chrome, Firefox, Safari, Edge)
+- **Pro:** Always-on microphone with no manual toggling
+- **Pro:** Universal access - no installation required
+- **Pro:** Works on any platform (macOS, Windows, Linux, tablets)
+- **Con:** Requires internet connection (no offline mode yet)
+
+**Browser Compatibility:**
+- Chrome: Excellent echo cancellation (WebRTC AEC3 algorithm)
+- Safari: Excellent system-level AEC
+- Firefox: Good WebRTC AEC implementation
+- Edge: Excellent (Chromium-based)
+- Mobile browsers: Good support on modern devices
+
+**Future Enhancements:**
+1. Progressive Web App (PWA) for installable web app
+2. Offline mode with cached resources
+3. Mobile-optimized voice interface
+4. Tablet-specific layouts
+
+**Rejected Alternatives:**
+
+**Option B: AudioWorklet + Manual Mic Toggling**
+- ❌ Breaks echo cancellation (browser can't see speaker output)
+- ❌ Requires complex state management for mic toggling
+- ❌ Not the industry standard pattern
+- ❌ Creates artificial delays and race conditions
+
+**Option C: Native Rust WebRTC**
+- ❌ 2-4 weeks development time
+- ❌ Duplicates browser's WebRTC implementation
+- ❌ Still requires manual echo cancellation implementation
+- ❌ Overkill for a temporary WKWebView limitation
+
+**Implementation Notes:**
+- Remove all pauseRecording() / resumeRecording() calls from codebase
+- Remove 800ms safety delays (not needed with browser AEC)
+- Keep audio playback in HTMLAudioElement (browser pipeline)
+- Document WKWebView limitation clearly
+- Monitor Tauri issues for WKWebView audio fixes
+
+**Research References:**
+- ChatGPT voice mode uses this exact pattern (always-on mic + browser AEC)
+- Google Meet, Zoom, Discord all use browser echo cancellation
+- WebRTC specification explicitly supports browser AEC
+- No production voice app manually toggles microphone tracks
+
+**Status:** ✅ Accepted - This is the definitive approach going forward
+
+**See Also:** ADR-001-VOICE-ECHO-CANCELLATION.md for complete decision record
+
+---
+
+### Decision 5: Conversation History Management
 
 **Decision:** Store full conversation in memory (HTTP mode)
 
@@ -1210,31 +1138,35 @@ AI hears its own voice and responds to itself in a loop.
 
 #### Diagnosis
 
-1. **Check echo cancellation:**
+1. **Check echo cancellation is enabled:**
    ```typescript
    stream.getAudioTracks()[0].getSettings().echoCancellation
+   // Must be: true
+   ```
+
+2. **Verify browser supports AEC:**
+   ```typescript
+   // Check if browser supports echo cancellation
+   const capabilities = navigator.mediaDevices.getSupportedConstraints();
+   console.log('Echo cancellation supported:', capabilities.echoCancellation);
    // Should be: true
    ```
 
-2. **Check microphone state during AI speech:**
+3. **Check microphone stays enabled:**
    ```typescript
-   // When AI is speaking, mic should be disabled
-   console.log('Track enabled:', audioTrack.enabled); // Should be: false
-   ```
-
-3. **Check timing:**
-   ```typescript
-   // Should see 800ms delay after AI finishes
-   console.log('Audio ended at:', Date.now());
-   // ... 800ms later ...
-   console.log('Mic resumed at:', Date.now());
+   // Microphone should ALWAYS be enabled (always-on approach)
+   console.log('Track enabled:', audioTrack.enabled); // Should be: true
    ```
 
 #### Solutions
 
-- **Increase safety delay:** Change `800ms` to `1200ms`
-- **Verify hardware muting:** Ensure `audioTrack.enabled = false` works
-- **Check audio routing:** Ensure speakers aren't too close to microphone
+- **Ensure echoCancellation constraint is set:** Verify getUserMedia includes `echoCancellation: true`
+- **Test in different browser:** Chrome and Safari have the best AEC implementations
+- **Check audio routing:** Ensure speakers aren't too close to microphone (physical issue)
+- **Verify not using old toggle approach:** Remove any pauseRecording()/resumeRecording() calls
+
+#### Note on Old Approach
+If you see microphone toggling (track.enabled changing between true/false), you're using the DEPRECATED approach. The correct pattern is to keep the microphone enabled throughout and rely on browser echo cancellation.
 
 ---
 

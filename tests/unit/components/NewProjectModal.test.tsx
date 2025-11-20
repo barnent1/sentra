@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { NewProjectModal } from '@/components/NewProjectModal'
-import * as tauri from '@/lib/tauri'
+import * as tauri from '@/services/sentra-api'
 
 // Mock the tauri module
-vi.mock('@/lib/tauri', () => ({
+vi.mock('@/services/sentra-api', () => ({
   createProject: vi.fn(),
   selectDirectory: vi.fn(),
   getTemplates: vi.fn(),

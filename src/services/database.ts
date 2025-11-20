@@ -34,6 +34,7 @@ export type Activity = Prisma.ActivityGetPayload<object>;
 
 export interface CreateUserInput {
   email: string;
+  password: string;
   name?: string;
 }
 
@@ -206,6 +207,7 @@ export class DatabaseService {
       return await this.prisma.user.create({
         data: {
           email: input.email.toLowerCase(), // Normalize email
+          password: input.password, // Hashed password (should be hashed before calling this method)
           name: input.name || null,
         },
       });

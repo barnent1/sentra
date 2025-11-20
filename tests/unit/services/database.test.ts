@@ -31,6 +31,13 @@ import {
   clearTestDatabase,
 } from '../../setup/database.setup';
 
+// Helper function to create test user input with password
+const createTestUserInput = (overrides?: Partial<CreateUserInput>): CreateUserInput => ({
+  email: 'test@example.com',
+  password: 'TestPassword123!',
+  ...overrides,
+});
+
 describe('DatabaseService', () => {
   let db: DatabaseService;
   let prisma: PrismaClient;
@@ -59,10 +66,7 @@ describe('DatabaseService', () => {
     describe('createUser', () => {
       it('should create a new user with valid data', async () => {
         // ARRANGE
-        const userData: CreateUserInput = {
-          email: 'test@example.com',
-          name: 'Test User',
-        };
+        const userData: CreateUserInput = createTestUserInput({ email: 'test@example.com', name: 'Test User' });
 
         // ACT
         const user = await db.createUser(userData);
@@ -77,35 +81,24 @@ describe('DatabaseService', () => {
 
       it('should throw error for duplicate email', async () => {
         // ARRANGE
-        await db.createUser({
-          email: 'duplicate@example.com',
-          name: 'First User',
-        });
+        await db.createUser(createTestUserInput({ email: 'duplicate@example.com', name: 'First User' }));
 
         // ACT & ASSERT
         await expect(
-          db.createUser({
-            email: 'duplicate@example.com',
-            name: 'Second User',
-          })
+          db.createUser(createTestUserInput({ email: 'duplicate@example.com', name: 'Second User' }))
         ).rejects.toThrow();
       });
 
       it('should throw error for invalid email format', async () => {
         // ACT & ASSERT
         await expect(
-          db.createUser({
-            email: 'invalid-email',
-            name: 'Test User',
-          })
+          db.createUser(createTestUserInput({ email: 'invalid-email', name: 'Test User' }))
         ).rejects.toThrow();
       });
 
       it('should create user with minimal data (name optional)', async () => {
         // ACT
-        const user = await db.createUser({
-          email: 'minimal@example.com',
-        });
+        const user = await db.createUser(createTestUserInput({ email: 'minimal@example.com' }));
 
         // ASSERT
         expect(user.id).toBeDefined();
@@ -117,10 +110,7 @@ describe('DatabaseService', () => {
     describe('getUserById', () => {
       it('should retrieve user by id', async () => {
         // ARRANGE
-        const created = await db.createUser({
-          email: 'find@example.com',
-          name: 'Find Me',
-        });
+        const created = await db.createUser(createTestUserInput({ email: 'find@example.com', name: 'Find Me' }));
 
         // ACT
         const found = await db.getUserById(created.id);
@@ -143,10 +133,7 @@ describe('DatabaseService', () => {
     describe('getUserByEmail', () => {
       it('should retrieve user by email', async () => {
         // ARRANGE
-        await db.createUser({
-          email: 'email@example.com',
-          name: 'Email User',
-        });
+        await db.createUser(createTestUserInput({ email: 'email@example.com', name: 'Email User' }));
 
         // ACT
         const found = await db.getUserByEmail('email@example.com');
@@ -166,10 +153,7 @@ describe('DatabaseService', () => {
 
       it('should be case-insensitive', async () => {
         // ARRANGE
-        await db.createUser({
-          email: 'CaseSensitive@example.com',
-          name: 'Case Test',
-        });
+        await db.createUser(createTestUserInput({ email: 'CaseSensitive@example.com', name: 'Case Test' }));
 
         // ACT
         const found = await db.getUserByEmail('casesensitive@example.com');
@@ -182,9 +166,9 @@ describe('DatabaseService', () => {
     describe('listUsers', () => {
       it('should return all users', async () => {
         // ARRANGE
-        await db.createUser({ email: 'user1@example.com', name: 'User 1' });
-        await db.createUser({ email: 'user2@example.com', name: 'User 2' });
-        await db.createUser({ email: 'user3@example.com', name: 'User 3' });
+        await db.createUser(createTestUserInput({ email: 'user1@example.com', name: 'User 1' }));
+        await db.createUser(createTestUserInput({ email: 'user2@example.com', name: 'User 2' }));
+        await db.createUser(createTestUserInput({ email: 'user3@example.com', name: 'User 3' }));
 
         // ACT
         const users = await db.listUsers();
@@ -203,10 +187,10 @@ describe('DatabaseService', () => {
 
       it('should order users by creation date descending', async () => {
         // ARRANGE
-        const first = await db.createUser({ email: 'first@example.com' });
+        const first = await db.createUser(createTestUserInput({ email: 'first@example.com' }));
         // Small delay to ensure different timestamps
         await new Promise(resolve => setTimeout(resolve, 10));
-        const second = await db.createUser({ email: 'second@example.com' });
+        const second = await db.createUser(createTestUserInput({ email: 'second@example.com' }));
 
         // ACT
         const users = await db.listUsers();
@@ -226,10 +210,7 @@ describe('DatabaseService', () => {
     let testUser: User;
 
     beforeEach(async () => {
-      testUser = await db.createUser({
-        email: 'project-owner@example.com',
-        name: 'Project Owner',
-      });
+      testUser = await db.createUser(createTestUserInput({ email: 'project-owner@example.com', name: 'Project Owner' }));
     });
 
     describe('createProject', () => {
@@ -285,10 +266,7 @@ describe('DatabaseService', () => {
 
       it('should allow duplicate project names for different users', async () => {
         // ARRANGE
-        const user2 = await db.createUser({
-          email: 'user2@example.com',
-          name: 'User 2',
-        });
+        const user2 = await db.createUser(createTestUserInput({ email: 'user2@example.com', name: 'User 2' }));
 
         // ACT
         const project1 = await db.createProject({
@@ -369,10 +347,7 @@ describe('DatabaseService', () => {
 
       it('should not return projects from other users', async () => {
         // ARRANGE
-        const user2 = await db.createUser({
-          email: 'user2@example.com',
-          name: 'User 2',
-        });
+        const user2 = await db.createUser(createTestUserInput({ email: 'user2@example.com', name: 'User 2' }));
         await db.createProject({ name: 'User1 Project', path: '/p1', userId: testUser.id });
         await db.createProject({ name: 'User2 Project', path: '/p2', userId: user2.id });
 
@@ -508,10 +483,7 @@ describe('DatabaseService', () => {
     let testProject: Project;
 
     beforeEach(async () => {
-      const user = await db.createUser({
-        email: 'agent-test@example.com',
-        name: 'Agent Tester',
-      });
+      const user = await db.createUser(createTestUserInput({ email: 'agent-test@example.com', name: 'Agent Tester' }));
       testProject = await db.createProject({
         name: 'Agent Project',
         path: '/path',
@@ -690,10 +662,7 @@ describe('DatabaseService', () => {
     let testProject: Project;
 
     beforeEach(async () => {
-      const user = await db.createUser({
-        email: 'cost-test@example.com',
-        name: 'Cost Tester',
-      });
+      const user = await db.createUser(createTestUserInput({ email: 'cost-test@example.com', name: 'Cost Tester' }));
       testProject = await db.createProject({
         name: 'Cost Project',
         path: '/path',
@@ -826,10 +795,7 @@ describe('DatabaseService', () => {
     let testProject: Project;
 
     beforeEach(async () => {
-      const user = await db.createUser({
-        email: 'activity-test@example.com',
-        name: 'Activity Tester',
-      });
+      const user = await db.createUser(createTestUserInput({ email: 'activity-test@example.com', name: 'Activity Tester' }));
       testProject = await db.createProject({
         name: 'Activity Project',
         path: '/path',
@@ -951,10 +917,7 @@ describe('DatabaseService', () => {
     describe('getRecentActivities', () => {
       it('should return recent activities across all projects for a user', async () => {
         // ARRANGE
-        const user = await db.createUser({
-          email: 'recent@example.com',
-          name: 'Recent User',
-        });
+        const user = await db.createUser(createTestUserInput({ email: 'recent@example.com', name: 'Recent User' }));
         const project1 = await db.createProject({
           name: 'Project 1',
           path: '/p1',
@@ -986,10 +949,7 @@ describe('DatabaseService', () => {
 
       it('should limit results', async () => {
         // ARRANGE
-        const user = await db.createUser({
-          email: 'limit@example.com',
-          name: 'Limit User',
-        });
+        const user = await db.createUser(createTestUserInput({ email: 'limit@example.com', name: 'Limit User' }));
         const project = await db.createProject({
           name: 'Project',
           path: '/p',
@@ -1041,10 +1001,7 @@ describe('DatabaseService', () => {
   describe('Transaction support', () => {
     it('should execute operations in transaction', async () => {
       // ARRANGE
-      const user = await db.createUser({
-        email: 'transaction@example.com',
-        name: 'Transaction User',
-      });
+      const user = await db.createUser(createTestUserInput({ email: 'transaction@example.com', name: 'Transaction User' }));
 
       // ACT
       await db.transaction(async tx => {
@@ -1064,10 +1021,7 @@ describe('DatabaseService', () => {
 
     it('should rollback on error', async () => {
       // ARRANGE
-      const user = await db.createUser({
-        email: 'rollback@example.com',
-        name: 'Rollback User',
-      });
+      const user = await db.createUser(createTestUserInput({ email: 'rollback@example.com', name: 'Rollback User' }));
 
       // ACT & ASSERT
       await expect(
@@ -1092,10 +1046,7 @@ describe('DatabaseService', () => {
   describe('Bulk operations', () => {
     it('should create multiple costs efficiently', async () => {
       // ARRANGE
-      const user = await db.createUser({
-        email: 'bulk@example.com',
-        name: 'Bulk User',
-      });
+      const user = await db.createUser(createTestUserInput({ email: 'bulk@example.com', name: 'Bulk User' }));
       const project = await db.createProject({
         name: 'Bulk Project',
         path: '/path',
@@ -1122,10 +1073,7 @@ describe('DatabaseService', () => {
 
     it('should create multiple activities efficiently', async () => {
       // ARRANGE
-      const user = await db.createUser({
-        email: 'bulk-activity@example.com',
-        name: 'Bulk Activity User',
-      });
+      const user = await db.createUser(createTestUserInput({ email: 'bulk-activity@example.com', name: 'Bulk Activity User' }));
       const project = await db.createProject({
         name: 'Bulk Activity Project',
         path: '/path',

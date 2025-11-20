@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { X, FolderOpen } from 'lucide-react';
-import { createProject, selectDirectory, getTemplates, type Template } from '@/lib/tauri';
+import { createProject, selectDirectory, getTemplates, type Template } from '@/services/sentra-api';
 
 interface NewProjectModalProps {
   isOpen: boolean;

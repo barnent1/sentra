@@ -10,12 +10,14 @@
 
 ## Overview
 
-This document defines how the Sentra application fetches and synchronizes data between the backend (Rust/Tauri) and frontend (React). The architecture prioritizes real-time updates, native performance, and simplicity.
+This document defines how the Sentra web application fetches and synchronizes data between the backend (Node.js/Express) and frontend (Next.js/React). The architecture prioritizes real-time updates and simplicity.
+
+**Note:** This document is being updated to reflect Sentra's transition from a Tauri desktop app to a Next.js web application. References to Tauri are historical.
 
 **What this covers:**
-- Tauri Events for native desktop reactivity
+- REST API calls for data fetching (via `@/services/sentra-api`)
 - React Server Components for initial page loads
-- Server-Sent Events (SSE) for web-based real-time updates
+- Server-Sent Events (SSE) for real-time updates
 - Best practices for each approach
 
 **What this does NOT cover:**

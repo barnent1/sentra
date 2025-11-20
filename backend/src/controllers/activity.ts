@@ -1,9 +1,7 @@
 // Activity tracking controller
 import { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { drizzleDb } from '@/services/database-drizzle'
 import type { CreateActivityRequest, ActivityResponse } from '../types'
-
-const prisma = new PrismaClient()
 
 /**
  * Serialize activity for API response
@@ -52,9 +50,7 @@ export async function createActivity(
     }
 
     // Verify project exists and user has access
-    const project = await prisma.project.findUnique({
-      where: { id: projectId },
-    })
+    const project = await drizzleDb.getProjectById(projectId)
 
     if (!project) {
       res.status(404).json({ error: 'Project not found' })
@@ -66,14 +62,12 @@ export async function createActivity(
       return
     }
 
-    // Create activity entry
-    const activity = await prisma.activity.create({
-      data: {
-        projectId,
-        type,
-        message,
-        metadata: metadata ? JSON.stringify(metadata) : null,
-      },
+    // Create activity entry (Drizzle service handles JSON serialization and validation)
+    const activity = await drizzleDb.createActivity({
+      projectId,
+      type: type as any, // Type is validated by Drizzle service
+      message,
+      metadata,
     })
 
     res.status(201).json({
@@ -87,9 +81,11 @@ export async function createActivity(
 
 /**
  * GET /api/activity
- * Get activities for user's projects
+ * Get activities for user's projects with pagination
  * Query params:
  * - projectId: Filter by specific project (optional)
+ * - limit: Number of activities to return (optional, default: 50, max: 100)
+ * - offset: Number of activities to skip (optional, default: 0)
  */
 export async function getActivities(
   req: Request,
@@ -101,27 +97,74 @@ export async function getActivities(
       return
     }
 
-    const { projectId } = req.query
+    const { projectId, limit: limitParam, offset: offsetParam } = req.query
 
-    // Build where clause
-    let whereClause: {
-      project: { userId: string }
-      projectId?: string
-    } = {
-      project: { userId: req.user.userId },
+    // Parse pagination parameters
+    const limit = limitParam ? Math.min(parseInt(limitParam as string, 10), 100) : 50
+    const offset = offsetParam ? parseInt(offsetParam as string, 10) : 0
+
+    // Validate pagination parameters
+    if (isNaN(limit) || limit <= 0) {
+      res.status(400).json({ error: 'Invalid limit parameter' })
+      return
     }
 
+    if (isNaN(offset) || offset < 0) {
+      res.status(400).json({ error: 'Invalid offset parameter' })
+      return
+    }
+
+    // If projectId specified, verify user owns it and get activities for that project
     if (projectId && typeof projectId === 'string') {
-      whereClause.projectId = projectId
+      const project = await drizzleDb.getProjectById(projectId)
+
+      if (!project) {
+        res.status(404).json({ error: 'Project not found' })
+        return
+      }
+
+      if (project.userId !== req.user.userId) {
+        res.status(403).json({ error: 'Access denied' })
+        return
+      }
+
+      const activities = await drizzleDb.getActivitiesByProject(projectId, {
+        limit,
+        offset,
+      })
+
+      res.status(200).json({
+        activities: activities.map(serializeActivity),
+        pagination: {
+          limit,
+          offset,
+          total: activities.length,
+        },
+      })
+      return
     }
 
-    const activities = await prisma.activity.findMany({
-      where: whereClause,
-      orderBy: { timestamp: 'desc' },
-    })
+    // Otherwise, get activities for all user's projects
+    const projects = await drizzleDb.listProjectsByUser(req.user.userId)
+    const allActivities = await Promise.all(
+      projects.map(p => drizzleDb.getActivitiesByProject(p.id))
+    )
+
+    // Flatten and sort by timestamp desc
+    const allActivitiesFlat = allActivities
+      .flat()
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+
+    // Apply pagination
+    const paginatedActivities = allActivitiesFlat.slice(offset, offset + limit)
 
     res.status(200).json({
-      activities: activities.map(serializeActivity),
+      activities: paginatedActivities.map(serializeActivity),
+      pagination: {
+        limit,
+        offset,
+        total: allActivitiesFlat.length,
+      },
     })
   } catch (error) {
     console.error('[Activity] Get activities error:', error)

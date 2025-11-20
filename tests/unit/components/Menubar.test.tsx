@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import MenubarPage from '@/app/menubar/page'
-import { invoke } from '@tauri-apps/api/core'
+import * as sentraApi from '@/services/sentra-api'
 
-// Mock Tauri API
-vi.mock('@tauri-apps/api/core', () => ({
-  invoke: vi.fn(),
+// Mock sentra-api library
+vi.mock('@/services/sentra-api', () => ({
+  getDashboardStats: vi.fn(),
 }))
 
 describe('MenubarPage', () => {
@@ -19,13 +19,13 @@ describe('MenubarPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(invoke).mockResolvedValue(mockStats)
+    vi.mocked(sentraApi.getDashboardStats).mockResolvedValue(mockStats)
   })
 
   describe('rendering', () => {
     it('should render loading state initially', () => {
       // ARRANGE
-      vi.mocked(invoke).mockImplementation(() => new Promise(() => {})) // Never resolves
+      vi.mocked(sentraApi.getDashboardStats).mockImplementation(() => new Promise(() => {})) // Never resolves
 
       // ACT
       render(<MenubarPage />)
@@ -83,7 +83,7 @@ describe('MenubarPage', () => {
   describe('stats display', () => {
     it('should show "Running" status when agents are active', async () => {
       // ARRANGE
-      vi.mocked(invoke).mockResolvedValue({ ...mockStats, activeAgents: 2 })
+      vi.mocked(sentraApi.getDashboardStats).mockResolvedValue({ ...mockStats, activeAgents: 2 })
 
       // ACT
       render(<MenubarPage />)
@@ -96,7 +96,7 @@ describe('MenubarPage', () => {
 
     it('should show "Idle" status when no agents are active', async () => {
       // ARRANGE
-      vi.mocked(invoke).mockResolvedValue({ ...mockStats, activeAgents: 0 })
+      vi.mocked(sentraApi.getDashboardStats).mockResolvedValue({ ...mockStats, activeAgents: 0 })
 
       // ACT
       render(<MenubarPage />)
@@ -109,7 +109,7 @@ describe('MenubarPage', () => {
 
     it('should show "Great!" for high success rate', async () => {
       // ARRANGE
-      vi.mocked(invoke).mockResolvedValue({ ...mockStats, successRate: 95 })
+      vi.mocked(sentraApi.getDashboardStats).mockResolvedValue({ ...mockStats, successRate: 95 })
 
       // ACT
       render(<MenubarPage />)
@@ -122,7 +122,7 @@ describe('MenubarPage', () => {
 
     it('should show "Good" for lower success rate', async () => {
       // ARRANGE
-      vi.mocked(invoke).mockResolvedValue({ ...mockStats, successRate: 75 })
+      vi.mocked(sentraApi.getDashboardStats).mockResolvedValue({ ...mockStats, successRate: 75 })
 
       // ACT
       render(<MenubarPage />)
@@ -150,7 +150,7 @@ describe('MenubarPage', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(invoke).toHaveBeenCalledWith('show_main_window')
+        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('show_main_window')
       })
     })
 
@@ -169,7 +169,7 @@ describe('MenubarPage', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(invoke).toHaveBeenCalledWith('quit_app')
+        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('quit_app')
       })
     })
 
@@ -188,14 +188,14 @@ describe('MenubarPage', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(invoke).toHaveBeenCalledWith('hide_menubar_window')
+        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('hide_menubar_window')
       })
     })
 
     it('should handle errors when opening dashboard', async () => {
       // ARRANGE
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.mocked(invoke)
+      vi.mocked(sentraApi.getDashboardStats)
         .mockResolvedValueOnce(mockStats) // Initial stats load
         .mockRejectedValueOnce(new Error('Failed to show window')) // Open dashboard fails
 
@@ -224,7 +224,7 @@ describe('MenubarPage', () => {
     it('should handle errors when quitting app', async () => {
       // ARRANGE
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.mocked(invoke)
+      vi.mocked(sentraApi.getDashboardStats)
         .mockResolvedValueOnce(mockStats) // Initial stats load
         .mockRejectedValueOnce(new Error('Failed to quit')) // Quit fails
 
@@ -261,7 +261,7 @@ describe('MenubarPage', () => {
 
       // Wait for initial load
       await waitFor(() => {
-        expect(invoke).toHaveBeenCalledWith('get_dashboard_stats')
+        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('get_dashboard_stats')
       })
 
       // ASSERT - Should have set up a 30-second interval
@@ -278,7 +278,7 @@ describe('MenubarPage', () => {
 
       // Wait for initial load
       await waitFor(() => {
-        expect(invoke).toHaveBeenCalledWith('get_dashboard_stats')
+        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('get_dashboard_stats')
       })
 
       // ACT
@@ -295,7 +295,7 @@ describe('MenubarPage', () => {
     it('should handle stats loading failure gracefully', async () => {
       // ARRANGE
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.mocked(invoke).mockRejectedValue(new Error('Failed to load stats'))
+      vi.mocked(sentraApi.getDashboardStats).mockRejectedValue(new Error('Failed to load stats'))
 
       // ACT
       render(<MenubarPage />)
@@ -313,7 +313,7 @@ describe('MenubarPage', () => {
 
     it('should display action buttons even when stats fail to load', async () => {
       // ARRANGE
-      vi.mocked(invoke).mockRejectedValue(new Error('Failed to load stats'))
+      vi.mocked(sentraApi.getDashboardStats).mockRejectedValue(new Error('Failed to load stats'))
 
       // ACT
       render(<MenubarPage />)
@@ -333,7 +333,7 @@ describe('MenubarPage', () => {
       const statsPromise = new Promise((resolve) => {
         resolveStats = resolve
       })
-      vi.mocked(invoke).mockReturnValue(statsPromise as any)
+      vi.mocked(sentraApi.getDashboardStats).mockReturnValue(statsPromise as any)
 
       // ACT
       render(<MenubarPage />)

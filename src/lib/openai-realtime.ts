@@ -1,11 +1,39 @@
 /**
  * OpenAI Realtime API client using WebRTC transport
- * WebRTC provides native echo cancellation and lower latency than WebSocket
- * This implementation follows OpenAI's official WebRTC pattern
  *
- * AUDIO PLAYBACK ARCHITECTURE:
- * - Uses HTMLAudioElement for simple, reliable audio playback
- * - Explicit .play() calls ensure playback works after pause/interruption
+ * CRITICAL DECISION (November 2025): Option A - Trust Industry Pattern
+ * See: /docs/decisions/ADR-001-VOICE-ECHO-CANCELLATION.md
+ *
+ * MICROPHONE MANAGEMENT:
+ * - ALWAYS-ON microphone (track.enabled stays true throughout conversation)
+ * - Browser native echo cancellation (echoCancellation: true) prevents feedback loops
+ * - Server-side VAD handles turn detection (when user starts/stops speaking)
+ * - This is the industry standard pattern used by ChatGPT voice and all production WebRTC apps
+ * - NO manual track toggling - browser AEC handles everything
+ *
+ * AUDIO PLAYBACK:
+ * - Uses HTMLAudioElement ONLY (must stay in browser pipeline)
+ * - WebRTC transport provides low latency (100-200ms)
+ * - DO NOT route through AudioWorklet → Rust - this BREAKS echo cancellation
+ *
+ * WHY AUDIOWORKLET BYPASS WAS REJECTED:
+ * - Browser AEC requires seeing BOTH mic input AND speaker output
+ * - AudioWorklet → Rust → CoreAudio removes speaker from browser's view
+ * - Browser AEC can only see mic input (with AI voice in it) → echo loop
+ * - Manual mic toggling to compensate is NOT the industry pattern
+ *
+ * ARCHITECTURE:
+ * ✅ CORRECT: Mic → WebRTC → OpenAI → WebRTC → HTMLAudioElement → Speakers
+ *             (browser sees both signals, AEC works)
+ * ❌ WRONG:   Mic → WebRTC → OpenAI → WebRTC → AudioWorklet → Rust → Speakers
+ *             (browser blind to speaker output, AEC fails)
+ *
+ * DEPRECATED CODE WARNING:
+ * The current implementation still has pauseRecording()/resumeRecording() calls
+ * which manually toggle track.enabled. This is the OLD approach and should be removed.
+ * These methods are marked @deprecated. Do not use them in new code.
+ *
+ * The microphone should remain enabled throughout the conversation.
  */
 
 // Realtime API supported voices (as of 2025)
@@ -66,18 +94,20 @@ export class RealtimeConversation {
 
       console.log('🔐 Requesting ephemeral token...');
 
-      // Get OpenAI API key from Tauri settings
+      // Get OpenAI API key from localStorage
       let apiKey: string | undefined;
       try {
-        // Check if Tauri is available (in desktop app)
-        if (typeof window !== 'undefined' && '__TAURI__' in window) {
-          const { invoke } = await import('@tauri-apps/api/core');
-          const settings = await invoke<{ openaiApiKey: string }>('get_settings');
-          apiKey = settings.openaiApiKey;
-          console.log('✅ Retrieved API key from Tauri settings');
+        // Check if localStorage is available (in browser)
+        if (typeof window !== 'undefined') {
+          const settingsStr = localStorage.getItem('sentra_settings');
+          if (settingsStr) {
+            const settings = JSON.parse(settingsStr);
+            apiKey = settings.openaiApiKey;
+            console.log('✅ Retrieved API key from localStorage');
+          }
         }
       } catch (error) {
-        console.warn('Failed to get settings from Tauri, will use server fallback:', error);
+        console.warn('Failed to get settings from localStorage, will use server fallback:', error);
       }
 
       // Get ephemeral token from our server endpoint
@@ -434,6 +464,18 @@ Keep every response under 10 words. This is a voice conversation, be brief!`;
     this.send(sessionConfig);
   }
 
+  /**
+   * Event Handler: OpenAI Realtime API Events
+   *
+   * ARCHITECTURE NOTE (2025-11-17, ADR-001):
+   * - Microphone stays enabled throughout conversation (always-on)
+   * - Browser echo cancellation prevents feedback automatically
+   * - NO manual track toggling (pauseRecording/resumeRecording not used)
+   * - Server-side VAD handles turn detection
+   * - This is the industry standard pattern (ChatGPT, Google Meet, Zoom)
+   *
+   * See: /docs/decisions/ADR-001-VOICE-ECHO-CANCELLATION.md
+   */
   private handleServerMessage(data: string) {
     try {
       const event = JSON.parse(data);
@@ -460,7 +502,11 @@ Keep every response under 10 words. This is a voice conversation, be brief!`;
         case 'output_audio_buffer.started':
           // Audio needs explicit .play() call to restart after being paused during user speech
           // Autoplay doesn't work when resuming after manual pause
-          console.log('🎵 AI audio transmission started');
+          console.log('🎵 AI audio transmission started (browser echo cancellation active)');
+
+          // REMOVED 2025-11-17: Manual toggling breaks industry pattern (ADR-001)
+          // this.pauseRecording();
+
           if (this.remoteAudioElement) {
             this.remoteAudioElement.play().then(() => {
               console.log('✅ Audio playback started via explicit play() call');
@@ -482,54 +528,14 @@ Keep every response under 10 words. This is a voice conversation, be brief!`;
           break;
 
         case 'response.audio.done':
-          // Bug #5 Fix: Track when audio playback actually completes
-          // Wait for the audio element to finish playing before resuming mic
           console.log('📡 Audio transmission complete from server');
 
-          if (this.remoteAudioElement) {
-            // Wait for audio to finish playing
-            const waitForPlayback = () => {
-              if (!this.remoteAudioElement) {
-                console.log('⚠️  Audio element removed, resuming immediately');
-                return;
-              }
+          // No need to resume recording - mic stays enabled
+          // Browser echo cancellation is always active
 
-              // Check if audio is still playing
-              if (!this.remoteAudioElement.paused && !this.remoteAudioElement.ended) {
-                console.log('⏳ Waiting for audio playback to complete...');
-                // Wait for 'ended' event
-                this.remoteAudioElement.onended = () => {
-                  console.log('✅ Audio playback completed');
-                  this.isPlayingAudio = false;
-
-                  // Bug #5 Fix: Add safety delay after playback before next input
-                  setTimeout(() => {
-                    console.log('🎤 Ready for next user input');
-                    if (this.config.onAudioPlaybackComplete) {
-                      this.config.onAudioPlaybackComplete();
-                    }
-                  }, 800); // 800ms safety delay
-                };
-              } else {
-                console.log('✅ Audio already finished playing');
-                this.isPlayingAudio = false;
-
-                // Add safety delay even if already finished
-                setTimeout(() => {
-                  console.log('🎤 Ready for next user input');
-                  if (this.config.onAudioPlaybackComplete) {
-                    this.config.onAudioPlaybackComplete();
-                  }
-                }, 800);
-              }
-            };
-
-            waitForPlayback();
-          } else {
-            console.log('⚠️  No audio element, resuming immediately');
-            if (this.config.onAudioPlaybackComplete) {
-              this.config.onAudioPlaybackComplete();
-            }
+          // Notify parent if needed
+          if (this.config.onAudioPlaybackComplete) {
+            this.config.onAudioPlaybackComplete();
           }
           break;
 
@@ -679,36 +685,26 @@ Keep every response under 10 words. This is a voice conversation, be brief!`;
     console.log('🛑 Recording stopped');
   }
 
+  /**
+   * @deprecated DO NOT USE - Violates industry pattern (ADR-001)
+   * Manual microphone toggling breaks natural conversation flow.
+   * Browser echo cancellation handles feedback prevention automatically.
+   * This method is kept for reference only and should not be called.
+   */
   pauseRecording(): void {
-    // Bug #3 Fix: Actually disable the microphone hardware, not just a boolean flag
-    if (this.stream) {
-      const audioTrack = this.stream.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = false;
-        console.log('⏸️  Microphone disabled (hardware muted)');
-        this.isRecording = false;
-      } else {
-        console.log('⏸️  No audio track found to pause');
-      }
-    } else {
-      console.log('⏸️  Pause requested but no stream available');
-    }
+    // NO-OP: Manual toggling disabled per ADR-001
+    console.warn('⚠️ pauseRecording() called but is deprecated (ADR-001)');
   }
 
+  /**
+   * @deprecated DO NOT USE - Violates industry pattern (ADR-001)
+   * Manual microphone toggling breaks natural conversation flow.
+   * Browser echo cancellation handles feedback prevention automatically.
+   * This method is kept for reference only and should not be called.
+   */
   resumeRecording(): void {
-    // Bug #3 Fix: Actually enable the microphone hardware, not just a boolean flag
-    if (this.stream) {
-      const audioTrack = this.stream.getAudioTracks()[0];
-      if (audioTrack) {
-        audioTrack.enabled = true;
-        console.log('▶️  Microphone enabled (hardware unmuted)');
-        this.isRecording = true;
-      } else {
-        console.log('▶️  No audio track found to resume');
-      }
-    } else {
-      console.log('▶️  Resume requested but no stream available');
-    }
+    // NO-OP: Manual toggling disabled per ADR-001
+    console.warn('⚠️ resumeRecording() called but is deprecated (ADR-001)');
   }
 
   async getGreeting(userName?: string): Promise<void> {

@@ -3,11 +3,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ActivityFeed } from '@/components/ActivityFeed'
 
 // Mock the tauri module
-vi.mock('@/lib/tauri', () => ({
+vi.mock('@/services/sentra-api', () => ({
   getActivityEvents: vi.fn(),
 }))
 
-import { getActivityEvents } from '@/lib/tauri'
+import { getActivityEvents } from '@/services/sentra-api'
 
 describe('ActivityFeed', () => {
   const mockEvents = [

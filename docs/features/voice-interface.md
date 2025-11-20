@@ -129,9 +129,10 @@ Audio playback (progressive) → Speaker
 - ~1-2 second latency total
 
 **Echo Prevention**
-- Pauses recording while AI speaks
-- 1.5s delay after speech completes
-- Prevents feedback loops
+- Browser native echo cancellation (always-on microphone)
+- WebRTC AEC (Acoustic Echo Cancellation) prevents feedback loops
+- Server-side VAD handles turn detection
+- Industry standard approach (same as ChatGPT voice)
 
 **Handoff Detection**
 - Detects phrase "pass this to an agent"
@@ -278,41 +279,50 @@ conversation.cleanup()
 
 ## Echo Prevention
 
-**Problem:** AI voice output can trigger its own microphone, creating feedback loop.
+**The Industry Standard Approach:**
 
-**Solutions:**
+Sentra uses the same pattern as ChatGPT voice, Google Meet, and all modern WebRTC voice applications:
 
-**HTTP API:**
-- 1000ms delay after TTS completes
-- Wait for audio to fully play
-- Then resume listening
+**Always-On Microphone + Browser Echo Cancellation**
+- Microphone track remains enabled throughout the entire conversation
+- Browser's native AEC (Acoustic Echo Cancellation) prevents feedback loops
+- Server-side VAD (Voice Activity Detection) handles turn detection
+- No manual track toggling needed
 
-**Realtime API:**
-- Pause recording when AI starts speaking
-- 1500ms delay after AI finishes
-- Resume recording automatically
+**Why This Works:**
+1. Modern browsers have excellent built-in echo cancellation
+2. WebRTC's `echoCancellation: true` filters out speaker audio before it reaches the mic
+3. Server-side VAD detects who is speaking (user vs AI)
+4. No artificial delays needed between conversation turns
 
 **Code:**
 ```typescript
-// HTTP API
-await playAudio(audioData)
-await new Promise(resolve => setTimeout(resolve, 1000))
-await conversation.startRecording()
-
-// Realtime API
-case 'response.audio.delta':
-  if (this.isRecording) {
-    this.pauseRecording()
+// Microphone setup - stays enabled throughout
+const stream = await navigator.mediaDevices.getUserMedia({
+  audio: {
+    echoCancellation: true,  // ← Critical for preventing feedback
+    noiseSuppression: true,
+    autoGainControl: true,
+    channelCount: 1,
   }
-  playAudioChunk(event.delta)
-  break
+});
 
-case 'response.audio.done':
-  setTimeout(() => {
-    this.resumeRecording()
-  }, 1500)
-  break
+// Add to peer connection - stays connected
+peerConnection.addTrack(stream.getAudioTracks()[0], stream);
+
+// Server-side VAD configuration
+session: {
+  turn_detection: {
+    type: 'server_vad',        // ← Server detects turns
+    silence_duration_ms: 1200  // 1.2s silence = user finished
+  }
+}
+
+// No manual track.enabled toggling needed!
 ```
+
+**Deprecated Approach (Do Not Use):**
+Previously, Sentra tried manually toggling `track.enabled` on every turn (pause when AI speaks, resume when finished). This is NOT the industry standard and causes bugs. The codebase still contains deprecated `pauseRecording()` and `resumeRecording()` methods that should not be used.
 
 ---
 

@@ -86,3 +86,39 @@ export interface ErrorResponse {
   error: string
   details?: unknown
 }
+
+export interface SettingsResponse {
+  id?: string
+  userId?: string
+  openaiApiKey?: string
+  anthropicApiKey?: string
+  githubToken?: string
+  githubRepoOwner?: string | null
+  githubRepoName?: string | null
+  voiceSettings?: Record<string, unknown> | null
+  notificationSettings?: Record<string, unknown> | null
+  language?: string | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface UpdateSettingsRequest {
+  openaiApiKey?: string | null
+  anthropicApiKey?: string | null
+  githubToken?: string | null
+  githubRepoOwner?: string | null
+  githubRepoName?: string | null
+  voiceSettings?: Record<string, unknown>
+  notificationSettings?: Record<string, unknown>
+  language?: string
+}
+
+export interface ValidateKeysRequest {
+  openaiApiKey?: string
+  anthropicApiKey?: string
+}
+
+export interface ValidateKeysResponse {
+  openai?: boolean
+  anthropic?: boolean
+}

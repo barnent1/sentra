@@ -427,8 +427,8 @@ class RealtimeConversation {
   private handleServerMessage()    // Parse server events
   async startRecording()           // Stream PCM audio
   stopRecording()                  // Stop stream
-  pauseRecording()                 // Pause while AI speaks
-  resumeRecording()                // Resume after AI finishes
+  pauseRecording()                 // @deprecated - should not toggle track.enabled
+  resumeRecording()                // @deprecated - should not toggle track.enabled
   async getGreeting()              // Trigger greeting
   cleanup()                        // Close connections
 }

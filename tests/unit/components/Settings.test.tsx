@@ -1,12 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Settings } from '@/components/Settings'
-import * as tauri from '@/lib/tauri'
+import * as settingsLib from '@/lib/settings'
+import * as sentraApi from '@/services/sentra-api'
 
-// Mock the tauri module
-vi.mock('@/lib/tauri', () => ({
+// Mock the settings module
+vi.mock('@/lib/settings', () => ({
   getSettings: vi.fn(),
   saveSettings: vi.fn(),
+}))
+
+// Mock the sentra-api module (for speakNotification)
+vi.mock('@/services/sentra-api', () => ({
   speakNotification: vi.fn(),
 }))
 
@@ -30,9 +35,9 @@ describe('Settings', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(tauri.getSettings).mockResolvedValue(mockSettings)
-    vi.mocked(tauri.saveSettings).mockResolvedValue(undefined)
-    vi.mocked(tauri.speakNotification).mockResolvedValue(undefined)
+    vi.mocked(settingsLib.getSettings).mockResolvedValue(mockSettings)
+    vi.mocked(settingsLib.saveSettings).mockResolvedValue(undefined)
+    vi.mocked(sentraApi.speakNotification).mockResolvedValue(undefined)
   })
 
   describe('rendering', () => {
@@ -68,7 +73,7 @@ describe('Settings', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(tauri.getSettings).toHaveBeenCalled()
+        expect(settingsLib.getSettings).toHaveBeenCalled()
       })
 
       const userNameInput = screen.getByPlaceholderText('e.g., Glen') as HTMLInputElement
@@ -175,14 +180,18 @@ describe('Settings', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(tauri.saveSettings).toHaveBeenCalled()
-        expect(mockOnClose).toHaveBeenCalled()
+        expect(settingsLib.saveSettings).toHaveBeenCalled()
       })
+
+      // Wait for success toast and modal close
+      await waitFor(() => {
+        expect(mockOnClose).toHaveBeenCalled()
+      }, { timeout: 2000 })
     })
 
     it('should show saving state when saving', async () => {
       // ARRANGE
-      vi.mocked(tauri.saveSettings).mockImplementation(
+      vi.mocked(settingsLib.saveSettings).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))
       )
 
@@ -200,10 +209,27 @@ describe('Settings', () => {
       expect(screen.getByText('Saving...')).toBeInTheDocument()
     })
 
+    it('should show success toast on successful save', async () => {
+      // ARRANGE
+      render(<Settings isOpen={true} onClose={mockOnClose} />)
+
+      await waitFor(() => {
+        expect(screen.queryByText('Loading settings...')).not.toBeInTheDocument()
+      })
+
+      // ACT
+      const saveButton = screen.getByText('Save Settings')
+      fireEvent.click(saveButton)
+
+      // ASSERT - Shows success toast
+      await waitFor(() => {
+        expect(screen.getByText('Settings saved successfully')).toBeInTheDocument()
+      })
+    })
+
     it('should handle save error', async () => {
       // ARRANGE
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-      vi.mocked(tauri.saveSettings).mockRejectedValue(new Error('Save failed'))
+      vi.mocked(settingsLib.saveSettings).mockRejectedValue(new Error('Save failed'))
 
       render(<Settings isOpen={true} onClose={mockOnClose} />)
 
@@ -215,14 +241,10 @@ describe('Settings', () => {
       const saveButton = screen.getByText('Save Settings')
       fireEvent.click(saveButton)
 
-      // ASSERT
+      // ASSERT - Now shows error toast instead of alert
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith(
-          expect.stringContaining('Failed to save settings')
-        )
+        expect(screen.getByText(/Failed to save settings/i)).toBeInTheDocument()
       })
-
-      alertSpy.mockRestore()
     })
   })
 
@@ -333,14 +355,14 @@ describe('Settings', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(tauri.speakNotification).toHaveBeenCalled()
+        expect(sentraApi.speakNotification).toHaveBeenCalled()
       })
     })
 
     it('should handle test voice error', async () => {
       // ARRANGE
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-      vi.mocked(tauri.speakNotification).mockRejectedValue(new Error('Voice test failed'))
+      vi.mocked(sentraApi.speakNotification).mockRejectedValue(new Error('Voice test failed'))
 
       render(<Settings isOpen={true} onClose={mockOnClose} />)
 
@@ -362,7 +384,7 @@ describe('Settings', () => {
 
     it('should disable test voice button when API key is missing', async () => {
       // ARRANGE
-      vi.mocked(tauri.getSettings).mockResolvedValue({
+      vi.mocked(settingsLib.getSettings).mockResolvedValue({
         ...mockSettings,
         openaiApiKey: '',
       })
@@ -380,7 +402,7 @@ describe('Settings', () => {
 
     it('should show testing state when testing voice', async () => {
       // ARRANGE
-      vi.mocked(tauri.speakNotification).mockImplementation(
+      vi.mocked(sentraApi.speakNotification).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))
       )
 
@@ -412,9 +434,9 @@ describe('Settings', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(tauri.speakNotification).toHaveBeenCalledWith(
+        expect(sentraApi.speakNotification).toHaveBeenCalledWith(
           expect.stringContaining('Test User'),
-          'nova',
+          'alloy',  // Changed from 'nova' to match mock settings
           'sk-test-key'
         )
       })
@@ -422,7 +444,7 @@ describe('Settings', () => {
 
     it('should use "there" when user name is not set', async () => {
       // ARRANGE
-      vi.mocked(tauri.getSettings).mockResolvedValue({
+      vi.mocked(settingsLib.getSettings).mockResolvedValue({
         ...mockSettings,
         userName: '',
       })
@@ -439,9 +461,9 @@ describe('Settings', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(tauri.speakNotification).toHaveBeenCalledWith(
+        expect(sentraApi.speakNotification).toHaveBeenCalledWith(
           expect.stringContaining('Hey there'),
-          'nova',
+          'alloy',  // Changed from 'nova' to match mock settings
           'sk-test-key'
         )
       })
@@ -450,7 +472,7 @@ describe('Settings', () => {
     it('should block preview for Realtime-only voices', async () => {
       // ARRANGE
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-      vi.mocked(tauri.getSettings).mockResolvedValue({
+      vi.mocked(settingsLib.getSettings).mockResolvedValue({
         ...mockSettings,
         voice: 'ballad', // Realtime-only voice
       })
@@ -470,7 +492,7 @@ describe('Settings', () => {
         expect(alertSpy).toHaveBeenCalledWith(
           expect.stringContaining('Ballad voice is only available in the Realtime API')
         )
-        expect(tauri.speakNotification).not.toHaveBeenCalled()
+        expect(sentraApi.speakNotification).not.toHaveBeenCalled()
       })
 
       alertSpy.mockRestore()
@@ -485,7 +507,7 @@ describe('Settings', () => {
       })
 
       // ASSERT - Check that Realtime-only voices have the indicator
-      expect(screen.getAllByText(/Realtime only - no preview/i).length).toBeGreaterThan(0)
+      expect(screen.getAllByText(/Voice chat only - no preview/i).length).toBeGreaterThan(0)
     })
   })
 
@@ -595,7 +617,7 @@ describe('Settings', () => {
     it('should handle loading settings error gracefully', async () => {
       // ARRANGE
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.mocked(tauri.getSettings).mockRejectedValue(new Error('Load failed'))
+      vi.mocked(settingsLib.getSettings).mockRejectedValue(new Error('Load failed'))
 
       // ACT
       render(<Settings isOpen={true} onClose={mockOnClose} />)
@@ -613,8 +635,7 @@ describe('Settings', () => {
 
     it('should handle non-Error save failures', async () => {
       // ARRANGE
-      const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-      vi.mocked(tauri.saveSettings).mockRejectedValue('String error')
+      vi.mocked(settingsLib.saveSettings).mockRejectedValue('String error')
 
       render(<Settings isOpen={true} onClose={mockOnClose} />)
 
@@ -626,12 +647,10 @@ describe('Settings', () => {
       const saveButton = screen.getByText('Save Settings')
       fireEvent.click(saveButton)
 
-      // ASSERT
+      // ASSERT - Shows error toast
       await waitFor(() => {
-        expect(alertSpy).toHaveBeenCalledWith('Failed to save settings: Unknown error')
+        expect(screen.getByText(/Failed to save settings: Unknown error/i)).toBeInTheDocument()
       })
-
-      alertSpy.mockRestore()
     })
   })
 })

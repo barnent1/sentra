@@ -1,9 +1,7 @@
 // Project controller
 import { Request, Response } from 'express'
-import { PrismaClient } from '@prisma/client'
+import { drizzleDb } from '@/services/database-drizzle'
 import type { CreateProjectRequest, ProjectResponse } from '../types'
-
-const prisma = new PrismaClient()
 
 /**
  * Serialize project for API response
@@ -29,8 +27,27 @@ function serializeProject(project: {
 }
 
 /**
+ * Calculate project progress based on activities
+ * Progress is based on agent completion ratio
+ */
+async function calculateProjectProgress(projectId: string): Promise<number> {
+  try {
+    const projectAgents = await drizzleDb.listAgentsByProject(projectId)
+
+    if (projectAgents.length === 0) {
+      return 0
+    }
+
+    const completedAgents = projectAgents.filter(a => a.status === 'completed').length
+    return Math.round((completedAgents / projectAgents.length) * 100)
+  } catch (error) {
+    return 0
+  }
+}
+
+/**
  * GET /api/projects
- * Get all projects for the authenticated user
+ * Get all projects for the authenticated user with progress calculation
  */
 export async function getProjects(req: Request, res: Response): Promise<void> {
   try {
@@ -39,13 +56,22 @@ export async function getProjects(req: Request, res: Response): Promise<void> {
       return
     }
 
-    const projects = await prisma.project.findMany({
-      where: { userId: req.user.userId },
-      orderBy: { createdAt: 'desc' },
-    })
+    // Drizzle service returns projects ordered by createdAt desc
+    const projects = await drizzleDb.listProjectsByUser(req.user.userId)
+
+    // Add progress to each project
+    const projectsWithProgress = await Promise.all(
+      projects.map(async (project) => {
+        const progress = await calculateProjectProgress(project.id)
+        return {
+          ...serializeProject(project),
+          progress,
+        }
+      })
+    )
 
     res.status(200).json({
-      projects: projects.map(serializeProject),
+      projects: projectsWithProgress,
     })
   } catch (error) {
     console.error('[Projects] Get projects error:', error)
@@ -80,14 +106,12 @@ export async function createProject(
       return
     }
 
-    // Create project
-    const project = await prisma.project.create({
-      data: {
-        name,
-        path,
-        userId: req.user.userId,
-        settings: settings ? JSON.stringify(settings) : null,
-      },
+    // Create project (Drizzle service handles JSON serialization)
+    const project = await drizzleDb.createProject({
+      name,
+      path,
+      userId: req.user.userId,
+      settings: settings || undefined,
     })
 
     res.status(201).json({
@@ -101,7 +125,7 @@ export async function createProject(
 
 /**
  * GET /api/projects/:id
- * Get a single project by ID
+ * Get a single project by ID with related agents, costs, and activities
  */
 export async function getProjectById(
   req: Request,
@@ -115,8 +139,11 @@ export async function getProjectById(
 
     const { id } = req.params
 
-    const project = await prisma.project.findUnique({
-      where: { id },
+    // Get project with relations
+    const project = await drizzleDb.getProjectById(id, {
+      includeAgents: true,
+      includeCosts: true,
+      includeActivities: true,
     })
 
     if (!project) {
@@ -130,8 +157,47 @@ export async function getProjectById(
       return
     }
 
+    // Calculate progress
+    const progress = await calculateProjectProgress(id)
+
+    // Calculate total cost
+    const totalCost = await drizzleDb.getTotalCostByProject(id)
+
     res.status(200).json({
-      project: serializeProject(project),
+      project: {
+        ...serializeProject(project),
+        progress,
+        totalCost: Number(totalCost.toFixed(2)),
+        agents: project.agents?.map(agent => ({
+          id: agent.id,
+          projectId: agent.projectId,
+          status: agent.status,
+          startTime: agent.startTime.toISOString(),
+          endTime: agent.endTime?.toISOString() || null,
+          logs: agent.logs,
+          error: agent.error,
+          createdAt: agent.createdAt.toISOString(),
+          updatedAt: agent.updatedAt.toISOString(),
+        })) || [],
+        costs: project.costs?.map(cost => ({
+          id: cost.id,
+          projectId: cost.projectId,
+          amount: cost.amount,
+          model: cost.model,
+          provider: cost.provider,
+          inputTokens: cost.inputTokens,
+          outputTokens: cost.outputTokens,
+          timestamp: cost.timestamp.toISOString(),
+        })) || [],
+        activities: project.activities?.map(activity => ({
+          id: activity.id,
+          projectId: activity.projectId,
+          type: activity.type,
+          message: activity.message,
+          metadata: activity.metadata,
+          timestamp: activity.timestamp.toISOString(),
+        })) || [],
+      },
     })
   } catch (error) {
     console.error('[Projects] Get project by ID error:', error)
@@ -155,9 +221,7 @@ export async function deleteProject(
 
     const { id } = req.params
 
-    const project = await prisma.project.findUnique({
-      where: { id },
-    })
+    const project = await drizzleDb.getProjectById(id)
 
     if (!project) {
       res.status(404).json({ error: 'Project not found' })
@@ -171,9 +235,7 @@ export async function deleteProject(
     }
 
     // Delete project (cascade will delete related records)
-    await prisma.project.delete({
-      where: { id },
-    })
+    await drizzleDb.deleteProject(id)
 
     res.status(204).send()
   } catch (error) {

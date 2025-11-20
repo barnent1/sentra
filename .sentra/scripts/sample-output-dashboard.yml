@@ -1,0 +1,154 @@
+# Sample Output from figma-import.py
+# This is what a generated screen spec looks like
+
+screen: "Dashboard"
+route: "/dashboard"
+figma_url: "https://figma.com/file/abc123/BookmarkManager"
+v0_source: "docs/specs/v0-exports/dashboard.tsx"
+
+# FROM FIGMA: Visual structure
+layout:
+  type: "flex"
+  direction: "VERTICAL"
+  spacing: 24
+  padding:
+    top: 32
+    right: 32
+    bottom: 32
+    left: 32
+  alignment:
+    primary: "MIN"
+    counter: "MIN"
+  children:
+    - name: "Header"
+      type: "FRAME"
+      component: "Header"
+      properties:
+        width: 1440
+        height: 64
+        backgroundColor: "#FFFFFF"
+
+    - name: "FilterBar"
+      type: "FRAME"
+      component: "Container"
+      properties:
+        width: 1440
+        height: 56
+
+    - name: "BookmarkGrid"
+      type: "FRAME"
+      component: "Container"
+      properties:
+        width: 1440
+
+components:
+  - "Button"
+  - "Card"
+  - "Modal"
+  - "Input"
+  - "Dropdown"
+
+# FROM ARCHITECT: Behavior
+behavior:
+  on_load:
+    - "Fetch user's bookmarks from API"
+    - "Show skeleton loading state"
+    - "Load user preferences (view mode, sort order)"
+
+  user_actions:
+    - action: "Click quick add button"
+      result: "Opens QuickAddModal for adding new bookmark"
+    - action: "Click bookmark card"
+      result: "Navigates to bookmark detail page"
+    - action: "Click filter dropdown"
+      result: "Opens filter menu with tags and categories"
+    - action: "Toggle view mode"
+      result: "Switches between grid and list view"
+
+  states:
+    - "Empty state: No bookmarks yet"
+    - "Loading state: Skeleton cards"
+    - "Error state: Failed to load bookmarks"
+    - "Populated state: Bookmarks displayed"
+
+  validation_rules:
+    - "User must be authenticated"
+    - "Bookmarks must belong to current user"
+
+  error_handling:
+    - "Network error: Show retry button"
+    - "Empty results: Show onboarding message"
+    - "Permission error: Redirect to login"
+
+# FROM ARCHITECT: E2E tests
+e2e_tests:
+  - name: "User adds first bookmark"
+    description: "User adds first bookmark"
+    steps:
+      - "Navigate to /dashboard"
+      - "See empty state message"
+      - "Click quick add button"
+      - "Paste URL in modal"
+      - "Click save"
+      - "Verify bookmark appears in grid"
+    assertions: []
+
+  - name: "User filters bookmarks by tag"
+    description: "User filters bookmarks by tag"
+    steps:
+      - "Navigate to /dashboard"
+      - "Click filter dropdown"
+      - "Select \"Work\" tag"
+      - "Verify only work bookmarks shown"
+    assertions: []
+
+# FROM FIGMA: Design tokens
+design_tokens:
+  colors:
+    primary: "#7C3AED"
+    secondary: "#EC4899"
+    background: "#FFFFFF"
+    surface: "#F9FAFB"
+    text: "#111827"
+    textSecondary: "#6B7280"
+    border: "#E5E7EB"
+    error: "#EF4444"
+    success: "#10B981"
+
+  spacing:
+    xs: "4px"
+    sm: "8px"
+    md: "16px"
+    lg: "24px"
+    xl: "32px"
+    2xl: "48px"
+
+  typography:
+    heading-1:
+      fontFamily: "Inter"
+      fontSize: "32px"
+      fontWeight: 700
+      lineHeight: "40px"
+    heading-2:
+      fontFamily: "Inter"
+      fontSize: "24px"
+      fontWeight: 600
+      lineHeight: "32px"
+    body:
+      fontFamily: "Inter"
+      fontSize: "16px"
+      fontWeight: 400
+      lineHeight: "24px"
+    caption:
+      fontFamily: "Inter"
+      fontSize: "14px"
+      fontWeight: 400
+      lineHeight: "20px"
+
+  effects: {}
+
+# Metadata
+metadata:
+  created_at: "2025-11-17T10:30:00.000000"
+  figma_file_id: "abc123"
+  figma_node_id: "456:789"

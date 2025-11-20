@@ -38,11 +38,10 @@ describe('performanceMiddleware', () => {
     mockTrackAPICall.mockClear();
     mockIsEnabled.mockReturnValue(true);
 
-    mockRequest = {
-      url: 'http://localhost:3000/api/test',
+    // Create a proper NextRequest mock with all required properties
+    mockRequest = new NextRequest('http://localhost:3000/api/test', {
       method: 'GET',
-      headers: new Headers(),
-    } as NextRequest;
+    });
 
     mockResponse = NextResponse.json({ data: 'test' });
 
@@ -66,10 +65,9 @@ describe('performanceMiddleware', () => {
     });
 
     it('should extract endpoint from URL', async () => {
-      mockRequest = {
-        ...mockRequest,
-        url: 'http://localhost:3000/api/users/123',
-      } as any as NextRequest;
+      mockRequest = new NextRequest('http://localhost:3000/api/users/123', {
+        method: 'GET',
+      });
       const middleware = performanceMiddleware();
       await middleware(mockRequest, mockNext);
 
@@ -82,10 +80,9 @@ describe('performanceMiddleware', () => {
     });
 
     it('should capture HTTP method', async () => {
-      mockRequest = {
-        ...mockRequest,
+      mockRequest = new NextRequest('http://localhost:3000/api/test', {
         method: 'POST',
-      } as any as NextRequest;
+      });
       const middleware = performanceMiddleware();
       await middleware(mockRequest, mockNext);
 
@@ -196,10 +193,9 @@ describe('performanceMiddleware', () => {
     });
 
     it('should exclude specific paths', async () => {
-      mockRequest = {
-        ...mockRequest,
-        url: 'http://localhost:3000/api/health',
-      };
+      mockRequest = new NextRequest('http://localhost:3000/api/health', {
+        method: 'GET',
+      });
 
       const middleware = performanceMiddleware({
         excludePaths: ['/api/health', '/api/metrics'],
@@ -210,10 +206,9 @@ describe('performanceMiddleware', () => {
     });
 
     it('should only include specified paths', async () => {
-      mockRequest = {
-        ...mockRequest,
-        url: 'http://localhost:3000/api/other',
-      };
+      mockRequest = new NextRequest('http://localhost:3000/api/other', {
+        method: 'GET',
+      });
 
       const middleware = performanceMiddleware({
         includePaths: ['/api/users', '/api/posts'],
@@ -224,10 +219,9 @@ describe('performanceMiddleware', () => {
     });
 
     it('should track included paths', async () => {
-      mockRequest = {
-        ...mockRequest,
-        url: 'http://localhost:3000/api/users',
-      };
+      mockRequest = new NextRequest('http://localhost:3000/api/users', {
+        method: 'GET',
+      });
 
       const middleware = performanceMiddleware({
         includePaths: ['/api/users', '/api/posts'],
@@ -249,10 +243,9 @@ describe('withPerformanceTracking', () => {
 
   it('should wrap API route handler', async () => {
     const wrapped = withPerformanceTracking(mockHandler);
-    const req = {
-      url: 'http://localhost:3000/api/test',
+    const req = new NextRequest('http://localhost:3000/api/test', {
       method: 'GET',
-    } as NextRequest;
+    });
 
     const response = await wrapped(req);
 
@@ -262,10 +255,9 @@ describe('withPerformanceTracking', () => {
 
   it('should track performance of wrapped handler', async () => {
     const wrapped = withPerformanceTracking(mockHandler);
-    const req = {
-      url: 'http://localhost:3000/api/test',
+    const req = new NextRequest('http://localhost:3000/api/test', {
       method: 'GET',
-    } as NextRequest;
+    });
 
     await wrapped(req);
 
@@ -278,10 +270,9 @@ describe('withPerformanceTracking', () => {
     });
 
     const wrapped = withPerformanceTracking(mockHandler);
-    const req = {
-      url: 'http://localhost:3000/api/test',
+    const req = new NextRequest('http://localhost:3000/api/test', {
       method: 'GET',
-    } as NextRequest;
+    });
 
     await expect(wrapped(req)).rejects.toThrow('Handler error');
   });
@@ -292,10 +283,9 @@ describe('withPerformanceTracking', () => {
       enabled: true,
     });
 
-    const req = {
-      url: 'http://localhost:3000/api/test',
+    const req = new NextRequest('http://localhost:3000/api/test', {
       method: 'GET',
-    } as NextRequest;
+    });
 
     await wrapped(req);
 

@@ -1,0 +1,32 @@
+# Sentra AI-Powered SaaS Factory - Python Dependencies
+#
+# These dependencies are used by Sentra automation scripts:
+# - .sentra/scripts/init-project.py
+# - .sentra/scripts/init-existing-project.py
+# - .sentra/scripts/auto-refactor.py
+# - .sentra/scripts/dashboard-generator.py
+# - .sentra/scripts/metrics-collector.py
+#
+# Install with: pip install -r requirements.txt
+# Or via setup script: ./scripts/setup-sentra.sh
+
+# HTTP requests (for API calls)
+requests>=2.31.0
+
+# YAML parsing (for configuration files)
+pyyaml>=6.0.1
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# Rich terminal output (for beautiful CLI)
+rich>=13.7.0
+
+# CLI argument parsing
+click>=8.1.7
+
+# JSON schema validation (optional)
+jsonschema>=4.20.0
+
+# Markdown processing (optional)
+markdown>=3.5.0

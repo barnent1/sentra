@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { X, Mic, MessageSquare, Keyboard } from 'lucide-react';
-import { getSettings, chatWithArchitect, getProjectContext, type ConversationMessage } from '@/lib/tauri';
+import { getSettings, chatWithArchitect, getProjectContext, type ConversationMessage } from '@/services/sentra-api';
 import { RealtimeConversation } from '@/lib/openai-realtime';
 
 interface Message {
@@ -212,7 +212,21 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Failed to send message:', error);
-      setErrorMessage('Failed to get response. Please check your API key.');
+
+      // Show user-friendly error message based on error type
+      if (error instanceof Error) {
+        if (error.message.includes('Invalid Anthropic API key') || error.message.includes('401')) {
+          setErrorMessage('Invalid Anthropic API key. Please update your key in Settings.');
+        } else if (error.message.includes('Rate limit')) {
+          setErrorMessage('Rate limit exceeded. Please wait a moment and try again.');
+        } else if (error.message.includes('API key is required')) {
+          setErrorMessage('Anthropic API key is not configured. Please add it in Settings.');
+        } else {
+          setErrorMessage(`Failed to get response: ${error.message}`);
+        }
+      } else {
+        setErrorMessage('Failed to get response. Please check your API key.');
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -251,7 +265,7 @@ Please provide a technical specification summarizing the requirements and implem
       // Save the spec using new versioning system
       if (projectPath) {
         console.log('💾 Saving spec...');
-        const { saveSpec } = await import('@/lib/tauri');
+        const { saveSpec } = await import('@/services/sentra-api');
         const specInfo = await saveSpec(projectName, projectPath, spec);
         console.log(`✅ Spec saved: ${specInfo.title} (v${specInfo.version})`);
       }
@@ -312,6 +326,12 @@ Please provide a technical specification summarizing the requirements and implem
           {textMode ? (
             /* Text Mode - Show Chat History */
             <div className="space-y-4">
+              {!apiKeysConfigured && (
+                <div className="p-4 bg-yellow-500/20 border border-yellow-500/30 rounded-lg text-yellow-300 text-sm">
+                  <strong>API Keys Not Configured</strong>
+                  <p className="mt-1">Please configure your OpenAI and Anthropic API keys in Settings to use the chat.</p>
+                </div>
+              )}
               {messages.map((message, index) => (
                 <div
                   key={index}

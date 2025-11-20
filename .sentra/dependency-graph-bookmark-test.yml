@@ -1,0 +1,678 @@
+# Dependency Graph: Bookmark Manager Test Project
+# Generated: 2025-11-17
+# Total Issues: 48
+# Structure: 4 batches (Foundation → Core APIs → UI → Polish)
+
+project:
+  name: bookmark-manager-test
+  total_issues: 48
+  estimated_duration: 6-8 weeks
+  complexity: Medium
+
+batches:
+  - id: 1
+    name: Foundation
+    description: Infrastructure, database, auth setup
+    issues: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    dependencies: []
+    estimated_duration: 1 week
+
+  - id: 2
+    name: Core APIs
+    description: Authentication and bookmark CRUD endpoints
+    issues: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+    dependencies: [1]
+    estimated_duration: 2-3 weeks
+
+  - id: 3
+    name: UI Components
+    description: Frontend forms, dashboard, and interactions
+    issues: [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]
+    dependencies: [1, 2]
+    estimated_duration: 2-3 weeks
+
+  - id: 4
+    name: Polish
+    description: Error handling, accessibility, optimization
+    issues: [41, 42, 43, 44, 45, 46, 47, 48]
+    dependencies: [1, 2, 3]
+    estimated_duration: 1 week
+
+issues:
+  # BATCH 1: FOUNDATION (Issues 1-10)
+  - id: 1
+    title: "[BM-001] Setup Next.js 15 + TypeScript project structure"
+    batch: 1
+    priority: p0
+    dependencies: []
+    blocks: [2, 3, 6, 7, 8]
+    estimated_complexity: small
+    files:
+      - package.json
+      - tsconfig.json
+      - next.config.js
+      - src/app/layout.tsx
+      - src/app/page.tsx
+
+  - id: 2
+    title: "[BM-002] Setup Prisma ORM with PostgreSQL and SQLite"
+    batch: 1
+    priority: p0
+    dependencies: [1]
+    blocks: [4, 5, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+    estimated_complexity: medium
+    files:
+      - prisma/schema.prisma
+      - prisma/migrations/
+      - src/lib/prisma.ts
+
+  - id: 3
+    title: "[BM-003] Setup Vitest + Playwright testing infrastructure"
+    batch: 1
+    priority: p0
+    dependencies: [1]
+    blocks: [4, 5, 11-48]
+    estimated_complexity: medium
+    files:
+      - vitest.config.ts
+      - playwright.config.ts
+      - tests/setup.ts
+      - tests/e2e/setup.ts
+
+  - id: 4
+    title: "[BM-004] Create database schema (User + Bookmark models)"
+    batch: 1
+    priority: p0
+    dependencies: [2]
+    blocks: [5, 9, 11-25]
+    estimated_complexity: small
+    files:
+      - prisma/schema.prisma
+
+  - id: 5
+    title: "[BM-005] Create database seed data for development"
+    batch: 1
+    priority: p1
+    dependencies: [4]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - prisma/seed.ts
+      - package.json
+
+  - id: 6
+    title: "[BM-006] Setup CI/CD pipeline (GitHub Actions)"
+    batch: 1
+    priority: p1
+    dependencies: [1, 3]
+    blocks: []
+    estimated_complexity: medium
+    files:
+      - .github/workflows/test.yml
+      - .github/workflows/deploy.yml
+
+  - id: 7
+    title: "[BM-007] Configure dark theme with TailwindCSS"
+    batch: 1
+    priority: p1
+    dependencies: [1]
+    blocks: [26-40]
+    estimated_complexity: small
+    files:
+      - tailwind.config.ts
+      - src/app/globals.css
+
+  - id: 8
+    title: "[BM-008] Setup environment variables (.env.example)"
+    batch: 1
+    priority: p0
+    dependencies: [1]
+    blocks: [2, 11-25]
+    estimated_complexity: small
+    files:
+      - .env.example
+      - .env.local
+
+  - id: 9
+    title: "[BM-009] Create auth utility functions (bcrypt, JWT)"
+    batch: 1
+    priority: p0
+    dependencies: [4, 8]
+    blocks: [11, 12, 13, 14]
+    estimated_complexity: medium
+    files:
+      - src/lib/auth.ts
+      - tests/unit/lib/auth.test.ts
+
+  - id: 10
+    title: "[BM-010] Create API middleware (error handling, CORS)"
+    batch: 1
+    priority: p0
+    dependencies: [1]
+    blocks: [11-25]
+    estimated_complexity: small
+    files:
+      - src/middleware.ts
+      - src/lib/api-utils.ts
+      - tests/unit/lib/api-utils.test.ts
+
+  # BATCH 2: CORE APIs (Issues 11-25)
+  - id: 11
+    title: "[BM-011] Implement POST /api/auth/register endpoint"
+    batch: 2
+    priority: p0
+    dependencies: [2, 4, 9, 10]
+    blocks: [26, 27]
+    estimated_complexity: medium
+    files:
+      - src/app/api/auth/register/route.ts
+      - tests/unit/api/auth/register.test.ts
+      - tests/e2e/auth.spec.ts
+
+  - id: 12
+    title: "[BM-012] Implement POST /api/auth/login endpoint"
+    batch: 2
+    priority: p0
+    dependencies: [2, 4, 9, 10]
+    blocks: [26, 27]
+    estimated_complexity: medium
+    files:
+      - src/app/api/auth/login/route.ts
+      - tests/unit/api/auth/login.test.ts
+      - tests/e2e/auth.spec.ts
+
+  - id: 13
+    title: "[BM-013] Implement GET /api/auth/me endpoint"
+    batch: 2
+    priority: p0
+    dependencies: [2, 4, 9, 10]
+    blocks: [28-40]
+    estimated_complexity: small
+    files:
+      - src/app/api/auth/me/route.ts
+      - tests/unit/api/auth/me.test.ts
+
+  - id: 14
+    title: "[BM-014] Create auth middleware for protected routes"
+    batch: 2
+    priority: p0
+    dependencies: [9]
+    blocks: [16-25]
+    estimated_complexity: medium
+    files:
+      - src/middleware/auth.ts
+      - tests/unit/middleware/auth.test.ts
+
+  - id: 15
+    title: "[BM-015] Create Zod validation schemas for bookmarks"
+    batch: 2
+    priority: p0
+    dependencies: [2, 4]
+    blocks: [16-20]
+    estimated_complexity: small
+    files:
+      - src/lib/validation.ts
+      - tests/unit/lib/validation.test.ts
+
+  - id: 16
+    title: "[BM-016] Implement GET /api/bookmarks (list with pagination)"
+    batch: 2
+    priority: p0
+    dependencies: [2, 4, 14, 15]
+    blocks: [31, 32]
+    estimated_complexity: medium
+    files:
+      - src/app/api/bookmarks/route.ts
+      - tests/unit/api/bookmarks/list.test.ts
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 17
+    title: "[BM-017] Implement POST /api/bookmarks (create)"
+    batch: 2
+    priority: p0
+    dependencies: [2, 4, 14, 15]
+    blocks: [35]
+    estimated_complexity: medium
+    files:
+      - src/app/api/bookmarks/route.ts
+      - tests/unit/api/bookmarks/create.test.ts
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 18
+    title: "[BM-018] Implement GET /api/bookmarks/:id (single bookmark)"
+    batch: 2
+    priority: p0
+    dependencies: [2, 4, 14, 15]
+    blocks: [36]
+    estimated_complexity: small
+    files:
+      - src/app/api/bookmarks/[id]/route.ts
+      - tests/unit/api/bookmarks/get.test.ts
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 19
+    title: "[BM-019] Implement PATCH /api/bookmarks/:id (update)"
+    batch: 2
+    priority: p0
+    dependencies: [2, 4, 14, 15]
+    blocks: [37]
+    estimated_complexity: medium
+    files:
+      - src/app/api/bookmarks/[id]/route.ts
+      - tests/unit/api/bookmarks/update.test.ts
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 20
+    title: "[BM-020] Implement DELETE /api/bookmarks/:id (delete)"
+    batch: 2
+    priority: p0
+    dependencies: [2, 4, 14, 15]
+    blocks: [38]
+    estimated_complexity: small
+    files:
+      - src/app/api/bookmarks/[id]/route.ts
+      - tests/unit/api/bookmarks/delete.test.ts
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 21
+    title: "[BM-021] Implement GET /api/bookmarks/tags (tag list with counts)"
+    batch: 2
+    priority: p1
+    dependencies: [2, 4, 14]
+    blocks: [34]
+    estimated_complexity: medium
+    files:
+      - src/app/api/bookmarks/tags/route.ts
+      - tests/unit/api/bookmarks/tags.test.ts
+
+  - id: 22
+    title: "[BM-022] Add search functionality to GET /api/bookmarks"
+    batch: 2
+    priority: p1
+    dependencies: [16]
+    blocks: [33]
+    estimated_complexity: medium
+    files:
+      - src/app/api/bookmarks/route.ts
+      - tests/unit/api/bookmarks/search.test.ts
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 23
+    title: "[BM-023] Add tag filtering to GET /api/bookmarks"
+    batch: 2
+    priority: p1
+    dependencies: [16, 21]
+    blocks: [34]
+    estimated_complexity: small
+    files:
+      - src/app/api/bookmarks/route.ts
+      - tests/unit/api/bookmarks/filter.test.ts
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 24
+    title: "[BM-024] Implement cursor-based pagination"
+    batch: 2
+    priority: p1
+    dependencies: [16]
+    blocks: []
+    estimated_complexity: medium
+    files:
+      - src/app/api/bookmarks/route.ts
+      - tests/unit/api/bookmarks/pagination.test.ts
+
+  - id: 25
+    title: "[BM-025] Create URL metadata fetching service (title, favicon)"
+    batch: 2
+    priority: p1
+    dependencies: [2]
+    blocks: [35]
+    estimated_complexity: medium
+    files:
+      - src/services/metadata.ts
+      - tests/unit/services/metadata.test.ts
+
+  # BATCH 3: UI COMPONENTS (Issues 26-40)
+  - id: 26
+    title: "[BM-026] Create login form component"
+    batch: 3
+    priority: p0
+    dependencies: [7, 11, 12]
+    blocks: []
+    estimated_complexity: medium
+    files:
+      - src/components/LoginForm.tsx
+      - src/app/auth/page.tsx
+      - tests/unit/components/LoginForm.test.tsx
+      - tests/e2e/auth.spec.ts
+
+  - id: 27
+    title: "[BM-027] Create register form component"
+    batch: 3
+    priority: p0
+    dependencies: [7, 11, 12]
+    blocks: []
+    estimated_complexity: medium
+    files:
+      - src/components/RegisterForm.tsx
+      - src/app/auth/page.tsx
+      - tests/unit/components/RegisterForm.test.tsx
+      - tests/e2e/auth.spec.ts
+
+  - id: 28
+    title: "[BM-028] Create dashboard layout component"
+    batch: 3
+    priority: p0
+    dependencies: [7, 13]
+    blocks: [29, 30, 31, 32]
+    estimated_complexity: medium
+    files:
+      - src/app/dashboard/layout.tsx
+      - src/components/DashboardLayout.tsx
+      - tests/unit/components/DashboardLayout.test.tsx
+
+  - id: 29
+    title: "[BM-029] Create header component (search, add button, user menu)"
+    batch: 3
+    priority: p0
+    dependencies: [28]
+    blocks: [33, 35]
+    estimated_complexity: medium
+    files:
+      - src/components/Header.tsx
+      - tests/unit/components/Header.test.tsx
+
+  - id: 30
+    title: "[BM-030] Create sidebar component (tag filter)"
+    batch: 3
+    priority: p1
+    dependencies: [28, 21]
+    blocks: [34]
+    estimated_complexity: medium
+    files:
+      - src/components/Sidebar.tsx
+      - tests/unit/components/Sidebar.test.tsx
+
+  - id: 31
+    title: "[BM-031] Create bookmark grid component"
+    batch: 3
+    priority: p0
+    dependencies: [28, 16]
+    blocks: [32]
+    estimated_complexity: medium
+    files:
+      - src/components/BookmarkGrid.tsx
+      - tests/unit/components/BookmarkGrid.test.tsx
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 32
+    title: "[BM-032] Create bookmark card component"
+    batch: 3
+    priority: p0
+    dependencies: [31]
+    blocks: [36]
+    estimated_complexity: medium
+    files:
+      - src/components/BookmarkCard.tsx
+      - tests/unit/components/BookmarkCard.test.tsx
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 33
+    title: "[BM-033] Create search bar component with debounce"
+    batch: 3
+    priority: p1
+    dependencies: [29, 22]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/components/SearchBar.tsx
+      - src/hooks/useDebounce.ts
+      - tests/unit/components/SearchBar.test.tsx
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 34
+    title: "[BM-034] Create tag filter component"
+    batch: 3
+    priority: p1
+    dependencies: [30, 23]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/components/TagFilter.tsx
+      - tests/unit/components/TagFilter.test.tsx
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 35
+    title: "[BM-035] Create add bookmark modal component"
+    batch: 3
+    priority: p0
+    dependencies: [17, 25, 29]
+    blocks: []
+    estimated_complexity: large
+    files:
+      - src/components/AddBookmarkModal.tsx
+      - src/hooks/useBookmarkForm.ts
+      - tests/unit/components/AddBookmarkModal.test.tsx
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 36
+    title: "[BM-036] Create bookmark detail view component"
+    batch: 3
+    priority: p1
+    dependencies: [18, 32]
+    blocks: [37]
+    estimated_complexity: medium
+    files:
+      - src/app/dashboard/bookmarks/[id]/page.tsx
+      - src/components/BookmarkDetail.tsx
+      - tests/unit/components/BookmarkDetail.test.tsx
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 37
+    title: "[BM-037] Create edit bookmark form component"
+    batch: 3
+    priority: p1
+    dependencies: [19, 36]
+    blocks: []
+    estimated_complexity: medium
+    files:
+      - src/components/EditBookmarkForm.tsx
+      - tests/unit/components/EditBookmarkForm.test.tsx
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 38
+    title: "[BM-038] Create delete confirmation dialog component"
+    batch: 3
+    priority: p1
+    dependencies: [20, 32]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/components/DeleteConfirmDialog.tsx
+      - tests/unit/components/DeleteConfirmDialog.test.tsx
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 39
+    title: "[BM-039] Create toast notification system"
+    batch: 3
+    priority: p0
+    dependencies: [7]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/components/Toast.tsx
+      - src/hooks/useToast.ts
+      - tests/unit/components/Toast.test.tsx
+
+  - id: 40
+    title: "[BM-040] Create loading states (skeletons, spinners)"
+    batch: 3
+    priority: p1
+    dependencies: [31, 32]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/components/LoadingStates.tsx
+      - tests/unit/components/LoadingStates.test.tsx
+
+  # BATCH 4: POLISH (Issues 41-48)
+  - id: 41
+    title: "[BM-041] Implement error boundaries for graceful failures"
+    batch: 4
+    priority: p1
+    dependencies: [28]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/components/ErrorBoundary.tsx
+      - src/app/error.tsx
+      - tests/unit/components/ErrorBoundary.test.tsx
+
+  - id: 42
+    title: "[BM-042] Add form validation animations and feedback"
+    batch: 4
+    priority: p2
+    dependencies: [26, 27, 35, 37]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/components/FormField.tsx
+      - src/app/globals.css
+
+  - id: 43
+    title: "[BM-043] Create empty states (no bookmarks, no results)"
+    batch: 4
+    priority: p1
+    dependencies: [31, 33]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/components/EmptyState.tsx
+      - tests/unit/components/EmptyState.test.tsx
+      - tests/e2e/bookmarks.spec.ts
+
+  - id: 44
+    title: "[BM-044] Create custom 404 page"
+    batch: 4
+    priority: p2
+    dependencies: [7]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/app/not-found.tsx
+      - tests/e2e/errors.spec.ts
+
+  - id: 45
+    title: "[BM-045] Add database indexes for performance optimization"
+    batch: 4
+    priority: p1
+    dependencies: [4, 16, 22, 23]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - prisma/schema.prisma
+      - prisma/migrations/
+
+  - id: 46
+    title: "[BM-046] Comprehensive accessibility testing (WCAG 2.1 AA)"
+    batch: 4
+    priority: p1
+    dependencies: [26-40]
+    blocks: []
+    estimated_complexity: medium
+    files:
+      - tests/e2e/accessibility.spec.ts
+      - playwright.config.ts
+
+  - id: 47
+    title: "[BM-047] SEO optimization (meta tags, Open Graph)"
+    batch: 4
+    priority: p2
+    dependencies: [1, 28]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - src/app/layout.tsx
+      - src/app/dashboard/layout.tsx
+      - src/lib/seo.ts
+
+  - id: 48
+    title: "[BM-048] Create deployment documentation (Vercel/Netlify)"
+    batch: 4
+    priority: p1
+    dependencies: [6]
+    blocks: []
+    estimated_complexity: small
+    files:
+      - docs/deployment/WEB-DEPLOYMENT.md
+      - vercel.json
+      - netlify.toml
+
+# File Conflict Detection
+file_conflicts:
+  - files: ["src/app/api/bookmarks/route.ts"]
+    modified_by_issues: [16, 17, 22, 23, 24]
+    resolution: "Issues must be completed sequentially in order"
+
+  - files: ["src/app/auth/page.tsx"]
+    modified_by_issues: [26, 27]
+    resolution: "Both components integrate into same auth page"
+
+  - files: ["prisma/schema.prisma"]
+    modified_by_issues: [2, 4, 45]
+    resolution: "Sequential modifications, run migrations after each"
+
+  - files: ["tests/e2e/bookmarks.spec.ts"]
+    modified_by_issues: [16, 17, 18, 19, 20, 22, 23, 31, 32, 33, 34, 35, 36, 37, 38, 43]
+    resolution: "All issues append new test scenarios to same file"
+
+  - files: ["tests/e2e/auth.spec.ts"]
+    modified_by_issues: [11, 12, 26, 27]
+    resolution: "All issues append new test scenarios to same file"
+
+# Parallel Execution Opportunities
+parallel_groups:
+  - name: "Independent UI Components"
+    issues: [39, 40, 41, 43, 44]
+    description: "Can be developed in parallel as they have no dependencies on each other"
+
+  - name: "Independent API Endpoints"
+    issues: [18, 20, 21]
+    description: "Can be developed after dependencies are met"
+
+  - name: "Polish Tasks"
+    issues: [42, 47]
+    description: "Visual enhancements that don't block functionality"
+
+# Quality Gates
+quality_gates:
+  - gate: "Foundation Complete"
+    issues: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    criteria:
+      - "All tests passing"
+      - "Database migrations run successfully"
+      - "TypeScript compiles without errors"
+      - "CI/CD pipeline green"
+
+  - gate: "Core APIs Complete"
+    issues: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+    criteria:
+      - "All API endpoints return correct status codes"
+      - "Authentication works end-to-end"
+      - "Service layer has 90%+ test coverage"
+      - "Input validation prevents XSS/injection"
+
+  - gate: "UI Complete"
+    issues: [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]
+    criteria:
+      - "All E2E tests passing"
+      - "Responsive design works on mobile/tablet/desktop"
+      - "Dark theme applied consistently"
+      - "Forms show proper validation feedback"
+
+  - gate: "Production Ready"
+    issues: [41, 42, 43, 44, 45, 46, 47, 48]
+    criteria:
+      - "WCAG 2.1 AA compliance verified"
+      - "Error handling covers edge cases"
+      - "Performance optimizations in place"
+      - "Deployment documentation tested"
