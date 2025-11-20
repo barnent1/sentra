@@ -143,8 +143,10 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error('[Auth] Register error:', error)
+    console.error('[Auth] Error stack:', error instanceof Error ? error.stack : 'No stack')
+    console.error('[Auth] Error message:', error instanceof Error ? error.message : String(error))
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     )
   }

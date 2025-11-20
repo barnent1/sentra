@@ -19,9 +19,8 @@
 
 import { eq, desc, and, sql, gte, lte, sum } from 'drizzle-orm';
 import type { PgTransaction } from 'drizzle-orm/pg-core';
-import type { NeonHttpQueryResultHKT } from 'drizzle-orm/neon-http';
-import { drizzle } from 'drizzle-orm/neon-http';
-import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from '../db/schema';
 import {
   users,
@@ -40,6 +39,7 @@ import {
 
 // Lazy database initialization
 let _db: ReturnType<typeof drizzle> | null = null;
+let _client: postgres.Sql | null = null;
 
 function getDb() {
   if (_db) {
@@ -51,8 +51,12 @@ function getDb() {
     throw new Error('DATABASE_URL environment variable is not set');
   }
 
-  const sql = neon(databaseUrl);
-  _db = drizzle(sql, { schema });
+  // Create postgres client with connection pooling
+  _client = postgres(databaseUrl, {
+    prepare: false, // Required for pgBouncer/Supabase pooler
+  });
+
+  _db = drizzle(_client, { schema });
   return _db;
 }
 

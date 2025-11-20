@@ -8,32 +8,48 @@
  * - Works in Vercel Edge Runtime
  * - Connection pooling
  * - HTTP-based protocol (no TCP)
- * - Conditional initialization (build-time safe)
+ * - Lazy initialization (runtime safe)
  */
 
-import { drizzle, type NeonHttpDatabase } from 'drizzle-orm/neon-http';
-import { neon } from '@neondatabase/serverless';
+import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from './schema';
 
-// Conditionally initialize database connection
-// During build: DATABASE_URL may not be set, so we create a placeholder
-// During runtime: DATABASE_URL must be set, connection is created
-let _db: NeonHttpDatabase<typeof schema> | null = null;
+// Lazy database initialization
+let _db: PostgresJsDatabase<typeof schema> | null = null;
+let _client: postgres.Sql | null = null;
 
-try {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (databaseUrl) {
-    const sql = neon(databaseUrl);
-    _db = drizzle(sql, { schema });
+function getDb(): PostgresJsDatabase<typeof schema> {
+  if (_db) {
+    return _db;
   }
-} catch (error) {
-  // Ignore errors during build time
-  console.warn('Database initialization skipped (build time)');
+
+  // Validate DATABASE_URL environment variable
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+
+  // Create postgres client with connection pooling (works with Supabase)
+  _client = postgres(databaseUrl, {
+    prepare: false, // Required for pgBouncer/Supabase pooler
+  });
+
+  // Create Drizzle instance with schema
+  _db = drizzle(_client, { schema });
+
+  return _db;
 }
 
-// Export database instance
-// Will be null during build, but initialized at runtime
-export const db = _db as NeonHttpDatabase<typeof schema>;
+// Export lazy getter that initializes on first use
+export const db = new Proxy({} as PostgresJsDatabase<typeof schema>, {
+  get(_target, prop) {
+    const dbInstance = getDb();
+    const value = (dbInstance as any)[prop];
+    // Bind methods to maintain context
+    return typeof value === 'function' ? value.bind(dbInstance) : value;
+  },
+});
 
 // Type-safe database instance
 export type Database = typeof db;
