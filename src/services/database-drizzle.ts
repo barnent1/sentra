@@ -14,13 +14,15 @@
  *
  * Usage:
  *   const db = DrizzleDatabaseService.getInstance();
- *   const user = await db.createUser({ email: 'test@example.com', password: 'hashed' });
+ *   const user = await db().createUser({ email: 'test@example.com', password: 'hashed' });
  */
 
 import { eq, desc, and, sql, gte, lte, sum } from 'drizzle-orm';
 import type { PgTransaction } from 'drizzle-orm/pg-core';
 import type { NeonHttpQueryResultHKT } from 'drizzle-orm/neon-http';
-import { db, type Database } from '../db/client';
+import { drizzle } from 'drizzle-orm/neon-http';
+import { neon } from '@neondatabase/serverless';
+import * as schema from '../db/schema';
 import {
   users,
   projects,
@@ -35,6 +37,29 @@ import {
   type Activity,
   type UserSettings,
 } from '../db/schema';
+
+// Lazy database initialization
+let _db: ReturnType<typeof drizzle> | null = null;
+
+function getDb() {
+  if (_db) {
+    return _db;
+  }
+
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+
+  const sql = neon(databaseUrl);
+  _db = drizzle(sql, { schema });
+  return _db;
+}
+
+// Helper to get database instance
+const db = () => getDb();
+
+export type Database = ReturnType<typeof drizzle>;
 
 // ============================================================================
 // Type Exports
@@ -228,7 +253,7 @@ export class DrizzleDatabaseService {
     this.validateEmail(input.email);
 
     try {
-      const [user] = await db
+      const [user] = await db()
         .insert(users)
         .values({
           email: input.email.toLowerCase(),
@@ -251,7 +276,7 @@ export class DrizzleDatabaseService {
    * Get user by ID
    */
   async getUserById(id: string): Promise<User | null> {
-    const [user] = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    const [user] = await db().select().from(users).where(eq(users.id, id)).limit(1);
     return user || null;
   }
 
@@ -259,7 +284,7 @@ export class DrizzleDatabaseService {
    * Get user by email
    */
   async getUserByEmail(email: string): Promise<User | null> {
-    const [user] = await db
+    const [user] = await db()
       .select()
       .from(users)
       .where(eq(users.email, email.toLowerCase()))
@@ -271,14 +296,14 @@ export class DrizzleDatabaseService {
    * List all users (ordered by creation date)
    */
   async listUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+    return await db().select().from(users).orderBy(desc(users.createdAt));
   }
 
   /**
    * Update user refresh token
    */
   async updateUserRefreshToken(userId: string, refreshToken: string | null): Promise<void> {
-    await db.update(users).set({ refreshToken }).where(eq(users.id, userId));
+    await db().update(users).set({ refreshToken }).where(eq(users.id, userId));
   }
 
   // --------------------------------------------------------------------------
@@ -291,7 +316,7 @@ export class DrizzleDatabaseService {
    */
   async createProject(input: CreateProjectInput): Promise<Project> {
     try {
-      const [project] = await db
+      const [project] = await db()
         .insert(projects)
         .values({
           name: input.name,
@@ -319,7 +344,7 @@ export class DrizzleDatabaseService {
     options: GetProjectOptions = {}
   ): Promise<ProjectWithRelations | null> {
     // Base project query
-    const [project] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+    const [project] = await db().select().from(projects).where(eq(projects.id, id)).limit(1);
 
     if (!project) {
       return null;
@@ -329,12 +354,12 @@ export class DrizzleDatabaseService {
 
     // Load relations if requested
     if (options.includeUser) {
-      const [user] = await db.select().from(users).where(eq(users.id, project.userId)).limit(1);
+      const [user] = await db().select().from(users).where(eq(users.id, project.userId)).limit(1);
       result.user = user;
     }
 
     if (options.includeAgents) {
-      result.agents = await db
+      result.agents = await db()
         .select()
         .from(agents)
         .where(eq(agents.projectId, id))
@@ -342,7 +367,7 @@ export class DrizzleDatabaseService {
     }
 
     if (options.includeCosts) {
-      result.costs = await db
+      result.costs = await db()
         .select()
         .from(costs)
         .where(eq(costs.projectId, id))
@@ -350,7 +375,7 @@ export class DrizzleDatabaseService {
     }
 
     if (options.includeActivities) {
-      result.activities = await db
+      result.activities = await db()
         .select()
         .from(activities)
         .where(eq(activities.projectId, id))
@@ -364,7 +389,7 @@ export class DrizzleDatabaseService {
    * List all projects for a user
    */
   async listProjectsByUser(userId: string): Promise<Project[]> {
-    const projectList = await db
+    const projectList = await db()
       .select()
       .from(projects)
       .where(eq(projects.userId, userId))
@@ -388,7 +413,7 @@ export class DrizzleDatabaseService {
     // Always update the updatedAt timestamp
     updateData.updatedAt = new Date();
 
-    const [project] = await db
+    const [project] = await db()
       .update(projects)
       .set(updateData)
       .where(eq(projects.id, id))
@@ -403,7 +428,7 @@ export class DrizzleDatabaseService {
    */
   async deleteProject(id: string): Promise<boolean> {
     try {
-      const result = await db.delete(projects).where(eq(projects.id, id)).returning();
+      const result = await db().delete(projects).where(eq(projects.id, id)).returning();
       return result.length > 0;
     } catch (error) {
       return false;
@@ -420,7 +445,7 @@ export class DrizzleDatabaseService {
   async createAgent(input: CreateAgentInput): Promise<Agent> {
     this.validateAgentStatus(input.status);
 
-    const [agent] = await db
+    const [agent] = await db()
       .insert(agents)
       .values({
         projectId: input.projectId,
@@ -439,7 +464,7 @@ export class DrizzleDatabaseService {
    * Get agent by ID with optional relations
    */
   async getAgentById(id: string, options: GetAgentOptions = {}): Promise<AgentWithRelations | null> {
-    const [agent] = await db.select().from(agents).where(eq(agents.id, id)).limit(1);
+    const [agent] = await db().select().from(agents).where(eq(agents.id, id)).limit(1);
 
     if (!agent) {
       return null;
@@ -448,7 +473,7 @@ export class DrizzleDatabaseService {
     const result: AgentWithRelations = this.deserializeAgent(agent);
 
     if (options.includeProject) {
-      const [project] = await db
+      const [project] = await db()
         .select()
         .from(projects)
         .where(eq(projects.id, agent.projectId))
@@ -463,7 +488,7 @@ export class DrizzleDatabaseService {
    * List all agents for a project
    */
   async listAgentsByProject(projectId: string): Promise<Agent[]> {
-    const agentList = await db
+    const agentList = await db()
       .select()
       .from(agents)
       .where(eq(agents.projectId, projectId))
@@ -490,7 +515,7 @@ export class DrizzleDatabaseService {
     // Always update the updatedAt timestamp
     updateData.updatedAt = new Date();
 
-    const [agent] = await db.update(agents).set(updateData).where(eq(agents.id, id)).returning();
+    const [agent] = await db().update(agents).set(updateData).where(eq(agents.id, id)).returning();
 
     return this.deserializeAgent(agent);
   }
@@ -502,7 +527,7 @@ export class DrizzleDatabaseService {
    */
   async appendAgentLogs(id: string, newLogs: string | string[]): Promise<Agent> {
     // Get current agent without deserialization to get raw logs
-    const [agent] = await db.select().from(agents).where(eq(agents.id, id)).limit(1);
+    const [agent] = await db().select().from(agents).where(eq(agents.id, id)).limit(1);
 
     if (!agent) {
       throw new Error('Agent not found');
@@ -535,7 +560,7 @@ export class DrizzleDatabaseService {
       updatedAt: new Date(),
     };
 
-    const [updatedAgent] = await db
+    const [updatedAgent] = await db()
       .update(agents)
       .set(updateData)
       .where(eq(agents.id, id))
@@ -554,7 +579,7 @@ export class DrizzleDatabaseService {
   async createCost(input: CreateCostInput): Promise<Cost> {
     this.validatePositiveAmount(input.amount);
 
-    const [cost] = await db
+    const [cost] = await db()
       .insert(costs)
       .values({
         projectId: input.projectId,
@@ -574,7 +599,7 @@ export class DrizzleDatabaseService {
    * Get all costs for a project
    */
   async getCostsByProject(projectId: string): Promise<Cost[]> {
-    return await db
+    return await db()
       .select()
       .from(costs)
       .where(eq(costs.projectId, projectId))
@@ -585,7 +610,7 @@ export class DrizzleDatabaseService {
    * Get total cost for a project
    */
   async getTotalCostByProject(projectId: string): Promise<number> {
-    const [result] = await db
+    const [result] = await db()
       .select({ total: sum(costs.amount) })
       .from(costs)
       .where(eq(costs.projectId, projectId));
@@ -597,7 +622,7 @@ export class DrizzleDatabaseService {
    * Get costs within a time range
    */
   async getCostsByTimeRange(start: Date, end: Date): Promise<Cost[]> {
-    return await db
+    return await db()
       .select()
       .from(costs)
       .where(and(gte(costs.timestamp, start), lte(costs.timestamp, end)))
@@ -611,7 +636,7 @@ export class DrizzleDatabaseService {
     // Validate all costs first
     costInputs.forEach((cost) => this.validatePositiveAmount(cost.amount));
 
-    await db.insert(costs).values(
+    await db().insert(costs).values(
       costInputs.map((cost) => ({
         projectId: cost.projectId,
         amount: cost.amount,
@@ -634,7 +659,7 @@ export class DrizzleDatabaseService {
   async createActivity(input: CreateActivityInput): Promise<Activity> {
     this.validateActivityType(input.type);
 
-    const [activity] = await db
+    const [activity] = await db()
       .insert(activities)
       .values({
         projectId: input.projectId,
@@ -655,7 +680,7 @@ export class DrizzleDatabaseService {
     projectId: string,
     options: GetActivitiesOptions = {}
   ): Promise<Activity[]> {
-    let query = db
+    let query = db()
       .select()
       .from(activities)
       .where(eq(activities.projectId, projectId))
@@ -677,7 +702,7 @@ export class DrizzleDatabaseService {
    * Get recent activities across all user's projects
    */
   async getRecentActivities(userId: string, limit: number = 10): Promise<ActivityWithRelations[]> {
-    const activityList = await db
+    const activityList = await db()
       .select({
         activity: activities,
         project: projects,
@@ -701,7 +726,7 @@ export class DrizzleDatabaseService {
     // Validate all activities first
     activityInputs.forEach((activity) => this.validateActivityType(activity.type));
 
-    await db.insert(activities).values(
+    await db().insert(activities).values(
       activityInputs.map((activity) => ({
         projectId: activity.projectId,
         type: activity.type,
@@ -720,7 +745,7 @@ export class DrizzleDatabaseService {
    * Get settings by user ID
    */
   async getSettingsByUserId(userId: string): Promise<UserSettings | null> {
-    const [settings] = await db
+    const [settings] = await db()
       .select()
       .from(userSettings)
       .where(eq(userSettings.userId, userId))
@@ -765,7 +790,7 @@ export class DrizzleDatabaseService {
       // Update existing settings
       settingsData.updatedAt = new Date();
 
-      const [updated] = await db
+      const [updated] = await db()
         .update(userSettings)
         .set(settingsData)
         .where(eq(userSettings.userId, userId))
@@ -774,7 +799,7 @@ export class DrizzleDatabaseService {
       return this.deserializeUserSettings(updated);
     } else {
       // Insert new settings
-      const [created] = await db.insert(userSettings).values(settingsData as any).returning();
+      const [created] = await db().insert(userSettings).values(settingsData as any).returning();
 
       return this.deserializeUserSettings(created);
     }
@@ -790,7 +815,7 @@ export class DrizzleDatabaseService {
   async transaction<T>(
     fn: (tx: any) => Promise<T>
   ): Promise<T> {
-    return await db.transaction(fn);
+    return await db().transaction(fn);
   }
 
   // --------------------------------------------------------------------------
@@ -806,12 +831,12 @@ export class DrizzleDatabaseService {
     }
 
     // Delete in order to respect foreign key constraints
-    await db.delete(activities);
-    await db.delete(costs);
-    await db.delete(agents);
-    await db.delete(projects);
-    await db.delete(userSettings);
-    await db.delete(users);
+    await db().delete(activities);
+    await db().delete(costs);
+    await db().delete(agents);
+    await db().delete(projects);
+    await db().delete(userSettings);
+    await db().delete(users);
   }
 
   // --------------------------------------------------------------------------
