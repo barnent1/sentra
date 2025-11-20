@@ -25,12 +25,19 @@ function getDb() {
   }
 
   // Validate DATABASE_URL environment variable
-  if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL environment variable is not set');
+  const databaseUrl = process.env.DATABASE_URL;
+
+  // During build time, return a mock to prevent errors
+  if (!databaseUrl) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('DATABASE_URL environment variable is not set');
+    }
+    // Return null during build/test - will be initialized at runtime
+    return null as any;
   }
 
   // Create SQL client using Neon's HTTP driver (edge-compatible)
-  const sql = neon(process.env.DATABASE_URL);
+  const sql = neon(databaseUrl);
 
   // Create Drizzle instance with schema
   _db = drizzle(sql, { schema });
@@ -38,10 +45,14 @@ function getDb() {
   return _db;
 }
 
-// Export lazy getter
+// Export lazy getter with direct access
 export const db = new Proxy({} as ReturnType<typeof drizzle>, {
   get(_target, prop) {
-    return (getDb() as any)[prop];
+    const instance = getDb();
+    if (!instance) {
+      throw new Error('Database not initialized - DATABASE_URL may be missing');
+    }
+    return (instance as any)[prop];
   },
 });
 
