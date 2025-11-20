@@ -51,8 +51,17 @@ function getDb() {
     throw new Error('DATABASE_URL environment variable is not set');
   }
 
-  // Clean up database URL (remove any trailing whitespace/newlines)
-  databaseUrl = databaseUrl.trim().replace(/\\n/g, '');
+  // Clean up database URL (remove any trailing/embedded whitespace, newlines, and escape sequences)
+  // Handle both literal \n and actual newline characters
+  databaseUrl = databaseUrl
+    .replace(/\\n/g, '')  // Remove literal \n escape sequences
+    .replace(/\n/g, '')   // Remove actual newline characters
+    .replace(/\r/g, '')   // Remove carriage returns
+    .trim();              // Remove leading/trailing whitespace
+
+  console.log('[Database] DATABASE_URL length:', databaseUrl.length);
+  console.log('[Database] DATABASE_URL (first 60 chars):', databaseUrl.substring(0, 60));
+  console.log('[Database] DATABASE_URL (last 20 chars):', databaseUrl.substring(databaseUrl.length - 20));
 
   // Create postgres client with connection pooling
   _client = postgres(databaseUrl, {
