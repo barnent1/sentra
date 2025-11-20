@@ -46,10 +46,13 @@ function getDb() {
     return _db;
   }
 
-  const databaseUrl = process.env.DATABASE_URL;
+  let databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
+
+  // Clean up database URL (remove any trailing whitespace/newlines)
+  databaseUrl = databaseUrl.trim().replace(/\\n/g, '');
 
   // Create postgres client with connection pooling
   _client = postgres(databaseUrl, {

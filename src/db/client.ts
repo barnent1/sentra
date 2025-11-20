@@ -25,10 +25,13 @@ function getDb(): PostgresJsDatabase<typeof schema> {
   }
 
   // Validate DATABASE_URL environment variable
-  const databaseUrl = process.env.DATABASE_URL;
+  let databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
+
+  // Clean up database URL (remove any trailing whitespace/newlines/escape sequences)
+  databaseUrl = databaseUrl.trim().replace(/\\n/g, '');
 
   // Create postgres client with connection pooling (works with Supabase)
   _client = postgres(databaseUrl, {
