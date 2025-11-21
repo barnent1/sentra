@@ -943,8 +943,16 @@ export async function createGitHubRepo(params: CreateGitHubRepoParams): Promise<
     })
 
     if (!response.ok) {
-      const error = await response.json()
-      throw new Error(error.error || `Failed to create GitHub repository: ${response.statusText}`)
+      // Try to parse error JSON, but handle cases where response is empty/invalid
+      let errorMessage = `Failed to create GitHub repository: ${response.statusText}`
+      try {
+        const error = await response.json()
+        errorMessage = error.error || errorMessage
+      } catch (jsonError) {
+        // Response body is empty or not JSON - use status text
+        console.warn('Failed to parse error response as JSON:', jsonError)
+      }
+      throw new Error(errorMessage)
     }
 
     const data = await response.json()

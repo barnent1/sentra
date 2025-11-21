@@ -36,7 +36,7 @@ function serializeProject(project: {
   name: string
   path: string
   userId: string
-  settings: string | null
+  settings: Record<string, any> | null
   createdAt: Date
   updatedAt: Date
 }): ProjectResponse {
@@ -45,7 +45,7 @@ function serializeProject(project: {
     name: project.name,
     path: project.path,
     userId: project.userId,
-    settings: project.settings ? JSON.parse(project.settings) : null,
+    settings: project.settings, // Already deserialized by drizzleDb
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
   }
