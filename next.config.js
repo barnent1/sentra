@@ -6,6 +6,11 @@ const nextConfig = {
   // Enable latest features
   reactStrictMode: true,
 
+  // Cache bust for jose dependency fix
+  generateBuildId: async () => {
+    return `build-${Date.now()}`
+  },
+
   // Note: swcMinify is now default in Next.js 15+
   // Note: PPR requires canary version - enable in future when stable
 
