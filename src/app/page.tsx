@@ -12,6 +12,7 @@ import { SpecViewer } from "@/components/SpecViewer";
 import { ProjectCard } from "@/components/ProjectCard";
 import { ProjectDetailPanel } from "@/components/ProjectDetailPanel";
 import { NewProjectModal } from "@/components/NewProjectModal";
+import { UserMenu } from "@/components/UserMenu";
 import { createGithubIssue, approveSpecVersion, setProjectMuted, type SpecInfo, type Project } from "@/services/sentra-api";
 import "@/lib/i18n"; // Initialize i18n
 
@@ -190,20 +191,6 @@ export default function Home() {
 
   return (
     <ProtectedRoute>
-      {/* Skip Links for Accessibility */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-violet-500 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400"
-      >
-        Skip to main content
-      </a>
-      <a
-        href="#projects-section"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-40 focus:z-50 focus:px-4 focus:py-2 focus:bg-violet-500 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-400"
-      >
-        Skip to projects
-      </a>
-
       <main id="main-content" className="min-h-screen bg-[#0A0A0B] p-8">
         {/* Header */}
         <header className="mb-8">
@@ -224,7 +211,7 @@ export default function Home() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-3">
+          <div className="flex items-center gap-3">
             {/* New Project Button */}
             <button
               data-testid="new-project-button"
@@ -236,15 +223,8 @@ export default function Home() {
               {t('dashboard.buttons.newProject')}
             </button>
 
-            {/* Settings Button */}
-            <button
-              data-testid="settings-button"
-              onClick={() => setSettingsOpen(true)}
-              className="p-3 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-lg transition-colors group"
-              title={t('dashboard.buttons.settings')}
-            >
-              <SettingsIcon className="w-5 h-5 text-primary group-hover:rotate-90 transition-transform duration-300" />
-            </button>
+            {/* User Menu with Avatar */}
+            <UserMenu onSettingsClick={() => setSettingsOpen(true)} />
           </div>
         </div>
       </header>

@@ -88,20 +88,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [API_URL]);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    console.log('[Auth] Login attempt for:', email);
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Login failed');
+    try {
+      const response = await fetch(`${API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      console.log('[Auth] Login response status:', response.status);
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error('[Auth] Login error:', error);
+        throw new Error(error.error || 'Login failed');
+      }
+
+      const data = await response.json();
+      console.log('[Auth] Login successful, user:', data.user);
+
+      saveTokens(data.token, data.refreshToken);
+      console.log('[Auth] Tokens saved');
+
+      setUser(data.user);
+      console.log('[Auth] User state updated');
+    } catch (error) {
+      console.error('[Auth] Login exception:', error);
+      throw error;
     }
-
-    const data = await response.json();
-    saveTokens(data.token, data.refreshToken);
-    setUser(data.user);
   };
 
   const signup = async (email: string, password: string, name?: string) => {

@@ -913,6 +913,48 @@ export async function getTemplate(id: string): Promise<Template | null> {
   return templates.find(t => t.id === id) || null
 }
 
+export interface GitHubRepository {
+  name: string
+  fullName: string
+  url: string
+  cloneUrl: string
+  sshUrl: string
+  owner: string
+  private: boolean
+  description: string | null
+}
+
+export interface CreateGitHubRepoParams {
+  name: string
+  owner?: string
+  description?: string
+  private?: boolean
+}
+
+/**
+ * Create a new GitHub repository from Sentra template
+ * Uses the Barnhardt-Enterprises-Inc/sentra-template-nextjs template
+ */
+export async function createGitHubRepo(params: CreateGitHubRepoParams): Promise<GitHubRepository> {
+  try {
+    const response = await fetchWithAuth('/api/github/repos', {
+      method: 'POST',
+      body: JSON.stringify(params),
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.error || `Failed to create GitHub repository: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return data.repository
+  } catch (error) {
+    console.error('Error creating GitHub repository:', error)
+    throw error
+  }
+}
+
 /**
  * Create a new project with Sentra configuration
  */

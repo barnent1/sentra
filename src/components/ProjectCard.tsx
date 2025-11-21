@@ -1,7 +1,8 @@
 "use client";
 
-import { Volume2 } from "lucide-react";
+import { Volume2, Copy, HelpCircle, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useState } from "react";
 import type { Project, SpecInfo } from "@/services/sentra-api";
 import "@/lib/i18n"; // Initialize i18n
 
@@ -15,6 +16,8 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, onMuteToggle, onViewDetails, onSpeakToArchitect, onViewSpec }: ProjectCardProps) {
   const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   const handleArchitectClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click event from firing
@@ -27,6 +30,18 @@ export function ProjectCard({ project, onMuteToggle, onViewDetails, onSpeakToArc
     e.stopPropagation(); // Prevent card click event from firing
     if (onViewSpec) {
       onViewSpec(project);
+    }
+  };
+
+  const handleCopyClone = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card click event from firing
+    const cloneCommand = `git clone ${project.path}`;
+    try {
+      await navigator.clipboard.writeText(cloneCommand);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
     }
   };
 
@@ -94,6 +109,48 @@ export function ProjectCard({ project, onMuteToggle, onViewDetails, onSpeakToArc
             <Volume2 className="w-4 h-4 text-violet-400" />
           </button>
         )}
+      </div>
+
+      {/* Repository URL */}
+      <div className="mb-3 flex items-center gap-2">
+        <a
+          href={project.path}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="text-xs text-violet-400 hover:text-violet-300 font-mono truncate flex items-center gap-1 flex-1"
+        >
+          {project.path}
+          <ExternalLink className="w-3 h-3 flex-shrink-0" />
+        </a>
+        <button
+          onClick={handleCopyClone}
+          className="p-1 rounded hover:bg-[#27272A] transition-colors flex-shrink-0"
+          title={copied ? "Copied!" : "Copy git clone command"}
+        >
+          <Copy className={`w-3 h-3 ${copied ? 'text-green-400' : 'text-gray-400'}`} />
+        </button>
+        <div className="relative flex-shrink-0">
+          <button
+            onMouseEnter={() => setShowTooltip(true)}
+            onMouseLeave={() => setShowTooltip(false)}
+            onClick={(e) => e.stopPropagation()}
+            className="p-1 rounded hover:bg-[#27272A] transition-colors"
+          >
+            <HelpCircle className="w-3 h-3 text-gray-400" />
+          </button>
+          {showTooltip && (
+            <div className="absolute bottom-full right-0 mb-2 w-64 p-3 bg-[#27272A] border border-[#3F3F46] rounded-lg shadow-xl z-10 text-xs text-gray-300">
+              <p className="font-semibold text-white mb-1">How to clone:</p>
+              <code className="block bg-[#18181B] p-2 rounded mb-2 text-violet-400">
+                git clone {project.path}
+              </code>
+              <p className="text-[10px] text-gray-400">
+                This will download the project files to your computer so you can work on them locally.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Current Task */}

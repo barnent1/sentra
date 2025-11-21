@@ -20,6 +20,8 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
+      // Give React time to update the auth state before navigating
+      await new Promise(resolve => setTimeout(resolve, 100));
       router.push('/');
     } catch (err: any) {
       setError(err.message || 'Invalid credentials');

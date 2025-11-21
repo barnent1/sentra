@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 // Force Node.js runtime for bcrypt compatibility
 export const runtime = 'nodejs'
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import { SignJWT } from 'jose'
 import { drizzleDb } from '@/services/database-drizzle'
 
 // Get JWT secrets from environment
@@ -30,18 +30,29 @@ interface LoginRequest {
 interface JWTPayload {
   userId: string
   email: string
+  [key: string]: unknown
 }
 
 /**
- * Generate JWT token and refresh token
+ * Generate JWT token and refresh token using jose
  */
-function generateTokens(userId: string, email: string) {
+async function generateTokens(userId: string, email: string) {
   const payload: JWTPayload = { userId, email }
 
-  const token = jwt.sign(payload, JWT_SECRET!, { expiresIn: TOKEN_EXPIRY })
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET!, {
-    expiresIn: REFRESH_TOKEN_EXPIRY,
-  })
+  const secret = new TextEncoder().encode(JWT_SECRET!)
+  const refreshSecret = new TextEncoder().encode(JWT_REFRESH_SECRET!)
+
+  const token = await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime(TOKEN_EXPIRY)
+    .setIssuedAt()
+    .sign(secret)
+
+  const refreshToken = await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime(REFRESH_TOKEN_EXPIRY)
+    .setIssuedAt()
+    .sign(refreshSecret)
 
   return { token, refreshToken }
 }
@@ -80,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate tokens
-    const { token, refreshToken } = generateTokens(user.id, user.email)
+    const { token, refreshToken } = await generateTokens(user.id, user.email)
 
     // Update refresh token in database
     await drizzleDb.updateUserRefreshToken(user.id, refreshToken)

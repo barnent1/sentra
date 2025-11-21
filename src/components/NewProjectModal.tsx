@@ -19,6 +19,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
   const [creating, setCreating] = useState(false);
   const [creatingStep, setCreatingStep] = useState('');
   const [nameError, setNameError] = useState('');
+  const [creationError, setCreationError] = useState('');
   const [isValid, setIsValid] = useState(false);
   const [githubConnected, setGithubConnected] = useState(false);
   const [checkingGithub, setCheckingGithub] = useState(true);
@@ -54,6 +55,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
       setDescription('');
       setTemplate('nextjs');
       setNameError('');
+      setCreationError('');
       setCreating(false);
       setCreatingStep('');
       setIsValid(false);
@@ -128,6 +130,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
 
     try {
       setCreating(true);
+      setCreationError('');
 
       // Step 1: Create GitHub repository from template
       setCreatingStep('Creating GitHub repository from Sentra template...');
@@ -155,8 +158,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
     } catch (error) {
       console.error('Failed to create project:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      alert(`Failed to create project: ${errorMessage}`);
-    } finally {
+      setCreationError(errorMessage);
       setCreating(false);
       setCreatingStep('');
     }
@@ -291,6 +293,28 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
               </div>
             )}
           </div>
+
+          {/* Creation Error */}
+          {creationError && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center">
+                  <span className="text-red-400 text-sm font-bold">!</span>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-red-400 font-medium mb-1">Failed to Create Project</h4>
+                  <p className="text-sm text-slate-300">{creationError}</p>
+                </div>
+                <button
+                  onClick={() => setCreationError('')}
+                  className="text-slate-400 hover:text-white transition-colors"
+                  aria-label="Dismiss error"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Progress Message */}
           {creating && creatingStep && (

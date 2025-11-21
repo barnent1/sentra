@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 // Force Node.js runtime for JWT compatibility
 export const runtime = 'nodejs'
-import jwt from 'jsonwebtoken'
+import { SignJWT, jwtVerify } from 'jose'
 import { drizzleDb } from '@/services/database-drizzle'
 
 // Get JWT secrets from environment
@@ -28,18 +28,29 @@ interface RefreshTokenRequest {
 interface JWTPayload {
   userId: string
   email: string
+  [key: string]: unknown
 }
 
 /**
- * Generate JWT token and refresh token
+ * Generate JWT token and refresh token using jose
  */
-function generateTokens(userId: string, email: string) {
+async function generateTokens(userId: string, email: string) {
   const payload: JWTPayload = { userId, email }
 
-  const token = jwt.sign(payload, JWT_SECRET!, { expiresIn: TOKEN_EXPIRY })
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_SECRET!, {
-    expiresIn: REFRESH_TOKEN_EXPIRY,
-  })
+  const secret = new TextEncoder().encode(JWT_SECRET!)
+  const refreshSecret = new TextEncoder().encode(JWT_REFRESH_SECRET!)
+
+  const token = await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime(TOKEN_EXPIRY)
+    .setIssuedAt()
+    .sign(secret)
+
+  const refreshToken = await new SignJWT(payload)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime(REFRESH_TOKEN_EXPIRY)
+    .setIssuedAt()
+    .sign(refreshSecret)
 
   return { token, refreshToken }
 }
@@ -56,10 +67,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify refresh token
+    // Verify refresh token using jose
     let decoded: JWTPayload
     try {
-      decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET!) as JWTPayload
+      const refreshSecret = new TextEncoder().encode(JWT_REFRESH_SECRET!)
+      const { payload } = await jwtVerify(refreshToken, refreshSecret)
+      decoded = payload as unknown as JWTPayload
     } catch (error) {
       return NextResponse.json(
         { error: 'Invalid refresh token' },
@@ -78,7 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate new tokens
-    const tokens = generateTokens(user.id, user.email)
+    const tokens = await generateTokens(user.id, user.email)
 
     // Update refresh token in database
     await drizzleDb.updateUserRefreshToken(user.id, tokens.refreshToken)
