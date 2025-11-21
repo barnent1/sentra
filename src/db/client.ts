@@ -1,13 +1,13 @@
 /**
  * Drizzle Database Client
  *
- * Edge-compatible database client for Vercel Edge Runtime.
- * Uses Neon's serverless driver for PostgreSQL.
+ * Database client for Supabase PostgreSQL.
+ * Uses postgres-js for reliable connection pooling.
  *
  * Features:
- * - Works in Vercel Edge Runtime
+ * - Works with Supabase PostgreSQL
  * - Connection pooling
- * - HTTP-based protocol (no TCP)
+ * - SSL support
  * - Lazy initialization (runtime safe)
  */
 
@@ -17,7 +17,7 @@ import * as schema from './schema';
 
 // Lazy database initialization
 let _db: PostgresJsDatabase<typeof schema> | null = null;
-let _client: postgres.Sql | null = null;
+let _sql: ReturnType<typeof postgres> | null = null;
 
 function getDb(): PostgresJsDatabase<typeof schema> {
   if (_db) {
@@ -25,21 +25,20 @@ function getDb(): PostgresJsDatabase<typeof schema> {
   }
 
   // Validate DATABASE_URL environment variable
-  let databaseUrl = process.env.DATABASE_URL;
+  const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
 
-  // Clean up database URL (remove any trailing whitespace/newlines/escape sequences)
-  databaseUrl = databaseUrl.trim().replace(/\\n/g, '');
-
-  // Create postgres client with connection pooling (works with Supabase)
-  _client = postgres(databaseUrl, {
-    prepare: false, // Required for pgBouncer/Supabase pooler
+  // Create postgres-js client (works with Supabase)
+  _sql = postgres(databaseUrl, {
+    max: 10, // Connection pool size
+    idle_timeout: 20,
+    connect_timeout: 10,
   });
 
   // Create Drizzle instance with schema
-  _db = drizzle(_client, { schema });
+  _db = drizzle(_sql, { schema });
 
   return _db;
 }
