@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
+import jwt from 'jsonwebtoken';
+
+// Force Node.js runtime for jsonwebtoken compatibility
+export const runtime = 'nodejs';
 
 // Get JWT secret from environment
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -12,11 +15,6 @@ if (!JWT_SECRET) {
 interface JWTPayload {
   userId: string;
   email: string;
-}
-
-// Convert JWT secret to Uint8Array for jose
-function getSecretKey(): Uint8Array {
-  return new TextEncoder().encode(JWT_SECRET);
 }
 
 /**
@@ -48,7 +46,7 @@ export const config = {
   ],
 };
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   // Add security headers
   const headers = new Headers();
   headers.set('X-Content-Type-Options', 'nosniff');
@@ -96,9 +94,8 @@ export async function middleware(request: NextRequest) {
       }
 
       try {
-        // Verify token using jose (Edge Runtime compatible)
-        const { payload } = await jwtVerify(finalToken, getSecretKey());
-        const decoded = payload as unknown as JWTPayload;
+        // Verify token using jsonwebtoken (Node.js runtime)
+        const decoded = jwt.verify(finalToken, JWT_SECRET) as JWTPayload;
 
         // Add user info to request headers
         const requestHeaders = new Headers(request.headers);
@@ -111,8 +108,7 @@ export async function middleware(request: NextRequest) {
           },
         });
       } catch (error) {
-        // Check if token is expired
-        if (error instanceof Error && error.message.includes('exp')) {
+        if (error instanceof jwt.TokenExpiredError) {
           return NextResponse.json(
             { error: 'Token expired' },
             { status: 401 }
@@ -135,5 +131,5 @@ export async function middleware(request: NextRequest) {
   });
 }
 
-// Note: Middleware runs on Edge Runtime by default in Next.js
-// No need to explicitly set runtime = 'edge' here
+// Note: Middleware is explicitly set to Node.js runtime to support jsonwebtoken
+// Edge Runtime doesn't support jsonwebtoken's Node.js dependencies
