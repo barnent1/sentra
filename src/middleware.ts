@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 
 // Get JWT secret from environment
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -12,6 +12,11 @@ if (!JWT_SECRET) {
 interface JWTPayload {
   userId: string;
   email: string;
+}
+
+// Convert JWT secret to Uint8Array for jose
+function getSecretKey(): Uint8Array {
+  return new TextEncoder().encode(JWT_SECRET);
 }
 
 /**
@@ -43,7 +48,7 @@ export const config = {
   ],
 };
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Add security headers
   const headers = new Headers();
   headers.set('X-Content-Type-Options', 'nosniff');
@@ -91,8 +96,9 @@ export function middleware(request: NextRequest) {
       }
 
       try {
-        // Verify token
-        const decoded = jwt.verify(finalToken, JWT_SECRET) as JWTPayload;
+        // Verify token using jose (Edge Runtime compatible)
+        const { payload } = await jwtVerify(finalToken, getSecretKey());
+        const decoded = payload as unknown as JWTPayload;
 
         // Add user info to request headers
         const requestHeaders = new Headers(request.headers);
@@ -105,7 +111,8 @@ export function middleware(request: NextRequest) {
           },
         });
       } catch (error) {
-        if (error instanceof jwt.TokenExpiredError) {
+        // Check if token is expired
+        if (error instanceof Error && error.message.includes('exp')) {
           return NextResponse.json(
             { error: 'Token expired' },
             { status: 401 }
