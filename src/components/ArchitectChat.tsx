@@ -131,6 +131,16 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
           console.log('🤝 Creating spec and spawning agent...');
           await handleConversationHandoff();
         },
+        onSessionReady: async () => {
+          // Session is configured - NOW we can send the greeting
+          console.log('✅ Session ready - sending greeting');
+          await conversation.getGreeting(settings.userName);
+
+          // Start recording after greeting is sent
+          await conversation.startRecording();
+          setIsListening(true);
+          setIsProcessing(false);
+        },
       });
 
       voiceConversationRef.current = conversation;
@@ -139,13 +149,7 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
       setIsProcessing(true);
       await conversation.connect();
 
-      // Get greeting from Sentra (with user's name)
-      await conversation.getGreeting(settings.userName);
-
-      // Start recording - WebRTC with echo cancellation handles everything
-      await conversation.startRecording();
-      setIsListening(true);
-      setIsProcessing(false);
+      // Greeting will be sent automatically when session is ready (via onSessionReady callback)
     } catch (error) {
       console.error('Failed to start voice mode:', error);
       setErrorMessage('Failed to start voice conversation. Please check your network connection.');

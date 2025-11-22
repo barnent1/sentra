@@ -56,6 +56,7 @@ export interface RealtimeConfig {
   onAudioPlay: (audio: ArrayBuffer) => void;
   onAudioPlaybackComplete?: () => void;  // Called when all audio chunks finish playing
   onConversationComplete?: () => void;
+  onSessionReady?: () => void;  // Called when session is configured and ready for greeting
 }
 
 export class RealtimeConversation {
@@ -265,11 +266,9 @@ export class RealtimeConversation {
 
       console.log('🔌 Connected to Realtime API via WebRTC');
 
-      // Configure session with instructions
-      this.sendSessionUpdate();
-
-      // Wait for session configuration to be processed before greeting
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Session configuration will be sent when data channel opens (see setupDataChannel)
+      // Wait for data channel to open and session to be created
+      console.log('⏳ Waiting for data channel to open...');
     } catch (error) {
       console.error('Failed to connect:', error);
       this.config.onError(
@@ -284,6 +283,9 @@ export class RealtimeConversation {
 
     this.dataChannel.onopen = () => {
       console.log('✅ Data channel opened');
+      // NOW we can send session configuration
+      console.log('📤 Sending session configuration...');
+      this.sendSessionUpdate();
     };
 
     this.dataChannel.onclose = () => {
@@ -508,6 +510,16 @@ CRITICAL: That phrase triggers spec creation. Only use when 100% certain they're
         case 'session.created':
           this.sessionId = event.session.id;
           console.log('✅ Session created:', this.sessionId);
+          console.log('✅ Session configured - ready for greeting');
+          break;
+
+        case 'session.updated':
+          console.log('✅ Session configuration applied');
+          // Session is now configured - safe to send greeting
+          if (this.config.onSessionReady) {
+            console.log('📢 Triggering onSessionReady callback');
+            this.config.onSessionReady();
+          }
           break;
 
         case 'response.created':
