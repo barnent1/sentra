@@ -36,16 +36,32 @@ function serializeProject(project: {
   name: string
   path: string
   userId: string
-  settings: Record<string, any> | null
+  settings: string | Record<string, any> | null
   createdAt: Date
   updatedAt: Date
 }): ProjectResponse {
+  // Parse settings if it's a string (defensive: handle both parsed and unparsed)
+  let parsedSettings: Record<string, any> | null = null;
+  if (project.settings) {
+    if (typeof project.settings === 'string') {
+      try {
+        parsedSettings = JSON.parse(project.settings);
+      } catch (error) {
+        console.warn('[Projects] Failed to parse settings JSON:', error);
+        parsedSettings = null;
+      }
+    } else {
+      // Already an object (drizzleDb deserializeProject already parsed it)
+      parsedSettings = project.settings;
+    }
+  }
+
   return {
     id: project.id,
     name: project.name,
     path: project.path,
     userId: project.userId,
-    settings: project.settings, // Already deserialized by drizzleDb
+    settings: parsedSettings,
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
   }
