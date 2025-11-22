@@ -267,6 +267,9 @@ export class RealtimeConversation {
 
       // Configure session with instructions
       this.sendSessionUpdate();
+
+      // Wait for session configuration to be processed before greeting
+      await new Promise(resolve => setTimeout(resolve, 500));
     } catch (error) {
       console.error('Failed to connect:', error);
       this.config.onError(
@@ -759,13 +762,18 @@ CRITICAL: That phrase triggers spec creation. Only use when 100% certain they're
       greetingText = `Good ${timeOfDay}, ${nameGreeting}! I see this is a brand new project - exciting! Let's build something amazing for ${projectName}. What are we creating?`;
     }
 
-    const instruction = `Say this greeting EXACTLY as written, with enthusiasm and warmth:
+    const instruction = `THIS IS YOUR FIRST MESSAGE TO THE USER. CRITICAL INSTRUCTION:
+
+You MUST say this greeting WORD-FOR-WORD. DO NOT improvise. DO NOT say anything else. DO NOT skip any part. Say EXACTLY these words:
 
 "${greetingText}"
 
-That's your complete greeting. Don't add anything else. Just say those words naturally and wait for their response.`;
+DO NOT say "loud and clear" or "what can I help you with" or anything generic.
+SAY THE GREETING ABOVE EXACTLY AS WRITTEN.
+Then STOP and wait for their response.`;
 
-    console.log('📢 Sending greeting instruction:', instruction);
+    console.log('📢 Sending greeting instruction:');
+    console.log(greetingText);
 
     // Send a message to trigger the greeting
     this.send({
