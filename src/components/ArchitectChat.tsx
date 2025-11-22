@@ -89,6 +89,7 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath }: Arc
         projectName,
         projectContext,
         voice: settings.voice,  // Use user's voice preference from settings
+        apiKey: settings.openaiApiKey,  // Pass API key from database settings
         onUserTranscript: (text) => {
           console.log('📝 User transcript received:', text);
           // Add user message to ref

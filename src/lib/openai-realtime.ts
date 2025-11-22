@@ -49,6 +49,7 @@ export interface RealtimeConfig {
   projectName: string;
   projectContext?: string;
   voice?: string;  // OpenAI Realtime voice - will be validated against REALTIME_VOICES
+  apiKey?: string;  // OpenAI API key (from database settings)
   onResponse: (text: string) => void;
   onUserTranscript: (text: string) => void;
   onError: (error: string) => void;
@@ -94,24 +95,27 @@ export class RealtimeConversation {
 
       console.log('🔐 Requesting ephemeral token...');
 
-      // Get OpenAI API key from localStorage
-      let apiKey: string | undefined;
-      try {
-        // Check if localStorage is available (in browser)
-        if (typeof window !== 'undefined') {
-          const settingsStr = localStorage.getItem('sentra_settings');
-          if (settingsStr) {
-            const settings = JSON.parse(settingsStr);
-            apiKey = settings.openaiApiKey;
-            console.log('✅ Retrieved API key from localStorage');
+      // Use API key from config (passed from ArchitectChat which gets it from database)
+      // Fallback to localStorage for backwards compatibility
+      let apiKey = this.config.apiKey;
+      if (!apiKey) {
+        try {
+          // Check if localStorage is available (in browser)
+          if (typeof window !== 'undefined') {
+            const settingsStr = localStorage.getItem('sentra_settings');
+            if (settingsStr) {
+              const settings = JSON.parse(settingsStr);
+              apiKey = settings.openaiApiKey;
+              console.log('✅ Retrieved API key from localStorage (fallback)');
+            }
           }
+        } catch (error) {
+          console.warn('Failed to get settings from localStorage, will use server fallback:', error);
         }
-      } catch (error) {
-        console.warn('Failed to get settings from localStorage, will use server fallback:', error);
       }
 
       // Get ephemeral token from our server endpoint
-      // Pass API key if we got it from Tauri, otherwise server will use env var
+      // Pass API key if we have it, otherwise server will use env var
       const tokenResponse = await fetch('/api/realtime-token', {
         method: 'POST',
         headers: {
