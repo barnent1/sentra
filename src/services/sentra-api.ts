@@ -340,77 +340,40 @@ export async function chatWithArchitect(
 ): Promise<string> {
   console.log(`[Web] Chatting with architect about ${projectName}: "${message}"`)
 
-  if (!anthropicApiKey) {
-    throw new Error('Anthropic API key is required')
-  }
-
   try {
-    // Build messages array from conversation history
-    const messages = conversationHistory.map((msg) => ({
-      role: msg.role === 'user' ? 'user' : 'assistant',
-      content: msg.content,
-    }))
-
-    // System prompt for the architect
-    const systemPrompt = `You are Sentra, an AI architect assistant for the project "${projectName}".
-You help developers plan and design features, review code, and provide technical guidance.
-Be concise, technical, and practical. Focus on actionable advice.`
-
-    // Call Anthropic API
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // Call our backend API route which proxies to Anthropic (avoids CORS)
+    const response = await fetch('/api/architect/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
-        max_tokens: 4096,
-        system: systemPrompt,
-        messages: messages,
+        projectName,
+        message,
+        conversationHistory,
       }),
     })
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-
-      if (response.status === 401) {
-        throw new Error('Invalid Anthropic API key')
-      } else if (response.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again later.')
-      } else {
-        throw new Error(
-          errorData.error?.message || `API error: ${response.status} ${response.statusText}`
-        )
-      }
+      throw new Error(errorData.error || `API error: ${response.status}`)
     }
 
     const data = await response.json()
 
-    // Extract text content from response
-    if (!data.content || !Array.isArray(data.content) || data.content.length === 0) {
-      throw new Error('Invalid response format from Anthropic API')
+    if (!data.response) {
+      throw new Error('Invalid response format from API')
     }
 
-    const textContent = data.content
-      .filter((block: any) => block.type === 'text')
-      .map((block: any) => block.text)
-      .join('\n')
-
-    if (!textContent) {
-      throw new Error('No text content in response')
-    }
-
-    return textContent
+    return data.response
   } catch (error) {
-    console.error('Error calling Anthropic API:', error)
+    console.error('Error calling architect API:', error)
 
     if (error instanceof Error) {
       throw error
     }
 
-    throw new Error('Failed to communicate with Anthropic API')
+    throw new Error('Failed to communicate with architect API')
   }
 }
 
