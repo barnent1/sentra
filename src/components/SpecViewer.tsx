@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Check, XCircle, ChevronDown, FileText } from 'lucide-react';
+import { X, Check, XCircle, ChevronDown, FileText, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { SpecInfo, SpecVersion } from '@/services/sentra-api';
@@ -33,6 +33,8 @@ export function SpecViewer({
   const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
   const [currentContent, setCurrentContent] = useState<string>(spec);
   const [currentInfo, setCurrentInfo] = useState<SpecInfo | undefined>(specInfo);
+  const [isApproving, setIsApproving] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
 
   const loadVersions = async () => {
     if (!specInfo) return;
@@ -69,22 +71,42 @@ export function SpecViewer({
   };
 
   const handleApprove = async () => {
+    if (isApproving || displayInfo?.isApproved) return;
+
+    setIsApproving(true);
     try {
       await onApprove();
+      alert('✅ Spec approved! GitHub issue created successfully.');
       onClose();
     } catch (error) {
       console.error('Failed to approve spec:', error);
-      alert('Failed to approve spec. Please try again.');
+      alert('❌ Failed to approve spec. Please try again.');
+    } finally {
+      setIsApproving(false);
     }
   };
 
   const handleReject = async () => {
+    if (isRejecting) return;
+
+    // Confirmation dialog
+    const confirmed = window.confirm(
+      'Are you sure you want to reject this specification?\n\n' +
+      'This will delete the spec. You can reopen the voice conversation to create a new one.'
+    );
+
+    if (!confirmed) return;
+
+    setIsRejecting(true);
     try {
       await onReject();
+      alert('✅ Specification rejected and deleted.');
       onClose();
     } catch (error) {
       console.error('Failed to reject spec:', error);
-      alert('Failed to reject spec. Please try again.');
+      alert('❌ Failed to reject spec. Please try again.');
+    } finally {
+      setIsRejecting(false);
     }
   };
 
@@ -233,7 +255,8 @@ export function SpecViewer({
           {onContinueEditing && displayInfo && (
             <button
               onClick={handleContinueEditing}
-              className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+              disabled={isApproving || isRejecting}
+              className="flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               data-testid="continue-editing-button"
             >
               <FileText className="w-5 h-5" />
@@ -242,20 +265,39 @@ export function SpecViewer({
           )}
           <button
             onClick={handleApprove}
-            className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-            disabled={displayInfo?.isApproved}
+            className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={displayInfo?.isApproved || isApproving || isRejecting}
             data-testid="approve-button"
           >
-            <Check className="w-5 h-5" />
-            {displayInfo?.isApproved ? 'Already Approved' : 'Approve & Create GitHub Issue'}
+            {isApproving ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Approving...
+              </>
+            ) : (
+              <>
+                <Check className="w-5 h-5" />
+                {displayInfo?.isApproved ? 'Already Approved' : 'Approve & Create GitHub Issue'}
+              </>
+            )}
           </button>
           <button
             onClick={handleReject}
-            className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isRejecting || isApproving}
             data-testid="reject-button"
           >
-            <XCircle className="w-5 h-5" />
-            Reject Specification
+            {isRejecting ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Rejecting...
+              </>
+            ) : (
+              <>
+                <XCircle className="w-5 h-5" />
+                Reject Specification
+              </>
+            )}
           </button>
         </div>
       </div>

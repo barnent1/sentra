@@ -65,24 +65,32 @@ export default function Home() {
   };
 
   const handleApproveSpec = async () => {
-    if (!selectedSpec || !selectedSpec.specInfo) return;
+    if (!selectedSpec || !selectedSpec.specInfo) {
+      console.error('No spec selected for approval');
+      throw new Error('No spec selected');
+    }
 
     try {
-      console.log(`Approving spec for ${selectedSpec.name}`);
+      console.log(`[Approve] Starting approval process for ${selectedSpec.name}`);
+      console.log(`[Approve] Spec title: ${selectedSpec.specInfo.title}`);
 
       // Create GitHub issue using gh CLI
       const title = `[AI Feature] ${selectedSpec.specInfo.title}`;
       const body = `${selectedSpec.spec}\n\n---\nSpec file: ${selectedSpec.specInfo.filePath}`;
+
+      console.log(`[Approve] Creating GitHub issue...`);
       const issueUrl = await createGithubIssue(
         title,
         body,
         ['ai-feature']
       );
 
-      console.log(`✅ GitHub issue created: ${issueUrl}`);
+      console.log(`[Approve] ✅ GitHub issue created: ${issueUrl}`);
 
       // Approve the spec version (new versioning system)
       const versionFile = selectedSpec.specInfo.filePath.split('/').pop() || '';
+      console.log(`[Approve] Approving spec version: ${versionFile}`);
+
       await approveSpecVersion(
         selectedSpec.name,
         selectedSpec.path,
@@ -91,29 +99,34 @@ export default function Home() {
         issueUrl
       );
 
-      // Close the modal
-      setSpecViewerOpen(false);
+      console.log(`[Approve] ✅ Spec approved successfully`);
 
       // Refresh the projects list
-      refetch();
+      console.log(`[Approve] Refreshing projects list...`);
+      await refetch();
 
-      alert(`Spec approved and GitHub issue created:\n${issueUrl}`);
+      console.log(`[Approve] ✅ Approval process completed`);
     } catch (error) {
-      console.error('Failed to approve spec:', error);
-      alert('Failed to approve spec and create GitHub issue. Please try again.');
+      console.error('[Approve] ❌ Failed to approve spec:', error);
+      throw error; // Re-throw to let SpecViewer handle the error display
     }
   };
 
   const handleRejectSpec = async () => {
-    if (!selectedSpec || !selectedSpec.specInfo) return;
+    if (!selectedSpec || !selectedSpec.specInfo) {
+      console.error('No spec selected for rejection');
+      throw new Error('No spec selected');
+    }
 
     try {
-      console.log(`Rejecting spec for ${selectedSpec.name}`);
+      console.log(`[Reject] Starting rejection process for ${selectedSpec.name}`);
+      console.log(`[Reject] Spec title: ${selectedSpec.specInfo.title}`);
 
       // Delete the spec (or specific version)
       const { deleteSpec } = await import('@/services/sentra-api');
       const versionFile = selectedSpec.specInfo.filePath.split('/').pop() || '';
 
+      console.log(`[Reject] Deleting spec version: ${versionFile}`);
       await deleteSpec(
         selectedSpec.name,
         selectedSpec.path,
@@ -121,16 +134,16 @@ export default function Home() {
         versionFile
       );
 
-      // Close the modal
-      setSpecViewerOpen(false);
+      console.log(`[Reject] ✅ Spec deleted successfully`);
 
       // Refresh the projects list
-      refetch();
+      console.log(`[Reject] Refreshing projects list...`);
+      await refetch();
 
-      alert('Specification rejected and deleted.');
+      console.log(`[Reject] ✅ Rejection process completed`);
     } catch (error) {
-      console.error('Failed to reject spec:', error);
-      alert('Failed to reject specification. Please try again.');
+      console.error('[Reject] ❌ Failed to reject spec:', error);
+      throw error; // Re-throw to let SpecViewer handle the error display
     }
   };
 
