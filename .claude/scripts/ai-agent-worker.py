@@ -1373,51 +1373,100 @@ This PR was created by Glen Barnhardt with the help of Claude Code
             self.log("Phase 3: Building Claude prompt")
             prompt = self.build_claude_prompt(issue, context)
 
-            # Phase 4: Execute Claude
-            self.log("Phase 4: Executing Claude Code CLI")
-            self.update_issue_progress("Implementing changes with Claude...")
+            # Phase 4-6: Execute Claude with retry loop for build failures
+            max_retries = 3
+            current_prompt = prompt
+            last_error = None
 
-            returncode, stdout, stderr = self.execute_claude_code(prompt)
+            for attempt in range(max_retries):
+                attempt_num = attempt + 1
+                self.log(f"Phase 4: Executing Claude Code CLI (attempt {attempt_num}/{max_retries})")
+                self.update_issue_progress(f"Implementing changes with Claude (attempt {attempt_num})...")
 
-            if returncode != 0:
-                self.log(f"Claude execution failed with code {returncode}", "ERROR")
-                self.log(f"STDERR: {stderr[:500]}", "ERROR")
-                raise RuntimeError(f"Claude execution failed: {stderr[:200]}")
+                returncode, stdout, stderr = self.execute_claude_code(current_prompt)
 
-            # Phase 5: Verify changes
-            self.log("Phase 5: Verifying changes")
+                if returncode != 0:
+                    self.log(f"Claude execution failed with code {returncode}", "ERROR")
+                    self.log(f"STDERR: {stderr[:500]}", "ERROR")
+                    raise RuntimeError(f"Claude execution failed: {stderr[:200]}")
 
-            if not self.has_changes():
-                self.log("No changes were made", "WARNING")
-                self.comment_on_issue(
-                    "The AI agent completed execution but no changes were made. "
-                    "This may indicate that:\n"
-                    "1. The issue requirements were unclear\n"
-                    "2. The requested changes already exist\n"
-                    "3. The agent encountered an issue\n\n"
-                    "This issue has been labeled 'needs-help' for human review."
-                )
-                subprocess.run(
-                    ["gh", "issue", "edit", str(self.issue_number), "--add-label", "needs-help"],
-                    cwd=self.repo_path,
-                    capture_output=True
-                )
-                raise RuntimeError("No changes made")
+                # Phase 5: Verify changes
+                self.log("Phase 5: Verifying changes")
 
-            changed_files = self.get_changed_files()
-            self.files_changed = set(changed_files)
-            result["files_changed"] = len(changed_files)
+                if not self.has_changes():
+                    self.log("No changes were made", "WARNING")
+                    self.comment_on_issue(
+                        "The AI agent completed execution but no changes were made. "
+                        "This may indicate that:\n"
+                        "1. The issue requirements were unclear\n"
+                        "2. The requested changes already exist\n"
+                        "3. The agent encountered an issue\n\n"
+                        "This issue has been labeled 'needs-help' for human review."
+                    )
+                    subprocess.run(
+                        ["gh", "issue", "edit", str(self.issue_number), "--add-label", "needs-help"],
+                        cwd=self.repo_path,
+                        capture_output=True
+                    )
+                    raise RuntimeError("No changes made")
 
-            self.log(f"Changes detected in {len(changed_files)} files")
-            self.check_constraints()
+                changed_files = self.get_changed_files()
+                self.files_changed = set(changed_files)
+                result["files_changed"] = len(changed_files)
 
-            # Phase 6: Run build and tests
-            self.log("Phase 6: Running build and tests")
-            self.update_issue_progress("Running build and tests...")
+                self.log(f"Changes detected in {len(changed_files)} files")
+                self.check_constraints()
 
-            build_passed, build_output = self.run_build()
-            if not build_passed:
-                raise RuntimeError(f"Build failed:\n{build_output[:500]}")
+                # Phase 6: Run build and tests
+                self.log("Phase 6: Running build and tests")
+                self.update_issue_progress("Running build and tests...")
+
+                build_passed, build_output = self.run_build()
+
+                if build_passed:
+                    self.log("Build passed!")
+                    last_error = None
+                    break  # Success - exit retry loop
+                else:
+                    last_error = build_output
+                    self.log(f"Build failed on attempt {attempt_num}", "ERROR")
+
+                    if attempt_num < max_retries:
+                        # Create fix prompt with error context
+                        self.log(f"Creating fix prompt for retry {attempt_num + 1}")
+                        self.update_issue_progress(f"Build failed, retrying with fix (attempt {attempt_num + 1})...")
+
+                        # Reset changes before retry
+                        subprocess.run(
+                            ["git", "checkout", "."],
+                            cwd=self.repo_path,
+                            capture_output=True
+                        )
+
+                        # Build a new prompt with the error context
+                        current_prompt = f"""The previous implementation attempt failed with a build error. Please fix the issue.
+
+## Original Task
+{prompt}
+
+## Build Error (MUST FIX)
+```
+{build_output[:1500]}
+```
+
+## Instructions
+1. Read the error message carefully
+2. Identify the root cause (likely a type error or missing import)
+3. Fix the issue in the affected file(s)
+4. Ensure the fix compiles without errors
+
+DO NOT explain - just make the fix and verify it works."""
+                    else:
+                        self.log(f"All {max_retries} attempts failed", "ERROR")
+
+            # Check if we exited due to persistent failure
+            if last_error:
+                raise RuntimeError(f"Build failed after {max_retries} attempts:\n{last_error[:500]}")
 
             if self.config.require_tests:
                 tests_passed, test_output = self.run_tests()
