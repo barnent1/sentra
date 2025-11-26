@@ -1436,18 +1436,11 @@ This PR was created by Glen Barnhardt with the help of Claude Code
                         self.log(f"Creating fix prompt for retry {attempt_num + 1}")
                         self.update_issue_progress(f"Build failed, retrying with fix (attempt {attempt_num + 1})...")
 
-                        # Reset changes before retry
-                        subprocess.run(
-                            ["git", "checkout", "."],
-                            cwd=self.repo_path,
-                            capture_output=True
-                        )
+                        # DO NOT reset changes - keep original implementation and fix the error
+                        # The error is likely in the code we just wrote, so we need to fix it in place
 
-                        # Build a new prompt with the error context
-                        current_prompt = f"""The previous implementation attempt failed with a build error. Please fix the issue.
-
-## Original Task
-{prompt}
+                        # Build a new prompt with the error context - asking to FIX the current code
+                        current_prompt = f"""The implementation has a build error that needs to be fixed IN PLACE. DO NOT start over.
 
 ## Build Error (MUST FIX)
 ```
@@ -1455,12 +1448,12 @@ This PR was created by Glen Barnhardt with the help of Claude Code
 ```
 
 ## Instructions
-1. Read the error message carefully
-2. Identify the root cause (likely a type error or missing import)
-3. Fix the issue in the affected file(s)
-4. Ensure the fix compiles without errors
+1. Read the error message carefully - it shows the exact file and line number
+2. The error is in YOUR changes - fix the type error or missing property
+3. Use the Edit tool to fix ONLY the problematic line(s)
+4. DO NOT revert or rewrite - just fix the specific error
 
-DO NOT explain - just make the fix and verify it works."""
+IMPORTANT: Keep all other changes intact. Only fix the build error."""
                     else:
                         self.log(f"All {max_retries} attempts failed", "ERROR")
 
