@@ -4,18 +4,170 @@ description: Use when working with authentication, API routes, user input, or se
 allowed-tools: Read, Grep, Bash
 ---
 
-# Security Sentinel (OWASP Auditor)
+# Security Sentinel (World-Class Security Skill)
 
 ## When to Use
-- API routes (especially POST/PATCH/PUT)
-- Authentication/authorization code
-- User input handling
-- Database queries
-- File operations
-- Environment variable usage
-- Payment processing
-- Session management
-- Data encryption
+
+**ALWAYS use this skill when:**
+- Writing/reviewing API routes (especially POST/PATCH/PUT/DELETE)
+- Implementing authentication or authorization
+- Handling user input (forms, query params, file uploads)
+- Working with database queries
+- Processing file operations
+- Managing environment variables and secrets
+- Building payment processing features
+- Implementing session management
+- Handling sensitive data or encryption
+- Before creating pull requests
+- Before deployment
+
+## Comprehensive Documentation
+
+This skill includes complete security references:
+
+### 📚 Core References (10,426 lines total)
+
+1. **owasp-top-10-complete.md** (2,133 lines) - Complete OWASP Top 10 with code examples
+   - A01: Broken Access Control (IDOR, path traversal)
+   - A02: Cryptographic Failures (weak hashing, hardcoded secrets)
+   - A03: Injection (SQL, NoSQL, Command injection)
+   - A04: Insecure Design (race conditions, rate limiting)
+   - A05: Security Misconfiguration (CORS, error messages)
+   - A06: Vulnerable Components (dependency management)
+   - A07: Authentication Failures (weak passwords, MFA)
+   - A08: Integrity Failures (supply chain, deserialization)
+   - A09: Logging Failures (audit trails, monitoring)
+   - A10: SSRF (URL validation, IP blocking)
+
+2. **authentication-patterns.md** (1,529 lines) - Complete authentication guide
+   - JWT token authentication
+   - Session-based authentication
+   - Password hashing (bcrypt, Argon2)
+   - Password reset flow
+   - Email verification
+   - Multi-factor authentication (TOTP)
+   - OAuth 2.0 (GitHub, Google)
+   - Passwordless authentication (magic links)
+   - Refresh token pattern
+
+3. **authorization-patterns.md** (1,062 lines) - Access control implementation
+   - Role-Based Access Control (RBAC)
+   - Attribute-Based Access Control (ABAC)
+   - Middleware protection
+   - API route protection
+   - Server Action protection
+   - Row-level security (Drizzle patterns)
+   - Permission system
+   - Resource ownership validation
+
+4. **input-validation-complete.md** (900 lines) - Zod validation for everything
+   - String, number, boolean, enum validation
+   - Email, URL, phone, UUID validation
+   - File upload validation (images, PDFs, CSVs)
+   - Password strength requirements
+   - Credit card validation (Luhn algorithm)
+   - IP address validation (v4, v6)
+   - Async validation (database checks)
+   - Error handling and display
+
+5. **sql-injection-prevention.md** (741 lines) - Drizzle ORM security
+   - Parameterized queries (always safe)
+   - Dynamic query building
+   - Raw SQL safety patterns
+   - LIKE query sanitization
+   - Database schema security
+   - Testing for SQL injection
+
+6. **xss-prevention.md** (630 lines) - React/Next.js XSS protection
+   - React's built-in escaping
+   - dangerouslySetInnerHTML with DOMPurify
+   - URL sanitization
+   - Content Security Policy (CSP)
+   - User-generated content handling
+   - innerHTML safety
+
+7. **csrf-prevention.md** (597 lines) - Cross-Site Request Forgery protection
+   - SameSite cookies (primary defense)
+   - CSRF tokens implementation
+   - Double submit cookie pattern
+   - Server Actions protection
+   - Origin header validation
+
+8. **secret-management.md** (547 lines) - Secure secret handling
+   - Environment variables best practices
+   - Secret rotation strategies
+   - Encryption at rest (AES-256-GCM)
+   - Secret detection (gitleaks, trufflehog)
+   - Production secrets (Vercel, AWS, Vault)
+
+9. **rate-limiting-patterns.md** (826 lines) - Prevent API abuse
+   - In-memory rate limiting
+   - Redis-based rate limiting
+   - API route protection
+   - Server Action protection
+   - IP-based rate limiting
+   - User-based rate limiting
+   - Sliding window algorithm
+   - Token bucket algorithm
+
+10. **security-checklist.md** (471 lines) - Pre-deployment audit (250+ items)
+    - Authentication security (passwords, sessions, JWT, MFA)
+    - Authorization security (access control, RLS)
+    - Input validation
+    - Data security (secrets, logging, database)
+    - File upload security
+    - Rate limiting
+    - Security headers (CSP, CORS, HSTS)
+    - Error handling
+    - Dependency security
+    - Monitoring and logging
+    - Infrastructure security
+    - Compliance (GDPR, PCI DSS)
+
+### 🛠️ Security Tools
+- **validate-security.py** (414 lines) - Automated vulnerability scanner
+  - Detects 20+ vulnerability types
+  - Scans for hardcoded secrets (API keys, passwords, tokens)
+  - Checks for SQL injection patterns
+  - Detects XSS vulnerabilities (dangerouslySetInnerHTML, innerHTML)
+  - Finds eval() and Function() usage
+  - Identifies weak cryptography (MD5, SHA1)
+  - Detects insecure randomness
+  - Checks for command injection
+  - Validates path traversal prevention
+  - Tests password hashing strength
+  - Audits JWT security
+  - Checks CORS configuration
+  - Validates cookie security (httpOnly, secure)
+  - Reports TypeScript issues (@ts-ignore, any)
+  - Exits with error on CRITICAL/HIGH issues
+  - Identifies XSS vulnerabilities
+  - Finds eval() and Function() usage
+  - Detects weak cryptography (MD5, SHA1)
+  - Checks for command injection
+  - Validates password hashing
+  - Finds CORS misconfigurations
+  - Checks for missing httpOnly cookies
+  - Reports TypeScript issues (@ts-ignore, any types)
+
+### 🚀 Quick Start
+
+**Before implementing ANY security-sensitive feature:**
+```bash
+# 1. Read the relevant guide
+cat owasp-top-10-complete.md
+cat authentication-patterns.md
+
+# 2. Implement following patterns
+
+# 3. Run security scanner
+python validate-security.py src/
+
+# 4. Check against security checklist
+cat security-checklist.md
+```
+
+## When to Use
 
 ## OWASP Top 10 Security Checks
 

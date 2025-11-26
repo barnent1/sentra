@@ -1,6 +1,6 @@
 ---
 name: sentra-architect
-description: Use when implementing new features in Sentra. Ensures TDD, TypeScript strict mode, Next.js App Router patterns, and security best practices are followed.
+description: Use when implementing new features in Sentra. Ensures TDD, TypeScript strict mode, Next.js App Router patterns, ShadCN UI components, and security best practices are followed. Updated for November 2025 standards.
 allowed-tools: Read, Grep, Glob
 ---
 
@@ -83,6 +83,38 @@ export async function POST(request: Request) {
 }
 ```
 
+### ShadCN UI Patterns (November 2025 Standard)
+```typescript
+// ✅ DO: Use ShadCN UI components
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form"
+
+// ✅ DO: Use DialogTrigger with asChild
+<DialogTrigger asChild>
+  <Button>Open</Button>
+</DialogTrigger>
+
+// ❌ DON'T: Create custom buttons without ShadCN
+<button className="px-4 py-2 bg-blue-500">Bad</button>
+
+// ✅ DO: Use Form component with React Hook Form + Zod
+const form = useForm<z.infer<typeof schema>>({
+  resolver: zodResolver(schema),
+})
+
+<Form {...form}>
+  <FormField ... />
+</Form>
+
+// ❌ DON'T: Use uncontrolled forms
+<form>
+  <input name="email" /> {/* No validation */}
+</form>
+```
+
+**→ See:** shadcn-ui-patterns skill for complete component library
+
 ### Security Patterns
 ```typescript
 // ❌ DON'T: Hardcoded secrets
@@ -95,8 +127,8 @@ if (!apiKey) throw new Error('OPENAI_API_KEY not configured')
 // ❌ DON'T: SQL injection
 const query = `SELECT * FROM users WHERE email = '${email}'`
 
-// ✅ DO: Parameterized queries (Prisma)
-const user = await prisma.user.findUnique({ where: { email } })
+// ✅ DO: Parameterized queries (Drizzle)
+const user = await db.query.users.findFirst({ where: eq(users.email, email) })
 ```
 
 ## TDD Requirements

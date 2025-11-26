@@ -30,6 +30,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:debug": "playwright test --debug",
+    "generate:e2e": "tsx src/cli/generate-e2e-tests.ts",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset",
@@ -44,6 +45,7 @@
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.70.1",
     "@neondatabase/serverless": "^1.0.2",
     "@octokit/rest": "^22.0.1",
     "@paralleldrive/cuid2": "^3.0.4",
@@ -68,6 +70,7 @@
     "lucide-react": "^0.441.0",
     "md5": "^2.3.0",
     "next": "15.5",
+    "openai": "^6.9.1",
     "postgres": "^3.4.7",
     "prisma": "6.19.0",
     "react": "^19.2.0",
@@ -77,6 +80,8 @@
     "recharts": "^2.12.7",
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^2.5.2",
+    "v0-sdk": "^0.15.1",
+    "yaml": "^2.8.1",
     "zod": "^4.1.12",
     "zustand": "^4.5.5"
   },
@@ -91,6 +96,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jest-image-snapshot": "^6.4.0",
+    "@types/js-yaml": "^4.0.9",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/md5": "^2.3.6",
     "@types/node": "^22.5.5",
@@ -107,6 +113,7 @@
     "eslint": "^8.57.1",
     "eslint-config-next": "15.5",
     "jest-image-snapshot": "^6.4.0",
+    "js-yaml": "^4.1.1",
     "jsdom": "^27.2.0",
     "playwright": "^1.48.0",
     "postcss": "^8.4.47",

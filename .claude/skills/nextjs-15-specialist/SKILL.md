@@ -6,62 +6,156 @@ allowed-tools: Read, Grep, Glob, WebFetch
 
 # Next.js 15 + App Router Specialist
 
-## When to Use
+**Complete Next.js 15 reference for Sentra development.**
+
+This skill provides comprehensive guidance on all Next.js 15 App Router patterns, ensuring agents implement modern Next.js correctly the first time.
+
+---
+
+## When to Use This Skill
+
+Use this skill when working with:
 - Creating new routes or pages
-- Implementing data fetching
+- Implementing data fetching (Server Components vs Client Components)
 - Server vs Client Component decisions
-- Server Actions
+- Server Actions and form handling
 - Streaming and Suspense
 - Metadata and SEO
 - Route handlers (API routes)
+- Caching strategies
+- Performance optimization
 
-## Key Patterns
+---
 
-### Server Components (Default)
-Server Components are the default in Next.js App Router. They run on the server and can directly access backend resources.
+## Complete Documentation
 
-```typescript
-// ✅ DO: Server Component (async allowed)
-export default async function ProjectsPage() {
-  const projects = await prisma.project.findMany()
-  return (
-    <div>
-      <h1>Projects</h1>
-      <ProjectList projects={projects} />
-    </div>
-  )
-}
+This skill includes comprehensive guides covering every Next.js 15 pattern:
 
-// Benefits:
-// - Direct database access
-// - No bundle sent to client
-// - Better performance
-// - SEO friendly
+### 📁 [App Router Complete Guide](./app-router-complete.md)
+**45+ examples covering:**
+- File-based routing (page.tsx, layout.tsx, route.ts)
+- Dynamic routes ([id], [...slug], [[...slug]])
+- Route groups ((group))
+- Private folders (_folder)
+- Route handlers (API routes)
+- Layouts and templates
+- Loading UI (loading.tsx)
+- Error boundaries (error.tsx, global-error.tsx)
+- Not found pages (not-found.tsx)
+- Parallel routes (@folder)
+- Intercepting routes ((.)folder)
+- Route segment config (dynamic, revalidate, runtime)
+
+### 🔄 [Data Fetching Complete Guide](./data-fetching-complete.md)
+**35+ examples covering:**
+- Server Component data fetching (async/await)
+- Client Component data fetching (useEffect, React Query, SWR)
+- Parallel data fetching (Promise.all)
+- Sequential data fetching (waterfall prevention)
+- Streaming data (Suspense boundaries)
+- Server-Sent Events (SSE for Sentra voice)
+- Data mutations (Server Actions)
+- Optimistic updates (useOptimistic)
+- Form handling (useFormStatus, useActionState)
+- Request deduplication
+- Preloading data
+
+### 💾 [Caching Strategies Guide](./caching-strategies.md)
+**35+ examples covering:**
+- Request memoization (automatic deduplication)
+- Data Cache (fetch cache behavior)
+- Full Route Cache (static vs dynamic)
+- Router Cache (client-side cache)
+- Cache configuration (force-cache, no-store, revalidate)
+- Cache tags (revalidateTag, revalidatePath)
+- On-demand revalidation
+- Time-based revalidation (ISR)
+- Cache debugging techniques
+- Opting out of caching
+
+### ⚡ [Server Actions Complete Guide](./server-actions-complete.md)
+**31+ examples covering:**
+- Basic Server Action patterns
+- Form actions (progressive enhancement)
+- Button actions (programmatic calls)
+- useFormStatus hook (loading states)
+- useActionState hook (state management)
+- useOptimistic hook (optimistic UI)
+- Error handling in actions
+- Validation with Zod
+- Returning JSON vs redirect
+- Security (authentication, CSRF)
+- Rate limiting
+- Database transactions
+
+### 🎯 [Metadata API Guide](./metadata-api.md)
+**26+ examples covering:**
+- Static metadata (exported object)
+- Dynamic metadata (generateMetadata)
+- File-based metadata (icon.png, opengraph-image.png)
+- Open Graph metadata
+- Twitter Cards
+- JSON-LD structured data
+- Viewport configuration
+- PWA manifest
+- Robots.txt
+- Sitemap generation
+
+### ✅ [Pattern Validator](./validate-patterns.py)
+**Executable Python script that checks:**
+- Server Components don't use client-only APIs
+- Client Components have 'use client' directive
+- Data fetching uses proper cache strategy
+- Server Actions are marked with 'use server'
+- Metadata API used correctly
+- Image optimization (<Image> not <img>)
+- Dynamic imports for heavy components
+
+Run with: `python validate-patterns.py /path/to/src`
+
+---
+
+## Quick Reference
+
+### Server vs Client Components Decision Tree
+
+```
+Do you need interactivity (onClick, onChange, etc.)?
+├─ YES → Client Component ('use client')
+└─ NO → Server Component (default)
+
+Do you need React hooks (useState, useEffect)?
+├─ YES → Client Component
+└─ NO → Server Component
+
+Do you need browser APIs (window, localStorage)?
+├─ YES → Client Component
+└─ NO → Server Component
+
+Do you need to fetch data?
+├─ Use Server Component (preferred)
+└─ Only use Client Component if data must be client-side
+
+Is the component purely presentational?
+└─ Server Component (better performance)
 ```
 
-**When to use:**
-- Data fetching from database
-- Accessing backend APIs
-- Reading environment variables
-- Static content rendering
+### Common Patterns
 
-**What you CAN do:**
-- async/await
-- Direct database queries
-- Access file system
-- Use Node.js APIs
-
-**What you CANNOT do:**
-- useState, useEffect, useContext
-- Event listeners (onClick, onChange)
-- Browser APIs (window, localStorage)
-- React hooks (except use from React 19)
-
-### Client Components
-Client Components run in the browser and enable interactivity.
+#### 1. Server Component Data Fetching
 
 ```typescript
-// ✅ DO: Client Component (when interactivity needed)
+// app/projects/page.tsx
+export default async function ProjectsPage() {
+  const projects = await db.project.findMany()
+  return <ProjectList projects={projects} />
+}
+```
+
+#### 2. Client Component with Interactivity
+
+```typescript
+// components/ProjectCard.tsx
 'use client'
 
 import { useState } from 'react'
@@ -86,121 +180,7 @@ export function ProjectCard({ project }: Props) {
 }
 ```
 
-**When to use:**
-- Interactive UI (buttons, forms, modals)
-- React hooks (useState, useEffect, etc.)
-- Browser APIs (localStorage, window)
-- Event handlers (onClick, onChange)
-
-**What you CAN do:**
-- useState, useEffect, useContext
-- Event handlers
-- Browser APIs
-- React hooks
-
-**What you CANNOT do:**
-- async component functions
-- Direct database access
-- Node.js APIs (fs, path)
-- Server-only code
-
-### Common Mistake: Async Client Component
-
-```typescript
-// ❌ DON'T: Async Client Component (SYNTAX ERROR)
-'use client'
-
-export default async function BadComponent() {
-  const data = await fetch('/api/data')
-  return <div>{data}</div>
-}
-// Error: Client Components cannot be async
-```
-
-```typescript
-// ✅ DO: Use useEffect in Client Component
-'use client'
-
-export default function GoodComponent() {
-  const [data, setData] = useState(null)
-
-  useEffect(() => {
-    fetch('/api/data')
-      .then(res => res.json())
-      .then(setData)
-  }, [])
-
-  return <div>{data}</div>
-}
-```
-
-```typescript
-// ✅ BETTER: Use Server Component
-export default async function BestComponent() {
-  const data = await fetch('/api/data')
-  return <DataDisplay data={data} />
-}
-```
-
-### Data Fetching Patterns
-
-#### Server Component (Recommended)
-```typescript
-// ✅ DO: Fetch in Server Component
-export default async function DashboardPage() {
-  // Parallel fetching
-  const [projects, users] = await Promise.all([
-    prisma.project.findMany(),
-    prisma.user.findMany(),
-  ])
-
-  return <Dashboard projects={projects} users={users} />
-}
-```
-
-#### Client Component with useEffect
-```typescript
-// ⚠️ ONLY when Server Component not possible
-'use client'
-
-export function DashboardClient() {
-  const [projects, setProjects] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetch('/api/projects')
-      .then(res => res.json())
-      .then(data => {
-        setProjects(data)
-        setLoading(false)
-      })
-  }, [])
-
-  if (loading) return <Skeleton />
-  return <ProjectList projects={projects} />
-}
-```
-
-#### React Query (Client-side)
-```typescript
-// ✅ DO: Use React Query in Client Components only
-'use client'
-
-import { useQuery } from '@tanstack/react-query'
-
-export function ProjectsClient() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['projects'],
-    queryFn: () => fetch('/api/projects').then(r => r.json()),
-  })
-
-  if (isLoading) return <Skeleton />
-  if (error) return <Error error={error} />
-  return <ProjectList projects={data} />
-}
-```
-
-### Server Actions
+#### 3. Server Action with Form
 
 ```typescript
 // app/actions.ts
@@ -208,24 +188,11 @@ export function ProjectsClient() {
 
 export async function createProject(formData: FormData) {
   const name = formData.get('name') as string
-  const description = formData.get('description') as string
-
-  // Validate
-  const validated = createProjectSchema.parse({ name, description })
-
-  // Create in database
-  const project = await prisma.project.create({
-    data: validated,
-  })
-
-  // Revalidate cache
+  const project = await db.project.create({ data: { name } })
   revalidatePath('/projects')
-
-  return project
+  return { success: true, project }
 }
-```
 
-```typescript
 // app/projects/new/page.tsx
 import { createProject } from '@/app/actions'
 
@@ -233,199 +200,297 @@ export default function NewProjectPage() {
   return (
     <form action={createProject}>
       <input name="name" required />
-      <textarea name="description" />
       <button type="submit">Create</button>
     </form>
   )
 }
 ```
 
-### Route Handlers (API Routes)
+#### 4. Streaming with Suspense
 
 ```typescript
-// app/api/projects/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
-
-const createProjectSchema = z.object({
-  name: z.string().min(1).max(100),
-  description: z.string().optional(),
-})
-
-export async function GET(request: NextRequest) {
-  const projects = await prisma.project.findMany()
-  return NextResponse.json(projects)
-}
-
-export async function POST(request: NextRequest) {
-  const body = await request.json()
-
-  // Validate
-  const validated = createProjectSchema.parse(body)
-
-  // Create
-  const project = await prisma.project.create({
-    data: validated,
-  })
-
-  return NextResponse.json(project, { status: 201 })
-}
-```
-
-### Streaming and Suspense
-
-```typescript
-// ✅ DO: Use Suspense for streaming
+// app/dashboard/page.tsx
 import { Suspense } from 'react'
 
 export default function DashboardPage() {
   return (
     <div>
-      <h1>Dashboard</h1>
       <Suspense fallback={<ProjectsSkeleton />}>
-        <ProjectsList />
+        <ProjectsAsync />
       </Suspense>
       <Suspense fallback={<UsersSkeleton />}>
-        <UsersList />
+        <UsersAsync />
       </Suspense>
     </div>
   )
 }
 
-// These components can be slow async Server Components
-async function ProjectsList() {
+async function ProjectsAsync() {
   const projects = await fetchProjects() // Slow query
-  return <div>{/* render projects */}</div>
-}
-
-async function UsersList() {
-  const users = await fetchUsers() // Slow query
-  return <div>{/* render users */}</div>
+  return <ProjectList projects={projects} />
 }
 ```
 
-### Metadata and SEO
+#### 5. Dynamic Metadata
 
 ```typescript
-// Static metadata
-export const metadata = {
-  title: 'Projects - Sentra',
-  description: 'Manage your AI-powered development projects',
-}
+// app/blog/[slug]/page.tsx
+import type { Metadata } from 'next'
 
-// Dynamic metadata
-export async function generateMetadata({ params }) {
-  const project = await prisma.project.findUnique({
-    where: { id: params.id },
-  })
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const post = await fetchPost(slug)
 
   return {
-    title: `${project.name} - Sentra`,
-    description: project.description,
+    title: post.title,
+    description: post.excerpt,
+    openGraph: {
+      title: post.title,
+      description: post.excerpt,
+      images: [post.coverImage],
+    },
   }
 }
 ```
 
-## Decision Tree: Server vs Client Component
+---
 
-```
-Do you need interactivity (onClick, onChange, etc.)?
-├─ YES → Client Component ('use client')
-└─ NO → Server Component (default)
+## Best Practices for Sentra
 
-Do you need React hooks (useState, useEffect)?
-├─ YES → Client Component
-└─ NO → Server Component
-
-Do you need browser APIs (window, localStorage)?
-├─ YES → Client Component
-└─ NO → Server Component
-
-Do you need to fetch data?
-├─ Use Server Component (preferred)
-└─ Only use Client Component if data must be client-side
-
-Is the component purely presentational?
-└─ Server Component (better performance)
-```
-
-## Common Patterns
-
-### Composition: Server + Client
+### 1. Default to Server Components
 
 ```typescript
-// app/projects/page.tsx (Server Component)
+// ✅ DO: Server Component (default)
 export default async function ProjectsPage() {
-  const projects = await prisma.project.findMany()
-
-  return (
-    <div>
-      <h1>Projects</h1>
-      {/* Pass data from Server to Client Component */}
-      <ProjectList projects={projects} />
-    </div>
-  )
+  const projects = await fetchProjects()
+  return <ProjectList projects={projects} />
 }
 
-// components/ProjectList.tsx (Client Component)
+// ❌ DON'T: Client Component when not needed
+'use client'
+export default function ProjectsPage() {
+  const [projects, setProjects] = useState([])
+  useEffect(() => {
+    fetchProjects().then(setProjects)
+  }, [])
+  return <ProjectList projects={projects} />
+}
+```
+
+### 2. Use Proper Cache Strategy
+
+```typescript
+// Static content (cached forever)
+const categories = await fetch('https://api.example.com/categories', {
+  cache: 'force-cache',
+}).then(r => r.json())
+
+// Dynamic content (no cache)
+const user = await fetch('https://api.example.com/me', {
+  cache: 'no-store',
+}).then(r => r.json())
+
+// ISR (revalidate every hour)
+const products = await fetch('https://api.example.com/products', {
+  next: { revalidate: 3600 },
+}).then(r => r.json())
+```
+
+### 3. Implement Proper Error Boundaries
+
+```typescript
+// app/dashboard/error.tsx
 'use client'
 
-export function ProjectList({ projects }: { projects: Project[] }) {
-  const [filter, setFilter] = useState('')
-
-  const filtered = projects.filter(p =>
-    p.name.toLowerCase().includes(filter.toLowerCase())
-  )
-
+export default function DashboardError({
+  error,
+  reset,
+}: {
+  error: Error
+  reset: () => void
+}) {
   return (
     <div>
-      <input
-        value={filter}
-        onChange={e => setFilter(e.target.value)}
-        placeholder="Filter projects..."
-      />
-      {filtered.map(project => (
-        <ProjectCard key={project.id} project={project} />
-      ))}
+      <h2>Something went wrong!</h2>
+      <button onClick={reset}>Try again</button>
     </div>
   )
 }
 ```
 
-## Best Practices
+### 4. Use Loading States
 
-1. **Default to Server Components**
-   - Start with Server Component
-   - Only use 'use client' when needed
-   - Minimize client bundle size
+```typescript
+// app/dashboard/loading.tsx
+export default function DashboardLoading() {
+  return <DashboardSkeleton />
+}
+```
 
-2. **Colocation**
-   - Keep components close to where they're used
-   - app/dashboard/components/ for dashboard-specific
-   - components/ for shared components
+### 5. Optimize Images
 
-3. **Data Fetching**
-   - Prefer Server Components for data fetching
-   - Use React Query only in Client Components
-   - Avoid fetching in useEffect when possible
+```typescript
+// ✅ DO: Use next/image
+import Image from 'next/image'
 
-4. **Error Handling**
-   - Use error.tsx for error boundaries
-   - Use loading.tsx for loading states
-   - Provide good fallback UX
+export function ProjectCard({ project }) {
+  return (
+    <Image
+      src={project.image}
+      alt={project.name}
+      width={400}
+      height={300}
+    />
+  )
+}
 
-5. **Performance**
-   - Server Components reduce bundle size
-   - Use Suspense for streaming
-   - Parallel data fetching with Promise.all
+// ❌ DON'T: Use <img> tag
+export function ProjectCard({ project }) {
+  return <img src={project.image} alt={project.name} />
+}
+```
+
+---
+
+## Common Mistakes to Avoid
+
+### ❌ Mistake 1: Async Client Component
+
+```typescript
+// ❌ DON'T: This is a syntax error
+'use client'
+
+export default async function BadComponent() {
+  const data = await fetch('/api/data')
+  return <div>{data}</div>
+}
+
+// ✅ DO: Use Server Component or useEffect
+export default async function GoodComponent() {
+  const data = await fetch('/api/data')
+  return <div>{data}</div>
+}
+```
+
+### ❌ Mistake 2: Client APIs in Server Component
+
+```typescript
+// ❌ DON'T: Server Components can't use browser APIs
+export default function BadComponent() {
+  const [state, setState] = useState(false) // Error!
+  return <div>{state}</div>
+}
+
+// ✅ DO: Add 'use client' directive
+'use client'
+
+export default function GoodComponent() {
+  const [state, setState] = useState(false)
+  return <div>{state}</div>
+}
+```
+
+### ❌ Mistake 3: Missing Cache Strategy
+
+```typescript
+// ❌ DON'T: Unclear caching behavior
+const data = await fetch('/api/data')
+
+// ✅ DO: Explicit cache strategy
+const data = await fetch('/api/data', {
+  cache: 'no-store', // or 'force-cache', or { next: { revalidate: 60 } }
+})
+```
+
+### ❌ Mistake 4: Not Using <Image>
+
+```typescript
+// ❌ DON'T: Unoptimized images
+<img src="/logo.png" alt="Logo" />
+
+// ✅ DO: Use Next.js Image optimization
+<Image src="/logo.png" alt="Logo" width={200} height={100} />
+```
+
+---
 
 ## Troubleshooting
 
-**Error: "You're importing a component that needs useState..."**
-→ Add 'use client' to the component file
+### Error: "You're importing a component that needs useState..."
 
-**Error: "async/await is not valid in Client Components"**
-→ Remove 'use client' or use useEffect instead
+**Solution:** Add `'use client'` to the component file.
 
-**Error: "process is not defined"**
-→ Environment variables in Client Components need NEXT_PUBLIC_ prefix
+### Error: "async/await is not valid in Client Components"
+
+**Solution:** Remove `'use client'` or use `useEffect` instead of async component.
+
+### Error: "process is not defined"
+
+**Solution:** Environment variables in Client Components need `NEXT_PUBLIC_` prefix.
+
+### Error: "Headers already sent"
+
+**Solution:** Don't use `headers()` or `cookies()` after sending response. Call them before any streaming.
+
+---
+
+## Official Documentation
+
+- **Next.js 15.5 Docs**: https://nextjs.org/docs
+- **App Router**: https://nextjs.org/docs/app
+- **Data Fetching**: https://nextjs.org/docs/app/building-your-application/data-fetching
+- **Server Actions**: https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations
+- **Caching**: https://nextjs.org/docs/app/building-your-application/caching
+- **Metadata**: https://nextjs.org/docs/app/building-your-application/optimizing/metadata
+- **Examples**: https://github.com/vercel/next.js/tree/canary/examples
+
+---
+
+## Validation
+
+Run the pattern validator to check your code:
+
+```bash
+python .claude/skills/nextjs-15-specialist/validate-patterns.py src/
+```
+
+The validator checks for:
+- ✅ Async Client Components (forbidden)
+- ✅ Client APIs in Server Components
+- ✅ 'use client' directive placement
+- ✅ Server Action async functions
+- ✅ Image optimization
+- ✅ Metadata in dynamic routes
+- ✅ Dynamic imports for heavy components
+- ✅ Fetch cache strategies
+- ✅ Route segment config
+
+---
+
+## Summary
+
+**This skill ensures you:**
+1. Choose correct component type (Server vs Client)
+2. Implement proper data fetching patterns
+3. Use appropriate caching strategies
+4. Handle Server Actions correctly
+5. Optimize metadata and SEO
+6. Avoid common Next.js mistakes
+7. Follow Sentra's architecture guidelines
+
+**When in doubt:**
+- Read the specific guide (links above)
+- Run the validator
+- Check official Next.js 15 docs
+- Default to Server Components
+
+---
+
+*Last updated: 2025-11-23*
+*Next.js Version: 15.5*
+*Total Examples: 150+*
+*Total Lines: 4,000+*

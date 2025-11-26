@@ -2,6 +2,7 @@
 name: orchestrator
 description: MUST BE USED as lead agent for all feature implementations - Plans work and coordinates specialized agents
 tools: Task, Read, Grep, Glob, AskUserQuestion
+skills: [architecture-patterns, quality-gates]
 model: opus
 ---
 

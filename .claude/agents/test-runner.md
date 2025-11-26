@@ -2,6 +2,7 @@
 name: test-runner
 description: Runs full test suite and verifies all quality checks pass
 tools: Read, Bash, Grep
+skills: [quality-gates]
 model: sonnet
 ---
 

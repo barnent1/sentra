@@ -1122,3 +1122,67 @@ export async function getAgentLogs(
     },
   ]
 }
+
+// ============================================================================
+// Prototype Management (Phase 3.3: Design Generation)
+// ============================================================================
+
+/**
+ * Prototype interface matching database schema
+ */
+export interface Prototype {
+  id: string
+  projectId: string
+  v0ChatId: string
+  v0DemoUrl: string | null
+  deploymentUrl: string
+  deploymentStatus: 'pending' | 'deploying' | 'ready' | 'error'
+  title: string
+  description: string | null
+  specPath: string | null
+  files: Array<{ path: string; content: string; language?: string }> | null
+  version: number
+  parentId: string | null
+  createdAt: Date
+  updatedAt: Date
+}
+
+/**
+ * Get all prototypes for a project
+ */
+export async function getPrototypes(projectId: string): Promise<Prototype[]> {
+  try {
+    const response = await fetchWithAuth(`/api/prototypes?projectId=${projectId}`)
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch prototypes: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    return data.prototypes
+  } catch (error) {
+    console.error('Error fetching prototypes:', error)
+    throw error
+  }
+}
+
+/**
+ * Iterate on a prototype with user feedback
+ */
+export async function iteratePrototype(prototypeId: string, feedback: string): Promise<void> {
+  try {
+    const response = await fetchWithAuth(`/api/prototypes/${prototypeId}/iterate`, {
+      method: 'POST',
+      body: JSON.stringify({ feedback }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to iterate prototype: ${response.statusText}`)
+    }
+
+    console.log(`[Web] Prototype ${prototypeId} iteration submitted`)
+  } catch (error) {
+    console.error('Error iterating prototype:', error)
+    throw error
+  }
+}

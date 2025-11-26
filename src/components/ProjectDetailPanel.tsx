@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
-import { X, GitBranch, FileText, DollarSign, Activity, GitPullRequest } from 'lucide-react';
+import { X, GitBranch, FileText, DollarSign, Activity, GitPullRequest, Layers } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { Project, GitCommit, GitStatus } from '@/services/sentra-api';
 import { getGitLog, getGitStatus, getTelemetryLogs } from '@/services/sentra-api';
 import { CostTracker } from '@/services/cost-tracker';
 import { PRReviewPanel } from '@/components/PRReviewPanel';
+import { PrototypePanel } from '@/components/PrototypePanel';
 
 interface ProjectDetailPanelProps {
   project: Project;
@@ -14,7 +15,7 @@ interface ProjectDetailPanelProps {
   onClose: () => void;
 }
 
-type Tab = 'overview' | 'git' | 'logs' | 'costs';
+type Tab = 'overview' | 'git' | 'logs' | 'costs' | 'prototypes';
 
 export function ProjectDetailPanel({ project, isOpen, onClose }: ProjectDetailPanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -26,6 +27,7 @@ export function ProjectDetailPanel({ project, isOpen, onClose }: ProjectDetailPa
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [gitError, setGitError] = useState<string | null>(null);
   const [showPRReview, setShowPRReview] = useState(false);
+  const [showPrototypePanel, setShowPrototypePanel] = useState(false);
 
   // Fetch git data when Git tab is active
   useEffect(() => {
@@ -102,7 +104,7 @@ export function ProjectDetailPanel({ project, isOpen, onClose }: ProjectDetailPa
 
   // Handle keyboard navigation for tabs
   const handleTabKeyDown = (e: React.KeyboardEvent, currentTab: Tab) => {
-    const tabs: Tab[] = ['overview', 'git', 'logs', 'costs'];
+    const tabs: Tab[] = ['overview', 'git', 'logs', 'costs', 'prototypes'];
     const currentIndex = tabs.indexOf(currentTab);
 
     if (e.key === 'ArrowRight') {
@@ -230,6 +232,26 @@ export function ProjectDetailPanel({ project, isOpen, onClose }: ProjectDetailPa
               <div className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
                 <span className="text-sm font-medium">Costs</span>
+              </div>
+            </button>
+
+            <button
+              data-testid="tab-prototypes"
+              id="tab-prototypes"
+              role="tab"
+              aria-selected={activeTab === 'prototypes'}
+              data-active={activeTab === 'prototypes'}
+              onClick={() => setActiveTab('prototypes')}
+              onKeyDown={(e) => handleTabKeyDown(e, 'prototypes')}
+              className={`pb-2 border-b-2 transition-colors ${
+                activeTab === 'prototypes'
+                  ? 'border-violet-500 text-violet-400'
+                  : 'border-transparent text-[#A1A1AA] hover:text-[#FAFAFA]'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4" />
+                <span className="text-sm font-medium">Prototypes</span>
               </div>
             </button>
           </div>
@@ -481,6 +503,38 @@ export function ProjectDetailPanel({ project, isOpen, onClose }: ProjectDetailPa
               </div>
             </div>
           )}
+
+          {/* Prototypes Tab */}
+          {activeTab === 'prototypes' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-[#A1A1AA]">
+                  Interactive prototypes generated from your specifications
+                </p>
+                <button
+                  data-testid="view-prototypes-btn"
+                  onClick={() => setShowPrototypePanel(true)}
+                  className="px-4 py-2 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/30 hover:border-violet-500/50 rounded-lg text-violet-400 transition-colors text-sm font-medium"
+                >
+                  View All Prototypes
+                </button>
+              </div>
+
+              <div className="bg-[#27272A] rounded-lg p-6 text-center">
+                <Layers className="w-12 h-12 text-violet-400 mx-auto mb-3" />
+                <p className="text-[#FAFAFA] font-medium mb-2">Prototype Management</p>
+                <p className="text-sm text-[#A1A1AA] mb-4">
+                  View, iterate, and deploy interactive prototypes for this project
+                </p>
+                <button
+                  onClick={() => setShowPrototypePanel(true)}
+                  className="px-4 py-2 bg-violet-600 hover:bg-violet-700 border border-violet-500 rounded-lg text-white transition-colors text-sm font-medium"
+                >
+                  Open Prototype Panel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -494,6 +548,13 @@ export function ProjectDetailPanel({ project, isOpen, onClose }: ProjectDetailPa
           prNumber={project.prNumber}
         />
       )}
+
+      {/* Prototype Panel */}
+      <PrototypePanel
+        projectId={project.name}
+        isOpen={showPrototypePanel}
+        onClose={() => setShowPrototypePanel(false)}
+      />
     </>
   );
 }

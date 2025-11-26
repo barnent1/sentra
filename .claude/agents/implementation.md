@@ -2,6 +2,7 @@
 name: implementation
 description: Writes implementation code to make failing tests pass - Cannot modify tests
 tools: Read, Write, Edit, Grep, Glob, Bash
+skills: [quality-gates, architecture-patterns, typescript-strict-guard, nextjs-15-specialist, drizzle-orm-patterns, react-19-patterns, zod-validation-patterns]
 model: sonnet
 ---
 
@@ -108,259 +109,42 @@ Before finishing:
 ## Code Quality Standards
 
 ### TypeScript Strict Mode
+→ **See:** typescript-strict-guard skill for complete standards
 
-**DO:**
-```typescript
-// Explicit types
-function calculateTotal(items: CartItem[]): number {
-  return items.reduce((sum, item) => sum + item.price, 0)
-}
-
-// Type guards
-function isUser(obj: unknown): obj is User {
-  return typeof obj === 'object' && obj !== null && 'id' in obj
-}
-
-// Proper null handling
-function getUser(id: string): User | null {
-  const user = db.users.get(id)
-  return user ?? null
-}
-```
-
-**DON'T:**
-```typescript
-// ❌ Using 'any'
-function processData(data: any) { }
-
-// ❌ Using @ts-ignore
-// @ts-ignore
-const user = getData()
-
-// ❌ Non-null assertion without comment
-const user = getUser(id)!.name
-```
+**Quick rules:**
+- No `any` types - use explicit types or `unknown` with type guards
+- No `@ts-ignore` - fix the underlying type error
+- No `!` assertions - use optional chaining or type guards
+- Explicit types on ALL function parameters and return values
 
 ### Error Handling
+→ **See:** architecture-patterns skill for error handling patterns
 
-**DO:**
-```typescript
-// Custom error classes
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'ValidationError'
-  }
-}
-
-// Explicit error handling
-async function registerUser(data: UserData): Promise<User> {
-  // Validate
-  if (!data.email.includes('@')) {
-    throw new ValidationError('Invalid email format')
-  }
-
-  // Handle database errors
-  try {
-    return await db.user.create({ data })
-  } catch (error) {
-    if (error.code === 'P2002') {
-      throw new ValidationError('Email already registered')
-    }
-    throw new Error('Database error')
-  }
-}
-```
-
-**DON'T:**
-```typescript
-// ❌ Silent failures
-try {
-  await riskyOperation()
-} catch (error) {
-  // Swallowed error
-}
-
-// ❌ Generic error messages
-throw new Error('Something went wrong')
-
-// ❌ Catching without re-throwing
-try {
-  await operation()
-} catch (error) {
-  console.log(error)
-  return null
-}
-```
+**Quick rules:**
+- Always use try/catch for async operations
+- Create custom error classes (ValidationError, NotFoundError)
+- Never swallow errors silently
+- Provide specific error messages
 
 ### Security
+→ **See:** security-sentinel skill for complete security standards
 
-**DO:**
-```typescript
-// Environment variables for secrets
-const apiKey = process.env.API_KEY
+**Quick rules:**
+- Environment variables for secrets (never hardcode)
+- Input validation with Zod schemas
+- Parameterized queries (use Drizzle ORM)
+- Password hashing with bcrypt (12+ rounds)
 
-// Password hashing
-const passwordHash = await bcrypt.hash(password, 10)
+## Implementation Examples
 
-// Input validation
-const validatedEmail = emailSchema.parse(input.email)
+→ **See:** architecture-patterns skill for detailed implementation examples
 
-// Parameterized queries (via Prisma)
-const user = await db.user.findUnique({ where: { email } })
-```
-
-**DON'T:**
-```typescript
-// ❌ Hardcoded secrets
-const apiKey = 'sk_live_abc123'
-
-// ❌ Raw SQL with string concatenation
-const query = `SELECT * FROM users WHERE email = '${email}'`
-
-// ❌ Storing plain text passwords
-await db.user.create({ data: { password } })
-```
-
-## Example: Auth Service Implementation
-
-**Given these failing tests** (from test-writer agent):
-```typescript
-// Tests expect:
-// - register(userData) creates user with hashed password
-// - login(credentials) returns JWT token
-// - Validates email format and password strength
-// - Handles duplicate emails and invalid credentials
-```
-
-**Implementation**:
-
-```typescript
-// src/services/auth.ts
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
-import { db } from '../db'
-import { ValidationError } from '../errors'
-
-const SALT_ROUNDS = 10
-const JWT_SECRET = process.env.JWT_SECRET!
-const JWT_EXPIRES_IN = '24h'
-
-interface UserData {
-  email: string
-  password: string
-}
-
-interface LoginResult {
-  token: string
-  user: {
-    id: string
-    email: string
-  }
-}
-
-export class AuthService {
-  /**
-   * Register a new user
-   * Validates input, hashes password, stores in database
-   */
-  async register(userData: UserData): Promise<{ id: string; email: string }> {
-    // Validate email format
-    if (!this.isValidEmail(userData.email)) {
-      throw new ValidationError('Invalid email format')
-    }
-
-    // Validate password strength
-    this.validatePassword(userData.password)
-
-    // Hash password
-    const passwordHash = await bcrypt.hash(userData.password, SALT_ROUNDS)
-
-    // Create user in database
-    try {
-      const user = await db.user.create({
-        data: {
-          email: userData.email,
-          passwordHash
-        }
-      })
-
-      // Return user without password
-      return {
-        id: user.id,
-        email: user.email
-      }
-    } catch (error: any) {
-      // Handle duplicate email (Prisma unique constraint error)
-      if (error.code === 'P2002') {
-        throw new ValidationError('Email already registered')
-      }
-      throw new Error('Database error')
-    }
-  }
-
-  /**
-   * Login with email and password
-   * Returns JWT token on success
-   */
-  async login(credentials: UserData): Promise<LoginResult> {
-    // Find user by email
-    const user = await db.user.findUnique({
-      where: { email: credentials.email }
-    })
-
-    if (!user) {
-      throw new ValidationError('Invalid credentials')
-    }
-
-    // Verify password
-    const isValidPassword = await bcrypt.compare(
-      credentials.password,
-      user.passwordHash
-    )
-
-    if (!isValidPassword) {
-      throw new ValidationError('Invalid credentials')
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    )
-
-    return {
-      token,
-      user: {
-        id: user.id,
-        email: user.email
-      }
-    }
-  }
-
-  /**
-   * Validate email format
-   */
-  private isValidEmail(email: string): boolean {
-    return email.includes('@') && email.includes('.')
-  }
-
-  /**
-   * Validate password strength
-   * Must be at least 8 characters with special character
-   */
-  private validatePassword(password: string): void {
-    if (password.length < 8) {
-      throw new ValidationError('Password must be at least 8 characters')
-    }
-
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      throw new ValidationError('Password must contain special character')
-    }
-  }
-}
-```
+**Key patterns:**
+- **Service Pattern** - Business logic in service classes
+- **API Pattern** - Request validation, error handling, response formatting
+- **Error Handling** - Custom error classes with specific messages
+- **Validation** - Zod schemas for input validation (see zod-validation-patterns skill)
+- **Security** - Authentication, authorization, input sanitization (see security-sentinel skill)
 
 ## Running Tests
 
@@ -394,54 +178,14 @@ If tests fail, debug and fix until they pass.
 
 ## Common Patterns in Sentra
 
-### Service Pattern
-```typescript
-// src/services/feature.ts
-export class FeatureService {
-  async operation(input: Input): Promise<Output> {
-    // 1. Validate
-    // 2. Process
-    // 3. Store/Retrieve
-    // 4. Return
-  }
-}
-```
+→ **See:** architecture-patterns skill for complete pattern reference
 
-### API Pattern
-```typescript
-// src/api/feature.ts
-export async function handler(req: Request): Promise<Response> {
-  try {
-    // 1. Parse input
-    // 2. Call service
-    // 3. Return success response
-  } catch (error) {
-    // 4. Handle errors
-    if (error instanceof ValidationError) {
-      return Response.json({ error: error.message }, { status: 400 })
-    }
-    return Response.json({ error: 'Internal error' }, { status: 500 })
-  }
-}
-```
-
-### Error Handling Pattern
-```typescript
-// src/errors.ts
-export class ValidationError extends Error {
-  constructor(message: string) {
-    super(message)
-    this.name = 'ValidationError'
-  }
-}
-
-export class NotFoundError extends Error {
-  constructor(resource: string) {
-    super(`${resource} not found`)
-    this.name = 'NotFoundError'
-  }
-}
-```
+**Pattern decision guide:**
+- **Data fetching?** → nextjs-15-specialist skill (Server Components, Server Actions)
+- **State management?** → architecture-patterns/state-management-patterns.md
+- **API endpoints?** → zod-validation-patterns skill + architecture-patterns/api-patterns.md
+- **Database queries?** → drizzle-orm-patterns skill
+- **Forms?** → react-19-patterns skill (useActionState, useFormStatus)
 
 ## Communication
 
@@ -463,35 +207,6 @@ Test results:
 Ready for code review.
 ```
 
-## Example: Implementing with SSE Pattern
-
-**Tests show:** Component should update reactively
-
-**Pattern check:** pattern-sse-reactive-data applies (reactive data updates)
-
-**Search examples:**
-```bash
-$ grep -r "EventSource" src/
-src/components/Dashboard.tsx: const eventSource = new EventSource('/api/stream')
-src/hooks/useSSE.ts: export function useSSE(url: string) { ... }
-```
-
-**Implementation:**
-```typescript
-// Follow existing pattern
-import { useSSE } from '@/hooks/useSSE'
-
-function NotificationCount() {
-  const count = useSSE('/api/notifications/count/stream')
-
-  return <span>{count} notifications</span>
-}
-```
-
-✅ Matches pattern
-✅ Reuses existing hook
-✅ Tests will pass
-✅ Validation hooks will pass
 
 ## Remember
 

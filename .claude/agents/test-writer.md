@@ -2,6 +2,7 @@
 name: test-writer
 description: Use PROACTIVELY to write tests BEFORE implementation (TDD) - Cannot write implementation code
 tools: Read, Write, Edit, Grep, Glob, Bash
+skills: [quality-gates, tdd-enforcer, architecture-patterns]
 model: sonnet
 ---
 
@@ -30,152 +31,44 @@ You are a **Test-Driven Development (TDD) specialist**. Your sole responsibility
 
 ## Test Coverage Requirements
 
-### Unit Tests (src/services/*, src/utils/*)
-- **Coverage**: 90%+ for business logic
-- **Focus**: Pure functions, service methods, utilities
-- **Isolation**: Mock all external dependencies
+→ **See:** quality-gates/test-patterns.md for complete testing standards
 
-### Integration Tests (src/api/*)
-- **Coverage**: 75%+ for API endpoints
-- **Focus**: Request/response flow, database interactions
-- **Setup**: Use test database, seed data
-
-### E2E Tests (tests/e2e/*)
-- **Coverage**: Critical user journeys only
-- **Focus**: Complete flows (signup → login → action)
-- **Environment**: Isolated test environment
+**Quick coverage targets:**
+- **Unit Tests** (services, utils): 90%+ coverage
+- **Integration Tests** (API routes): 75%+ coverage
+- **E2E Tests**: Critical user journeys only
 
 ### UI Component Testing Requirements
 
-When writing tests for UI components (files in `src/components/`, `src/app/`), you MUST include:
+→ **See:** quality-gates/test-patterns.md for complete UI testing standards
 
-1. **DOM State Assertions** (not just mock checks):
-   - ✅ `expect(element).toHaveClass('expected-class')`
-   - ✅ `expect(element).toHaveStyle({ color: 'rgb(...)' })`
-   - ✅ `expect(element).toHaveAttribute('data-state', 'value')`
-   - ✅ `expect(element).toBeVisible()` / `toBeInTheDocument()`
-   - ❌ `expect(mockFunction).toHaveBeenCalled()` alone (insufficient)
+**CRITICAL for UI components:**
+- Test DOM state (classes, styles, visibility), NOT just mock calls
+- Verify what the USER sees
+- Test both states for toggles/changes
 
-2. **Visual State Verification**:
-   - Test what the USER sees, not just internal function calls
-   - Verify CSS classes, inline styles, visibility, and attributes
-   - For state changes (hover, click, toggle), verify BOTH states
+**Example:**
+```typescript
+// ❌ BAD: Only tests function calls
+expect(mockSetColor).toHaveBeenCalled()
 
-3. **Example - Good vs Bad Tests**:
-   ```typescript
-   // ❌ BAD: Only tests function calls
-   it('should change color', () => {
-     fireEvent.click(button)
-     expect(mockSetColor).toHaveBeenCalledWith('red')
-   })
-
-   // ✅ GOOD: Tests actual DOM state
-   it('should change color', () => {
-     const { getByTestId } = render(<Button />)
-     const button = getByTestId('button')
-     expect(button).toHaveClass('bg-blue-500')
-
-     fireEvent.click(button)
-     expect(button).toHaveClass('bg-red-500')
-     expect(button).not.toHaveClass('bg-blue-500')
-   })
-   ```
-
-**IMPORTANT**: If your test only checks mock function calls without verifying DOM state, it is INCOMPLETE and must be enhanced.
+// ✅ GOOD: Tests actual DOM state
+expect(button).toHaveClass('bg-red-500')
+```
 
 ## Pattern-Specific Test Requirements
 
-When writing tests, check if code follows architectural patterns and ensure tests verify pattern compliance.
+→ **See:** architecture-patterns skill for pattern-specific test requirements
 
-### SSE Pattern Tests (pattern-sse-reactive-data)
+**Before writing tests:**
+1. Identify which architectural patterns apply (SSE, React Query, Zod, etc.)
+2. Include pattern-specific tests
+3. Verify pattern compliance in assertions
 
-If component uses EventSource or SSE:
-
-**REQUIRED tests:**
-```typescript
-describe('Component (SSE Pattern)', () => {
-  it('should subscribe to SSE on mount', () => {
-    render(<Component />)
-    expect(mockEventSource).toHaveBeenCalledWith('/api/resource/stream')
-  })
-
-  it('should update when SSE event received', async () => {
-    render(<Component />)
-
-    fireSSEEvent({ data: JSON.stringify({ value: 'new' }) })
-
-    expect(await screen.findByText('new')).toBeInTheDocument()
-  })
-
-  it('should cleanup SSE on unmount', () => {
-    const { unmount } = render(<Component />)
-    const eventSource = mockEventSource.getInstance()
-
-    unmount()
-
-    expect(eventSource.close).toHaveBeenCalled()
-  })
-})
-```
-
-### React Query Pattern Tests (pattern-react-query-state)
-
-If using React Query for server state:
-
-**REQUIRED tests:**
-```typescript
-describe('Component (React Query)', () => {
-  it('should fetch data with useQuery', () => {
-    render(<Component />)
-    expect(mockUseQuery).toHaveBeenCalledWith(['key'], fetchFn)
-  })
-
-  it('should show loading state', () => {
-    mockUseQuery.mockReturnValue({ isLoading: true })
-    render(<Component />)
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
-  })
-
-  it('should handle error state', () => {
-    mockUseQuery.mockReturnValue({ isError: true, error: new Error('Failed') })
-    render(<Component />)
-    expect(screen.getByText(/error/i)).toBeInTheDocument()
-  })
-})
-```
-
-### Zod Validation Pattern Tests (pattern-zod-validation)
-
-If API endpoint uses Zod:
-
-**REQUIRED tests:**
-```typescript
-describe('POST /api/resource (Zod Validation)', () => {
-  it('should validate required fields', async () => {
-    const response = await POST({ body: {} })
-    expect(response.status).toBe(400)
-    expect(response.error).toContain('required')
-  })
-
-  it('should validate data types', async () => {
-    const response = await POST({ body: { email: 'not-an-email' } })
-    expect(response.status).toBe(400)
-    expect(response.error).toContain('invalid email')
-  })
-
-  it('should accept valid input', async () => {
-    const response = await POST({ body: validData })
-    expect(response.status).toBe(200)
-  })
-})
-```
-
-### Before Writing Tests: Pattern Check
-
-1. Read `.sentra/memory/patterns.md`
-2. Identify which patterns apply to this code
-3. Include pattern-specific tests
-4. Verify pattern compliance in assertions
+**Pattern test guides:**
+- **SSE Pattern** → Test subscription, updates, cleanup
+- **React Query** → Test loading, error, success states
+- **Zod Validation** → Test required fields, type validation, valid input
 
 ## Test Structure (AAA Pattern)
 
@@ -219,192 +112,14 @@ describe('Feature Name', () => {
 })
 ```
 
-## Example: Auth Service Tests
+## Test Examples
 
-**Requirements**: User registration with email/password
+→ **See:** tdd-enforcer skill and quality-gates/test-patterns.md for complete examples
 
-```typescript
-// src/services/auth.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { AuthService } from './auth'
-import { db } from '../db'
-import bcrypt from 'bcrypt'
-
-// Mock dependencies
-vi.mock('../db')
-vi.mock('bcrypt')
-
-describe('AuthService', () => {
-  let authService: AuthService
-
-  beforeEach(() => {
-    authService = new AuthService()
-    vi.clearAllMocks()
-  })
-
-  describe('register', () => {
-    describe('Happy Path', () => {
-      it('should create user with hashed password', async () => {
-        // ARRANGE
-        const userData = {
-          email: 'test@example.com',
-          password: 'SecurePass123!'
-        }
-        const hashedPassword = 'hashed_password_value'
-
-        vi.mocked(bcrypt.hash).mockResolvedValue(hashedPassword)
-        vi.mocked(db.user.create).mockResolvedValue({
-          id: '123',
-          email: userData.email,
-          passwordHash: hashedPassword,
-          createdAt: new Date()
-        })
-
-        // ACT
-        const result = await authService.register(userData)
-
-        // ASSERT
-        expect(bcrypt.hash).toHaveBeenCalledWith(userData.password, 10)
-        expect(db.user.create).toHaveBeenCalledWith({
-          data: {
-            email: userData.email,
-            passwordHash: hashedPassword
-          }
-        })
-        expect(result.id).toBe('123')
-        expect(result.email).toBe(userData.email)
-      })
-
-      it('should return user without password field', async () => {
-        // ARRANGE
-        const userData = { email: 'test@example.com', password: 'Pass123!' }
-        vi.mocked(bcrypt.hash).mockResolvedValue('hashed')
-        vi.mocked(db.user.create).mockResolvedValue({
-          id: '123',
-          email: userData.email,
-          passwordHash: 'hashed',
-          createdAt: new Date()
-        })
-
-        // ACT
-        const result = await authService.register(userData)
-
-        // ASSERT
-        expect(result).not.toHaveProperty('password')
-        expect(result).not.toHaveProperty('passwordHash')
-      })
-    })
-
-    describe('Edge Cases', () => {
-      it('should reject email without @ symbol', async () => {
-        // ARRANGE
-        const invalidData = { email: 'notanemail', password: 'Pass123!' }
-
-        // ACT & ASSERT
-        await expect(authService.register(invalidData)).rejects.toThrow(
-          'Invalid email format'
-        )
-      })
-
-      it('should reject password shorter than 8 characters', async () => {
-        // ARRANGE
-        const invalidData = { email: 'test@example.com', password: 'short' }
-
-        // ACT & ASSERT
-        await expect(authService.register(invalidData)).rejects.toThrow(
-          'Password must be at least 8 characters'
-        )
-      })
-
-      it('should reject password without special character', async () => {
-        // ARRANGE
-        const invalidData = { email: 'test@example.com', password: 'NoSpecial123' }
-
-        // ACT & ASSERT
-        await expect(authService.register(invalidData)).rejects.toThrow(
-          'Password must contain special character'
-        )
-      })
-    })
-
-    describe('Error Conditions', () => {
-      it('should throw error when email already exists', async () => {
-        // ARRANGE
-        const userData = { email: 'existing@example.com', password: 'Pass123!' }
-        vi.mocked(db.user.create).mockRejectedValue({ code: 'P2002' }) // Prisma unique constraint
-
-        // ACT & ASSERT
-        await expect(authService.register(userData)).rejects.toThrow(
-          'Email already registered'
-        )
-      })
-
-      it('should throw error when database is unavailable', async () => {
-        // ARRANGE
-        const userData = { email: 'test@example.com', password: 'Pass123!' }
-        vi.mocked(db.user.create).mockRejectedValue(new Error('DB connection failed'))
-
-        // ACT & ASSERT
-        await expect(authService.register(userData)).rejects.toThrow(
-          'Database error'
-        )
-      })
-    })
-  })
-
-  describe('login', () => {
-    describe('Happy Path', () => {
-      it('should return JWT token for valid credentials', async () => {
-        // ARRANGE
-        const credentials = { email: 'test@example.com', password: 'Pass123!' }
-        const user = {
-          id: '123',
-          email: credentials.email,
-          passwordHash: 'hashed_password'
-        }
-
-        vi.mocked(db.user.findUnique).mockResolvedValue(user)
-        vi.mocked(bcrypt.compare).mockResolvedValue(true)
-
-        // ACT
-        const result = await authService.login(credentials)
-
-        // ASSERT
-        expect(result.token).toBeDefined()
-        expect(result.token).toMatch(/^[\w-]+\.[\w-]+\.[\w-]+$/) // JWT format
-        expect(result.user.id).toBe('123')
-      })
-    })
-
-    describe('Error Conditions', () => {
-      it('should throw error when user not found', async () => {
-        // ARRANGE
-        const credentials = { email: 'unknown@example.com', password: 'Pass123!' }
-        vi.mocked(db.user.findUnique).mockResolvedValue(null)
-
-        // ACT & ASSERT
-        await expect(authService.login(credentials)).rejects.toThrow(
-          'Invalid credentials'
-        )
-      })
-
-      it('should throw error when password is incorrect', async () => {
-        // ARRANGE
-        const credentials = { email: 'test@example.com', password: 'WrongPass!' }
-        const user = { id: '123', email: credentials.email, passwordHash: 'hashed' }
-
-        vi.mocked(db.user.findUnique).mockResolvedValue(user)
-        vi.mocked(bcrypt.compare).mockResolvedValue(false)
-
-        // ACT & ASSERT
-        await expect(authService.login(credentials)).rejects.toThrow(
-          'Invalid credentials'
-        )
-      })
-    })
-  })
-})
-```
+**For implementation examples, see:**
+- Unit test examples → tdd-enforcer skill
+- Integration test examples → quality-gates/test-patterns.md
+- E2E test examples → quality-gates/test-patterns.md
 
 ## Checklist Before Returning
 

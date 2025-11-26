@@ -29,12 +29,27 @@ import {
   costs,
   activities,
   userSettings,
+  prototypes,
+  prototypeIterations,
+  organizations,
+  organizationMembers,
+  teams,
+  teamMembers,
+  organizationInvitations,
   type User,
   type Project,
   type Agent,
   type Cost,
   type Activity,
   type UserSettings,
+  type Prototype,
+  type PrototypeIteration,
+  type CodeFile,
+  type Organization,
+  type OrganizationMember,
+  type Team,
+  type TeamMember,
+  type OrganizationInvitation,
 } from '../db/schema';
 
 // Lazy database initialization
@@ -71,7 +86,22 @@ export type Database = ReturnType<typeof drizzle>;
 // Type Exports
 // ============================================================================
 
-export type { User, Project, Agent, Cost, Activity, UserSettings };
+export type {
+  User,
+  Project,
+  Agent,
+  Cost,
+  Activity,
+  UserSettings,
+  Prototype,
+  PrototypeIteration,
+  CodeFile,
+  Organization,
+  OrganizationMember,
+  Team,
+  TeamMember,
+  OrganizationInvitation,
+};
 
 // ============================================================================
 // Input Types (matching Prisma service)
@@ -87,6 +117,9 @@ export interface CreateProjectInput {
   name: string;
   path: string;
   userId: string;
+  orgId: string;
+  teamId?: string;
+  visibility?: 'private' | 'team' | 'organization';
   settings?: Record<string, unknown>;
 }
 
@@ -98,6 +131,8 @@ export interface UpdateProjectInput {
 
 export interface CreateAgentInput {
   projectId: string;
+  orgId: string;
+  triggeredBy: string;
   status: AgentStatus;
   endTime?: Date;
   logs?: string[];
@@ -113,6 +148,8 @@ export interface UpdateAgentInput {
 
 export interface CreateCostInput {
   projectId: string;
+  orgId: string;
+  userId: string;
   amount: number;
   model: string;
   provider: 'openai' | 'anthropic';
@@ -122,6 +159,8 @@ export interface CreateCostInput {
 
 export interface CreateActivityInput {
   projectId: string;
+  orgId: string;
+  userId: string;
   type: ActivityType;
   message: string;
   metadata?: Record<string, unknown>;
@@ -136,6 +175,77 @@ export interface UpdateSettingsInput {
   voiceSettings?: Record<string, unknown>;
   notificationSettings?: Record<string, unknown>;
   language?: string;
+}
+
+export interface CreatePrototypeInput {
+  projectId: string;
+  v0ChatId: string;
+  v0DemoUrl?: string;
+  deploymentUrl: string;
+  deploymentStatus: 'pending' | 'deploying' | 'ready' | 'error';
+  title: string;
+  description?: string;
+  specPath?: string;
+  files?: CodeFile[];
+  version?: number;
+  parentId?: string;
+}
+
+export interface UpdatePrototypeInput {
+  deploymentStatus?: 'pending' | 'deploying' | 'ready' | 'error';
+  files?: CodeFile[];
+  version?: number;
+}
+
+export interface CreatePrototypeIterationInput {
+  prototypeId: string;
+  feedback: string;
+  changesApplied: string;
+}
+
+export interface CreateOrganizationInput {
+  name: string;
+  slug: string;
+  description?: string;
+}
+
+export interface UpdateOrganizationInput {
+  name?: string;
+  slug?: string;
+  description?: string;
+}
+
+export interface AddOrganizationMemberInput {
+  orgId: string;
+  userId: string;
+  role: 'owner' | 'admin' | 'member';
+  invitedBy?: string;
+}
+
+export interface CreateTeamInput {
+  orgId: string;
+  name: string;
+  description?: string;
+}
+
+export interface UpdateTeamInput {
+  name?: string;
+  description?: string;
+}
+
+export interface AddTeamMemberInput {
+  teamId: string;
+  userId: string;
+  role: 'lead' | 'member';
+}
+
+export interface CreateInvitationInput {
+  orgId: string;
+  email: string;
+  role: 'admin' | 'member';
+  invitedBy: string;
+  token: string;
+  expiresAt: Date;
 }
 
 // ============================================================================
@@ -247,6 +357,27 @@ export class DrizzleDatabaseService {
     this.isConnected = false;
   }
 
+  /**
+   * Clear all data from database (for testing only)
+   * WARNING: This deletes all data - use only in test environments
+   */
+  async clearDatabase(): Promise<void> {
+    // Delete in order to respect foreign key constraints
+    await db().delete(prototypeIterations);
+    await db().delete(prototypes);
+    await db().delete(activities);
+    await db().delete(costs);
+    await db().delete(agents);
+    await db().delete(userSettings);
+    await db().delete(projects);
+    await db().delete(organizationInvitations);
+    await db().delete(teamMembers);
+    await db().delete(teams);
+    await db().delete(organizationMembers);
+    await db().delete(organizations);
+    await db().delete(users);
+  }
+
   // --------------------------------------------------------------------------
   // User Operations
   // --------------------------------------------------------------------------
@@ -300,9 +431,20 @@ export class DrizzleDatabaseService {
 
   /**
    * List all users (ordered by creation date)
+   * Note: Password field is excluded for security
    */
-  async listUsers(): Promise<User[]> {
-    return await db().select().from(users).orderBy(desc(users.createdAt));
+  async listUsers(): Promise<Omit<User, 'password'>[]> {
+    return await db()
+      .select({
+        id: users.id,
+        email: users.email,
+        name: users.name,
+        refreshToken: users.refreshToken,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .orderBy(desc(users.createdAt));
   }
 
   /**
@@ -328,6 +470,9 @@ export class DrizzleDatabaseService {
           name: input.name,
           path: input.path,
           userId: input.userId,
+          orgId: input.orgId,
+          teamId: input.teamId || null,
+          visibility: input.visibility || 'private',
           settings: input.settings ? JSON.stringify(input.settings) : null,
         })
         .returning();
@@ -455,6 +600,8 @@ export class DrizzleDatabaseService {
       .insert(agents)
       .values({
         projectId: input.projectId,
+        orgId: input.orgId,
+        triggeredBy: input.triggeredBy,
         status: input.status,
         startTime: new Date(),
         endTime: input.endTime || null,
@@ -589,6 +736,8 @@ export class DrizzleDatabaseService {
       .insert(costs)
       .values({
         projectId: input.projectId,
+        orgId: input.orgId,
+        userId: input.userId,
         amount: input.amount,
         model: input.model,
         provider: input.provider,
@@ -645,6 +794,8 @@ export class DrizzleDatabaseService {
     await db().insert(costs).values(
       costInputs.map((cost) => ({
         projectId: cost.projectId,
+        orgId: cost.orgId,
+        userId: cost.userId,
         amount: cost.amount,
         model: cost.model,
         provider: cost.provider,
@@ -669,6 +820,8 @@ export class DrizzleDatabaseService {
       .insert(activities)
       .values({
         projectId: input.projectId,
+        orgId: input.orgId,
+        userId: input.userId,
         type: input.type,
         message: input.message,
         metadata: input.metadata ? JSON.stringify(input.metadata) : null,
@@ -735,6 +888,8 @@ export class DrizzleDatabaseService {
     await db().insert(activities).values(
       activityInputs.map((activity) => ({
         projectId: activity.projectId,
+        orgId: activity.orgId,
+        userId: activity.userId,
         type: activity.type,
         message: activity.message,
         metadata: activity.metadata ? JSON.stringify(activity.metadata) : null,
@@ -837,12 +992,473 @@ export class DrizzleDatabaseService {
     }
 
     // Delete in order to respect foreign key constraints
+    await db().delete(prototypeIterations);
+    await db().delete(prototypes);
     await db().delete(activities);
     await db().delete(costs);
     await db().delete(agents);
     await db().delete(projects);
     await db().delete(userSettings);
+    await db().delete(organizationInvitations);
+    await db().delete(teamMembers);
+    await db().delete(teams);
+    await db().delete(organizationMembers);
+    await db().delete(organizations);
     await db().delete(users);
+  }
+
+  // --------------------------------------------------------------------------
+  // Prototype Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Create a new prototype
+   */
+  async createPrototype(input: CreatePrototypeInput): Promise<Prototype> {
+    const [prototype] = await db()
+      .insert(prototypes)
+      .values({
+        projectId: input.projectId,
+        v0ChatId: input.v0ChatId,
+        v0DemoUrl: input.v0DemoUrl || null,
+        deploymentUrl: input.deploymentUrl,
+        deploymentStatus: input.deploymentStatus,
+        title: input.title,
+        description: input.description || null,
+        specPath: input.specPath || null,
+        files: input.files as any || null,
+        version: input.version || 1,
+        parentId: input.parentId || null,
+      })
+      .returning();
+
+    return prototype;
+  }
+
+  /**
+   * Get prototype by ID
+   */
+  async getPrototypeById(id: string): Promise<Prototype | null> {
+    const [prototype] = await db()
+      .select()
+      .from(prototypes)
+      .where(eq(prototypes.id, id))
+      .limit(1);
+
+    return prototype || null;
+  }
+
+  /**
+   * List prototypes by project
+   */
+  async listPrototypesByProject(projectId: string): Promise<Prototype[]> {
+    return await db()
+      .select()
+      .from(prototypes)
+      .where(eq(prototypes.projectId, projectId))
+      .orderBy(desc(prototypes.createdAt));
+  }
+
+  /**
+   * Update prototype
+   */
+  async updatePrototype(id: string, input: UpdatePrototypeInput): Promise<Prototype> {
+    const updateData: Partial<typeof prototypes.$inferInsert> = {};
+
+    if (input.deploymentStatus !== undefined) {
+      updateData.deploymentStatus = input.deploymentStatus;
+    }
+    if (input.files !== undefined) {
+      updateData.files = input.files as any;
+    }
+    if (input.version !== undefined) {
+      updateData.version = input.version;
+    }
+
+    // Always update the updatedAt timestamp
+    updateData.updatedAt = new Date();
+
+    const [prototype] = await db()
+      .update(prototypes)
+      .set(updateData)
+      .where(eq(prototypes.id, id))
+      .returning();
+
+    return prototype;
+  }
+
+  /**
+   * Delete prototype
+   */
+  async deletePrototype(id: string): Promise<boolean> {
+    try {
+      const result = await db()
+        .delete(prototypes)
+        .where(eq(prototypes.id, id))
+        .returning();
+      return result.length > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // Prototype Iteration Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Create a new prototype iteration
+   */
+  async createPrototypeIteration(input: CreatePrototypeIterationInput): Promise<PrototypeIteration> {
+    const [iteration] = await db()
+      .insert(prototypeIterations)
+      .values({
+        prototypeId: input.prototypeId,
+        feedback: input.feedback,
+        changesApplied: input.changesApplied,
+      })
+      .returning();
+
+    return iteration;
+  }
+
+  /**
+   * Get iterations for a prototype
+   */
+  async getPrototypeIterations(prototypeId: string): Promise<PrototypeIteration[]> {
+    return await db()
+      .select()
+      .from(prototypeIterations)
+      .where(eq(prototypeIterations.prototypeId, prototypeId))
+      .orderBy(desc(prototypeIterations.createdAt));
+  }
+
+  // --------------------------------------------------------------------------
+  // Organization Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Create a new organization
+   */
+  async createOrganization(input: CreateOrganizationInput): Promise<Organization> {
+    try {
+      const [organization] = await db()
+        .insert(organizations)
+        .values({
+          name: input.name,
+          slug: input.slug.toLowerCase(),
+          description: input.description || null,
+        })
+        .returning();
+
+      return organization;
+    } catch (error: any) {
+      // Handle unique constraint violation (duplicate slug)
+      if (error.code === '23505') {
+        throw new Error('Organization with this slug already exists');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Get organization by ID
+   */
+  async getOrganizationById(id: string): Promise<Organization | null> {
+    const [organization] = await db()
+      .select()
+      .from(organizations)
+      .where(eq(organizations.id, id))
+      .limit(1);
+
+    return organization || null;
+  }
+
+  /**
+   * Get organization by slug
+   */
+  async getOrganizationBySlug(slug: string): Promise<Organization | null> {
+    const [organization] = await db()
+      .select()
+      .from(organizations)
+      .where(eq(organizations.slug, slug.toLowerCase()))
+      .limit(1);
+
+    return organization || null;
+  }
+
+  /**
+   * Update organization
+   */
+  async updateOrganization(id: string, input: UpdateOrganizationInput): Promise<Organization> {
+    const updateData: Partial<typeof organizations.$inferInsert> = {};
+
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.slug !== undefined) updateData.slug = input.slug.toLowerCase();
+    if (input.description !== undefined) updateData.description = input.description;
+
+    updateData.updatedAt = new Date();
+
+    try {
+      const [organization] = await db()
+        .update(organizations)
+        .set(updateData)
+        .where(eq(organizations.id, id))
+        .returning();
+
+      return organization;
+    } catch (error: any) {
+      // Handle unique constraint violation (duplicate slug)
+      if (error.code === '23505') {
+        throw new Error('Organization with this slug already exists');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Delete organization
+   */
+  async deleteOrganization(id: string): Promise<boolean> {
+    try {
+      const result = await db()
+        .delete(organizations)
+        .where(eq(organizations.id, id))
+        .returning();
+      return result.length > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * List all organizations for a user
+   */
+  async listUserOrganizations(userId: string): Promise<Organization[]> {
+    const memberships = await db()
+      .select({
+        organization: organizations,
+      })
+      .from(organizationMembers)
+      .innerJoin(organizations, eq(organizationMembers.orgId, organizations.id))
+      .where(eq(organizationMembers.userId, userId))
+      .orderBy(desc(organizations.createdAt));
+
+    return memberships.map((m) => m.organization);
+  }
+
+  // --------------------------------------------------------------------------
+  // Organization Member Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Add a member to an organization
+   */
+  async addOrganizationMember(input: AddOrganizationMemberInput): Promise<OrganizationMember> {
+    try {
+      const [member] = await db()
+        .insert(organizationMembers)
+        .values({
+          orgId: input.orgId,
+          userId: input.userId,
+          role: input.role,
+          invitedBy: input.invitedBy || null,
+        })
+        .returning();
+
+      return member;
+    } catch (error: any) {
+      // Handle unique constraint violation (user already in org)
+      if (error.code === '23505') {
+        throw new Error('User is already a member of this organization');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Remove a member from an organization
+   */
+  async removeOrganizationMember(orgId: string, userId: string): Promise<boolean> {
+    try {
+      const result = await db()
+        .delete(organizationMembers)
+        .where(and(eq(organizationMembers.orgId, orgId), eq(organizationMembers.userId, userId)))
+        .returning();
+      return result.length > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get all members of an organization
+   */
+  async getOrganizationMembers(orgId: string): Promise<OrganizationMember[]> {
+    return await db()
+      .select()
+      .from(organizationMembers)
+      .where(eq(organizationMembers.orgId, orgId))
+      .orderBy(desc(organizationMembers.joinedAt));
+  }
+
+  /**
+   * Update a member's role
+   */
+  async updateMemberRole(
+    orgId: string,
+    userId: string,
+    role: 'owner' | 'admin' | 'member'
+  ): Promise<OrganizationMember> {
+    const [member] = await db()
+      .update(organizationMembers)
+      .set({ role })
+      .where(and(eq(organizationMembers.orgId, orgId), eq(organizationMembers.userId, userId)))
+      .returning();
+
+    if (!member) {
+      throw new Error('Member not found');
+    }
+
+    return member;
+  }
+
+  /**
+   * Get a user's role in an organization
+   */
+  async getUserOrganizationRole(
+    orgId: string,
+    userId: string
+  ): Promise<'owner' | 'admin' | 'member' | null> {
+    const [member] = await db()
+      .select()
+      .from(organizationMembers)
+      .where(and(eq(organizationMembers.orgId, orgId), eq(organizationMembers.userId, userId)))
+      .limit(1);
+
+    return member ? (member.role as 'owner' | 'admin' | 'member') : null;
+  }
+
+  // --------------------------------------------------------------------------
+  // Team Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Create a new team
+   */
+  async createTeam(input: CreateTeamInput): Promise<Team> {
+    const [team] = await db()
+      .insert(teams)
+      .values({
+        orgId: input.orgId,
+        name: input.name,
+        description: input.description || null,
+      })
+      .returning();
+
+    return team;
+  }
+
+  /**
+   * Get team by ID
+   */
+  async getTeamById(id: string): Promise<Team | null> {
+    const [team] = await db().select().from(teams).where(eq(teams.id, id)).limit(1);
+
+    return team || null;
+  }
+
+  /**
+   * List all teams in an organization
+   */
+  async listOrganizationTeams(orgId: string): Promise<Team[]> {
+    return await db()
+      .select()
+      .from(teams)
+      .where(eq(teams.orgId, orgId))
+      .orderBy(desc(teams.createdAt));
+  }
+
+  /**
+   * Update team
+   */
+  async updateTeam(id: string, input: UpdateTeamInput): Promise<Team> {
+    const updateData: Partial<typeof teams.$inferInsert> = {};
+
+    if (input.name !== undefined) updateData.name = input.name;
+    if (input.description !== undefined) updateData.description = input.description;
+
+    updateData.updatedAt = new Date();
+
+    const [team] = await db().update(teams).set(updateData).where(eq(teams.id, id)).returning();
+
+    return team;
+  }
+
+  /**
+   * Delete team
+   */
+  async deleteTeam(id: string): Promise<boolean> {
+    try {
+      const result = await db().delete(teams).where(eq(teams.id, id)).returning();
+      return result.length > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  // --------------------------------------------------------------------------
+  // Team Member Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Add a member to a team
+   */
+  async addTeamMember(input: AddTeamMemberInput): Promise<TeamMember> {
+    try {
+      const [member] = await db()
+        .insert(teamMembers)
+        .values({
+          teamId: input.teamId,
+          userId: input.userId,
+          role: input.role,
+        })
+        .returning();
+
+      return member;
+    } catch (error: any) {
+      // Handle unique constraint violation (user already in team)
+      if (error.code === '23505') {
+        throw new Error('User is already a member of this team');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Remove a member from a team
+   */
+  async removeTeamMember(teamId: string, userId: string): Promise<boolean> {
+    try {
+      const result = await db()
+        .delete(teamMembers)
+        .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)))
+        .returning();
+      return result.length > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * Get all members of a team
+   */
+  async getTeamMembers(teamId: string): Promise<TeamMember[]> {
+    return await db()
+      .select()
+      .from(teamMembers)
+      .where(eq(teamMembers.teamId, teamId))
+      .orderBy(desc(teamMembers.joinedAt));
   }
 
   // --------------------------------------------------------------------------

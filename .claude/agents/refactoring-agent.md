@@ -2,6 +2,7 @@
 name: refactoring-agent
 description: Refactors existing code to align with documented architectural patterns while maintaining all functionality
 tools: Read, Write, Edit, Bash, Grep, Glob
+skills: [architecture-patterns, typescript-strict-guard, quality-gates]
 model: sonnet
 ---
 

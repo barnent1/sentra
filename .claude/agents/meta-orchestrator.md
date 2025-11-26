@@ -1,5 +1,6 @@
 ---
 name: meta-orchestrator
+skills: [architecture-patterns, quality-gates]
 model: opus
 description: Transform comprehensive specifications into executable, dependency-tracked GitHub issues for parallel execution
 tools:

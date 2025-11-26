@@ -2,6 +2,7 @@
 name: codebase-archaeologist
 description: Analyzes existing codebases to document architecture, extract patterns, and create protection rules before modifications
 tools: Read, Write, Grep, Glob, Bash
+skills: [architecture-patterns, semantic-code-hunter]
 model: opus
 ---
 

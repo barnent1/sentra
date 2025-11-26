@@ -2,6 +2,7 @@
 name: security-auditor
 description: Audits code for security vulnerabilities before deployment - Use for auth, payments, data handling
 tools: Read, Grep, Glob, Bash
+skills: [security-sentinel, code-review-standards]
 model: sonnet
 ---
 
