@@ -26,7 +26,7 @@ export const organizations = pgTable('organizations', {
   billingEmail: text('billing_email'),
   settings: text('settings'), // JSON string
   createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
   slugIdx: uniqueIndex('organizations_slug_idx').on(table.slug),
 }));

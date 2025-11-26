@@ -181,6 +181,8 @@ export async function POST(request: NextRequest) {
     // Create activity entry
     const activity = await drizzleDb.createActivity({
       projectId,
+      orgId: project.orgId,
+      userId: user.userId,
       type: type as any,
       message,
       metadata,

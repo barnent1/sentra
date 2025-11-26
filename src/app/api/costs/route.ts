@@ -149,6 +149,8 @@ export async function POST(request: NextRequest) {
     // Create cost entry
     const cost = await drizzleDb.createCost({
       projectId,
+      orgId: project.orgId,
+      userId: user.userId,
       amount,
       model,
       provider: provider as any,

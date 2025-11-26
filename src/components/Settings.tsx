@@ -71,6 +71,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
     if (isOpen) {
       loadSettings();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   async function loadSettings() {

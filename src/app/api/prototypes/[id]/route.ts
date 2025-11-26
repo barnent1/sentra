@@ -40,13 +40,13 @@ interface PrototypeResponse {
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     // Authenticate user
     const user = requireAuthUser(request);
 
-    const { id } = params;
+    const { id } = await params;
 
     // Get prototype
     const prototype = await (drizzleDb as any).getPrototypeById(id);

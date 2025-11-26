@@ -26,6 +26,7 @@ export function PrototypePanel({ projectId, isOpen, onClose }: PrototypePanelPro
     if (isOpen) {
       fetchPrototypes();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, projectId]);
 
   // Handle Escape key to close panel
@@ -264,7 +265,7 @@ export function PrototypePanel({ projectId, isOpen, onClose }: PrototypePanelPro
               Provide Feedback
             </h3>
             <p className="text-sm text-[#A1A1AA] mb-4">
-              Describe the changes you'd like to make to "{selectedPrototype.title}"
+              Describe the changes you&apos;d like to make to &quot;{selectedPrototype.title}&quot;
             </p>
 
             <textarea

@@ -18,11 +18,6 @@ export default defineConfig({
     // Database tests need sequential execution to avoid race conditions
     // when multiple tests share the same database and cleanup in afterEach
     pool: 'forks',
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
     // Run test files sequentially (not just tests within a file)
     fileParallelism: false,
 

@@ -10,7 +10,7 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
-import { DatabaseService } from './database-drizzle';
+import { drizzleDb } from './database-drizzle';
 import type { E2ETest } from '../schemas/e2e-spec.schema';
 
 /**
@@ -180,7 +180,7 @@ export class TestRefinementService {
   ): Promise<RefinementResult> {
     try {
       // 1. Fetch API key from database
-      const settings = await DatabaseService.getUserSettings(userId);
+      const settings = await drizzleDb.getSettingsByUserId(userId);
 
       if (!settings?.anthropicApiKey) {
         return {

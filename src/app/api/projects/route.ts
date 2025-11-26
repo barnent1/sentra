@@ -15,6 +15,7 @@ export const runtime = 'nodejs'
 interface CreateProjectRequest {
   name: string
   path: string
+  orgId: string
   settings?: Record<string, any>
 }
 
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
   try {
     const user = requireAuthUser(request)
     const body = await request.json() as CreateProjectRequest
-    const { name, path, settings } = body
+    const { name, path, orgId, settings } = body
 
     // Validate required fields
     if (!name) {
@@ -140,11 +141,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'path is required' }, { status: 400 })
     }
 
+    if (!orgId) {
+      return NextResponse.json({ error: 'orgId is required' }, { status: 400 })
+    }
+
     // Create project
     const project = await drizzleDb.createProject({
       name,
       path,
       userId: user.userId,
+      orgId,
       settings: settings || undefined,
     })
 

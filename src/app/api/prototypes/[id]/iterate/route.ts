@@ -36,13 +36,13 @@ interface IteratePrototypeResponse {
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     // Authenticate user
     const user = requireAuthUser(request);
 
-    const { id } = params;
+    const { id } = await params;
 
     // Parse request body
     const body = (await request.json()) as IteratePrototypeRequest;

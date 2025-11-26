@@ -6,6 +6,12 @@ const nextConfig = {
   // Enable latest features
   reactStrictMode: true,
 
+  // ESLint: Don't fail build on warnings (only errors)
+  eslint: {
+    ignoreDuringBuilds: false,  // Still run ESLint
+    dirs: ['src'],              // Only check src directory
+  },
+
   // Cache bust for jose dependency fix
   generateBuildId: async () => {
     return `build-${Date.now()}`

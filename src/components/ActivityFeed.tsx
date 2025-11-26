@@ -43,6 +43,7 @@ export function ActivityFeed({ project, showFilter = false, limit = 50 }: Activi
   // Initial fetch
   useEffect(() => {
     fetchEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProject, limit]);
 
   // Auto-refresh every 5 seconds
@@ -52,6 +53,7 @@ export function ActivityFeed({ project, showFilter = false, limit = 50 }: Activi
     }, 5000);
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProject, limit]);
 
   // Update selected project when prop changes
