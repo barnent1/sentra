@@ -1,0 +1,175 @@
+name: Sentra AI Agent (Local Runner)
+
+# Self-hosted runner workflow - uses YOUR Claude Code (Max Pro)
+# NO API credits needed!
+
+on:
+  issues:
+    types: [labeled]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to work on'
+        required: true
+        type: number
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  ai-agent-local:
+    # Only run if issue has "ai-feature" label
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'issues' && contains(github.event.issue.labels.*.name, 'ai-feature')) ||
+      (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'ai-feature'))
+
+    # Run on YOUR Mac - uses your Claude Code with Max Pro subscription
+    runs-on: [self-hosted, macOS, sentra]
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Claude Code
+        run: |
+          echo "🖥️  Running on self-hosted Mac runner"
+          echo "💰 Using YOUR Claude Code (Max Pro) - NO API charges!"
+          echo ""
+          if command -v claude &> /dev/null; then
+            echo "✅ Claude Code CLI found"
+          else
+            echo "❌ Claude Code CLI NOT FOUND"
+            echo "Make sure Claude Code is installed and in PATH"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create feature branch
+        run: |
+          ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
+          BRANCH_NAME="feature/issue-${ISSUE_NUMBER}"
+
+          if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+            echo "Branch exists, checking out"
+            git fetch origin "$BRANCH_NAME"
+            git checkout "$BRANCH_NAME"
+          else
+            echo "Creating new branch"
+            git checkout -b "$BRANCH_NAME"
+          fi
+
+          git config user.name "Sentra AI Agent"
+          git config user.email "agent@sentra.dev"
+
+      - name: Run AI Agent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # NO ANTHROPIC_API_KEY needed - uses local Claude Code auth!
+        run: |
+          ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
+
+          echo "🤖 Starting AI Agent for issue #$ISSUE_NUMBER"
+          echo "💰 Using Max Pro subscription - $0 API cost!"
+          echo ""
+
+          # Get issue details
+          ISSUE_TITLE=$(gh issue view "$ISSUE_NUMBER" --json title --jq '.title')
+          ISSUE_BODY=$(gh issue view "$ISSUE_NUMBER" --json body --jq '.body')
+
+          echo "Issue: $ISSUE_TITLE"
+          echo ""
+
+          # Build prompt
+          PROMPT="You are working on GitHub issue #$ISSUE_NUMBER in the sentra project.
+
+          Title: $ISSUE_TITLE
+
+          Description:
+          $ISSUE_BODY
+
+          Instructions:
+          1. Read CLAUDE.md for project context
+          2. Implement the feature/fix described in the issue
+          3. Write tests if appropriate
+          4. Ensure the build passes (npm run build)
+          5. Commit your changes with a descriptive message
+          6. Create a PR for review
+
+          Work in the current directory. The branch 'feature/issue-$ISSUE_NUMBER' is already checked out."
+
+          # Run Claude Code - uses YOUR Max Pro subscription!
+          claude -p "$PROMPT" \
+            --permission-mode acceptEdits \
+            --allowedTools "Bash(*) Read(*) Edit(*) Write(*) Glob(*) Grep(*)" \
+            2>&1 | tee claude-output.txt
+
+          echo ""
+          echo "✅ Claude Code finished"
+
+      - name: Push changes and create PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
+          BRANCH_NAME="feature/issue-${ISSUE_NUMBER}"
+
+          # Check if there are changes to commit
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          # Push branch
+          git push -u origin "$BRANCH_NAME" || true
+
+          # Check if PR already exists
+          EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --json number --jq '.[0].number')
+
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR #$EXISTING_PR already exists"
+            gh issue comment "$ISSUE_NUMBER" --body "🔄 Updated PR #$EXISTING_PR with new changes."
+          else
+            # Create PR
+            PR_URL=$(gh pr create \
+              --title "Fix: Issue #$ISSUE_NUMBER" \
+              --body "Resolves #$ISSUE_NUMBER
+
+            🤖 Generated by Sentra AI Agent (self-hosted)
+            💰 Cost: \$0 (Max Pro subscription)" \
+              --base main \
+              --head "$BRANCH_NAME" 2>&1) || true
+
+            if [ -n "$PR_URL" ]; then
+              gh issue comment "$ISSUE_NUMBER" --body "✅ Created PR: $PR_URL"
+            fi
+          fi
+
+      - name: Report completion
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
+          WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          if [ "${{ job.status }}" = "success" ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "✅ AI agent completed! See [workflow logs]($WORKFLOW_URL)"
+          else
+            gh issue comment "$ISSUE_NUMBER" --body "❌ AI agent failed. See [workflow logs]($WORKFLOW_URL)"
+          fi
