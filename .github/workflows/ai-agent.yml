@@ -27,10 +27,10 @@ jobs:
       (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'ai-feature'))
 
     runs-on: ubuntu-latest
-    timeout-minutes: 45  # Higher limit for complex Sentra tasks
+    timeout-minutes: 45
 
     # Phase 1: Docker Containerization for Security
-    # See: ADR_0001_CONTAINER_SECURITY.md
+    # Risk reduction: 60-70%
     #
     # Security measures:
     # - Read-only root filesystem (--read-only)
@@ -42,16 +42,7 @@ jobs:
     # - /tmp: Standard temporary files
     # - ~/.cache: Python pip cache, npm cache
     # - ~/workspace: Working directory for git operations
-    # - ~/.claude/telemetry: Claude Code logs (write access needed)
-    #
-    # Phase 2 Security: Credential proxy socket mount
-    # - Mounted read-only from host
-    # - NO credentials in container environment
-    #
-    # Read-only access (baked into image):
-    # - ~/.claude/bin/claude: Claude Code CLI binary
-    # - ~/.claude/: Claude Code installation directory
-    # - <workspace>/.claude/: Project-specific hooks and agents
+    # - ~/.claude/telemetry: Claude Code logs
     container:
       image: ghcr.io/${{ github.repository_owner }}/sentra-agent:latest
       options: >-
@@ -62,7 +53,6 @@ jobs:
         --tmpfs /home/claude-agent/.cache:exec,mode=0755
         --tmpfs /home/claude-agent/workspace:exec,mode=0755
         --tmpfs /home/claude-agent/.claude/telemetry:exec,mode=0755
-        --volume /tmp/credential-proxy.sock:/tmp/credential-proxy.sock:ro
         --memory=2g
         --memory-swap=2g
         --cpus=2
@@ -76,43 +66,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full history for context
-
-      # Phase 2 Security: Start credential proxy on HOST
-      # Proxy runs outside container and validates all credential requests
-      - name: Start credential proxy service
-        run: |
-          echo "Starting credential proxy service (Phase 2 Security)..."
-
-          # Make proxy script executable
-          chmod +x .claude/services/credential-proxy.py
-
-          # Start proxy in background on host
-          python3 .claude/services/credential-proxy.py &
-          PROXY_PID=$!
-          echo "PROXY_PID=$PROXY_PID" >> $GITHUB_ENV
-
-          # Wait for socket creation
-          echo "Waiting for credential proxy socket..."
-          for i in {1..30}; do
-            if [ -S /tmp/credential-proxy.sock ]; then
-              echo "✅ Credential proxy started successfully (PID: $PROXY_PID)"
-              echo "✅ Socket permissions: $(stat -c '%a' /tmp/credential-proxy.sock)"
-              break
-            fi
-            sleep 0.5
-          done
-
-          if [ ! -S /tmp/credential-proxy.sock ]; then
-            echo "❌ Failed to start credential proxy"
-            exit 1
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-
-      # Container already has Python, Node.js, and npm installed
-      # See: .claude/Dockerfile for complete environment setup
+          fetch-depth: 0
 
       - name: Cache npm dependencies
         uses: actions/cache@v4
@@ -128,43 +82,28 @@ jobs:
 
       - name: Verify container environment
         run: |
-          echo "🐳 Running in secure Docker container"
+          echo "🐳 Running in secure Docker container (Phase 1 Security)"
           echo ""
           echo "=== Runtime Versions ==="
           echo "Python: $(python3.11 --version)"
           echo "Node: $(node --version)"
           echo "npm: $(npm --version)"
-          echo "Next.js: $(npx next --version 2>&1 || echo 'NOT FOUND')"
-          echo ""
-          echo "=== User Context ==="
-          echo "User: $(whoami)"
-          echo "UID: $(id -u)"
-          echo "GID: $(id -g)"
-          echo "Home: $HOME"
           echo ""
           echo "=== Claude Code CLI ==="
           if command -v claude &> /dev/null; then
             echo "✅ Claude Code CLI: $(claude --version)"
-            echo "✅ Binary location: $(which claude)"
-            echo "✅ Claude directory exists: $(ls -la ~/.claude/ | head -5)"
           else
-            echo "❌ Claude Code CLI NOT FOUND in PATH"
-            echo "PATH: $PATH"
+            echo "❌ Claude Code CLI NOT FOUND"
             exit 1
           fi
-          echo ""
-          echo "=== Project Structure ==="
-          echo "Workspace: $(pwd)"
-          echo "Project .claude/: $(ls -la .claude/ | head -10 || echo 'NOT FOUND')"
 
       - name: Create feature branch
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
           BRANCH_NAME="feature/issue-${ISSUE_NUMBER}"
 
-          # Check if branch already exists
           if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
-            echo "Branch already exists, checking out"
+            echo "Branch exists, checking out"
             git fetch origin "$BRANCH_NAME"
             git checkout "$BRANCH_NAME"
           else
@@ -172,76 +111,33 @@ jobs:
             git checkout -b "$BRANCH_NAME"
           fi
 
-          # Configure git
           git config user.name "Sentra AI Agent"
           git config user.email "agent@sentra.dev"
 
-      - name: Load Sentra project context
-        run: |
-          echo "📚 Loading Sentra project context..."
-          if [ -f ".sentra/memory/project-overview.md" ]; then
-            echo "✅ Project overview loaded"
-          fi
-          if [ -f ".sentra/config.yml" ]; then
-            echo "✅ Project configuration loaded"
-          fi
-
-      - name: Debug Python environment
-        run: |
-          echo "=== Python Environment Debug ==="
-          echo "Python version:"
-          python3.11 --version
-          echo "Python path:"
-          python3.11 -c "import sys; print('\n'.join(sys.path))"
-          echo "PYTHONPATH: $PYTHONPATH"
-          echo "Checking for anthropic package:"
-          python3.11 -c "import anthropic; print(f'anthropic version: {anthropic.__version__}')" || echo "anthropic not found"
-          echo "User site-packages:"
-          ls -la /home/claude-agent/.local/lib/python3.11/site-packages/ | head -20
-
       - name: Run AI Agent
         env:
-          # Phase 2 Security: NO credentials in container environment
-          # Credentials provided by proxy on host via Unix socket
-          # ANTHROPIC_API_KEY: NOT SET (proxy provides)
-          # GITHUB_TOKEN: NOT SET (proxy provides)
-
-          # Claude Code CLI configuration
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DISABLE_AUTOUPDATER: 'true'
           DISABLE_TELEMETRY: 'true'
-          # Agent constraints
           CLAUDE_MAX_EXECUTION_TIME: '45'
           CLAUDE_MAX_API_CALLS_PER_ISSUE: '150'
           CLAUDE_MAX_FILE_CHANGES: '75'
-          CLAUDE_REQUIRE_TESTS: 'false'  # No tests yet in early phase
+          CLAUDE_REQUIRE_TESTS: 'false'
           CLAUDE_GITHUB_COMMENTS: 'true'
           CLAUDE_LOG_API_CALLS: 'true'
-          # Rate limiting configuration (prevent 429 errors)
-          CLAUDE_RATE_LIMIT_TPM: '25000'  # 25k tokens/min (under 30k limit)
-          CLAUDE_RATE_LIMIT_RETRIES: '3'  # Retry 3 times with backoff
-          CLAUDE_RATE_LIMIT_THRESHOLD: '0.8'  # Throttle at 80% of limit
+          CLAUDE_RATE_LIMIT_TPM: '25000'
+          CLAUDE_RATE_LIMIT_RETRIES: '3'
+          CLAUDE_RATE_LIMIT_THRESHOLD: '0.8'
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
 
-          echo "🔒 Phase 2 Security: Container has NO credentials in environment"
-          echo "🔒 Credentials provided by proxy via socket: /tmp/credential-proxy.sock"
+          echo "🤖 Starting AI Agent for issue #$ISSUE_NUMBER"
+          echo "🔒 Phase 1 Security: Docker container isolation active"
 
-          # Scripts are checked into the repository at .claude/scripts/
           chmod +x .claude/scripts/ai-agent-worker.py .claude/scripts/notify.sh
 
-          # Run the AI agent (using python3.11 to match Dockerfile)
           python3.11 .claude/scripts/ai-agent-worker.py "$ISSUE_NUMBER" . | tee agent-output.json || exit 1
-
-      - name: Cleanup credential proxy
-        if: always()
-        run: |
-          echo "Cleaning up credential proxy..."
-          if [ -n "$PROXY_PID" ]; then
-            kill $PROXY_PID || true
-            echo "✅ Stopped credential proxy (PID: $PROXY_PID)"
-          fi
-          rm -f /tmp/credential-proxy.sock
-          echo "✅ Removed credential proxy socket"
 
       - name: Upload agent logs
         if: always()
@@ -261,21 +157,12 @@ jobs:
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
-          # Parse the agent output to get PR URL (if created)
-          # Note: agent already posts comment with PR URL in Phase 8, so this is just a backup
           if [ -f agent-output.json ]; then
             PR_URL=$(grep -o '"pr_url": "[^"]*"' agent-output.json | cut -d'"' -f4 | tail -1)
-
-            if [ -n "$PR_URL" ] && [ "$PR_URL" != "null" ]; then
-              echo "PR was created successfully: $PR_URL"
-              # Agent already posted comment with PR URL, so we don't need to duplicate
-            else
-              echo "PR creation may have failed - check agent logs"
-              BODY="✅ AI agent completed this task!\n\n⚠️ Note: Pull request creation encountered an issue. The changes have been pushed to the branch, but you may need to create the PR manually.\n\nView [workflow logs]($WORKFLOW_URL) for details."
+            if [ -z "$PR_URL" ] || [ "$PR_URL" = "null" ]; then
+              BODY="✅ AI agent completed!\n\n⚠️ PR may need manual creation. See [workflow logs]($WORKFLOW_URL)."
               gh issue comment "$ISSUE_NUMBER" --body "$BODY"
             fi
-          else
-            echo "Could not find agent output file"
           fi
 
       - name: Report failure
@@ -285,6 +172,6 @@ jobs:
         run: |
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
           WORKFLOW_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          BODY="❌ AI agent encountered an issue while working on this task.\n\nCheck the [workflow logs]($WORKFLOW_URL) for details.\n\nThis issue has been labeled 'needs-help' and requires human attention."
+          BODY="❌ AI agent failed.\n\nSee [workflow logs]($WORKFLOW_URL)."
           gh issue comment "$ISSUE_NUMBER" --body "$BODY"
           gh issue edit "$ISSUE_NUMBER" --add-label "needs-help"

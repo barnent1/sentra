@@ -72,7 +72,7 @@ import signal
 import re
 import shlex
 import glob
-import socket as socket_module  # For Unix socket communication
+# Socket module removed - credential proxy disabled
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Dict, Any, Tuple, List
@@ -104,20 +104,14 @@ class Config:
     @classmethod
     def from_env(cls) -> 'Config':
         """Load configuration from environment variables"""
-        # Phase 2: Credentials may not be in environment (proxy provides them)
-        # Phase 1 fallback: Credentials in environment
         api_key = os.getenv("ANTHROPIC_API_KEY", "")
         github_token = os.getenv("GITHUB_TOKEN", "")
 
-        # Only require credentials if proxy socket doesn't exist
-        credential_socket = "/var/run/credential-proxy.sock"
-        has_proxy = os.path.exists(credential_socket)
+        if not api_key:
+            raise ValueError("ANTHROPIC_API_KEY not set")
 
-        if not has_proxy and not api_key:
-            raise ValueError("ANTHROPIC_API_KEY not set and credential proxy not available")
-
-        if not has_proxy and not github_token:
-            raise ValueError("GITHUB_TOKEN not set and credential proxy not available")
+        if not github_token:
+            raise ValueError("GITHUB_TOKEN not set")
 
         return cls(
             anthropic_api_key=api_key,
@@ -355,13 +349,7 @@ class AgentWorker:
         # GitHub API base URL
         self.github_api = "https://api.github.com"
 
-        # Credential proxy (Phase 2 security)
-        self.credential_socket = "/var/run/credential-proxy.sock"
-        self.use_credential_proxy = os.path.exists(self.credential_socket)
-        if self.use_credential_proxy:
-            self.log("Phase 2 security: Using credential proxy")
-        else:
-            self.log("Phase 1 security: Credentials in environment (proxy not available)")
+        self.log("Phase 1 security: Docker container isolation active")
 
         # Setup telemetry
         self.telemetry_dir = Path.home() / ".claude" / "telemetry"
@@ -403,70 +391,32 @@ class AgentWorker:
         self.log(f"STRUCTURED: {json.dumps(log_data)}", "DATA")
 
     # ========================================================================
-    # Credential Proxy (Phase 2 Security)
+    # Credential Access
     # ========================================================================
 
     def get_credential(self, service: str, operation: str) -> str:
         """
-        Request credential from proxy service (Phase 2) or environment (Phase 1).
-
-        Phase 2 Security: Credentials never exposed to container environment.
-        The credential proxy runs on the host and validates all requests.
-
-        Phase 1 Fallback: If proxy not available, use environment variables.
+        Get credential from environment variables.
 
         Args:
             service: "github" or "anthropic"
-            operation: Specific operation (e.g., "clone", "push", "api_call")
+            operation: Specific operation (for logging)
 
         Returns:
             Credential token
-
-        Raises:
-            RuntimeError: If credential request denied or unavailable
         """
-        if self.use_credential_proxy:
-            # Phase 2: Request from proxy
-            try:
-                with socket_module.socket(socket_module.AF_UNIX, socket_module.SOCK_STREAM) as sock:
-                    sock.connect(self.credential_socket)
-
-                    request = {
-                        "service": service,
-                        "operation": operation,
-                        "pid": os.getpid(),
-                    }
-
-                    sock.send(json.dumps(request).encode('utf-8'))
-                    response_data = sock.recv(4096).decode('utf-8')
-                    response = json.loads(response_data)
-
-                    if response.get("status") == "granted":
-                        self.log(f"Credential granted for {service}/{operation}")
-                        return response["token"]
-                    else:
-                        error = response.get("error", "Unknown error")
-                        raise RuntimeError(f"Credential request denied: {error}")
-
-            except socket_module.error as e:
-                raise RuntimeError(f"Cannot connect to credential proxy: {e}")
-            except json.JSONDecodeError as e:
-                raise RuntimeError(f"Invalid response from credential proxy: {e}")
-
+        if service == "github":
+            token = os.getenv("GITHUB_TOKEN")
+            if not token:
+                raise RuntimeError("GITHUB_TOKEN not set")
+            return token
+        elif service == "anthropic":
+            token = os.getenv("ANTHROPIC_API_KEY")
+            if not token:
+                raise RuntimeError("ANTHROPIC_API_KEY not set")
+            return token
         else:
-            # Phase 1: Use environment variables (fallback)
-            if service == "github":
-                token = os.getenv("GITHUB_TOKEN")
-                if not token:
-                    raise RuntimeError("GITHUB_TOKEN not set in environment")
-                return token
-            elif service == "anthropic":
-                token = os.getenv("ANTHROPIC_API_KEY")
-                if not token:
-                    raise RuntimeError("ANTHROPIC_API_KEY not set in environment")
-                return token
-            else:
-                raise RuntimeError(f"Unknown service: {service}")
+            raise RuntimeError(f"Unknown service: {service}")
 
     # ========================================================================
     # Environment Validation
@@ -975,16 +925,8 @@ _This is an automated progress update. Updates are posted every 5 minutes._
             self.log(f"Running: claude -p <prompt> --permission-mode acceptEdits --allowedTools ...")
 
             # Execute Claude Code CLI
-            # Important: Get ANTHROPIC_API_KEY via credential proxy (Phase 2) or environment (Phase 1)
             env = os.environ.copy()
-
-            # Get Anthropic API key
-            if self.use_credential_proxy:
-                # Phase 2: Get from proxy
-                env["ANTHROPIC_API_KEY"] = self.get_credential("anthropic", "api_call")
-            else:
-                # Phase 1: Already in environment
-                env["ANTHROPIC_API_KEY"] = self.config.anthropic_api_key
+            env["ANTHROPIC_API_KEY"] = self.config.anthropic_api_key
 
             # Disable auto-updater and telemetry in containerized environment
             env["DISABLE_AUTOUPDATER"] = "true"
@@ -1303,11 +1245,7 @@ This PR was created by Glen Barnhardt with the help of Claude Code
             repo_info = self.get_repo_info()
             repo_name = f"{repo_info['owner']}/{repo_info['repo']}"
 
-            # Get GitHub token via credential proxy
-            if self.use_credential_proxy:
-                github_token = self.get_credential("github", "create_pr")
-            else:
-                github_token = self.config.github_token
+            github_token = self.config.github_token
 
             # Initialize PyGithub
             gh = Github(github_token)
