@@ -429,16 +429,52 @@ export async function rejectSpec(projectName: string, projectPath: string): Prom
 }
 
 /**
- * Create a GitHub issue from a spec using gh CLI
+ * Create a GitHub issue from a spec
  */
 export async function createGithubIssue(
   specTitle: string,
   specBody: string,
   labels: string[] = ['ai-feature']
 ): Promise<string> {
-  console.log(`[Web] Creating GitHub issue: ${specTitle}`)
-  // TODO: Implement backend endpoint to create GitHub issues
-  return 'https://github.com/example/repo/issues/123'
+  try {
+    const { logger } = await import('@/services/logger')
+    const { getSettings } = await import('@/lib/settings')
+
+    logger.info('Creating GitHub issue from spec', {
+      title: specTitle,
+      bodyLength: specBody.length,
+      labels,
+    })
+
+    // Get settings (GitHub token, repo info)
+    const settings = await getSettings()
+
+    if (!settings.githubToken) {
+      throw new Error('GitHub PAT not configured. Please add your GitHub token in settings.')
+    }
+
+    if (!settings.githubRepoOwner || !settings.githubRepoName) {
+      throw new Error('GitHub repository not configured. Please set repository owner and name in settings.')
+    }
+
+    // Use the GitHub library to create the issue
+    const { createIssueFromSpec } = await import('@/lib/github')
+    const fullSpec = `# ${specTitle}\n\n${specBody}`
+
+    const issueUrl = await createIssueFromSpec(
+      fullSpec,
+      settings.githubToken,
+      settings.githubRepoOwner,
+      settings.githubRepoName
+    )
+
+    logger.info('GitHub issue created successfully', { issueUrl })
+    return issueUrl
+  } catch (error) {
+    const { logger } = await import('@/services/logger')
+    logger.error('Failed to create GitHub issue', error)
+    throw error
+  }
 }
 
 /**
