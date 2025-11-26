@@ -258,6 +258,80 @@ class RateLimiter:
 
 
 # ============================================================================
+# Model Selection
+# ============================================================================
+
+# Model tiers with their use cases and costs (per 1M tokens, Nov 2025)
+MODELS = {
+    'opus': {
+        'name': 'opus',  # Latest Opus
+        'input_cost': 5.0,
+        'output_cost': 25.0,
+        'use_cases': ['architecture', 'complex algorithms', 'major refactoring', 'security audit'],
+    },
+    'sonnet': {
+        'name': 'sonnet',  # Latest Sonnet (default)
+        'input_cost': 3.0,
+        'output_cost': 15.0,
+        'use_cases': ['feature implementation', 'multi-file changes', 'test writing', 'code review'],
+    },
+    'haiku': {
+        'name': 'haiku',  # Latest Haiku
+        'input_cost': 1.0,
+        'output_cost': 5.0,
+        'use_cases': ['simple fixes', 'documentation', 'typos', 'small refactoring', 'config changes'],
+    },
+}
+
+def select_model_for_issue(issue: Dict[str, Any]) -> str:
+    """
+    Select the appropriate model based on issue complexity.
+
+    Returns model alias: 'opus', 'sonnet', or 'haiku'
+    """
+    title = issue.get('title', '').lower()
+    body = issue.get('body', '').lower()
+    labels = [l.get('name', '').lower() for l in issue.get('labels', [])]
+    content = f"{title} {body}"
+
+    # Priority labels override analysis
+    if 'use-opus' in labels or 'complex' in labels:
+        return 'opus'
+    if 'use-haiku' in labels or 'simple' in labels:
+        return 'haiku'
+
+    # Opus indicators (complex tasks)
+    opus_keywords = [
+        'architecture', 'redesign', 'security audit', 'major refactor',
+        'complex algorithm', 'performance optimization', 'database migration',
+        'breaking change', 'api design', 'system design'
+    ]
+    if any(kw in content for kw in opus_keywords):
+        return 'opus'
+
+    # Haiku indicators (simple tasks)
+    haiku_keywords = [
+        'typo', 'fix typo', 'documentation', 'readme', 'comment',
+        'rename', 'simple fix', 'config', 'env', 'version bump',
+        'update dependency', 'lint', 'format', 'style'
+    ]
+    if any(kw in content for kw in haiku_keywords):
+        return 'haiku'
+
+    # Check complexity by content length and structure
+    # Short issues with simple acceptance criteria -> Haiku
+    if len(body) < 500 and body.count('- [ ]') <= 3:
+        return 'haiku'
+
+    # Very long issues with many acceptance criteria -> Opus
+    if len(body) > 3000 or body.count('- [ ]') > 10:
+        return 'opus'
+
+    # Default to Sonnet for balanced performance
+    return 'sonnet'
+
+
+# ============================================================================
 # Main Agent Worker Class
 # ============================================================================
 
@@ -869,7 +943,8 @@ _This is an automated progress update. Updates are posted every 5 minutes._
     def execute_claude_code(
         self,
         prompt: str,
-        timeout: Optional[int] = None
+        timeout: Optional[int] = None,
+        model: str = 'sonnet'
     ) -> Tuple[int, str, str]:
         """
         Execute Claude using Claude Code CLI
@@ -877,6 +952,11 @@ _This is an automated progress update. Updates are posted every 5 minutes._
         This uses the native Claude Code CLI installed in the container,
         which provides better tool integration and error handling than
         the raw Anthropic SDK.
+
+        Args:
+            prompt: The prompt to send to Claude
+            timeout: Execution timeout in seconds
+            model: Model to use ('opus', 'sonnet', 'haiku')
 
         WHY CLI OVER SDK:
         - Built-in tool ecosystem (Read, Write, Edit, Bash, Glob, Grep)
@@ -918,11 +998,14 @@ _This is an automated progress update. Updates are posted every 5 minutes._
             claude_cmd = [
                 "claude",
                 "-p", prompt,
+                "--model", model,
                 "--permission-mode", "acceptEdits",
                 "--allowedTools", "Bash(*) Read(*) Edit(*) Write(*) Glob(*) Grep(*)"
             ]
 
-            self.log(f"Running: claude -p <prompt> --permission-mode acceptEdits --allowedTools ...")
+            model_info = MODELS.get(model, MODELS['sonnet'])
+            self.log(f"Running: claude --model {model} -p <prompt> --permission-mode acceptEdits --allowedTools ...")
+            self.log(f"Model costs: ${model_info['input_cost']}/1M input, ${model_info['output_cost']}/1M output")
 
             # Execute Claude Code CLI
             env = os.environ.copy()
@@ -1358,10 +1441,17 @@ This PR was created by Glen Barnhardt with the help of Claude Code
                     f"Issue #{self.issue_number} does not have 'ai-feature' label"
                 )
 
+            # Select appropriate model based on issue complexity
+            selected_model = select_model_for_issue(issue)
+            model_info = MODELS[selected_model]
+            self.log(f"Selected model: {selected_model} (${model_info['input_cost']}/{model_info['output_cost']} per 1M tokens)")
+            result["model"] = selected_model
+
             # Comment on issue
             self.comment_on_issue(
-                "AI agent has started working on this issue. "
-                f"Branch: `{branch}`\n\n"
+                f"🤖 AI agent has started working on this issue.\n\n"
+                f"**Branch:** `{branch}`\n"
+                f"**Model:** `{selected_model}` (auto-selected based on complexity)\n\n"
                 "Progress updates will be posted every 5 minutes."
             )
 
@@ -1383,7 +1473,7 @@ This PR was created by Glen Barnhardt with the help of Claude Code
                 self.log(f"Phase 4: Executing Claude Code CLI (attempt {attempt_num}/{max_retries})")
                 self.update_issue_progress(f"Implementing changes with Claude (attempt {attempt_num})...")
 
-                returncode, stdout, stderr = self.execute_claude_code(current_prompt)
+                returncode, stdout, stderr = self.execute_claude_code(current_prompt, model=selected_model)
 
                 if returncode != 0:
                     self.log(f"Claude execution failed with code {returncode}", "ERROR")
