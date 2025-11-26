@@ -100,7 +100,7 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 - ✅ Added `savePendingSpec()` function
 - ✅ Added `approveSpec()` function
 - ✅ Added `rejectSpec()` function
-- ✅ Handoff handler saves spec to `.claude/pending-spec.md`
+- ✅ Handoff handler saves spec to `.sentra/specs/pending-spec.md`
 
 ### In Progress 🚧
 
@@ -141,9 +141,9 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 - `src/components/ArchitectChat.tsx` - Voice conversation UI
 - `src/app/page.tsx` - Main dashboard (TODO: add View Spec button)
 
-**Spec Storage Location (WILL CHANGE in Task 1.4):**
-- **Current:** `<project>/.claude/pending-spec.md` and `approved-spec.md`
-- **Target:** `<project>/.sentra/specs/pending-spec.md` and `approved-spec.md`
+**Spec Storage Location:**
+- **Pending specs:** `<project>/.sentra/specs/pending-spec.md`
+- **Approved specs:** `<project>/.sentra/specs/approved-spec.md`
 - **Archive:** `<project>/.sentra/specs/archive/YYYY-MM-DD-HH-MM.md`
 
 ### Technical Notes
@@ -160,7 +160,7 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 2. ✅ User describes features → Sentra listens and asks clarifying questions
 3. ✅ User confirms done → Sentra triggers handoff
 4. ✅ Claude creates spec
-5. ✅ Spec saved to `.claude/pending-spec.md`
+5. ✅ Spec saved to `.sentra/specs/pending-spec.md`
 6. ✅ Dialog closes
 7. ❌ **MISSING:** User sees "View Spec" on project card
 8. ❌ **MISSING:** User clicks to view formatted markdown

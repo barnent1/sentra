@@ -74,15 +74,15 @@ Track all features, components, and tasks across the entire Sentra project.
 
 - [✅] Frontend spec storage (TypeScript)
   - Functions in `src/lib/tauri.ts`
-  - Saves to `.claude/pending-spec.md` (temporary)
+  - Saves to `.sentra/specs/pending-spec.md`
   - Priority: P0
 
-- [🚧] Change storage to `.sentra/specs/`
-  - Current: `.claude/pending-spec.md` and `approved-spec.md`
-  - Target: `.sentra/specs/pending-spec.md` and `approved-spec.md`
+- [✅] Change storage to `.sentra/specs/`
+  - Pending specs: `.sentra/specs/pending-spec.md`
+  - Approved specs: `.sentra/specs/approved-spec.md`
   - Archive: `.sentra/specs/archive/YYYY-MM-DD-HH-MM.md`
   - Priority: P1
-  - Estimate: 1-2 hours
+  - Status: Complete
 
 ### Spec Approval Workflow
 
