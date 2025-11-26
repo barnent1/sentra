@@ -18,6 +18,7 @@ export interface SpecInfo {
   isLatest: boolean
   isApproved: boolean
   githubIssueUrl?: string
+  size?: number // Size in bytes
 }
 
 export interface SpecVersion {

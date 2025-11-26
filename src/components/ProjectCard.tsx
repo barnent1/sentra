@@ -72,6 +72,10 @@ export function ProjectCard({ project, onMuteToggle, onViewDetails, onSpeakToArc
     return t('project.activeAgents', { count: project.activeAgents });
   };
 
+  // Check for pending spec
+  const pendingSpec = project.specs?.find(spec => !spec.isApproved);
+  const specSizeKB = pendingSpec?.size ? (pendingSpec.size / 1024).toFixed(1) : null;
+
   return (
     <div
       data-testid="project-card"
@@ -110,6 +114,19 @@ export function ProjectCard({ project, onMuteToggle, onViewDetails, onSpeakToArc
           </button>
         )}
       </div>
+
+      {/* Spec Pending Badge */}
+      {pendingSpec && onViewSpec && (
+        <div className="mb-3">
+          <button
+            data-testid="spec-badge"
+            onClick={handleSpecClick}
+            className="px-3 py-1 bg-violet-500/20 border border-violet-500/50 rounded-full text-xs text-violet-300 animate-pulse hover:bg-violet-500/30 transition-colors"
+          >
+            📝 Spec Pending Review{specSizeKB ? ` (${specSizeKB} KB)` : ''}
+          </button>
+        </div>
+      )}
 
       {/* Repository URL */}
       <div className="mb-3 flex items-center gap-2">
