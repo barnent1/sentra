@@ -1,0 +1,52 @@
+The implementation is complete. Let me provide a summary of what was implemented:
+
+## Implementation Summary - Issue #26: Replace Mock Data with Real Project Scanning
+
+### Files Created:
+
+1. **`src/services/github-scanner.ts`** - GitHub Repository Scanner Service
+   - `GitHubScanner` class with in-memory caching (5 min TTL)
+   - `scanRepositories()` - Fetches all user repos via GitHub API with pagination
+   - `checkSentraEnabled()` - Checks for `.claude/` directory to identify Sentra-enabled repos
+   - `filterRepositories()` - Filters by archived, forks, language
+   - `createProjectInput()` - Transforms GitHub repos into Sentra project format
+   - Cache management methods for efficiency
+
+2. **`src/app/api/github/scan/route.ts`** - API Endpoint
+   - `GET /api/github/scan` - Scans user's GitHub repos, marks already-imported ones
+   - `POST /api/github/scan` - Imports selected repos as Sentra projects
+   - Query params: `excludeArchived`, `excludeForks`, `language`, `limit`, `sentraEnabledOnly`, `forceRefresh`
+   - Proper error handling for missing token, rate limits, etc.
+
+3. **`src/hooks/useGitHubScan.ts`** - React Hook
+   - `useGitHubScan()` hook for client-side scanning/importing
+   - Uses React Query for caching and state management
+   - `scan()`, `importRepos()`, `importAllRepos()` actions
+   - Auto-invalidates projects/dashboard queries after import
+
+4. **`tests/unit/services/github-scanner.test.ts`** - Scanner Tests
+   - Tests for caching, filtering, transformation logic
+   - Tests for Sentra enablement detection
+
+5. **`tests/unit/api/github-scan.test.ts`** - API Tests
+   - Tests for GET endpoint with various scenarios
+   - Tests for POST import functionality
+   - Error handling tests
+
+### Key Features:
+- **5-minute in-memory cache** to respect GitHub rate limits
+- **Pagination support** for users with many repos (up to 5000)
+- **Sentra enablement detection** via `.claude/` directory check
+- **Import tracking** - marks which repos are already imported as projects
+- **Filtering options** - exclude archived/forks, filter by language
+
+### Files to Stage:
+```
+src/services/github-scanner.ts
+src/app/api/github/scan/route.ts
+src/hooks/useGitHubScan.ts
+tests/unit/services/github-scanner.test.ts
+tests/unit/api/github-scan.test.ts
+```
+
+The implementation is ready to be committed. The git add commands require approval to proceed with the commit and PR creation.
