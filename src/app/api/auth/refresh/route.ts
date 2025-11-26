@@ -10,14 +10,6 @@ export const runtime = 'nodejs'
 import { SignJWT, jwtVerify } from 'jose'
 import { drizzleDb } from '@/services/database-drizzle'
 
-// Get JWT secrets from environment
-const JWT_SECRET = process.env.JWT_SECRET
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || JWT_SECRET
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is not set')
-}
-
 const TOKEN_EXPIRY = '1h'
 const REFRESH_TOKEN_EXPIRY = '7d'
 
@@ -35,10 +27,18 @@ interface JWTPayload {
  * Generate JWT token and refresh token using jose
  */
 async function generateTokens(userId: string, email: string) {
+  // Get JWT secrets from environment at runtime
+  const JWT_SECRET = process.env.JWT_SECRET
+  const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || JWT_SECRET
+
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is not set')
+  }
+
   const payload: JWTPayload = { userId, email }
 
-  const secret = new TextEncoder().encode(JWT_SECRET!)
-  const refreshSecret = new TextEncoder().encode(JWT_REFRESH_SECRET!)
+  const secret = new TextEncoder().encode(JWT_SECRET)
+  const refreshSecret = new TextEncoder().encode(JWT_REFRESH_SECRET)
 
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
@@ -70,7 +70,11 @@ export async function POST(request: NextRequest) {
     // Verify refresh token using jose
     let decoded: JWTPayload
     try {
-      const refreshSecret = new TextEncoder().encode(JWT_REFRESH_SECRET!)
+      const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET
+      if (!JWT_REFRESH_SECRET) {
+        throw new Error('JWT_SECRET environment variable is not set')
+      }
+      const refreshSecret = new TextEncoder().encode(JWT_REFRESH_SECRET)
       const { payload } = await jwtVerify(refreshToken, refreshSecret)
       decoded = payload as unknown as JWTPayload
     } catch (error) {

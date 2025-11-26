@@ -11,14 +11,6 @@ import bcrypt from 'bcrypt'
 import { SignJWT } from 'jose'
 import { drizzleDb } from '@/services/database-drizzle'
 
-// Get JWT secrets from environment
-const JWT_SECRET = process.env.JWT_SECRET
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || JWT_SECRET
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is not set')
-}
-
 const SALT_ROUNDS = 10
 const TOKEN_EXPIRY = '1h'
 const REFRESH_TOKEN_EXPIRY = '7d'
@@ -62,10 +54,18 @@ function isValidPassword(password: string): boolean {
  * Generate JWT token and refresh token using jose
  */
 async function generateTokens(userId: string, email: string) {
+  // Get JWT secrets from environment at runtime
+  const JWT_SECRET = process.env.JWT_SECRET
+  const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || JWT_SECRET
+
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET environment variable is not set')
+  }
+
   const payload: JWTPayload = { userId, email }
 
-  const secret = new TextEncoder().encode(JWT_SECRET!)
-  const refreshSecret = new TextEncoder().encode(JWT_REFRESH_SECRET!)
+  const secret = new TextEncoder().encode(JWT_SECRET)
+  const refreshSecret = new TextEncoder().encode(JWT_REFRESH_SECRET)
 
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
