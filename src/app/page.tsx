@@ -71,25 +71,43 @@ export default function Home() {
     }
 
     try {
-      console.log(`[Approve] Starting approval process for ${selectedSpec.name}`);
-      console.log(`[Approve] Spec title: ${selectedSpec.specInfo.title}`);
+      const { logger } = await import('@/services/logger');
+
+      logger.info('Starting spec approval process', {
+        project: selectedSpec.name,
+        specTitle: selectedSpec.specInfo.title,
+        specId: selectedSpec.specInfo.id,
+      });
 
       // Create GitHub issue using gh CLI
       const title = `[AI Feature] ${selectedSpec.specInfo.title}`;
       const body = `${selectedSpec.spec}\n\n---\nSpec file: ${selectedSpec.specInfo.filePath}`;
 
-      console.log(`[Approve] Creating GitHub issue...`);
+      logger.info('Creating GitHub issue from spec', {
+        project: selectedSpec.name,
+        specTitle: selectedSpec.specInfo.title,
+      });
+
       const issueUrl = await createGithubIssue(
         title,
         body,
         ['ai-feature']
       );
 
-      console.log(`[Approve] ✅ GitHub issue created: ${issueUrl}`);
+      logger.info('GitHub issue created successfully', {
+        project: selectedSpec.name,
+        issueUrl,
+      });
 
       // Approve the spec version (new versioning system)
       const versionFile = selectedSpec.specInfo.filePath.split('/').pop() || '';
-      console.log(`[Approve] Approving spec version: ${versionFile}`);
+
+      logger.info('Approving spec version', {
+        project: selectedSpec.name,
+        specId: selectedSpec.specInfo.id,
+        versionFile,
+        issueUrl,
+      });
 
       await approveSpecVersion(
         selectedSpec.name,
@@ -99,15 +117,16 @@ export default function Home() {
         issueUrl
       );
 
-      console.log(`[Approve] ✅ Spec approved successfully`);
+      logger.info('Spec approval process completed', {
+        project: selectedSpec.name,
+        specId: selectedSpec.specInfo.id,
+      });
 
       // Refresh the projects list
-      console.log(`[Approve] Refreshing projects list...`);
       await refetch();
-
-      console.log(`[Approve] ✅ Approval process completed`);
     } catch (error) {
-      console.error('[Approve] ❌ Failed to approve spec:', error);
+      const { logger } = await import('@/services/logger');
+      logger.error('Spec approval process failed', error);
       throw error; // Re-throw to let SpecViewer handle the error display
     }
   };
