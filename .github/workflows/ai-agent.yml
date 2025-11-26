@@ -62,7 +62,7 @@ jobs:
         --tmpfs /home/claude-agent/.cache:exec,mode=0755
         --tmpfs /home/claude-agent/workspace:exec,mode=0755
         --tmpfs /home/claude-agent/.claude/telemetry:exec,mode=0755
-        --volume /var/run/credential-proxy.sock:/var/run/credential-proxy.sock:ro
+        --volume /tmp/credential-proxy.sock:/tmp/credential-proxy.sock:ro
         --memory=2g
         --memory-swap=2g
         --cpus=2
@@ -95,15 +95,15 @@ jobs:
           # Wait for socket creation
           echo "Waiting for credential proxy socket..."
           for i in {1..30}; do
-            if [ -S /var/run/credential-proxy.sock ]; then
+            if [ -S /tmp/credential-proxy.sock ]; then
               echo "✅ Credential proxy started successfully (PID: $PROXY_PID)"
-              echo "✅ Socket permissions: $(stat -c '%a' /var/run/credential-proxy.sock)"
+              echo "✅ Socket permissions: $(stat -c '%a' /tmp/credential-proxy.sock)"
               break
             fi
             sleep 0.5
           done
 
-          if [ ! -S /var/run/credential-proxy.sock ]; then
+          if [ ! -S /tmp/credential-proxy.sock ]; then
             echo "❌ Failed to start credential proxy"
             exit 1
           fi
@@ -224,7 +224,7 @@ jobs:
           ISSUE_NUMBER=${{ github.event.inputs.issue_number || github.event.issue.number }}
 
           echo "🔒 Phase 2 Security: Container has NO credentials in environment"
-          echo "🔒 Credentials provided by proxy via socket: /var/run/credential-proxy.sock"
+          echo "🔒 Credentials provided by proxy via socket: /tmp/credential-proxy.sock"
 
           # Scripts are checked into the repository at .claude/scripts/
           chmod +x .claude/scripts/ai-agent-worker.py .claude/scripts/notify.sh
@@ -240,7 +240,7 @@ jobs:
             kill $PROXY_PID || true
             echo "✅ Stopped credential proxy (PID: $PROXY_PID)"
           fi
-          rm -f /var/run/credential-proxy.sock
+          rm -f /tmp/credential-proxy.sock
           echo "✅ Removed credential proxy socket"
 
       - name: Upload agent logs

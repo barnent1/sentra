@@ -86,7 +86,7 @@ class CredentialProxy:
     Runs as host process, not inside container.
     """
 
-    def __init__(self, socket_path: str = "/var/run/credential-proxy.sock"):
+    def __init__(self, socket_path: str = "/tmp/credential-proxy.sock"):
         self.socket_path = socket_path
         self.audit_log = Path("/tmp/credential-audit.log")
         self.rate_limiter = RateLimiter(max_requests_per_minute=100)
