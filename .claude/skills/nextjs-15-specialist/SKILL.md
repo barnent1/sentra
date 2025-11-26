@@ -12,6 +12,34 @@ This skill provides comprehensive guidance on all Next.js 15 App Router patterns
 
 ---
 
+## CRITICAL RULES (NEVER VIOLATE)
+
+These rules are NON-NEGOTIABLE. Violations will break builds.
+
+### 1. ALWAYS use `<Image>` from `next/image` - NEVER use `<img>`
+
+```typescript
+// ✅ ALWAYS DO THIS
+import Image from 'next/image'
+
+<Image src="/logo.png" alt="Logo" width={200} height={100} />
+<Image src={user.avatar} alt={user.name} width={40} height={40} />
+
+// ❌ NEVER DO THIS - BUILD WILL FAIL
+<img src="/logo.png" alt="Logo" />
+<img src={user.avatar} alt={user.name} />
+```
+
+**Why:** Next.js Image component provides automatic optimization, lazy loading, and prevents layout shift. ESLint is configured to fail builds on `<img>` usage.
+
+### 2. Server Components are DEFAULT - only add 'use client' when needed
+
+### 3. Never make async Client Components
+
+### 4. Always specify cache strategy for fetch()
+
+---
+
 ## When to Use This Skill
 
 Use this skill when working with:

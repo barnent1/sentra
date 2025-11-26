@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Activity, Folder, DollarSign, TrendingUp, Loader2, Settings as SettingsIcon, UserCircle, Mic, FileText, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useDashboard } from "@/hooks/useDashboard";
@@ -198,10 +199,12 @@ export default function Home() {
           <div className="flex items-center gap-3">
             {/* Logo */}
             <div className="w-16 h-16 flex items-center justify-center">
-              <img
+              <Image
                 src="/sentra-logo.png"
                 alt="Sentra"
-                className="w-16 h-16"
+                width={64}
+                height={64}
+                priority
               />
             </div>
             <div>

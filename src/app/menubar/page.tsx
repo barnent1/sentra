@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Activity, Folder, DollarSign, TrendingUp, ExternalLink, X, Power } from "lucide-react";
 import { getDashboardStats, type DashboardStats } from "@/services/sentra-api";
 
@@ -51,10 +52,12 @@ export default function MenubarPage() {
       <div className="bg-[#0A0A0B] px-4 py-3 border-b border-[#27272A] flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 flex items-center justify-center">
-            <img
+            <Image
               src="/sentra-logo.png"
               alt="Sentra"
-              className="w-8 h-8"
+              width={32}
+              height={32}
+              priority
             />
           </div>
           <div>

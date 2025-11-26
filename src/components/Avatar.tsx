@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import md5 from 'md5';
 
 interface AvatarProps {
@@ -64,7 +65,7 @@ export function Avatar({ email, name, size = 'md', className = '' }: AvatarProps
     setImageLoaded(false);
 
     // Check if image is already cached - if so, it will load instantly
-    const img = new Image();
+    const img = new window.Image();
     img.src = gravatarUrl;
     if (img.complete) {
       setImageLoaded(true);
@@ -74,10 +75,12 @@ export function Avatar({ email, name, size = 'md', className = '' }: AvatarProps
   return (
     <div className={`relative flex-shrink-0 ${sizeClasses[size]} ${className}`}>
       {/* Always render image to allow browser caching to work */}
-      <img
+      <Image
         src={gravatarUrl}
         alt={name || email}
-        className={`w-full h-full rounded-full object-cover border-2 border-[#3F3F46] transition-opacity duration-150 ${
+        width={sizePx[size]}
+        height={sizePx[size]}
+        className={`rounded-full object-cover border-2 border-[#3F3F46] transition-opacity duration-150 ${
           imageLoaded && !imageError ? 'opacity-100' : 'opacity-0'
         }`}
         onLoad={() => setImageLoaded(true)}
