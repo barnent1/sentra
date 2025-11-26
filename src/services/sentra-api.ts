@@ -29,6 +29,7 @@ export interface SpecVersion {
 }
 
 export interface Project {
+  id: string
   name: string
   path: string
   activeAgents: number
@@ -119,6 +120,7 @@ export async function getProjects(): Promise<Project[]> {
 
     // Transform backend response to frontend Project format
     return data.projects.map((project: any) => ({
+      id: project.id,
       name: project.name,
       path: project.path,
       activeAgents: 0, // Will be populated from agents API

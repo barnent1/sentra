@@ -23,13 +23,13 @@ export default function Home() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [newProjectOpen, setNewProjectOpen] = useState(false);
   const [architectChatOpen, setArchitectChatOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<{ name: string; path: string } | null>(null);
+  const [selectedProject, setSelectedProject] = useState<{ id: string; name: string; path: string } | null>(null);
   const [specViewerOpen, setSpecViewerOpen] = useState(false);
   const [selectedSpec, setSelectedSpec] = useState<{ spec: string; specInfo?: SpecInfo; name: string; path: string } | null>(null);
   const [detailPanelOpen, setDetailPanelOpen] = useState(false);
   const [detailPanelProject, setDetailPanelProject] = useState<Project | null>(null);
 
-  const handleSpeakToArchitect = (project: { name: string; path: string }) => {
+  const handleSpeakToArchitect = (project: { id: string; name: string; path: string }) => {
     console.log(`Starting voice conversation for project: ${project.name}`);
     setSelectedProject(project);
     setArchitectChatOpen(true);
@@ -285,6 +285,7 @@ export default function Home() {
           // Refresh projects to pick up any new pending specs
           refetch();
         }}
+        projectId={selectedProject?.id || ''}
         projectName={selectedProject?.name || ''}
         projectPath={selectedProject?.path}
       />
