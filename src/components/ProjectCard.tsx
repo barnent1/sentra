@@ -10,7 +10,7 @@ interface ProjectCardProps {
   project: Project;
   onMuteToggle: (projectName: string, shouldMute: boolean) => void;
   onViewDetails: (project: Project) => void;
-  onSpeakToArchitect?: (project: { name: string; path: string }) => void;
+  onSpeakToArchitect?: (project: { id: string; name: string; path: string }) => void;
   onViewSpec?: (project: { name: string; path: string; specs?: SpecInfo[] }) => void;
 }
 
@@ -22,7 +22,7 @@ export function ProjectCard({ project, onMuteToggle, onViewDetails, onSpeakToArc
   const handleArchitectClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent card click event from firing
     if (onSpeakToArchitect) {
-      onSpeakToArchitect({ name: project.name, path: project.path });
+      onSpeakToArchitect({ id: project.id, name: project.name, path: project.path });
     }
   };
 

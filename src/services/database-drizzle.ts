@@ -36,6 +36,7 @@ import {
   teams,
   teamMembers,
   organizationInvitations,
+  architectSessions,
   type User,
   type Project,
   type Agent,
@@ -50,6 +51,7 @@ import {
   type Team,
   type TeamMember,
   type OrganizationInvitation,
+  type ArchitectSession,
 } from '../db/schema';
 
 // Lazy database initialization
@@ -101,6 +103,7 @@ export type {
   Team,
   TeamMember,
   OrganizationInvitation,
+  ArchitectSession,
 };
 
 // ============================================================================
@@ -964,6 +967,56 @@ export class DrizzleDatabaseService {
 
       return this.deserializeUserSettings(created);
     }
+  }
+
+  // --------------------------------------------------------------------------
+  // Architect Session Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Get architect sessions by user ID, optionally filtered by project
+   */
+  async getArchitectSessionsByUser(
+    userId: string,
+    projectId?: string
+  ): Promise<ArchitectSession[]> {
+    const conditions = [eq(architectSessions.userId, userId)];
+    if (projectId) {
+      conditions.push(eq(architectSessions.projectId, projectId));
+    }
+
+    const sessions = await db()
+      .select()
+      .from(architectSessions)
+      .where(and(...conditions))
+      .orderBy(desc(architectSessions.lastActiveAt));
+
+    return sessions.map((session) => this.deserializeArchitectSession(session));
+  }
+
+  /**
+   * Get architect session by ID
+   */
+  async getArchitectSessionById(id: string): Promise<ArchitectSession | null> {
+    const [session] = await db()
+      .select()
+      .from(architectSessions)
+      .where(eq(architectSessions.id, id))
+      .limit(1);
+
+    return session ? this.deserializeArchitectSession(session) : null;
+  }
+
+  /**
+   * Deserialize architect session (parse JSON fields)
+   */
+  private deserializeArchitectSession(session: ArchitectSession): ArchitectSession {
+    return {
+      ...session,
+      categoryProgress: session.categoryProgress,
+      blockers: session.blockers,
+      gaps: session.gaps,
+    } as ArchitectSession;
   }
 
   // --------------------------------------------------------------------------
