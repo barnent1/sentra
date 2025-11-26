@@ -1040,12 +1040,22 @@ _This is an automated progress update. Updates are posted every 5 minutes._
             # Track for rate limiting (approximate)
             self.rate_limiter.add_usage(estimated_input_tokens, estimated_output_tokens)
 
-            # Estimate cost
-            cost = (estimated_input_tokens * 3 / 1_000_000) + (estimated_output_tokens * 15 / 1_000_000)
+            # Estimate cost using actual model pricing
+            model_pricing = MODELS.get(model, MODELS['sonnet'])
+            input_cost = (estimated_input_tokens * model_pricing['input_cost'] / 1_000_000)
+            output_cost = (estimated_output_tokens * model_pricing['output_cost'] / 1_000_000)
+            cost = input_cost + output_cost
             self.estimated_cost += cost
             self.api_calls += 1
 
-            self.log(f"Estimated: {estimated_input_tokens} in, {estimated_output_tokens} out, ${cost:.4f}")
+            # Store token counts for summary
+            if not hasattr(self, 'total_input_tokens'):
+                self.total_input_tokens = 0
+                self.total_output_tokens = 0
+            self.total_input_tokens += estimated_input_tokens
+            self.total_output_tokens += estimated_output_tokens
+
+            self.log(f"💰 API Call: {estimated_input_tokens:,} in + {estimated_output_tokens:,} out = ${cost:.4f} ({model})")
 
             self.log_structured("claude_execution_complete", {
                 "returncode": result.returncode,
@@ -1620,11 +1630,14 @@ Co-Authored-By: Claude <noreply@anthropic.com>
             result["api_calls"] = self.api_calls
             result["estimated_cost"] = self.estimated_cost
             result["duration_seconds"] = int(time.time() - self.start_time)
+            result["input_tokens"] = getattr(self, 'total_input_tokens', 0)
+            result["output_tokens"] = getattr(self, 'total_output_tokens', 0)
 
             self.log("="*80)
-            self.log(f"Agent completed successfully!")
+            self.log(f"✅ Agent completed successfully!")
             self.log(f"Duration: {result['duration_seconds'] / 60:.1f} minutes")
-            self.log(f"Cost: ${result['estimated_cost']:.2f}")
+            self.log(f"Tokens: {result['input_tokens']:,} in / {result['output_tokens']:,} out")
+            self.log(f"Cost: ${result['estimated_cost']:.4f}")
             self.log("="*80)
 
             return result
@@ -1707,9 +1720,27 @@ def main():
         worker = AgentWorker(issue_number, repo_path)
         result = worker.run()
 
-        # Output result as JSON
+        # Output cost summary banner
         print("\n" + "="*80)
-        print("RESULT:")
+        print("💰 COST SUMMARY")
+        print("="*80)
+        model_used = result.get("model", "sonnet")
+        model_info = MODELS.get(model_used, MODELS['sonnet'])
+        input_tokens = result.get("input_tokens", 0)
+        output_tokens = result.get("output_tokens", 0)
+        total_cost = result.get("estimated_cost", 0)
+
+        print(f"  Issue:        #{result.get('issue_number', '?')}")
+        print(f"  Model:        {model_used} (${model_info['input_cost']}/{model_info['output_cost']} per 1M)")
+        print(f"  API Calls:    {result.get('api_calls', 0)}")
+        print(f"  Input:        {input_tokens:,} tokens")
+        print(f"  Output:       {output_tokens:,} tokens")
+        print(f"  ─────────────────────────")
+        print(f"  TOTAL COST:   ${total_cost:.4f}")
+        print("="*80)
+
+        # Output full result as JSON
+        print("\nRESULT:")
         print(json.dumps(result, indent=2))
         print("="*80)
 
