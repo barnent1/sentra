@@ -1,0 +1,12 @@
+# GitHub Issue Template Configuration
+# This configures the template chooser when creating new issues
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: Documentation
+    url: https://github.com/barnent1/sentra/tree/main/docs
+    about: Check the documentation before opening an issue
+  - name: Security Vulnerability
+    url: https://github.com/barnent1/sentra/security/advisories/new
+    about: Report security vulnerabilities privately (do not open a public issue)
