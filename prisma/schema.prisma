@@ -1,4 +1,4 @@
-// Sentra Database Schema
+// Quetrex Database Schema
 // Manages users, projects, agents, costs, and activity tracking
 
 generator client {

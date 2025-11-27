@@ -1,15 +1,15 @@
 # Architect API Reference
 
-**Audience:** Developers integrating with Sentra's multi-session architect
+**Audience:** Developers integrating with Quetrex's multi-session architect
 **Last Updated:** 2025-11-23
 
 ---
 
 ## Overview
 
-The Architect API enables multi-session conversations with Sentra's AI architect. The architect helps refine software specifications through natural language conversations that span days or weeks, maintaining perfect memory across sessions.
+The Architect API enables multi-session conversations with Quetrex's AI architect. The architect helps refine software specifications through natural language conversations that span days or weeks, maintaining perfect memory across sessions.
 
-**Base URL:** `https://your-sentra-instance.com/api`
+**Base URL:** `https://your-quetrex-instance.com/api`
 
 **Authentication:** Bearer token (JWT) required for all endpoints except health check
 
@@ -42,7 +42,7 @@ All API requests (except `/health`) require a JWT bearer token.
 
 ```bash
 # Login to get token
-curl -X POST https://your-sentra-instance.com/api/auth/login \
+curl -X POST https://your-quetrex-instance.com/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "user@example.com",
@@ -68,7 +68,7 @@ curl -X POST https://your-sentra-instance.com/api/auth/login \
 Include in `Authorization` header for all requests:
 
 ```bash
-curl -X GET https://your-sentra-instance.com/api/architect/sessions \
+curl -X GET https://your-quetrex-instance.com/api/architect/sessions \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
@@ -86,7 +86,7 @@ Check API availability.
 
 **Request:**
 ```bash
-curl https://your-sentra-instance.com/api/health
+curl https://your-quetrex-instance.com/api/health
 ```
 
 **Response:**
@@ -119,7 +119,7 @@ interface CreateSessionRequest {
 
 **Example:**
 ```bash
-curl -X POST https://your-sentra-instance.com/api/architect/sessions \
+curl -X POST https://your-quetrex-instance.com/api/architect/sessions \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -173,7 +173,7 @@ Get all architect sessions for a project.
 
 **Example:**
 ```bash
-curl "https://your-sentra-instance.com/api/architect/sessions?projectId=proj_abc123&status=active" \
+curl "https://your-quetrex-instance.com/api/architect/sessions?projectId=proj_abc123&status=active" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -212,7 +212,7 @@ Retrieve complete session details including conversation history.
 
 **Example:**
 ```bash
-curl https://your-sentra-instance.com/api/architect/sessions/sess_xyz789 \
+curl https://your-quetrex-instance.com/api/architect/sessions/sess_xyz789 \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -301,7 +301,7 @@ interface SendMessageRequest {
 
 **Example:**
 ```bash
-curl -X POST https://your-sentra-instance.com/api/architect/sessions/sess_xyz789/messages \
+curl -X POST https://your-quetrex-instance.com/api/architect/sessions/sess_xyz789/messages \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -344,7 +344,7 @@ Get current progress and readiness score for a session.
 
 **Example:**
 ```bash
-curl https://your-sentra-instance.com/api/architect/sessions/sess_xyz789/progress \
+curl https://your-quetrex-instance.com/api/architect/sessions/sess_xyz789/progress \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -415,7 +415,7 @@ interface ResumeSessionRequest {
 
 **Example:**
 ```bash
-curl -X POST https://your-sentra-instance.com/api/architect/sessions/sess_xyz789/resume \
+curl -X POST https://your-quetrex-instance.com/api/architect/sessions/sess_xyz789/resume \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -479,7 +479,7 @@ interface GenerateSpecRequest {
 
 **Example:**
 ```bash
-curl -X POST https://your-sentra-instance.com/api/architect/sessions/sess_xyz789/generate-spec \
+curl -X POST https://your-quetrex-instance.com/api/architect/sessions/sess_xyz789/generate-spec \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -692,7 +692,7 @@ X-RateLimit-Reset: 1637692800
 
 import axios from 'axios'
 
-const API_BASE = 'https://your-sentra-instance.com/api'
+const API_BASE = 'https://your-quetrex-instance.com/api'
 const TOKEN = 'your-jwt-token'
 
 // Create session
@@ -775,7 +775,7 @@ async function generateSpec(sessionId: string) {
 
 import requests
 
-API_BASE = 'https://your-sentra-instance.com/api'
+API_BASE = 'https://your-quetrex-instance.com/api'
 TOKEN = 'your-jwt-token'
 
 headers = {
@@ -836,7 +836,7 @@ def generate_spec(session_id: str):
 
 ```bash
 # Set variables
-export API_BASE="https://your-sentra-instance.com/api"
+export API_BASE="https://your-quetrex-instance.com/api"
 export TOKEN="your-jwt-token"
 
 # Create session

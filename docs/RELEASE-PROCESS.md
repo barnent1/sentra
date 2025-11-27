@@ -1,6 +1,6 @@
-# Sentra Release Process
+# Quetrex Release Process
 
-**Complete guide to building, versioning, and releasing Sentra across all platforms**
+**Complete guide to building, versioning, and releasing Quetrex across all platforms**
 
 Last updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
@@ -22,7 +22,7 @@ Last updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
 ## Overview
 
-Sentra uses a fully automated CI/CD pipeline for building and releasing desktop applications across macOS, Windows, and Linux. The release process is triggered by pushing a version tag to GitHub.
+Quetrex uses a fully automated CI/CD pipeline for building and releasing desktop applications across macOS, Windows, and Linux. The release process is triggered by pushing a version tag to GitHub.
 
 ### Key Components
 
@@ -90,8 +90,8 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 1. **Clone repository**
    ```bash
-   git clone https://github.com/barnent1/sentra.git
-   cd sentra
+   git clone https://github.com/barnent1/quetrex.git
+   cd quetrex
    ```
 
 2. **Install dependencies**
@@ -137,7 +137,7 @@ npm run tauri signer generate
 
 ## Versioning Strategy
 
-Sentra follows **Semantic Versioning 2.0.0** (https://semver.org):
+Quetrex follows **Semantic Versioning 2.0.0** (https://semver.org):
 
 ```
 MAJOR.MINOR.PATCH
@@ -177,7 +177,7 @@ git push origin main
 git push origin v$(jq -r .version package.json)
 
 # Monitor release
-open https://github.com/barnent1/sentra/actions
+open https://github.com/barnent1/quetrex/actions
 ```
 
 ---
@@ -246,7 +246,7 @@ Next steps:
      git push origin v1.0.1
 
   4. Monitor the release workflow:
-     https://github.com/barnent1/sentra/actions
+     https://github.com/barnent1/quetrex/actions
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
@@ -310,7 +310,7 @@ The GitHub Actions workflow will now:
 
 **Monitor progress:**
 ```bash
-open https://github.com/barnent1/sentra/actions
+open https://github.com/barnent1/quetrex/actions
 ```
 
 Or use GitHub CLI:
@@ -325,21 +325,21 @@ Once complete, verify the release:
 
 1. **GitHub Releases page**
    ```bash
-   open https://github.com/barnent1/sentra/releases/latest
+   open https://github.com/barnent1/quetrex/releases/latest
    ```
 
 2. **Check artifacts**
-   - `Sentra_1.0.1_macOS_universal.dmg` (+ .sha256)
-   - `Sentra_1.0.1_Windows_x64-setup.exe` (+ .sha256)
-   - `Sentra_1.0.1_Linux_x86_64.AppImage` (+ .sha256)
-   - `Sentra_1.0.1_Linux_amd64.deb` (+ .sha256)
+   - `Quetrex_1.0.1_macOS_universal.dmg` (+ .sha256)
+   - `Quetrex_1.0.1_Windows_x64-setup.exe` (+ .sha256)
+   - `Quetrex_1.0.1_Linux_x86_64.AppImage` (+ .sha256)
+   - `Quetrex_1.0.1_Linux_amd64.deb` (+ .sha256)
    - `latest.json` (update manifest)
 
 3. **Download and test** (recommended)
    ```bash
    # macOS
-   curl -LO https://github.com/barnent1/sentra/releases/download/v1.0.1/Sentra_1.0.1_macOS_universal.dmg
-   open Sentra_1.0.1_macOS_universal.dmg
+   curl -LO https://github.com/barnent1/quetrex/releases/download/v1.0.1/Quetrex_1.0.1_macOS_universal.dmg
+   open Quetrex_1.0.1_macOS_universal.dmg
    ```
 
 ---
@@ -391,29 +391,29 @@ After running build commands:
 src-tauri/target/
 ├── universal-apple-darwin/
 │   └── release/bundle/dmg/
-│       └── Sentra_universal.dmg
+│       └── Quetrex_universal.dmg
 ├── x86_64-apple-darwin/
 │   └── release/bundle/dmg/
-│       └── Sentra_x64.dmg
+│       └── Quetrex_x64.dmg
 ├── aarch64-apple-darwin/
 │   └── release/bundle/dmg/
-│       └── Sentra_aarch64.dmg
+│       └── Quetrex_aarch64.dmg
 ├── x86_64-pc-windows-msvc/
 │   └── release/bundle/nsis/
-│       └── Sentra_x64-setup.exe
+│       └── Quetrex_x64-setup.exe
 └── x86_64-unknown-linux-gnu/
     └── release/bundle/
         ├── appimage/
-        │   └── sentra.AppImage
+        │   └── quetrex.AppImage
         └── deb/
-            └── sentra_amd64.deb
+            └── quetrex_amd64.deb
 ```
 
 ---
 
 ## Auto-Update System
 
-Sentra includes built-in automatic updates using Tauri's updater plugin.
+Quetrex includes built-in automatic updates using Tauri's updater plugin.
 
 ### How It Works
 
@@ -430,24 +430,24 @@ The release workflow automatically creates `latest.json`:
 ```json
 {
   "version": "1.0.1",
-  "notes": "See release notes at https://github.com/barnent1/sentra/releases/tag/v1.0.1",
+  "notes": "See release notes at https://github.com/barnent1/quetrex/releases/tag/v1.0.1",
   "pub_date": "2025-11-13T18:00:00Z",
   "platforms": {
     "darwin-x86_64": {
       "signature": "",
-      "url": "https://github.com/barnent1/sentra/releases/download/v1.0.1/Sentra_1.0.1_macOS_universal.dmg"
+      "url": "https://github.com/barnent1/quetrex/releases/download/v1.0.1/Quetrex_1.0.1_macOS_universal.dmg"
     },
     "darwin-aarch64": {
       "signature": "",
-      "url": "https://github.com/barnent1/sentra/releases/download/v1.0.1/Sentra_1.0.1_macOS_universal.dmg"
+      "url": "https://github.com/barnent1/quetrex/releases/download/v1.0.1/Quetrex_1.0.1_macOS_universal.dmg"
     },
     "windows-x86_64": {
       "signature": "",
-      "url": "https://github.com/barnent1/sentra/releases/download/v1.0.1/Sentra_1.0.1_Windows_x64-setup.exe"
+      "url": "https://github.com/barnent1/quetrex/releases/download/v1.0.1/Quetrex_1.0.1_Windows_x64-setup.exe"
     },
     "linux-x86_64": {
       "signature": "",
-      "url": "https://github.com/barnent1/sentra/releases/download/v1.0.1/Sentra_1.0.1_Linux_x86_64.AppImage"
+      "url": "https://github.com/barnent1/quetrex/releases/download/v1.0.1/Quetrex_1.0.1_Linux_x86_64.AppImage"
     }
   }
 }
@@ -463,7 +463,7 @@ The release workflow automatically creates `latest.json`:
     "updater": {
       "active": true,
       "endpoints": [
-        "https://github.com/barnent1/sentra/releases/latest/download/latest.json"
+        "https://github.com/barnent1/quetrex/releases/latest/download/latest.json"
       ],
       "dialog": true,
       "pubkey": "YOUR_PUBLIC_KEY_HERE"
@@ -586,7 +586,7 @@ gh run view <run-id> --log
 cat src-tauri/tauri.conf.json | jq '.plugins.updater'
 
 # Verify update manifest exists
-curl -I https://github.com/barnent1/sentra/releases/latest/download/latest.json
+curl -I https://github.com/barnent1/quetrex/releases/latest/download/latest.json
 ```
 
 **Enable debug logging:**
@@ -651,7 +651,7 @@ Use this checklist for every release:
 - [GitHub Actions](https://docs.github.com/en/actions)
 - [Keep a Changelog](https://keepachangelog.com)
 
-### Sentra Specific
+### Quetrex Specific
 
 - [Contributing Guide](../CONTRIBUTING.md)
 - [Architecture Documentation](../docs/architecture/)
@@ -659,8 +659,8 @@ Use this checklist for every release:
 
 ### Support
 
-- GitHub Issues: https://github.com/barnent1/sentra/issues
-- Discussions: https://github.com/barnent1/sentra/discussions
+- GitHub Issues: https://github.com/barnent1/quetrex/issues
+- Discussions: https://github.com/barnent1/quetrex/discussions
 
 ---
 

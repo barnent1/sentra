@@ -3,8 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { X, GitBranch, FileText, DollarSign, Activity, GitPullRequest, Layers } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import type { Project, GitCommit, GitStatus } from '@/services/sentra-api';
-import { getGitLog, getGitStatus, getTelemetryLogs } from '@/services/sentra-api';
+import type { Project, GitCommit, GitStatus } from '@/services/quetrex-api';
+import { getGitLog, getGitStatus, getTelemetryLogs } from '@/services/quetrex-api';
 import { CostTracker } from '@/services/cost-tracker';
 import { PRReviewPanel } from '@/components/PRReviewPanel';
 import { PrototypePanel } from '@/components/PrototypePanel';

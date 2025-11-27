@@ -551,7 +551,7 @@ Layouts and templates share UI across routes.
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sentra - AI Development Platform',
+  title: 'Quetrex - AI Development Platform',
   description: 'Voice-first AI assistant for developers',
 }
 

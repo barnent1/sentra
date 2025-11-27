@@ -39,7 +39,7 @@ describe('GET /api/prototypes/[id]', () => {
     projectId: 'project-123',
     v0ChatId: 'chat-123',
     v0DemoUrl: 'https://v0.dev/demo-123',
-    deploymentUrl: 'https://prototypes.sentra.app/test-project',
+    deploymentUrl: 'https://prototypes.quetrex.app/test-project',
     deploymentStatus: 'ready' as const,
     title: 'Dashboard',
     description: 'Main dashboard screen',
@@ -93,7 +93,7 @@ describe('GET /api/prototypes/[id]', () => {
       projectId: 'project-123',
       title: 'Dashboard',
       description: 'Main dashboard screen',
-      deploymentUrl: 'https://prototypes.sentra.app/test-project',
+      deploymentUrl: 'https://prototypes.quetrex.app/test-project',
       deploymentStatus: 'ready',
       version: 1,
       iterations: [

@@ -1,5 +1,5 @@
 {
-  "description": "Sentra Bug-Proof Hook Configuration - 6-Layer Defense System",
+  "description": "Quetrex Bug-Proof Hook Configuration - 6-Layer Defense System",
   "PreToolUse": [
     {
       "description": "Validate bash commands - BLOCKS git bypass (--no-verify)",

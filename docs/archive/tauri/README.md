@@ -8,7 +8,7 @@
 
 ## Why These Documents Are Archived
 
-In November 2025, Sentra transitioned from a Tauri-based desktop application to a pure web application. This decision was made because:
+In November 2025, Quetrex transitioned from a Tauri-based desktop application to a pure web application. This decision was made because:
 
 1. **WKWebView Audio Limitation** - WKWebView on macOS cannot play WebRTC audio (Apple platform bug)
 2. **Voice is Core Product** - Perfect echo cancellation is non-negotiable
@@ -34,7 +34,7 @@ The WKWebView audio limitation proved to be a blocker:
 - WebRTC audio wouldn't play through HTMLAudioElement in WKWebView
 - All workarounds (AudioWorklet bypass, manual mic toggling) broke echo cancellation
 - Timeline for Apple/Tauri fix was unknown
-- Voice is the core feature of Sentra - couldn't compromise on quality
+- Voice is the core feature of Quetrex - couldn't compromise on quality
 
 ## Tauri-Specific Documents
 
@@ -50,7 +50,7 @@ These are no longer relevant to the current web application architecture.
 
 ## Current Architecture
 
-Sentra is now a **Next.js 15 web application** deployed to Vercel/Netlify. See:
+Quetrex is now a **Next.js 15 web application** deployed to Vercel/Netlify. See:
 
 - [Web Deployment Guide](../../deployment/WEB-DEPLOYMENT.md)
 - [Voice System Architecture](../../architecture/VOICE-SYSTEM.md)

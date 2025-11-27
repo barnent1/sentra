@@ -230,10 +230,10 @@ python3 .claude/scripts/ai-agent-worker.py <issue_number>
 ## References
 
 - **Anthropic API Limits**: https://docs.anthropic.com/claude/reference/rate-limits
-- **Agent Worker Script**: `/Users/barnent1/Projects/sentra/.claude/scripts/ai-agent-worker.py`
-- **Workflow Config**: `/Users/barnent1/Projects/sentra/.github/workflows/ai-agent.yml`
-- **Test Suite**: `/Users/barnent1/Projects/sentra/.claude/scripts/test-rate-limiter.py`
+- **Agent Worker Script**: `/Users/barnent1/Projects/quetrex/.claude/scripts/ai-agent-worker.py`
+- **Workflow Config**: `/Users/barnent1/Projects/quetrex/.github/workflows/ai-agent.yml`
+- **Test Suite**: `/Users/barnent1/Projects/quetrex/.claude/scripts/test-rate-limiter.py`
 
 ---
 
-*This implementation follows Sentra's Perfect Agentic Structure principles: comprehensive testing, clear logging, graceful error handling, and production-ready code.*
+*This implementation follows Quetrex's Perfect Agentic Structure principles: comprehensive testing, clear logging, graceful error handling, and production-ready code.*

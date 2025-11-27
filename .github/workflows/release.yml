@@ -104,27 +104,27 @@ jobs:
 
           # Create universal binary using lipo
           lipo -create \
-            x86_64-apple-darwin/release/bundle/macos/Sentra.app/Contents/MacOS/Sentra \
-            aarch64-apple-darwin/release/bundle/macos/Sentra.app/Contents/MacOS/Sentra \
-            -output universal-apple-darwin/release/bundle/macos/Sentra
+            x86_64-apple-darwin/release/bundle/macos/Quetrex.app/Contents/MacOS/Quetrex \
+            aarch64-apple-darwin/release/bundle/macos/Quetrex.app/Contents/MacOS/Quetrex \
+            -output universal-apple-darwin/release/bundle/macos/Quetrex
 
           # Copy the x64 app bundle as base
-          cp -r x86_64-apple-darwin/release/bundle/macos/Sentra.app \
+          cp -r x86_64-apple-darwin/release/bundle/macos/Quetrex.app \
             universal-apple-darwin/release/bundle/macos/
 
           # Replace binary with universal one
-          cp universal-apple-darwin/release/bundle/macos/Sentra \
-            universal-apple-darwin/release/bundle/macos/Sentra.app/Contents/MacOS/
+          cp universal-apple-darwin/release/bundle/macos/Quetrex \
+            universal-apple-darwin/release/bundle/macos/Quetrex.app/Contents/MacOS/
 
           # Create DMG
           mkdir -p dmg
-          cp -r universal-apple-darwin/release/bundle/macos/Sentra.app dmg/
+          cp -r universal-apple-darwin/release/bundle/macos/Quetrex.app dmg/
 
           # Create disk image
-          hdiutil create -volname Sentra \
+          hdiutil create -volname Quetrex \
             -srcfolder dmg \
             -ov -format UDZO \
-            universal-apple-darwin/release/bundle/dmg/Sentra_universal.dmg
+            universal-apple-darwin/release/bundle/dmg/Quetrex_universal.dmg
 
       - name: Sign macOS app (if certificate available)
         if: ${{ secrets.APPLE_CERTIFICATE }}
@@ -150,11 +150,11 @@ jobs:
 
           # Sign the app
           codesign --force --deep --sign "${{ secrets.APPLE_SIGNING_IDENTITY }}" \
-            src-tauri/target/universal-apple-darwin/release/bundle/macos/Sentra.app
+            src-tauri/target/universal-apple-darwin/release/bundle/macos/Quetrex.app
 
           # Verify signature
-          codesign --verify --verbose src-tauri/target/universal-apple-darwin/release/bundle/macos/Sentra.app
-          spctl --assess --verbose src-tauri/target/universal-apple-darwin/release/bundle/macos/Sentra.app
+          codesign --verify --verbose src-tauri/target/universal-apple-darwin/release/bundle/macos/Quetrex.app
+          spctl --assess --verbose src-tauri/target/universal-apple-darwin/release/bundle/macos/Quetrex.app
 
           echo "✅ Application signed successfully"
 
@@ -165,33 +165,33 @@ jobs:
 
           # Create zip for notarization
           cd src-tauri/target/universal-apple-darwin/release/bundle/macos
-          zip -r Sentra.zip Sentra.app
+          zip -r Quetrex.zip Quetrex.app
 
           # Submit for notarization
-          xcrun notarytool submit Sentra.zip \
+          xcrun notarytool submit Quetrex.zip \
             --apple-id "${{ secrets.APPLE_ID }}" \
             --password "${{ secrets.APPLE_APP_PASSWORD }}" \
             --team-id "${{ secrets.APPLE_TEAM_ID }}" \
             --wait
 
           # Staple the notarization
-          xcrun stapler staple Sentra.app
+          xcrun stapler staple Quetrex.app
 
           echo "✅ Application notarized successfully"
 
       - name: Generate checksums (macOS)
         run: |
           cd src-tauri/target/universal-apple-darwin/release/bundle/dmg
-          shasum -a 256 Sentra_universal.dmg > Sentra_universal.dmg.sha256
-          cat Sentra_universal.dmg.sha256
+          shasum -a 256 Quetrex_universal.dmg > Quetrex_universal.dmg.sha256
+          cat Quetrex_universal.dmg.sha256
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-universal
           path: |
-            src-tauri/target/universal-apple-darwin/release/bundle/dmg/Sentra_universal.dmg
-            src-tauri/target/universal-apple-darwin/release/bundle/dmg/Sentra_universal.dmg.sha256
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/Quetrex_universal.dmg
+            src-tauri/target/universal-apple-darwin/release/bundle/dmg/Quetrex_universal.dmg.sha256
           retention-days: 7
 
   build-windows:
@@ -246,7 +246,7 @@ jobs:
             /tr http://timestamp.digicert.com `
             /td sha256 `
             /fd sha256 `
-            src-tauri\target\release\bundle\nsis\Sentra_*_x64-setup.exe
+            src-tauri\target\release\bundle\nsis\Quetrex_*_x64-setup.exe
 
           Write-Host "✅ Application signed successfully"
 
@@ -254,17 +254,17 @@ jobs:
         shell: powershell
         run: |
           cd src-tauri\target\release\bundle\nsis
-          $hash = Get-FileHash -Algorithm SHA256 Sentra_*_x64-setup.exe
-          $hash.Hash + "  " + $hash.Path.Split("\")[-1] | Out-File -FilePath Sentra_x64-setup.exe.sha256
-          Get-Content Sentra_x64-setup.exe.sha256
+          $hash = Get-FileHash -Algorithm SHA256 Quetrex_*_x64-setup.exe
+          $hash.Hash + "  " + $hash.Path.Split("\")[-1] | Out-File -FilePath Quetrex_x64-setup.exe.sha256
+          Get-Content Quetrex_x64-setup.exe.sha256
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-x64
           path: |
-            src-tauri/target/release/bundle/nsis/Sentra_*_x64-setup.exe
-            src-tauri/target/release/bundle/nsis/Sentra_x64-setup.exe.sha256
+            src-tauri/target/release/bundle/nsis/Quetrex_*_x64-setup.exe
+            src-tauri/target/release/bundle/nsis/Quetrex_x64-setup.exe.sha256
           retention-days: 7
 
   build-linux:
@@ -320,16 +320,16 @@ jobs:
           # AppImage
           if [ -f appimage/*.AppImage ]; then
             cd appimage
-            shasum -a 256 *.AppImage > sentra.AppImage.sha256
-            cat sentra.AppImage.sha256
+            shasum -a 256 *.AppImage > quetrex.AppImage.sha256
+            cat quetrex.AppImage.sha256
             cd ..
           fi
 
           # Debian package
           if [ -f deb/*.deb ]; then
             cd deb
-            shasum -a 256 *.deb > sentra.deb.sha256
-            cat sentra.deb.sha256
+            shasum -a 256 *.deb > quetrex.deb.sha256
+            cat quetrex.deb.sha256
             cd ..
           fi
 
@@ -378,24 +378,24 @@ jobs:
 
           # macOS
           if [ -d "artifacts/macos-universal" ]; then
-            cp artifacts/macos-universal/Sentra_universal.dmg release-assets/Sentra_${{ steps.version.outputs.version }}_macOS_universal.dmg
-            cp artifacts/macos-universal/Sentra_universal.dmg.sha256 release-assets/Sentra_${{ steps.version.outputs.version }}_macOS_universal.dmg.sha256
+            cp artifacts/macos-universal/Quetrex_universal.dmg release-assets/Quetrex_${{ steps.version.outputs.version }}_macOS_universal.dmg
+            cp artifacts/macos-universal/Quetrex_universal.dmg.sha256 release-assets/Quetrex_${{ steps.version.outputs.version }}_macOS_universal.dmg.sha256
           fi
 
           # Windows
           if [ -d "artifacts/windows-x64" ]; then
-            cp artifacts/windows-x64/Sentra_*_x64-setup.exe release-assets/Sentra_${{ steps.version.outputs.version }}_Windows_x64-setup.exe || true
-            cp artifacts/windows-x64/Sentra_x64-setup.exe.sha256 release-assets/Sentra_${{ steps.version.outputs.version }}_Windows_x64-setup.exe.sha256 || true
+            cp artifacts/windows-x64/Quetrex_*_x64-setup.exe release-assets/Quetrex_${{ steps.version.outputs.version }}_Windows_x64-setup.exe || true
+            cp artifacts/windows-x64/Quetrex_x64-setup.exe.sha256 release-assets/Quetrex_${{ steps.version.outputs.version }}_Windows_x64-setup.exe.sha256 || true
           fi
 
           # Linux AppImage
           if [ -d "artifacts/linux-x64" ]; then
-            cp artifacts/linux-x64/*.AppImage release-assets/Sentra_${{ steps.version.outputs.version }}_Linux_x86_64.AppImage || true
-            cp artifacts/linux-x64/*.AppImage.sha256 release-assets/Sentra_${{ steps.version.outputs.version }}_Linux_x86_64.AppImage.sha256 || true
+            cp artifacts/linux-x64/*.AppImage release-assets/Quetrex_${{ steps.version.outputs.version }}_Linux_x86_64.AppImage || true
+            cp artifacts/linux-x64/*.AppImage.sha256 release-assets/Quetrex_${{ steps.version.outputs.version }}_Linux_x86_64.AppImage.sha256 || true
 
             # Linux Debian
-            cp artifacts/linux-x64/*.deb release-assets/Sentra_${{ steps.version.outputs.version }}_Linux_amd64.deb || true
-            cp artifacts/linux-x64/*.deb.sha256 release-assets/Sentra_${{ steps.version.outputs.version }}_Linux_amd64.deb.sha256 || true
+            cp artifacts/linux-x64/*.deb release-assets/Quetrex_${{ steps.version.outputs.version }}_Linux_amd64.deb || true
+            cp artifacts/linux-x64/*.deb.sha256 release-assets/Quetrex_${{ steps.version.outputs.version }}_Linux_amd64.deb.sha256 || true
           fi
 
           # List all assets
@@ -427,20 +427,20 @@ jobs:
           echo "## Downloads" >> release_notes.txt
           echo "" >> release_notes.txt
           echo "### macOS" >> release_notes.txt
-          echo "- Universal binary (Intel + Apple Silicon): \`Sentra_${{ steps.version.outputs.version }}_macOS_universal.dmg\`" >> release_notes.txt
+          echo "- Universal binary (Intel + Apple Silicon): \`Quetrex_${{ steps.version.outputs.version }}_macOS_universal.dmg\`" >> release_notes.txt
           echo "" >> release_notes.txt
           echo "### Windows" >> release_notes.txt
-          echo "- 64-bit installer: \`Sentra_${{ steps.version.outputs.version }}_Windows_x64-setup.exe\`" >> release_notes.txt
+          echo "- 64-bit installer: \`Quetrex_${{ steps.version.outputs.version }}_Windows_x64-setup.exe\`" >> release_notes.txt
           echo "" >> release_notes.txt
           echo "### Linux" >> release_notes.txt
-          echo "- AppImage: \`Sentra_${{ steps.version.outputs.version }}_Linux_x86_64.AppImage\`" >> release_notes.txt
-          echo "- Debian package: \`Sentra_${{ steps.version.outputs.version }}_Linux_amd64.deb\`" >> release_notes.txt
+          echo "- AppImage: \`Quetrex_${{ steps.version.outputs.version }}_Linux_x86_64.AppImage\`" >> release_notes.txt
+          echo "- Debian package: \`Quetrex_${{ steps.version.outputs.version }}_Linux_amd64.deb\`" >> release_notes.txt
           echo "" >> release_notes.txt
           echo "## Checksums" >> release_notes.txt
           echo "" >> release_notes.txt
           echo "Verify your download with SHA256 checksums (provided as \`.sha256\` files):" >> release_notes.txt
           echo "\`\`\`bash" >> release_notes.txt
-          echo "shasum -a 256 -c Sentra_${{ steps.version.outputs.version }}_*.sha256" >> release_notes.txt
+          echo "shasum -a 256 -c Quetrex_${{ steps.version.outputs.version }}_*.sha256" >> release_notes.txt
           echo "\`\`\`" >> release_notes.txt
           echo "" >> release_notes.txt
           echo "---" >> release_notes.txt
@@ -472,19 +472,19 @@ jobs:
             "platforms": {
               "darwin-x86_64": {
                 "signature": "",
-                "url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/Sentra_${{ steps.version.outputs.version }}_macOS_universal.dmg"
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/Quetrex_${{ steps.version.outputs.version }}_macOS_universal.dmg"
               },
               "darwin-aarch64": {
                 "signature": "",
-                "url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/Sentra_${{ steps.version.outputs.version }}_macOS_universal.dmg"
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/Quetrex_${{ steps.version.outputs.version }}_macOS_universal.dmg"
               },
               "windows-x86_64": {
                 "signature": "",
-                "url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/Sentra_${{ steps.version.outputs.version }}_Windows_x64-setup.exe"
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/Quetrex_${{ steps.version.outputs.version }}_Windows_x64-setup.exe"
               },
               "linux-x86_64": {
                 "signature": "",
-                "url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/Sentra_${{ steps.version.outputs.version }}_Linux_x86_64.AppImage"
+                "url": "https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/Quetrex_${{ steps.version.outputs.version }}_Linux_x86_64.AppImage"
               }
             }
           }

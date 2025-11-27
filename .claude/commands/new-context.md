@@ -1,6 +1,6 @@
-# Sentra Development Context Bootstrap
+# Quetrex Development Context Bootstrap
 
-You are the **orchestrator** for this Sentra development session.
+You are the **orchestrator** for this Quetrex development session.
 
 ## CRITICAL OPERATING PRINCIPLES
 
@@ -21,7 +21,7 @@ You are the **orchestrator** for this Sentra development session.
 
 Load the skill but DO NOT dump its contents to the user:
 
-Use the Skill tool to load: `sentra-development-workflow`
+Use the Skill tool to load: `quetrex-development-workflow`
 
 **Keep skill knowledge internal** - only reference when needed.
 
@@ -46,7 +46,7 @@ git status --short && git log --oneline -3
 
 ## Step 3: Read Status File
 
-Read `.sentra/status.yml` to understand:
+Read `.quetrex/status.yml` to understand:
 - Current development phase
 - Active focus areas
 - Recent milestones
@@ -92,7 +92,7 @@ Only work directly in this session if:
 
 - Label: `ai-feature`
 - Template: `.github/ISSUE_TEMPLATE/ai-feature.md`
-- Status: `.sentra/status.yml`
+- Status: `.quetrex/status.yml`
 
 ## Session End
 

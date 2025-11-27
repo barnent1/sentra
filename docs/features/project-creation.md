@@ -10,7 +10,7 @@
 
 ## Overview
 
-Enable users to create new projects entirely within Sentra, without touching the terminal. Select from pre-built templates, auto-initialize Git/GitHub, and immediately start working with AI agents.
+Enable users to create new projects entirely within Quetrex, without touching the terminal. Select from pre-built templates, auto-initialize Git/GitHub, and immediately start working with AI agents.
 
 **Vision:** Reduce project setup from 15+ terminal commands to one button click.
 
@@ -32,9 +32,9 @@ Enable users to create new projects entirely within Sentra, without touching the
 7. `git commit -m "Initial commit"`
 8. `gh repo create`
 9. `git push -u origin main`
-10. Create `.sentra/` directory
-11. Create `.sentra/config.yml`
-12. Add project to Sentra tracking
+10. Create `.quetrex/` directory
+11. Create `.quetrex/config.yml`
+12. Add project to Quetrex tracking
 13. Install dependencies
 14. Configure linting/formatting
 15. Set up testing framework
@@ -51,7 +51,7 @@ Enable users to create new projects entirely within Sentra, without touching the
 **Time:** 30 seconds
 
 **Steps:**
-1. Click [+ New Project] in Sentra dashboard
+1. Click [+ New Project] in Quetrex dashboard
 2. Enter project name and location
 3. Select template (Next.js, Python, etc.)
 4. Click [Create Project]
@@ -129,7 +129,7 @@ Enable users to create new projects entirely within Sentra, without touching the
 │  Options                                        │
 │  [✓] Initialize Git repository                 │
 │  [✓] Create GitHub repository                  │
-│  [✓] Add to Sentra tracking                    │
+│  [✓] Add to Quetrex tracking                    │
 │  [✓] Install dependencies                      │
 │                                                 │
 │           [Cancel]     [Create Project]        │
@@ -189,7 +189,7 @@ my-app/
 ├── prisma/
 │   └── schema.prisma
 ├── public/
-├── .sentra/
+├── .quetrex/
 │   └── config.yml
 ├── package.json
 ├── tsconfig.json
@@ -237,7 +237,7 @@ my-api/
 │   └── services/
 ├── tests/
 ├── alembic/
-├── .sentra/
+├── .quetrex/
 │   └── config.yml
 ├── pyproject.toml
 ├── Dockerfile
@@ -279,7 +279,7 @@ my-mobile-app/
 │   ├── store/
 │   └── api/
 ├── assets/
-├── .sentra/
+├── .quetrex/
 │   └── config.yml
 ├── App.tsx
 ├── package.json
@@ -307,7 +307,7 @@ npm install @react-navigation/native zustand axios
 **Generated Structure:**
 ```
 my-project/
-├── .sentra/
+├── .quetrex/
 │   └── config.yml
 ├── .gitignore
 └── README.md
@@ -380,7 +380,7 @@ export function NewProjectModal({ onClose }: { onClose: () => void }) {
   const [options, setOptions] = useState({
     initGit: true,
     createGithub: true,
-    addToSentra: true,
+    addToQuetrex: true,
     installDeps: true
   })
   const [creating, setCreating] = useState(false)
@@ -518,8 +518,8 @@ pub async fn create_project(
         run_command(&project_path, "git", &["push", "-u", "origin", "main"])?;
     }
 
-    // 6. Add .sentra/ directory
-    init_sentra_tracking(&project_path, &name)?;
+    // 6. Add .quetrex/ directory
+    init_quetrex_tracking(&project_path, &name)?;
 
     // 7. Install dependencies (if requested)
     if install_deps {
@@ -621,7 +621,7 @@ fn init_blank_template(path: &str, _name: &str) -> Result<(), String> {
     // Just create README
     fs::write(
         format!("{}/README.md", path),
-        "# My Project\n\nProject created with Sentra.\n"
+        "# My Project\n\nProject created with Quetrex.\n"
     ).map_err(|e| e.to_string())?;
 
     // Create .gitignore
@@ -633,19 +633,19 @@ fn init_blank_template(path: &str, _name: &str) -> Result<(), String> {
     Ok(())
 }
 
-fn init_sentra_tracking(path: &str, name: &str) -> Result<(), String> {
-    fs::create_dir_all(format!("{}/.sentra", path)).map_err(|e| e.to_string())?;
+fn init_quetrex_tracking(path: &str, name: &str) -> Result<(), String> {
+    fs::create_dir_all(format!("{}/.quetrex", path)).map_err(|e| e.to_string())?;
 
     let config = format!(
         r#"project_name: {}
 created_at: {}
-sentra_version: 1.0.0
+quetrex_version: 1.0.0
 "#,
         name,
         chrono::Utc::now().to_rfc3339()
     );
 
-    fs::write(format!("{}/.sentra/config.yml", path), config)
+    fs::write(format!("{}/.quetrex/config.yml", path), config)
         .map_err(|e| e.to_string())?;
 
     Ok(())
@@ -721,7 +721,7 @@ export async function pickDirectory(): Promise<string | null> {
    - Installs dependencies
    - Initializes Git
    - Creates GitHub repo
-   - Adds `.sentra/` config
+   - Adds `.quetrex/` config
 8. Modal closes
 9. New project card appears in dashboard
 10. User can immediately start voice conversation
@@ -804,7 +804,7 @@ test('creates Next.js project', async () => {
 
   // Verify files created
   expect(fs.existsSync('/tmp/test-nextjs-app/package.json')).toBe(true)
-  expect(fs.existsSync('/tmp/test-nextjs-app/.sentra/config.yml')).toBe(true)
+  expect(fs.existsSync('/tmp/test-nextjs-app/.quetrex/config.yml')).toBe(true)
   expect(fs.existsSync('/tmp/test-nextjs-app/.git')).toBe(true)
 })
 ```
@@ -911,7 +911,7 @@ Command::new("sh")
 Allow users to create their own templates:
 
 ```yaml
-# .sentra/templates/my-template.yml
+# .quetrex/templates/my-template.yml
 name: My Custom Template
 description: Company standard stack
 commands:
@@ -942,12 +942,12 @@ Browse community templates:
 
 ### Project Import
 
-Import existing projects into Sentra:
+Import existing projects into Quetrex:
 ```
 [Import Existing Project]
   → Browse to directory
   → Detect framework
-  → Add .sentra/ tracking
+  → Add .quetrex/ tracking
 ```
 
 ---

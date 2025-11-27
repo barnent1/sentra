@@ -4,7 +4,7 @@
 
 **Overall Security Rating: B+ (Good)**
 
-Sentra has a solid security foundation with no critical vulnerabilities discovered. All high-priority findings have been addressed during this audit.
+Quetrex has a solid security foundation with no critical vulnerabilities discovered. All high-priority findings have been addressed during this audit.
 
 ### Summary Statistics
 - **Critical Vulnerabilities**: 0
@@ -117,7 +117,7 @@ curl -I http://localhost:3000 | grep -E '(CSP|X-Frame|X-Content)'
 
 **Status**: ⚠️ DOCUMENTED (acceptable for current version)
 
-**Finding**: API keys stored in `~/.claude/sentra/settings.json` without encryption.
+**Finding**: API keys stored in `~/.claude/quetrex/settings.json` without encryption.
 
 **Impact**:
 - If attacker gains filesystem access, can read API keys
@@ -140,7 +140,7 @@ curl -I http://localhost:3000 | grep -E '(CSP|X-Frame|X-Content)'
 
 **Status**: ⚠️ DOCUMENTED (architectural decision)
 
-**Finding**: Sentra trusts output from `gh` CLI without additional validation.
+**Finding**: Quetrex trusts output from `gh` CLI without additional validation.
 
 **Impact**:
 - If `gh` CLI compromised, could inject malicious data
@@ -277,7 +277,7 @@ All dependencies from trusted sources:
 3. **Tauri architecture**: Native security boundaries
 4. **Git2 library**: Using safe Git library (not shell git)
 5. **Password fields**: Using `type="password"` for sensitive inputs
-6. **Settings isolation**: User settings in `~/.claude/sentra/` (not project directory)
+6. **Settings isolation**: User settings in `~/.claude/quetrex/` (not project directory)
 
 ---
 
@@ -333,7 +333,7 @@ All dependencies from trusted sources:
 
 ## Conclusion
 
-Sentra has a **solid security foundation** with no critical vulnerabilities. All findings have been addressed or documented with acceptable risk justification.
+Quetrex has a **solid security foundation** with no critical vulnerabilities. All findings have been addressed or documented with acceptable risk justification.
 
 ### Key Achievements
 ✅ Comprehensive input validation (Zod schemas)

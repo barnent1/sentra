@@ -10,12 +10,12 @@
 
 ## Overview
 
-This document defines how the Sentra web application fetches and synchronizes data between the backend (Node.js/Express) and frontend (Next.js/React). The architecture prioritizes real-time updates and simplicity.
+This document defines how the Quetrex web application fetches and synchronizes data between the backend (Node.js/Express) and frontend (Next.js/React). The architecture prioritizes real-time updates and simplicity.
 
-**Note:** This document is being updated to reflect Sentra's transition from a Tauri desktop app to a Next.js web application. References to Tauri are historical.
+**Note:** This document is being updated to reflect Quetrex's transition from a Tauri desktop app to a Next.js web application. References to Tauri are historical.
 
 **What this covers:**
-- REST API calls for data fetching (via `@/services/sentra-api`)
+- REST API calls for data fetching (via `@/services/quetrex-api`)
 - React Server Components for initial page loads
 - Server-Sent Events (SSE) for real-time updates
 - Best practices for each approach
@@ -32,7 +32,7 @@ This document defines how the Sentra web application fetches and synchronizes da
 > **Native-first, reactive data flow with automatic synchronization**
 
 **Rationale:**
-Sentra is a native desktop app built with Tauri, so the primary data fetching mechanism should leverage native capabilities (Tauri Events). This provides the best performance, lowest latency, and most natural integration with the Rust backend. For the optional web version, we use Server-Sent Events for similar reactive behavior.
+Quetrex is a native desktop app built with Tauri, so the primary data fetching mechanism should leverage native capabilities (Tauri Events). This provides the best performance, lowest latency, and most natural integration with the Rust backend. For the optional web version, we use Server-Sent Events for similar reactive behavior.
 
 ---
 
@@ -169,7 +169,7 @@ export function ProjectList() {
 ### Directory Structure
 
 ```
-sentra/
+quetrex/
 ├── src-tauri/src/
 │   ├── commands.rs         # Tauri commands that emit events
 │   ├── watcher.rs          # Background watchers
@@ -243,7 +243,7 @@ describe('Tauri Events integration', () => {
 #### ✅ Good Example
 
 ```typescript
-// hooks/useDashboard.ts - Real example from Sentra
+// hooks/useDashboard.ts - Real example from Quetrex
 import { useState, useEffect } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { getProjects, getActiveAgents, getDashboardStats } from '@/lib/tauri';
@@ -852,7 +852,7 @@ export interface DashboardStats {
 
 ### Event Names
 
-Standard event names used in Sentra:
+Standard event names used in Quetrex:
 
 - `projects-updated`: Project list changed
 - `agents-updated`: Agent status changed

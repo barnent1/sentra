@@ -1,6 +1,6 @@
 # Installation Guide
 
-Get Sentra running on your Mac in 10 minutes.
+Get Quetrex running on your Mac in 10 minutes.
 
 ---
 
@@ -132,8 +132,8 @@ Get Sentra running on your Mac in 10 minutes.
 
 ```bash
 # Clone from GitHub
-git clone https://github.com/yourusername/sentra.git
-cd sentra
+git clone https://github.com/yourusername/quetrex.git
+cd quetrex
 ```
 
 Or download ZIP from GitHub and extract.
@@ -171,7 +171,7 @@ OPENAI_API_KEY=sk-...your-key-here...
 GITHUB_TOKEN=ghp_...your-token...
 
 # Optional: Project configuration
-NEXT_PUBLIC_APP_NAME=Sentra
+NEXT_PUBLIC_APP_NAME=Quetrex
 ```
 
 **Security Note:** Never commit `.env.local` to git. It's already in `.gitignore`.
@@ -194,7 +194,7 @@ npm run tauri:dev
 
 When the app opens, you should see:
 
-- Sentra dashboard with "Welcome" screen
+- Quetrex dashboard with "Welcome" screen
 - Settings icon in top-right
 - "Chat with Architect" button
 
@@ -204,7 +204,7 @@ When the app opens, you should see:
 
 **Click "Chat with Architect"** and:
 - Allow microphone access when prompted
-- You should hear a greeting from Sentra
+- You should hear a greeting from Quetrex
 
 ---
 
@@ -229,8 +229,8 @@ npm run tauri:dev
 
 **Solution:**
 1. Open **System Preferences** → **Security & Privacy** → **Microphone**
-2. Enable microphone for "Sentra" (or your terminal/browser)
-3. Restart Sentra app
+2. Enable microphone for "Quetrex" (or your terminal/browser)
+3. Restart Quetrex app
 
 ### OpenAI API Key Not Working
 
@@ -259,15 +259,15 @@ If error persists:
 
 **macOS:**
 1. Open **System Preferences** → **Security & Privacy** → **Microphone**
-2. Enable microphone for "Sentra" (or your terminal/browser)
+2. Enable microphone for "Quetrex" (or your terminal/browser)
 3. Check system volume is not muted
-4. Restart Sentra app
+4. Restart Quetrex app
 
 **Windows:**
 1. Open **Settings** → **Privacy** → **Microphone**
-2. Enable microphone access for Sentra
+2. Enable microphone access for Quetrex
 3. Check system volume and audio device
-4. Restart Sentra app
+4. Restart Quetrex app
 
 **Linux:**
 ```bash
@@ -325,7 +325,7 @@ npm run tauri:dev
 
 ---
 
-## Updating Sentra
+## Updating Quetrex
 
 ### Update to Latest Version
 
@@ -359,17 +359,17 @@ cat package.json | grep version
 ```bash
 # Delete repository
 cd ..
-rm -rf sentra
+rm -rf quetrex
 ```
 
 ### Remove Generated Data
 
 ```bash
-# Remove Sentra data directory (if any)
-rm -rf ~/.sentra
+# Remove Quetrex data directory (if any)
+rm -rf ~/.quetrex
 
 # Remove Tauri cache
-rm -rf ~/Library/Caches/com.sentra.app
+rm -rf ~/Library/Caches/com.quetrex.app
 ```
 
 ### Remove Rust (if installed)
@@ -392,7 +392,7 @@ npm run tauri:build
 
 Output location:
 ```
-src-tauri/target/release/bundle/macos/Sentra.app
+src-tauri/target/release/bundle/macos/Quetrex.app
 ```
 
 You can:
@@ -406,7 +406,7 @@ You can:
 
 ## Next Steps
 
-Now that Sentra is installed:
+Now that Quetrex is installed:
 
 1. **[Quick Start →](quick-start.md)** - Your first voice conversation (5 minutes)
 2. **[First Steps →](first-steps.md)** - Learn the interface and workflow
@@ -417,7 +417,7 @@ Now that Sentra is installed:
 ## Need Help?
 
 - **Documentation:** [docs/README.md](../README.md)
-- **Common Issues:** Check [GitHub Issues](https://github.com/yourusername/sentra/issues)
+- **Common Issues:** Check [GitHub Issues](https://github.com/yourusername/quetrex/issues)
 - **Questions:** Open new issue with `question` label
 
 ---

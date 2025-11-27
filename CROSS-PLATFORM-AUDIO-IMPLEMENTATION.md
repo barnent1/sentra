@@ -8,7 +8,7 @@
 
 ## Overview
 
-Sentra's voice system has been upgraded from macOS-only (`afplay`) to full cross-platform support using the **rodio** audio library. This enables voice notifications to work consistently on macOS, Windows, and Linux.
+Quetrex's voice system has been upgraded from macOS-only (`afplay`) to full cross-platform support using the **rodio** audio library. This enables voice notifications to work consistently on macOS, Windows, and Linux.
 
 ---
 

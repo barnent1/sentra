@@ -1,6 +1,6 @@
-# Sentra Quick Start Guide
+# Quetrex Quick Start Guide
 
-**Get Sentra running in 5 minutes.** This guide covers the essentials to get you from zero to a working Sentra instance.
+**Get Quetrex running in 5 minutes.** This guide covers the essentials to get you from zero to a working Quetrex instance.
 
 ---
 
@@ -22,8 +22,8 @@ Before you begin:
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/barnent1/sentra.git
-cd sentra
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex
 ```
 
 ### Step 2: Install Dependencies
@@ -71,7 +71,7 @@ You should see:
 
 Visit **http://localhost:3007** in your browser.
 
-You should see the Sentra dashboard!
+You should see the Quetrex dashboard!
 
 ---
 
@@ -87,7 +87,7 @@ You should see the Sentra dashboard!
 5. **Answer questions** to refine your specification
 6. **Review generated spec** when complete
 
-That's it! You've just had your first conversation with Sentra's voice architect.
+That's it! You've just had your first conversation with Quetrex's voice architect.
 
 ---
 
@@ -232,7 +232,7 @@ node --version  # Should be 18+
 
 ## Next Steps
 
-Now that you have Sentra running, here's what to explore next:
+Now that you have Quetrex running, here's what to explore next:
 
 ### 1. Read Core Documentation
 
@@ -263,7 +263,7 @@ npm run test:coverage
 ### 4. Explore the Codebase
 
 ```
-sentra/
+quetrex/
 ├── src/app/              # Next.js pages (App Router)
 ├── src/components/       # React components
 ├── src/lib/              # OpenAI integration
@@ -273,7 +273,7 @@ sentra/
 
 ### 5. Make Your First Change
 
-Pick a `good first issue` from [GitHub Issues](https://github.com/barnent1/sentra/issues):
+Pick a `good first issue` from [GitHub Issues](https://github.com/barnent1/quetrex/issues):
 
 ```bash
 # Create feature branch
@@ -394,9 +394,9 @@ Useful aliases:
 
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
-alias sentra-dev='npm run dev'
-alias sentra-test='npm test'
-alias sentra-check='npm run type-check && npm run lint && npm test -- --run'
+alias quetrex-dev='npm run dev'
+alias quetrex-test='npm test'
+alias quetrex-check='npm run type-check && npm run lint && npm test -- --run'
 ```
 
 ### Git Configuration
@@ -420,7 +420,7 @@ git config fetch.prune true
 
 ### 1. Port 3007 vs 3000
 
-Sentra runs on **port 3007** (not the default 3000).
+Quetrex runs on **port 3007** (not the default 3000).
 
 ```bash
 # Correct
@@ -444,7 +444,7 @@ APP_URL=http://localhost:3007
 
 ### 3. TypeScript Strict Mode
 
-Sentra uses **strict mode** with zero tolerance:
+Quetrex uses **strict mode** with zero tolerance:
 
 ```typescript
 // ❌ BAD - Will not compile
@@ -475,7 +475,7 @@ src/components/    |   55.2  |   48.3   |   61.9  |   57.1  ❌ Need 60%+
 
 ### 5. Quality Hooks Cannot Be Bypassed
 
-Sentra's 6-layer defense system prevents bad commits:
+Quetrex's 6-layer defense system prevents bad commits:
 
 ```bash
 # ❌ This will FAIL
@@ -512,7 +512,7 @@ POST /api/architect/message   # Send message to architect
 ### File Paths
 
 ```
-/Users/barnent1/Projects/sentra/                # Project root
+/Users/barnent1/Projects/quetrex/                # Project root
 ├── src/                                         # Source code
 │   ├── app/                                     # Next.js pages
 │   ├── components/                              # React components
@@ -530,7 +530,7 @@ POST /api/architect/message   # Send message to architect
 ### Resources
 
 - **Documentation:** [docs/](../docs/)
-- **Issues:** [GitHub Issues](https://github.com/barnent1/sentra/issues)
+- **Issues:** [GitHub Issues](https://github.com/barnent1/quetrex/issues)
 - **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ### Before Asking for Help
@@ -553,7 +553,7 @@ POST /api/architect/message   # Send message to architect
 
 **You've learned:**
 
-- How to install and run Sentra (5 minutes)
+- How to install and run Quetrex (5 minutes)
 - Common commands for development
 - Troubleshooting tips
 - Next steps for learning more

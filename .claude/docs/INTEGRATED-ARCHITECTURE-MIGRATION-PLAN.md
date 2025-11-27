@@ -1,6 +1,6 @@
 # Integrated Architecture Migration Plan
 
-**Goal:** Align Sentra with Anthropic's integrated agent + skill architecture
+**Goal:** Align Quetrex with Anthropic's integrated agent + skill architecture
 **Current Compliance:** 70%
 **Target Compliance:** 100%
 **Estimated Effort:** 12-16 hours over 3 phases
@@ -169,7 +169,7 @@ if __name__ == "__main__":
 ---
 name: architecture-patterns
 description: >
-  Organizational coding patterns for Sentra.
+  Organizational coding patterns for Quetrex.
   Use when implementing features to follow established conventions.
 ---
 
@@ -213,7 +213,7 @@ When implementing features:
 5. Verify pattern compliance in tests
 ```
 
-**Migrate from `.sentra/memory/patterns.md`:**
+**Migrate from `.quetrex/memory/patterns.md`:**
 - Extract patterns into separate files
 - Add pattern IDs for easy reference
 - Add code examples for each pattern
@@ -246,7 +246,7 @@ When implementing features:
 ---
 name: code-review-standards
 description: >
-  Code review criteria for Sentra.
+  Code review criteria for Quetrex.
   Use when reviewing code for quality, security, and maintainability.
 ---
 
@@ -539,7 +539,7 @@ See: test-quality-checklist.md
 #### Task 3.4: Enhance Remaining Skills (1 hour)
 
 - nextjs-15-specialist
-- sentra-architect
+- quetrex-architect
 - semantic-code-hunter
 - voice-system-expert
 
@@ -583,7 +583,7 @@ python .claude/skills/quality-gates/validate.py --file src/services/auth.ts
 ```markdown
 ## Agent + Skill Architecture
 
-Sentra follows Anthropic's integrated agent + skill architecture:
+Quetrex follows Anthropic's integrated agent + skill architecture:
 
 **Skills = Cross-cutting expertise**
 - quality-gates: Validation framework for all agents

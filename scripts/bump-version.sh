@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Sentra Version Bump Script
+# Quetrex Version Bump Script
 # Created by Glen Barnhardt with help from Claude Code
 #
 # This script manages versioning across all project files and creates release tags
@@ -277,7 +277,7 @@ show_summary() {
     echo "     ${BLUE}git push origin $tag${NC}"
     echo ""
     echo "  4. Monitor the release workflow:"
-    echo "     ${BLUE}https://github.com/barnent1/sentra/actions${NC}"
+    echo "     ${BLUE}https://github.com/barnent1/quetrex/actions${NC}"
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
@@ -286,7 +286,7 @@ show_summary() {
 # Main script
 main() {
     echo ""
-    info "Sentra Version Bump Script"
+    info "Quetrex Version Bump Script"
     echo ""
 
     # Check arguments

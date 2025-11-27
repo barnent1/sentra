@@ -9,7 +9,7 @@
 
 ## Overview
 
-This checklist ensures all critical systems are verified before deploying Sentra to production. Follow this checklist in order for every production deployment.
+This checklist ensures all critical systems are verified before deploying Quetrex to production. Follow this checklist in order for every production deployment.
 
 **Target completion time:** 30-45 minutes
 **Required for:** Every production deployment
@@ -154,7 +154,7 @@ docker exec <container-id> env | grep -E '(TOKEN|KEY|SECRET)'
 **Verification command:**
 ```bash
 # Check logs for secrets
-grep -rE '(ghp_|sk-ant-|sk_live_)' /var/log/sentra/ || echo "No secrets found"
+grep -rE '(ghp_|sk-ant-|sk_live_)' /var/log/quetrex/ || echo "No secrets found"
 # Expected: "No secrets found"
 ```
 
@@ -246,7 +246,7 @@ npm test -- --run --coverage
    # Revert to previous deployment
    vercel rollback <previous-deployment-id>
    # OR
-   gh api repos/barnent1/sentra/deployments/<deployment-id>/statuses \
+   gh api repos/barnent1/quetrex/deployments/<deployment-id>/statuses \
      -f state=inactive
    ```
 
@@ -259,7 +259,7 @@ npm test -- --run --coverage
 3. **Verify rollback:**
    ```bash
    # Check app version
-   curl https://sentra.app/api/health | jq .version
+   curl https://quetrex.app/api/health | jq .version
 
    # Check database schema version
    npm run db:migrate:status
@@ -339,7 +339,7 @@ npm run deploy:prod
 #### Step 4: Post-Deployment Verification
 ```bash
 # Health check
-curl https://sentra.app/api/health
+curl https://quetrex.app/api/health
 # Expected: {"status":"ok","version":"1.0.0"}
 
 # Smoke tests
@@ -400,8 +400,8 @@ npm run test:smoke:prod
 #### API Endpoints Verification
 ```bash
 # Test critical endpoints
-curl https://sentra.app/api/health
-curl -H "Authorization: Bearer <token>" https://sentra.app/api/projects
+curl https://quetrex.app/api/health
+curl -H "Authorization: Bearer <token>" https://quetrex.app/api/projects
 
 # Expected: All return 2xx status codes
 ```
@@ -598,7 +598,7 @@ Response: {"status":"ok","connected":true}
 
 ```bash
 # Check application status
-curl https://sentra.app/api/health
+curl https://quetrex.app/api/health
 
 # View recent errors (last 1 hour)
 # (Sentry, or your error tracking tool)

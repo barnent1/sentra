@@ -100,7 +100,7 @@ def check_architectural_patterns(content: str, file_path: str):
             if not any(p in content for p in ['EventSource', 'useSSE', '/stream']):
                 issues.append(
                     "⚠️  Pattern suggestion: Consider using SSE pattern for reactive data. "
-                    "See pattern-sse-reactive-data in .sentra/memory/patterns.md"
+                    "See pattern-sse-reactive-data in .quetrex/memory/patterns.md"
                 )
 
     # Check for 'any' type (architectural requirement)
@@ -108,7 +108,7 @@ def check_architectural_patterns(content: str, file_path: str):
         if re.search(r':\s*any\b|<any>|\bany\[\]', content):
             issues.append(
                 "❌ Pattern violation: TypeScript 'any' type not allowed. "
-                "See pattern-typescript-strict in .sentra/memory/patterns.md"
+                "See pattern-typescript-strict in .quetrex/memory/patterns.md"
             )
 
     # Check for client component with async (architectural error)
@@ -118,7 +118,7 @@ def check_architectural_patterns(content: str, file_path: str):
         if has_use_client and has_async:
             issues.append(
                 "❌ Pattern violation: Cannot use async in client component. "
-                "See pattern-client-component-boundaries in .sentra/memory/patterns.md"
+                "See pattern-client-component-boundaries in .quetrex/memory/patterns.md"
             )
 
     # Check API routes for Zod validation
@@ -136,7 +136,7 @@ def check_architectural_patterns(content: str, file_path: str):
         if handles_mutations and not uses_zod:
             issues.append(
                 "❌ Pattern violation: API route must use Zod validation. "
-                "See pattern-zod-validation in .sentra/memory/patterns.md"
+                "See pattern-zod-validation in .quetrex/memory/patterns.md"
             )
 
     # Separate blocking issues from warnings

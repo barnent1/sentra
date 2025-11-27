@@ -1,4 +1,4 @@
-# Sentra Release Workflow Diagram
+# Quetrex Release Workflow Diagram
 
 Visual representation of the automated build and release process.
 
@@ -87,7 +87,7 @@ Created by Glen Barnhardt with help from Claude Code
 │  Job 4: Create GitHub Release (~5 minutes)                                  │
 │  ┌────────────────────────────────────────────────────────────────┐        │
 │  │ 1. Download all artifacts                                       │        │
-│  │ 2. Rename with version (Sentra_0.1.1_macOS_universal.dmg)     │        │
+│  │ 2. Rename with version (Quetrex_0.1.1_macOS_universal.dmg)     │        │
 │  │ 3. Extract CHANGELOG for this version                          │        │
 │  │ 4. Generate release notes                                       │        │
 │  │ 5. Create latest.json manifest                                 │        │
@@ -112,14 +112,14 @@ Created by Glen Barnhardt with help from Claude Code
 │  │ • Updated dependencies                                          │        │
 │  │                                                                 │        │
 │  │ Downloads:                                                      │        │
-│  │ 📦 Sentra_0.1.1_macOS_universal.dmg (78.2 MB)                 │        │
-│  │ 📦 Sentra_0.1.1_macOS_universal.dmg.sha256                     │        │
-│  │ 📦 Sentra_0.1.1_Windows_x64-setup.exe (54.1 MB)               │        │
-│  │ 📦 Sentra_0.1.1_Windows_x64-setup.exe.sha256                  │        │
-│  │ 📦 Sentra_0.1.1_Linux_x86_64.AppImage (82.5 MB)               │        │
-│  │ 📦 Sentra_0.1.1_Linux_x86_64.AppImage.sha256                  │        │
-│  │ 📦 Sentra_0.1.1_Linux_amd64.deb (51.3 MB)                     │        │
-│  │ 📦 Sentra_0.1.1_Linux_amd64.deb.sha256                        │        │
+│  │ 📦 Quetrex_0.1.1_macOS_universal.dmg (78.2 MB)                 │        │
+│  │ 📦 Quetrex_0.1.1_macOS_universal.dmg.sha256                     │        │
+│  │ 📦 Quetrex_0.1.1_Windows_x64-setup.exe (54.1 MB)               │        │
+│  │ 📦 Quetrex_0.1.1_Windows_x64-setup.exe.sha256                  │        │
+│  │ 📦 Quetrex_0.1.1_Linux_x86_64.AppImage (82.5 MB)               │        │
+│  │ 📦 Quetrex_0.1.1_Linux_x86_64.AppImage.sha256                  │        │
+│  │ 📦 Quetrex_0.1.1_Linux_amd64.deb (51.3 MB)                     │        │
+│  │ 📦 Quetrex_0.1.1_Linux_amd64.deb.sha256                        │        │
 │  │ 📦 latest.json                                                  │        │
 │  └────────────────────────────────────────────────────────────────┘        │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -129,7 +129,7 @@ Created by Glen Barnhardt with help from Claude Code
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                             USER'S MACHINE                                   │
 │                                                                              │
-│  Sentra App (v0.1.0)                                                        │
+│  Quetrex App (v0.1.0)                                                        │
 │  ┌────────────────────────────────────────────────────────────────┐        │
 │  │ On startup (5 seconds later):                                   │        │
 │  │                                                                 │        │
@@ -163,7 +163,7 @@ Created by Glen Barnhardt with help from Claude Code
 │  │ 8. Relaunch app                                                 │        │
 │  └────────────────────────────────────────────────────────────────┘        │
 │                               ↓                                               │
-│  Sentra App (v0.1.1) ✓                                                      │
+│  Quetrex App (v0.1.1) ✓                                                      │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -301,23 +301,23 @@ User Experience:
 GitHub Release: v0.1.1
 │
 ├─ macOS
-│  ├─ Sentra_0.1.1_macOS_universal.dmg
+│  ├─ Quetrex_0.1.1_macOS_universal.dmg
 │  │  ├─ Intel binary (x86_64)
 │  │  └─ Apple Silicon binary (aarch64)
-│  └─ Sentra_0.1.1_macOS_universal.dmg.sha256
+│  └─ Quetrex_0.1.1_macOS_universal.dmg.sha256
 │
 ├─ Windows
-│  ├─ Sentra_0.1.1_Windows_x64-setup.exe
+│  ├─ Quetrex_0.1.1_Windows_x64-setup.exe
 │  │  └─ NSIS installer with auto-update support
-│  └─ Sentra_0.1.1_Windows_x64-setup.exe.sha256
+│  └─ Quetrex_0.1.1_Windows_x64-setup.exe.sha256
 │
 ├─ Linux
-│  ├─ Sentra_0.1.1_Linux_x86_64.AppImage
+│  ├─ Quetrex_0.1.1_Linux_x86_64.AppImage
 │  │  └─ Universal portable app
-│  ├─ Sentra_0.1.1_Linux_x86_64.AppImage.sha256
-│  ├─ Sentra_0.1.1_Linux_amd64.deb
+│  ├─ Quetrex_0.1.1_Linux_x86_64.AppImage.sha256
+│  ├─ Quetrex_0.1.1_Linux_amd64.deb
 │  │  └─ Debian/Ubuntu package
-│  └─ Sentra_0.1.1_Linux_amd64.deb.sha256
+│  └─ Quetrex_0.1.1_Linux_amd64.deb.sha256
 │
 └─ latest.json (Auto-update manifest)
    {
@@ -356,7 +356,7 @@ gh run list --workflow=release.yml
 gh run watch
 
 # View release
-open https://github.com/barnent1/sentra/releases/latest
+open https://github.com/barnent1/quetrex/releases/latest
 ```
 
 ---

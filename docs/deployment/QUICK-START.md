@@ -1,4 +1,4 @@
-# Quick Start: Deploy Sentra to Web
+# Quick Start: Deploy Quetrex to Web
 
 This guide gets you deployed in under 5 minutes.
 
@@ -32,7 +32,7 @@ In Vercel dashboard:
 1. Go to your project settings
 2. Navigate to Environment Variables
 3. Add:
-   - `NEXT_PUBLIC_APP_URL`: Your Vercel URL (e.g., https://sentra.vercel.app)
+   - `NEXT_PUBLIC_APP_URL`: Your Vercel URL (e.g., https://quetrex.vercel.app)
 
 ### 4. Done!
 Your app is live at: `https://your-project.vercel.app`
@@ -63,7 +63,7 @@ npm run deploy:netlify
 In Netlify dashboard:
 1. Go to Site settings > Environment variables
 2. Add:
-   - `NEXT_PUBLIC_APP_URL`: Your Netlify URL (e.g., https://sentra.netlify.app)
+   - `NEXT_PUBLIC_APP_URL`: Your Netlify URL (e.g., https://quetrex.netlify.app)
 
 ### 4. Done!
 Your app is live at: `https://your-project.netlify.app`

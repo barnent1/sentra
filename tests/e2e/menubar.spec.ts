@@ -33,13 +33,13 @@ test.describe('Menu Bar Integration', () => {
       expect(boundingBox?.height).toBe(420);
     });
 
-    test('should display Sentra branding in header', async ({ page }) => {
+    test('should display Quetrex branding in header', async ({ page }) => {
       // ARRANGE & ACT - Header elements should be visible
 
       // ASSERT
-      await expect(page.getByText('Sentra')).toBeVisible();
+      await expect(page.getByText('Quetrex')).toBeVisible();
       await expect(page.getByText('Quick Stats')).toBeVisible();
-      await expect(page.getByAltText('Sentra')).toBeVisible(); // Logo
+      await expect(page.getByAltText('Quetrex')).toBeVisible(); // Logo
     });
 
     test('should display close button in header', async ({ page }) => {
@@ -242,7 +242,7 @@ test.describe('Menu Bar Integration', () => {
       expect(showMainWindowCalled).toBe(true);
     });
 
-    test('should quit app when "Quit Sentra" is clicked', async ({ page }) => {
+    test('should quit app when "Quit Quetrex" is clicked', async ({ page }) => {
       // ARRANGE
       let quitAppCalled = false;
       await page.exposeFunction('trackQuit', () => {
@@ -264,7 +264,7 @@ test.describe('Menu Bar Integration', () => {
       });
 
       // ACT
-      await page.getByText('Quit Sentra').click();
+      await page.getByText('Quit Quetrex').click();
 
       // ASSERT
       await page.waitForTimeout(100);
@@ -394,7 +394,7 @@ test.describe('Menu Bar Integration', () => {
 
       // ACT & ASSERT - Should still show action buttons
       await expect(page.getByText('Open Dashboard')).toBeVisible();
-      await expect(page.getByText('Quit Sentra')).toBeVisible();
+      await expect(page.getByText('Quit Quetrex')).toBeVisible();
     });
   });
 

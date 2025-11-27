@@ -24,9 +24,9 @@ Comprehensive guide to using Drizzle ORM with Vercel Edge Runtime and serverless
 - **Better performance**: Reduced latency for database operations
 - **Automatic scaling**: Handle traffic spikes without configuration
 
-### Sentra's Edge-First Architecture
+### Quetrex's Edge-First Architecture
 
-Sentra uses Drizzle ORM specifically because it's edge-compatible. Prisma 6.19.0 blocks Vercel Edge Runtime due to Node.js dependencies.
+Quetrex uses Drizzle ORM specifically because it's edge-compatible. Prisma 6.19.0 blocks Vercel Edge Runtime due to Node.js dependencies.
 
 **Decision Record**: See `/docs/decisions/ADR-002-DRIZZLE-ORM-MIGRATION.md`
 

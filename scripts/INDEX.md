@@ -1,4 +1,4 @@
-# Sentra Installation Scripts - Complete Index
+# Quetrex Installation Scripts - Complete Index
 
 Quick reference guide to all installation and setup scripts.
 
@@ -6,21 +6,21 @@ Quick reference guide to all installation and setup scripts.
 
 ## Start Here
 
-**Brand New to Sentra?** → `QUICK-START.md` (5 minutes)
+**Brand New to Quetrex?** → `QUICK-START.md` (5 minutes)
 
 **Need Detailed Instructions?** → `INSTALLATION.md` (comprehensive guide)
 
-**Ready to Setup?** → Run `./scripts/setup-sentra.sh`
+**Ready to Setup?** → Run `./scripts/setup-quetrex.sh`
 
 ---
 
 ## Core Scripts
 
-### 1. setup-sentra.sh
+### 1. setup-quetrex.sh
 **Complete system setup automation**
 
 ```bash
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 ```
 
 **Does:**
@@ -59,7 +59,7 @@ Quick reference guide to all installation and setup scripts.
 **Initialize NEW project**
 
 ```bash
-python .sentra/scripts/init-project.py --name "project-name"
+python .quetrex/scripts/init-project.py --name "project-name"
 ```
 
 **Does:**
@@ -79,7 +79,7 @@ python .sentra/scripts/init-project.py --name "project-name"
 **Initialize EXISTING project**
 
 ```bash
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 ```
 
 **Does:**
@@ -89,7 +89,7 @@ python .sentra/scripts/init-existing-project.py
 - Extracts existing patterns
 - Identifies critical paths
 
-**When:** Adding Sentra to existing codebase
+**When:** Adding Quetrex to existing codebase
 
 **Time:** ~2 minutes
 
@@ -127,7 +127,7 @@ python .sentra/scripts/init-existing-project.py
 
 ### Scripts Reference
 
-**File:** `.sentra/scripts/README.md`
+**File:** `.quetrex/scripts/README.md`
 **Length:** 15-minute read
 **For:** Understanding automation scripts
 **Contains:**
@@ -157,8 +157,8 @@ python .sentra/scripts/init-existing-project.py
 
 ### Setup Scripts
 ```
-/Users/barnent1/Projects/sentra/scripts/
-├── setup-sentra.sh          Main setup script
+/Users/barnent1/Projects/quetrex/scripts/
+├── setup-quetrex.sh          Main setup script
 ├── install-serena.sh        Serena MCP installation
 ├── QUICK-START.md           5-minute guide
 ├── INSTALLATION.md          Complete guide
@@ -167,7 +167,7 @@ python .sentra/scripts/init-existing-project.py
 
 ### Project Scripts
 ```
-/Users/barnent1/Projects/sentra/.sentra/scripts/
+/Users/barnent1/Projects/quetrex/.quetrex/scripts/
 ├── init-project.py              New project initialization
 ├── init-existing-project.py     Existing project analysis
 ├── auto-refactor.py             Code refactoring
@@ -182,7 +182,7 @@ python .sentra/scripts/init-existing-project.py
 
 ### Configuration
 ```
-/Users/barnent1/Projects/sentra/
+/Users/barnent1/Projects/quetrex/
 ├── requirements.txt         Python dependencies
 ├── package.json             Node.js dependencies
 ├── .gitignore              Ignore patterns
@@ -197,7 +197,7 @@ python .sentra/scripts/init-existing-project.py
 
 ```bash
 # Step 1: Setup everything
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 
 # Step 2: Verify installation
 claude --version
@@ -206,10 +206,10 @@ node --version
 
 # Step 3: Choose your path
 # Option A: New project
-python .sentra/scripts/init-project.py --name "my-project"
+python .quetrex/scripts/init-project.py --name "my-project"
 
 # Option B: Existing project
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 ```
 
 ---
@@ -218,7 +218,7 @@ python .sentra/scripts/init-existing-project.py
 
 ```bash
 # 1. Initialize project
-python .sentra/scripts/init-project.py --name "bookmark-manager"
+python .quetrex/scripts/init-project.py --name "bookmark-manager"
 
 # 2. Start Voice Architect
 claude
@@ -246,7 +246,7 @@ claude
 
 ```bash
 # 1. Analyze existing code
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 
 # Output shows:
 # - 234 files analyzed
@@ -258,7 +258,7 @@ python .sentra/scripts/init-existing-project.py
 cat docs/existing-codebase/ANALYSIS-SUMMARY.md
 
 # 3. Review protection rules
-cat .sentra/protection/protection-rules.yml
+cat .quetrex/protection/protection-rules.yml
 
 # 4. Add features safely
 claude
@@ -267,7 +267,7 @@ claude
 # Meta Orchestrator follows existing patterns
 
 # 5. Monitor progress
-python .sentra/scripts/dashboard-generator.py --serve
+python .quetrex/scripts/dashboard-generator.py --serve
 ```
 
 ---
@@ -297,7 +297,7 @@ claude
 
 ```bash
 # Automated check
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 # Will check and report all prerequisites
 
 # Manual check
@@ -314,7 +314,7 @@ claude --version     # Any version
 
 ```bash
 # Option 1: Automated (via setup script)
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 
 # Option 2: Manual
 pip install -r requirements.txt
@@ -331,7 +331,7 @@ pip install -r requirements.txt
 
 ```bash
 # Option 1: Automated (via setup script)
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 
 # Option 2: Manual
 npm install
@@ -349,7 +349,7 @@ npm install
 # After making changes
 cat scripts/INSTALLATION.md       # Review install guide
 cat scripts/QUICK-START.md        # Review quick start
-cat .sentra/scripts/README.md     # Review scripts docs
+cat .quetrex/scripts/README.md     # Review scripts docs
 cat INSTALLATION-COMPLETE.md      # Review implementation
 ```
 
@@ -378,7 +378,7 @@ npm run type-check
 ### Quick Fixes
 
 **Problem:** Prerequisites missing
-**Solution:** `./scripts/setup-sentra.sh` will identify and guide
+**Solution:** `./scripts/setup-quetrex.sh` will identify and guide
 
 **Problem:** Python dependencies fail
 **Solution:** Use virtual environment: `python3 -m venv venv`
@@ -390,7 +390,7 @@ npm run type-check
 **Solution:** Install from https://docs.claude.com/claude-code
 
 **Problem:** Permission denied
-**Solution:** `chmod +x scripts/*.sh .sentra/scripts/*.py`
+**Solution:** `chmod +x scripts/*.sh .quetrex/scripts/*.py`
 
 ### Detailed Troubleshooting
 
@@ -406,7 +406,7 @@ See `scripts/INSTALLATION.md` → Troubleshooting section
 1. QUICK-START.md           ← Start here (5 min)
 2. INDEX.md                 ← You are here
 3. INSTALLATION.md          ← Detailed guide
-4. .sentra/scripts/README.md ← Scripts reference
+4. .quetrex/scripts/README.md ← Scripts reference
 5. INSTALLATION-COMPLETE.md ← Implementation details
 ```
 
@@ -414,7 +414,7 @@ See `scripts/INSTALLATION.md` → Troubleshooting section
 
 - **Claude Code:** https://docs.claude.com/claude-code
 - **Serena MCP:** https://github.com/PierrunoYT/serena-mcp
-- **GitHub Issues:** https://github.com/barnent1/sentra/issues
+- **GitHub Issues:** https://github.com/barnent1/quetrex/issues
 
 ---
 
@@ -430,13 +430,13 @@ See `scripts/INSTALLATION.md` → Troubleshooting section
 
 ```bash
 # Setup
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 
 # New project
-python .sentra/scripts/init-project.py --name "project"
+python .quetrex/scripts/init-project.py --name "project"
 
 # Existing project
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 
 # Serena only
 ./scripts/install-serena.sh
@@ -447,14 +447,14 @@ npm test
 npm run type-check
 
 # Dashboard
-python .sentra/scripts/dashboard-generator.py --serve
+python .quetrex/scripts/dashboard-generator.py --serve
 
 # Metrics
-python .sentra/scripts/metrics-collector.py --summary
+python .quetrex/scripts/metrics-collector.py --summary
 ```
 
 ---
 
 **Need help?** Start with `scripts/QUICK-START.md` or `scripts/INSTALLATION.md`
 
-**Ready to build?** Run `./scripts/setup-sentra.sh`
+**Ready to build?** Run `./scripts/setup-quetrex.sh`

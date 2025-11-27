@@ -143,7 +143,7 @@ export async function createIssueFromSpec(
 ${description}
 
 ---
-*Created from Sentra AI Specification*`
+*Created from Quetrex AI Specification*`
 
     // Call GitHub API
     const response = await fetch(

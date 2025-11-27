@@ -2,14 +2,14 @@
 
 ## Overview
 
-Sentra includes a native macOS menu bar integration that provides quick access to project statistics and key actions without opening the full dashboard. The menu bar icon appears in the system tray and displays a compact popup window when clicked.
+Quetrex includes a native macOS menu bar integration that provides quick access to project statistics and key actions without opening the full dashboard. The menu bar icon appears in the system tray and displays a compact popup window when clicked.
 
 ## Features
 
 ### Menu Bar Icon
 - **Location**: macOS system menu bar (top-right area)
 - **Appearance**: Adapts automatically to light/dark mode
-- **Tooltip**: "Sentra - AI Agent Control Center"
+- **Tooltip**: "Quetrex - AI Agent Control Center"
 - **Interaction**: Left-click to toggle popup window
 
 ### Popup Window
@@ -39,11 +39,11 @@ The popup shows real-time statistics in a compact 2x2 grid:
 
 The popup provides two primary actions:
 
-1. **Open Dashboard**: Opens the main Sentra dashboard window
+1. **Open Dashboard**: Opens the main Quetrex dashboard window
    - Automatically hides the menubar popup
    - Brings main window to focus
 
-2. **Quit Sentra**: Exits the application completely
+2. **Quit Quetrex**: Exits the application completely
 
 ## Implementation Details
 
@@ -111,7 +111,7 @@ Window configuration in `tauri.conf.json`:
 ```json
 {
   "label": "menubar",
-  "title": "Sentra Menu",
+  "title": "Quetrex Menu",
   "url": "/menubar",
   "width": 320,
   "height": 420,
@@ -167,12 +167,12 @@ tauri-plugin-positioner = { version = "2", features = ["tray-icon"] }
 
 ## User Experience Flow
 
-1. **App Launch**: Sentra icon appears in menu bar
+1. **App Launch**: Quetrex icon appears in menu bar
 2. **Click Icon**: Popup window appears below icon
 3. **View Stats**: Quick glance at project status
 4. **Take Action**:
    - Click "Open Dashboard" → Main window opens, popup hides
-   - Click "Quit Sentra" → Application exits
+   - Click "Quit Quetrex" → Application exits
    - Click close button (×) → Popup hides, icon remains
 5. **Auto-refresh**: Stats update every 30 seconds while popup is open
 

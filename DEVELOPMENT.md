@@ -1,4 +1,4 @@
-# Sentra Development Guide
+# Quetrex Development Guide
 
 **Created by Glen Barnhardt with the help of Claude Code**
 
@@ -11,7 +11,7 @@
 ✅ **Dashboard UI built** - Dynamic homepage with real data
 ✅ **Data layer complete** - TypeScript interfaces and hooks
 ✅ **Auto-refresh implemented** - Dashboard updates every 10 seconds
-✅ **Logo support added** - Ready for actual Sentra icon
+✅ **Logo support added** - Ready for actual Quetrex icon
 ✅ **Mock data working** - Full UI functional with sample data
 
 🚧 **Next:** Tauri integration to read real telemetry data
@@ -24,13 +24,13 @@
 ### Option 1: Using the script (recommended)
 
 ```bash
-~/Projects/claude-code-base/scripts/dev-sentra.sh
+~/Projects/claude-code-base/scripts/dev-quetrex.sh
 ```
 
 ### Option 2: Manual
 
 ```bash
-cd ~/Projects/claude-code-base/sentra
+cd ~/Projects/claude-code-base/quetrex
 npm install
 npm run dev
 ```
@@ -44,14 +44,14 @@ Then open http://localhost:3000 in your browser.
 ### UI Components
 
 **Homepage (src/app/page.tsx):**
-- Header with Sentra branding (green beaker icon)
+- Header with Quetrex branding (green beaker icon)
 - 4 stat cards: Active Agents, Projects, Cost, Success Rate
 - Active Agents section with live status indicators
 - Projects grid showing all tracked projects
 
 **Theme:**
 - Dark mode with violet accent colors (shadcn/ui violet theme)
-- Glass morphism effects (`sentra-glass` utility class)
+- Glass morphism effects (`quetrex-glass` utility class)
 - Custom status indicators (running, idle, error)
 - Beautiful gradients and animations
 
@@ -91,17 +91,17 @@ The app uses shadcn/ui's **dark violet theme**:
 - **Destructive:** Red (for errors)
 
 Custom utilities:
-- `.sentra-glass` - Glassmorphism effect
-- `.sentra-card` - Standard card styling
-- `.sentra-status-running` - Green status badge
-- `.sentra-status-idle` - Gray status badge
-- `.sentra-status-error` - Red status badge
+- `.quetrex-glass` - Glassmorphism effect
+- `.quetrex-card` - Standard card styling
+- `.quetrex-status-running` - Green status badge
+- `.quetrex-status-idle` - Gray status badge
+- `.quetrex-status-error` - Red status badge
 
 ---
 
 ## Data Layer Architecture
 
-Sentra uses a clean separation between UI and data:
+Quetrex uses a clean separation between UI and data:
 
 ### TypeScript Types (`src/lib/tauri.ts`)
 
@@ -177,7 +177,7 @@ When Tauri is integrated, set `MOCK_MODE = false` and the real Tauri commands wi
 
 **Adding shadcn/ui components:**
 ```bash
-cd sentra
+cd quetrex
 npx shadcn-ui@latest add button
 npx shadcn-ui@latest add card
 npx shadcn-ui@latest add badge
@@ -186,14 +186,14 @@ npx shadcn-ui@latest add badge
 **Tailwind classes:**
 - Use `bg-background`, `text-foreground` for theme colors
 - Use `border-border` for consistent borders
-- Use custom `.sentra-*` classes for app-specific styling
+- Use custom `.quetrex-*` classes for app-specific styling
 
 ---
 
 ## File Structure
 
 ```
-sentra/
+quetrex/
 ├── src/
 │   ├── app/
 │   │   ├── globals.css       # Dark violet theme

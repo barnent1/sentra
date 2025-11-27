@@ -6,7 +6,7 @@
 
 ## Overview
 
-This directory contains comprehensive research and actionable strategies for implementing a zero-bugs production environment for the Sentra AI Agent Control Center project.
+This directory contains comprehensive research and actionable strategies for implementing a zero-bugs production environment for the Quetrex AI Agent Control Center project.
 
 ## Documents
 

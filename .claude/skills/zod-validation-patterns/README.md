@@ -2,7 +2,7 @@
 
 ## Overview
 
-Comprehensive Zod validation skill for Sentra providing production-ready patterns for all input validation scenarios.
+Comprehensive Zod validation skill for Quetrex providing production-ready patterns for all input validation scenarios.
 
 ## Statistics
 

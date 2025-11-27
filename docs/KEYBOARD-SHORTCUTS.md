@@ -1,6 +1,6 @@
 # Keyboard Shortcuts
 
-Complete guide to keyboard navigation and shortcuts in Sentra.
+Complete guide to keyboard navigation and shortcuts in Quetrex.
 
 ## Platform-Specific Keys
 
@@ -164,7 +164,7 @@ When a project card is focused:
 
 ### Keyboard-Only Usage
 
-Sentra can be fully operated without a mouse:
+Quetrex can be fully operated without a mouse:
 
 1. Use `Tab` to navigate between elements
 2. Use `Enter` or `Space` to activate buttons
@@ -197,7 +197,7 @@ Sentra can be fully operated without a mouse:
 
 ## Browser-Specific Shortcuts
 
-These are standard browser shortcuts that work in Sentra:
+These are standard browser shortcuts that work in Quetrex:
 
 | Shortcut | Action | Browser |
 |----------|--------|---------|
@@ -212,7 +212,7 @@ These are standard browser shortcuts that work in Sentra:
 
 ## Customization (Coming Soon)
 
-Future versions of Sentra will support:
+Future versions of Quetrex will support:
 
 - **Custom Keyboard Shortcuts**: Remap shortcuts to your preference
 - **Shortcut Cheat Sheet**: In-app shortcut reference (`Cmd/Ctrl + /`)
@@ -225,7 +225,7 @@ If you encounter any keyboard navigation issues:
 
 1. Check this guide to ensure you're using the correct shortcut
 2. Try refreshing the page (`Cmd/Ctrl + R`)
-3. Report the issue at: [github.com/barnent1/sentra/issues](https://github.com/barnent1/sentra/issues)
+3. Report the issue at: [github.com/barnent1/quetrex/issues](https://github.com/barnent1/quetrex/issues)
    - Use label: `accessibility` and `keyboard-navigation`
    - Include your operating system and browser version
 

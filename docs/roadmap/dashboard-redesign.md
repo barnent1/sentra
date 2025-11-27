@@ -10,13 +10,13 @@
 
 ## Vision
 
-Transform Sentra's dashboard from a minimalistic single-project view into a **mission control center** for managing multiple AI-powered projects simultaneously. The redesign emphasizes:
+Transform Quetrex's dashboard from a minimalistic single-project view into a **mission control center** for managing multiple AI-powered projects simultaneously. The redesign emphasizes:
 
 1. **Multi-project visibility** - Monitor all your projects at a glance
 2. **True dark theme** - Professional dark cards with subtle borders, violet accents
 3. **Actionable intelligence** - See status, progress, and next actions without drilling down
 4. **Voice-first interaction** - Queue system prevents overlapping speech from multiple projects
-5. **In-app workflow** - Create projects, review PRs, and manage everything without leaving Sentra
+5. **In-app workflow** - Create projects, review PRs, and manage everything without leaving Quetrex
 
 ---
 
@@ -58,13 +58,13 @@ Sections:     48px vertical spacing
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  Sentra                                    [Settings] [Profile]  │
+│  Quetrex                                    [Settings] [Profile]  │
 ├─────────────────────────────────────────────────────────────────┤
 │  [Projects] [Analytics] [Costs] [Settings]                      │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │  ┌─────────────────────┐  ┌─────────────────────┐              │
-│  │ ● Sentra            │  │ ● E-commerce App    │   [+ New]    │
+│  │ ● Quetrex            │  │ ● E-commerce App    │   [+ New]    │
 │  │                     │  │                     │              │
 │  │ Implementing voice  │  │ Building checkout   │              │
 │  │ queue system        │  │ flow                │              │
@@ -169,7 +169,7 @@ Grid of project cards as shown above.
 **Note:** Costs hidden by default (separate tab), not shown in main dashboard to avoid anxiety.
 
 ### Settings Tab
-Global Sentra settings (API keys, preferences, etc.)
+Global Quetrex settings (API keys, preferences, etc.)
 
 ---
 
@@ -208,7 +208,7 @@ Global Sentra settings (API keys, preferences, etc.)
 │                                         │
 │  [x] Initialize Git repository          │
 │  [x] Create GitHub repository           │
-│  [x] Add to Sentra tracking             │
+│  [x] Add to Quetrex tracking             │
 │                                         │
 │          [Cancel]  [Create Project]     │
 └─────────────────────────────────────────┘
@@ -243,8 +243,8 @@ Global Sentra settings (API keys, preferences, etc.)
 - Creates directory structure
 - Initializes Git repository
 - Creates GitHub repository (if selected)
-- Adds `.sentra/` directory for tracking
-- Adds to Sentra project list
+- Adds `.quetrex/` directory for tracking
+- Adds to Quetrex project list
 - Opens in dashboard
 
 ---
@@ -257,7 +257,7 @@ Global Sentra settings (API keys, preferences, etc.)
 
 ```
 ┌─────────────────────────────────────────┐
-│  ← Back          Sentra                 │
+│  ← Back          Quetrex                 │
 ├─────────────────────────────────────────┤
 │  [Overview] [Git] [Logs] [Costs]        │
 ├─────────────────────────────────────────┤
@@ -348,7 +348,7 @@ Last 7 Days:
 Voice Queue Service
     ↓
 Queue: [
-  { project: "sentra", message: "Voice queue implemented" },
+  { project: "quetrex", message: "Voice queue implemented" },
   { project: "ecommerce", message: "Checkout flow complete" }
 ]
     ↓
@@ -409,7 +409,7 @@ interface VoiceMessage {
 
 ## In-App PR Review & Approval
 
-**Problem:** User must leave Sentra to review PRs on GitHub.
+**Problem:** User must leave Quetrex to review PRs on GitHub.
 
 **Solution:** Inline PR review modal with GitHub API integration.
 
@@ -469,7 +469,7 @@ GET /repos/{owner}/{repo}/commits/{sha}/check-runs
 POST /repos/{owner}/{repo}/pulls/{number}/reviews
 {
   event: "APPROVE",
-  body: "Approved via Sentra"
+  body: "Approved via Quetrex"
 }
 
 // Merge PR
@@ -486,7 +486,7 @@ src/services/github-api.ts
 
 **Authentication:**
 - Uses GitHub Personal Access Token
-- Stored in Sentra settings
+- Stored in Quetrex settings
 - Scopes required: `repo`, `workflow`
 
 ### File Tree Navigation
@@ -516,7 +516,7 @@ Click file to view diff inline.
 When agent starts work, it creates a task breakdown:
 
 ```yaml
-# .sentra/tasks/current.yml
+# .quetrex/tasks/current.yml
 task: Implement voice queue system
 started: 2025-11-13T14:32:15Z
 checkpoints:
@@ -565,7 +565,7 @@ async function generateCheckpoints(task: string): Promise<Checkpoint[]> {
 ### Real-Time Updates
 
 As agent completes each checkpoint:
-1. Updates `.sentra/tasks/current.yml`
+1. Updates `.quetrex/tasks/current.yml`
 2. Tauri watches file for changes
 3. Dashboard updates progress bar
 4. Voice notification (if unmuted): "Checkpoint complete: Add queue state management"
@@ -608,7 +608,7 @@ The design should match the aesthetic shown in the user's reference image:
 ### Phase 2: Project Management (Week 3)
 - ✅ New Project button + modal
 - ✅ Template selection
-- ✅ Auto-initialization (Git, GitHub, Sentra)
+- ✅ Auto-initialization (Git, GitHub, Quetrex)
 - ✅ Project scaffolding (Tauri command)
 
 ### Phase 3: Voice Queue (Week 4)
@@ -673,14 +673,14 @@ pub async fn create_project(
     // 2. Initialize from template
     // 3. Init Git if requested
     // 4. Create GitHub repo if requested
-    // 5. Add .sentra/ directory
+    // 5. Add .quetrex/ directory
     // 6. Add to project list
     // 7. Return project details
 }
 
 #[tauri::command]
 pub async fn get_project_progress(project_id: String) -> Result<Progress, String> {
-    // Read .sentra/tasks/current.yml
+    // Read .quetrex/tasks/current.yml
     // Calculate progress from checkpoints
     // Return percentage and breakdown
 }
@@ -701,7 +701,7 @@ pub async fn get_git_status(project_path: String) -> Result<GitStatus, String> {
 use notify::{Watcher, RecursiveMode, Event};
 
 fn watch_task_file(project_path: &str, callback: impl Fn(Progress)) {
-    let task_file = format!("{}/.sentra/tasks/current.yml", project_path);
+    let task_file = format!("{}/.quetrex/tasks/current.yml", project_path);
 
     let mut watcher = notify::recommended_watcher(move |res: Result<Event, _>| {
         if let Ok(event) = res {
@@ -745,7 +745,7 @@ test('create new project from template', async ({ page }) => {
 })
 
 test('view project drill-down details', async ({ page }) => {
-  await page.click('[data-testid="project-card-sentra"] [data-testid="view-button"]')
+  await page.click('[data-testid="project-card-quetrex"] [data-testid="view-button"]')
 
   // Detail panel should slide in
   await expect(page.getByRole('dialog')).toBeVisible()
@@ -753,7 +753,7 @@ test('view project drill-down details', async ({ page }) => {
 })
 
 test('review and approve PR in-app', async ({ page }) => {
-  await page.click('[data-testid="project-card-sentra"] [data-testid="view-button"]')
+  await page.click('[data-testid="project-card-quetrex"] [data-testid="view-button"]')
   await page.click('[data-testid="tab-git"]')
   await page.click('[data-testid="pr-42-review"]')
 

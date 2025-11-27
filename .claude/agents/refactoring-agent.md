@@ -34,7 +34,7 @@ Read the file thoroughly:
 
 ### 2. Read Target Pattern
 
-Load pattern from `.sentra/memory/patterns.md`:
+Load pattern from `.quetrex/memory/patterns.md`:
 - What does the pattern require?
 - How should it be implemented?
 - What are the testing requirements?
@@ -96,7 +96,7 @@ Run full test suite:
 - ✅ Manual testing completed
 
 ### References:
-- Pattern: .sentra/memory/patterns.md#pattern-[id]
+- Pattern: .quetrex/memory/patterns.md#pattern-[id]
 - Architecture doc: docs/architecture/[DOC].md
 ```
 

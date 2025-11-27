@@ -48,7 +48,7 @@ export async function POST(
         },
         body: JSON.stringify({
           event: 'APPROVE',
-          body: comment || 'Approved via Sentra',
+          body: comment || 'Approved via Quetrex',
         }),
       }
     )

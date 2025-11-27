@@ -49,7 +49,7 @@ describe('VoiceQueue', () => {
     it('should add message to queue with default priority (info)', async () => {
       const message: VoiceMessage = {
         text: 'Test message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
       };
 
       await queue.add(message);
@@ -61,7 +61,7 @@ describe('VoiceQueue', () => {
     it('should add message with specified priority', async () => {
       const message: VoiceMessage = {
         text: 'Error occurred',
-        projectName: 'sentra',
+        projectName: 'quetrex',
         priority: 'error',
       };
 
@@ -74,12 +74,12 @@ describe('VoiceQueue', () => {
     it('should assign unique ID to each message', async () => {
       const message1: VoiceMessage = {
         text: 'Message 1',
-        projectName: 'sentra',
+        projectName: 'quetrex',
       };
 
       const message2: VoiceMessage = {
         text: 'Message 2',
-        projectName: 'sentra',
+        projectName: 'quetrex',
       };
 
       const id1 = await queue.add(message1);
@@ -93,7 +93,7 @@ describe('VoiceQueue', () => {
     it('should start processing automatically when first message added', async () => {
       const message: VoiceMessage = {
         text: 'First message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
       };
 
       await queue.add(message);
@@ -106,11 +106,11 @@ describe('VoiceQueue', () => {
 
     it('should filter out muted projects', async () => {
       // Mute the project first
-      queue.setProjectMuted('sentra', true);
+      queue.setProjectMuted('quetrex', true);
 
       const message: VoiceMessage = {
         text: 'Muted message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
       };
 
       await queue.add(message);
@@ -124,11 +124,11 @@ describe('VoiceQueue', () => {
     });
 
     it('should not filter messages from unmuted projects', async () => {
-      queue.setProjectMuted('sentra', false);
+      queue.setProjectMuted('quetrex', false);
 
       const message: VoiceMessage = {
         text: 'Unmuted message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
       };
 
       await queue.add(message);
@@ -144,7 +144,7 @@ describe('VoiceQueue', () => {
 
       const message: VoiceMessage = {
         text: 'Test message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
       };
 
       await queue.add(message);
@@ -171,13 +171,13 @@ describe('VoiceQueue', () => {
     it('should process error priority before warning', async () => {
       const warning: VoiceMessage = {
         text: 'Warning message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
         priority: 'warning',
       };
 
       const error: VoiceMessage = {
         text: 'Error message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
         priority: 'error',
       };
 
@@ -202,13 +202,13 @@ describe('VoiceQueue', () => {
     it('should process warning priority before info', async () => {
       const info: VoiceMessage = {
         text: 'Info message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
         priority: 'info',
       };
 
       const warning: VoiceMessage = {
         text: 'Warning message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
         priority: 'warning',
       };
 
@@ -228,19 +228,19 @@ describe('VoiceQueue', () => {
     it('should maintain FIFO order within same priority', async () => {
       const message1: VoiceMessage = {
         text: 'First info',
-        projectName: 'sentra',
+        projectName: 'quetrex',
         priority: 'info',
       };
 
       const message2: VoiceMessage = {
         text: 'Second info',
-        projectName: 'sentra',
+        projectName: 'quetrex',
         priority: 'info',
       };
 
       const message3: VoiceMessage = {
         text: 'Third info',
-        projectName: 'sentra',
+        projectName: 'quetrex',
         priority: 'info',
       };
 
@@ -273,9 +273,9 @@ describe('VoiceQueue', () => {
 
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Message 1', projectName: 'sentra' });
-      await queue.add({ text: 'Message 2', projectName: 'sentra' });
-      await queue.add({ text: 'Message 3', projectName: 'sentra' });
+      await queue.add({ text: 'Message 1', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 2', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 3', projectName: 'quetrex' });
 
       // Wait for all to process
       await new Promise(resolve => setTimeout(resolve, 300));
@@ -289,7 +289,7 @@ describe('VoiceQueue', () => {
       });
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Test message', projectName: 'sentra' });
+      await queue.add({ text: 'Test message', projectName: 'quetrex' });
 
       // Wait for processing to start
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -304,7 +304,7 @@ describe('VoiceQueue', () => {
       mockTTSFunction = vi.fn().mockResolvedValue(undefined);
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Test message', projectName: 'sentra' });
+      await queue.add({ text: 'Test message', projectName: 'quetrex' });
 
       // Wait for processing to complete
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -318,7 +318,7 @@ describe('VoiceQueue', () => {
       mockTTSFunction = vi.fn().mockRejectedValue(new Error('TTS failed'));
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Test message', projectName: 'sentra' });
+      await queue.add({ text: 'Test message', projectName: 'quetrex' });
 
       // Wait for processing attempt
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -340,8 +340,8 @@ describe('VoiceQueue', () => {
 
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Message 1', projectName: 'sentra' });
-      await queue.add({ text: 'Message 2', projectName: 'sentra' });
+      await queue.add({ text: 'Message 1', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 2', projectName: 'quetrex' });
 
       // Wait for both to process
       await new Promise(resolve => setTimeout(resolve, 150));
@@ -352,21 +352,21 @@ describe('VoiceQueue', () => {
 
   describe('setProjectMuted', () => {
     it('should mute a project', () => {
-      queue.setProjectMuted('sentra', true);
-      expect(queue.isProjectMuted('sentra')).toBe(true);
+      queue.setProjectMuted('quetrex', true);
+      expect(queue.isProjectMuted('quetrex')).toBe(true);
     });
 
     it('should unmute a project', () => {
-      queue.setProjectMuted('sentra', true);
-      queue.setProjectMuted('sentra', false);
-      expect(queue.isProjectMuted('sentra')).toBe(false);
+      queue.setProjectMuted('quetrex', true);
+      queue.setProjectMuted('quetrex', false);
+      expect(queue.isProjectMuted('quetrex')).toBe(false);
     });
 
     it('should handle multiple projects independently', () => {
-      queue.setProjectMuted('sentra', true);
+      queue.setProjectMuted('quetrex', true);
       queue.setProjectMuted('workcell', false);
 
-      expect(queue.isProjectMuted('sentra')).toBe(true);
+      expect(queue.isProjectMuted('quetrex')).toBe(true);
       expect(queue.isProjectMuted('workcell')).toBe(false);
     });
 
@@ -375,11 +375,11 @@ describe('VoiceQueue', () => {
     });
 
     it('should persist mute state across multiple checks', () => {
-      queue.setProjectMuted('sentra', true);
+      queue.setProjectMuted('quetrex', true);
 
-      expect(queue.isProjectMuted('sentra')).toBe(true);
-      expect(queue.isProjectMuted('sentra')).toBe(true);
-      expect(queue.isProjectMuted('sentra')).toBe(true);
+      expect(queue.isProjectMuted('quetrex')).toBe(true);
+      expect(queue.isProjectMuted('quetrex')).toBe(true);
+      expect(queue.isProjectMuted('quetrex')).toBe(true);
     });
   });
 
@@ -390,9 +390,9 @@ describe('VoiceQueue', () => {
       });
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Message 1', projectName: 'sentra' });
-      await queue.add({ text: 'Message 2', projectName: 'sentra' });
-      await queue.add({ text: 'Message 3', projectName: 'sentra' });
+      await queue.add({ text: 'Message 1', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 2', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 3', projectName: 'quetrex' });
 
       queue.clear();
 
@@ -406,7 +406,7 @@ describe('VoiceQueue', () => {
       });
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Processing message', projectName: 'sentra' });
+      await queue.add({ text: 'Processing message', projectName: 'quetrex' });
 
       // Wait for processing to start
       await new Promise(resolve => setTimeout(resolve, 50));
@@ -427,12 +427,12 @@ describe('VoiceQueue', () => {
       });
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Sentra message 1', projectName: 'sentra' });
+      await queue.add({ text: 'Quetrex message 1', projectName: 'quetrex' });
       await queue.add({ text: 'Workcell message', projectName: 'workcell' });
-      await queue.add({ text: 'Sentra message 2', projectName: 'sentra' });
+      await queue.add({ text: 'Quetrex message 2', projectName: 'quetrex' });
 
-      // Clear sentra messages before any processing starts
-      queue.clearProject('sentra');
+      // Clear quetrex messages before any processing starts
+      queue.clearProject('quetrex');
 
       const status = queue.getStatus();
       expect(status.queueLength).toBeLessThan(3);
@@ -440,7 +440,7 @@ describe('VoiceQueue', () => {
       // Wait for processing
       await new Promise(resolve => setTimeout(resolve, 200));
 
-      // Should only process workcell message (sentra messages were cleared)
+      // Should only process workcell message (quetrex messages were cleared)
       expect(mockTTSFunction).toHaveBeenCalledTimes(1);
       expect(mockTTSFunction).toHaveBeenCalledWith('Workcell message');
     });
@@ -451,10 +451,10 @@ describe('VoiceQueue', () => {
       });
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Sentra message', projectName: 'sentra' });
+      await queue.add({ text: 'Quetrex message', projectName: 'quetrex' });
       await queue.add({ text: 'Workcell message', projectName: 'workcell' });
 
-      queue.clearProject('sentra');
+      queue.clearProject('quetrex');
 
       await new Promise(resolve => setTimeout(resolve, 250));
 
@@ -464,8 +464,8 @@ describe('VoiceQueue', () => {
 
   describe('getStatus', () => {
     it('should return current queue length', async () => {
-      await queue.add({ text: 'Message 1', projectName: 'sentra' });
-      await queue.add({ text: 'Message 2', projectName: 'sentra' });
+      await queue.add({ text: 'Message 1', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 2', projectName: 'quetrex' });
 
       const status = queue.getStatus();
       expect(status.queueLength).toBeGreaterThanOrEqual(0);
@@ -477,7 +477,7 @@ describe('VoiceQueue', () => {
       });
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Test message', projectName: 'sentra' });
+      await queue.add({ text: 'Test message', projectName: 'quetrex' });
 
       // Check during processing (wait longer to ensure processing has started)
       await new Promise(resolve => setTimeout(resolve, 30));
@@ -498,7 +498,7 @@ describe('VoiceQueue', () => {
 
       await queue.add({
         text: 'Test message',
-        projectName: 'sentra',
+        projectName: 'quetrex',
         priority: 'warning',
       });
 
@@ -507,7 +507,7 @@ describe('VoiceQueue', () => {
       const status = queue.getStatus();
       expect(status.currentMessage).not.toBeNull();
       expect(status.currentMessage?.text).toBe('Test message');
-      expect(status.currentMessage?.projectName).toBe('sentra');
+      expect(status.currentMessage?.projectName).toBe('quetrex');
       expect(status.currentMessage?.priority).toBe('warning');
     });
 
@@ -519,8 +519,8 @@ describe('VoiceQueue', () => {
 
   describe('destroy', () => {
     it('should clear queue', async () => {
-      await queue.add({ text: 'Message 1', projectName: 'sentra' });
-      await queue.add({ text: 'Message 2', projectName: 'sentra' });
+      await queue.add({ text: 'Message 1', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 2', projectName: 'quetrex' });
 
       queue.destroy();
 
@@ -534,8 +534,8 @@ describe('VoiceQueue', () => {
       });
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Message 1', projectName: 'sentra' });
-      await queue.add({ text: 'Message 2', projectName: 'sentra' });
+      await queue.add({ text: 'Message 1', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 2', projectName: 'quetrex' });
 
       // Wait for first message to start
       await new Promise(resolve => setTimeout(resolve, 20));
@@ -562,7 +562,7 @@ describe('VoiceQueue', () => {
     it('should respect echo prevention delay', async () => {
       const startTime = Date.now();
 
-      await queue.add({ text: 'Test message', projectName: 'sentra' });
+      await queue.add({ text: 'Test message', projectName: 'quetrex' });
 
       // Wait for processing
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -581,8 +581,8 @@ describe('VoiceQueue', () => {
 
       const startTime = Date.now();
 
-      await queue.add({ text: 'Message 1', projectName: 'sentra' });
-      await queue.add({ text: 'Message 2', projectName: 'sentra' });
+      await queue.add({ text: 'Message 1', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 2', projectName: 'quetrex' });
 
       // Wait for both to process
       await new Promise(resolve => setTimeout(resolve, 200));
@@ -599,7 +599,7 @@ describe('VoiceQueue', () => {
     it('should handle rapid message additions', async () => {
       const messages = Array.from({ length: 10 }, (_, i) => ({
         text: `Message ${i}`,
-        projectName: 'sentra',
+        projectName: 'quetrex',
       }));
 
       // Add all messages rapidly
@@ -612,11 +612,11 @@ describe('VoiceQueue', () => {
 
     it('should handle concurrent mute changes', async () => {
       const promises = [
-        queue.add({ text: 'Message 1', projectName: 'sentra' }),
-        queue.setProjectMuted('sentra', true),
-        queue.add({ text: 'Message 2', projectName: 'sentra' }),
-        queue.setProjectMuted('sentra', false),
-        queue.add({ text: 'Message 3', projectName: 'sentra' }),
+        queue.add({ text: 'Message 1', projectName: 'quetrex' }),
+        queue.setProjectMuted('quetrex', true),
+        queue.add({ text: 'Message 2', projectName: 'quetrex' }),
+        queue.setProjectMuted('quetrex', false),
+        queue.add({ text: 'Message 3', projectName: 'quetrex' }),
       ];
 
       await Promise.all(promises);
@@ -631,8 +631,8 @@ describe('VoiceQueue', () => {
       });
       queue = new VoiceQueue(mockTTSFunction as unknown as TTSFunction);
 
-      await queue.add({ text: 'Message 1', projectName: 'sentra' });
-      await queue.add({ text: 'Message 2', projectName: 'sentra' });
+      await queue.add({ text: 'Message 1', projectName: 'quetrex' });
+      await queue.add({ text: 'Message 2', projectName: 'quetrex' });
 
       // Clear while processing
       setTimeout(() => queue.clear(), 50);
@@ -647,7 +647,7 @@ describe('VoiceQueue', () => {
 
   describe('edge cases', () => {
     it('should handle empty message text', async () => {
-      await queue.add({ text: '', projectName: 'sentra' });
+      await queue.add({ text: '', projectName: 'quetrex' });
 
       await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -657,7 +657,7 @@ describe('VoiceQueue', () => {
     it('should handle very long messages', async () => {
       const longMessage = 'a'.repeat(10000);
 
-      await queue.add({ text: longMessage, projectName: 'sentra' });
+      await queue.add({ text: longMessage, projectName: 'quetrex' });
 
       await new Promise(resolve => setTimeout(resolve, 100));
 

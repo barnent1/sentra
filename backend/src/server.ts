@@ -1,4 +1,4 @@
-// Sentra Backend API Server
+// Quetrex Backend API Server
 // Express server for cloud features (authentication, projects, costs, activity)
 import express, { Express } from 'express'
 import cors from 'cors'
@@ -80,7 +80,7 @@ export function startServer(port: number = 3001): void {
   const app = createApp()
 
   app.listen(port, () => {
-    console.log(`🚀 Sentra Backend API Server running on port ${port}`)
+    console.log(`🚀 Quetrex Backend API Server running on port ${port}`)
     console.log(`   Health check: http://localhost:${port}/health`)
     console.log(`   API endpoint: http://localhost:${port}/api`)
   })

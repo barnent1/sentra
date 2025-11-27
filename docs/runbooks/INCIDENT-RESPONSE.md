@@ -7,7 +7,7 @@
 
 ## Overview
 
-This playbook provides step-by-step procedures for responding to security incidents in Sentra's production environment.
+This playbook provides step-by-step procedures for responding to security incidents in Quetrex's production environment.
 
 **Severity Levels:**
 - **P0 (Critical):** Active attack, data breach, service down
@@ -22,13 +22,13 @@ This playbook provides step-by-step procedures for responding to security incide
 ### Escalation Path
 
 **On-Call Engineer (First Response):**
-- Slack: `#sentra-incidents`
-- PagerDuty: Sentra On-Call rotation
+- Slack: `#quetrex-incidents`
+- PagerDuty: Quetrex On-Call rotation
 
 **Security Team:**
-- Email: security@sentra.app
+- Email: security@quetrex.app
 - Slack: `#security`
-- Lead: Glen Barnhardt (glen@sentra.app)
+- Lead: Glen Barnhardt (glen@quetrex.app)
 
 **Infrastructure Team:**
 - Slack: `#infra`
@@ -258,7 +258,7 @@ const limiter = rateLimit({
 # Via Vercel firewall or database provider
 
 # 3. Capture current state
-pg_dump sentra_db > breach_snapshot_$(date +%Y%m%d_%H%M%S).sql
+pg_dump quetrex_db > breach_snapshot_$(date +%Y%m%d_%H%M%S).sql
 ```
 
 ### Investigation (< 30 minutes)
@@ -338,7 +338,7 @@ Actions Taken:
 
 Next Update: [Time]
 
-Contact: security@sentra.app
+Contact: security@quetrex.app
 ```
 
 ### Post-Incident Report

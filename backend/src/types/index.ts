@@ -1,4 +1,4 @@
-// Type definitions for Sentra Backend API
+// Type definitions for Quetrex Backend API
 
 export interface RegisterRequest {
   email: string

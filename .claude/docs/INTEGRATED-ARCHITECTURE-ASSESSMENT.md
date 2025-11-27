@@ -1,4 +1,4 @@
-# Integrated Architecture Assessment: Sentra vs Anthropic's Vision
+# Integrated Architecture Assessment: Quetrex vs Anthropic's Vision
 
 **Date:** 2025-11-23
 **Assessor:** Claude Code
@@ -11,7 +11,7 @@
 **Overall Compliance:** 70% ✅
 **Status:** Good foundation, needs refinement to match Anthropic's integrated architecture
 
-Sentra has the right structure (skills + agents) but is missing the **integration layer** that makes them truly composable. Agents don't auto-load skills, skills lack progressive disclosure files, and knowledge is duplicated across agents instead of composed from skills.
+Quetrex has the right structure (skills + agents) but is missing the **integration layer** that makes them truly composable. Agents don't auto-load skills, skills lack progressive disclosure files, and knowledge is duplicated across agents instead of composed from skills.
 
 ---
 
@@ -24,7 +24,7 @@ Sentra has the right structure (skills + agents) but is missing the **integratio
 .claude/skills/
 ├── nextjs-15-specialist/SKILL.md
 ├── typescript-strict-guard/SKILL.md
-├── sentra-architect/SKILL.md
+├── quetrex-architect/SKILL.md
 ├── semantic-code-hunter/SKILL.md
 ├── tdd-enforcer/SKILL.md
 ├── security-sentinel/SKILL.md
@@ -149,7 +149,7 @@ model: sonnet
 - API design patterns
 - State management patterns
 
-**Current workaround:** Patterns documented in `.sentra/memory/patterns.md` but not accessible as skill. implementation.md references this file manually (lines 48-80).
+**Current workaround:** Patterns documented in `.quetrex/memory/patterns.md` but not accessible as skill. implementation.md references this file manually (lines 48-80).
 
 **Problem:** Agents can't load patterns on-demand via skill system.
 
@@ -228,7 +228,7 @@ def validate_typescript_strict(file_path):
 
 ## Compliance Matrix
 
-| Aspect | Document Standard | Sentra Current | Status |
+| Aspect | Document Standard | Quetrex Current | Status |
 |--------|------------------|----------------|--------|
 | Skill folder structure | ✅ Required | ✅ Present | 100% ✅ |
 | SKILL.md files | ✅ Required | ✅ Present | 100% ✅ |

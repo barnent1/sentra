@@ -1,6 +1,6 @@
 # Testing Patterns & Examples
 
-**Real-world test examples for Sentra AI Agent Control Center**
+**Real-world test examples for Quetrex AI Agent Control Center**
 
 This document provides copy-paste test patterns and examples specific to our tech stack:
 - Next.js 15.x (App Router)

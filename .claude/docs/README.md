@@ -1,6 +1,6 @@
 # Claude Code Documentation
 
-This directory contains architecture decision records and implementation guidance for the Sentra project's Claude Code integration.
+This directory contains architecture decision records and implementation guidance for the Quetrex project's Claude Code integration.
 
 ## Documents
 

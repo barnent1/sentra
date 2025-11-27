@@ -9,14 +9,14 @@
 
 ## Context
 
-Sentra currently has **208 hand-written E2E tests** across 13 test files, covering:
+Quetrex currently has **208 hand-written E2E tests** across 13 test files, covering:
 - Dashboard interactions (497 lines)
 - Project creation workflows (585 lines)
 - Settings modals (696 lines)
 - Visual regression testing (478 lines)
 - Accessibility, git integration, cost tracking, PR reviews, etc.
 
-**Problem:** Manual E2E test writing is time-consuming and error-prone. As Sentra scales to support multiple AI agent workflows, we need to automatically generate E2E tests from design specifications.
+**Problem:** Manual E2E test writing is time-consuming and error-prone. As Quetrex scales to support multiple AI agent workflows, we need to automatically generate E2E tests from design specifications.
 
 **Goal:** Achieve **zero manual E2E test writing** by generating tests from YAML specs.
 
@@ -242,7 +242,7 @@ Each template shows the final generated test code.
 
 ```typescript
 const prompt = `
-You are an expert Playwright test generator for Sentra.
+You are an expert Playwright test generator for Quetrex.
 
 Generate an E2E test based on this specification:
 
@@ -253,7 +253,7 @@ Requirements:
 2. Include proper data-testid selectors
 3. Add appropriate waitForTimeout for animations
 4. Handle edge cases (skip if no data, check count before accessing)
-5. Follow existing test patterns from Sentra codebase
+5. Follow existing test patterns from Quetrex codebase
 
 Existing test examples:
 ${relevantExamples}
@@ -355,7 +355,7 @@ If validation fails → Retry with error feedback (max 2 retries) → Human revi
 
 ## References
 
-- Existing E2E tests: `/Users/barnent1/Projects/sentra/tests/e2e/`
+- Existing E2E tests: `/Users/barnent1/Projects/quetrex/tests/e2e/`
 - Playwright docs: https://playwright.dev/
 - Mustache templates: https://mustache.github.io/
 - Claude API: https://docs.anthropic.com/claude/reference/
@@ -439,4 +439,4 @@ function calculateTemplateMatch(spec: TestSpec): { best: number; template: strin
 
 ---
 
-*This ADR is part of Sentra's Perfect Agentic Structure ensuring systematic decision-making and architectural consistency.*
+*This ADR is part of Quetrex's Perfect Agentic Structure ensuring systematic decision-making and architectural consistency.*

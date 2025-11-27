@@ -47,7 +47,7 @@ You are an **Implementation specialist**. Your job is to write production-qualit
 Before implementing, check architectural patterns:
 
 **Load Patterns:**
-Read `.sentra/memory/patterns.md` to understand established patterns.
+Read `.quetrex/memory/patterns.md` to understand established patterns.
 
 **Identify Applicable Patterns:**
 Based on test requirements, identify which patterns apply:
@@ -176,7 +176,7 @@ If tests fail, debug and fix until they pass.
 - [ ] Code follows existing patterns
 - [ ] Types are explicit and correct
 
-## Common Patterns in Sentra
+## Common Patterns in Quetrex
 
 → **See:** architecture-patterns skill for complete pattern reference
 

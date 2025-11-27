@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { X, GitBranch, Check, AlertCircle, Clock, AlertTriangle } from 'lucide-react';
-import type { PullRequestData } from '@/services/sentra-api';
-import { getPullRequest, getPRDiff, approvePullRequest, requestChangesPullRequest, mergePullRequest, getSettings } from '@/services/sentra-api';
+import type { PullRequestData } from '@/services/quetrex-api';
+import { getPullRequest, getPRDiff, approvePullRequest, requestChangesPullRequest, mergePullRequest, getSettings } from '@/services/quetrex-api';
 
 interface PRReviewPanelProps {
   isOpen: boolean;

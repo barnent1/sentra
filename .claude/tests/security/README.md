@@ -27,7 +27,7 @@ This test suite verifies all security measures implemented in Phase 1 of the sec
 
 3. **Build the container image**
    ```bash
-   docker build -t sentra-ai-agent:latest -f .claude/docker/Dockerfile .
+   docker build -t quetrex-ai-agent:latest -f .claude/docker/Dockerfile .
    ```
 
 ## Running Tests
@@ -131,7 +131,7 @@ sudo systemctl start docker
 ### Image not found
 Build the image first:
 ```bash
-docker build -t sentra-ai-agent:latest -f .claude/docker/Dockerfile .
+docker build -t quetrex-ai-agent:latest -f .claude/docker/Dockerfile .
 ```
 
 ### Tests timing out

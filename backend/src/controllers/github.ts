@@ -277,7 +277,7 @@ export async function approvePullRequest(req: Request, res: Response): Promise<v
         },
         body: JSON.stringify({
           event: 'APPROVE',
-          body: comment || 'Approved via Sentra',
+          body: comment || 'Approved via Quetrex',
         }),
       }
     );

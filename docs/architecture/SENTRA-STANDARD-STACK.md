@@ -1,4 +1,4 @@
-# Sentra Standard Stack
+# Quetrex Standard Stack
 
 **Version:** 1.1
 **Last Updated:** 2025-11-19
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The Sentra Standard Stack represents the optimal technology choices for building modern, production-ready SaaS applications. This stack is based on:
+The Quetrex Standard Stack represents the optimal technology choices for building modern, production-ready SaaS applications. This stack is based on:
 
 - **Real-world usage** by top companies (Vercel, Linear, Supabase)
 - **Performance benchmarks** (bundle size, runtime speed)
@@ -104,7 +104,7 @@ npm install -D drizzle-kit
 
 **Decision: Drizzle over Prisma**
 
-Sentra uses Next.js 15 on Vercel with full access to latest features. Prisma 6.19.0 blocks Vercel Edge Runtime, limiting platform capabilities.
+Quetrex uses Next.js 15 on Vercel with full access to latest features. Prisma 6.19.0 blocks Vercel Edge Runtime, limiting platform capabilities.
 
 **Technical Comparison:**
 
@@ -119,7 +119,7 @@ Sentra uses Next.js 15 on Vercel with full access to latest features. Prisma 6.1
 | Migration System | ✅ Excellent | ✅ Good | Prisma |
 | Visual Studio | ✅ Yes | ❌ No | Prisma |
 
-**Why Drizzle for Sentra:**
+**Why Drizzle for Quetrex:**
 - **Edge-first architecture** - Works everywhere (Node.js, Edge, Serverless)
 - **Type-safe queries** - Fully typed with TypeScript inference
 - **Minimal bundle** - 7KB vs heavy Node.js runtime
@@ -487,7 +487,7 @@ Deployment: Vercel
 
 ## Future UI Configuration
 
-When you build the Sentra interface, users should be able to configure:
+When you build the Quetrex interface, users should be able to configure:
 
 ### 1. Project Type
 - [ ] Full-stack SaaS (default)
@@ -545,7 +545,7 @@ For comparison:
 - Formik: 44KB
 - Redux Toolkit: 30KB+
 
-The Sentra Standard Stack achieves **better functionality with 50% smaller bundle** compared to common alternatives.
+The Quetrex Standard Stack achieves **better functionality with 50% smaller bundle** compared to common alternatives.
 
 ---
 
@@ -586,13 +586,13 @@ Use the automated setup script:
 
 ```bash
 cd your-project
-/path/to/sentra/.sentra/scripts/setup-nextjs-stack.sh .
+/path/to/quetrex/.quetrex/scripts/setup-nextjs-stack.sh .
 ```
 
-Or via Sentra CLI (coming soon):
+Or via Quetrex CLI (coming soon):
 
 ```bash
-sentra init --stack standard
+quetrex init --stack standard
 ```
 
 ---

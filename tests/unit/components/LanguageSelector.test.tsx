@@ -4,7 +4,7 @@ import { Settings } from '@/components/Settings';
 import i18n from '@/lib/i18n';
 
 // Mock Tauri API
-vi.mock('@/services/sentra-api', () => ({
+vi.mock('@/services/quetrex-api', () => ({
   getSettings: vi.fn(() =>
     Promise.resolve({
       userName: 'Test User',

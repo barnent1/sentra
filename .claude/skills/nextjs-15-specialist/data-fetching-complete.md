@@ -616,7 +616,7 @@ export default function ProjectPage({
 
 ## Server-Sent Events
 
-Real-time data streaming for Sentra voice interface.
+Real-time data streaming for Quetrex voice interface.
 
 ### Example 21: SSE Route Handler
 

@@ -1,0 +1,115 @@
+# Quetrex Dependency Graph - Test Configuration
+# Small test configuration to verify the dependency tracking system
+
+project: "Quetrex Dependency System Test"
+total_issues: 10
+
+batches:
+  batch_1:
+    name: "Foundation"
+    parallel_limit: 3
+    estimated_duration: "1 day"
+    issues: [1, 2, 3]
+    dependencies: []
+
+  batch_2:
+    name: "Core Features"
+    parallel_limit: 4
+    estimated_duration: "2 days"
+    issues: [4, 5, 6, 7]
+    dependencies:
+      all_from_batch: ["batch_1"]
+
+  batch_3:
+    name: "Advanced"
+    parallel_limit: 3
+    estimated_duration: "1 day"
+    issues: [8, 9, 10]
+    dependencies:
+      all_from_batch: ["batch_2"]
+
+issues:
+  # Batch 1: Foundation (no dependencies)
+  - id: 1
+    depends_on: []
+    soft_depends_on: []
+    blocks: [4, 5]
+    conflicts_with: []
+    files:
+      - "test/file1.ts"
+
+  - id: 2
+    depends_on: []
+    soft_depends_on: []
+    blocks: [6]
+    conflicts_with: []
+    files:
+      - "test/file2.ts"
+
+  - id: 3
+    depends_on: []
+    soft_depends_on: []
+    blocks: [7]
+    conflicts_with: []
+    files:
+      - "test/file3.ts"
+
+  # Batch 2: Core Features
+  - id: 4
+    depends_on: [1]
+    soft_depends_on: [2]
+    blocks: [8]
+    conflicts_with: []
+    files:
+      - "test/feature1.ts"
+
+  - id: 5
+    depends_on: [1]
+    soft_depends_on: []
+    blocks: [8]
+    conflicts_with: [6]
+    files:
+      - "test/feature2.ts"
+      - "test/shared.ts"
+
+  - id: 6
+    depends_on: [2]
+    soft_depends_on: []
+    blocks: [9]
+    conflicts_with: [5]
+    files:
+      - "test/feature3.ts"
+      - "test/shared.ts"  # Conflicts with issue 5
+
+  - id: 7
+    depends_on: [3]
+    soft_depends_on: []
+    blocks: [10]
+    conflicts_with: []
+    files:
+      - "test/feature4.ts"
+
+  # Batch 3: Advanced
+  - id: 8
+    depends_on: [4, 5]
+    soft_depends_on: []
+    blocks: []
+    conflicts_with: []
+    files:
+      - "test/advanced1.ts"
+
+  - id: 9
+    depends_on: [6]
+    soft_depends_on: []
+    blocks: []
+    conflicts_with: []
+    files:
+      - "test/advanced2.ts"
+
+  - id: 10
+    depends_on: [7]
+    soft_depends_on: []
+    blocks: []
+    conflicts_with: []
+    files:
+      - "test/advanced3.ts"

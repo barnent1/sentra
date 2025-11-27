@@ -45,7 +45,7 @@ describe('TeamService', () => {
 
   beforeEach(async () => {
     // Setup test database connection
-    const databaseUrl = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/sentra_test';
+    const databaseUrl = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/quetrex_test';
     sql = postgres(databaseUrl, { max: 1 });
     db = drizzle(sql);
 

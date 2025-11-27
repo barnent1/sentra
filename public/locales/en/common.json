@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "Sentra",
+    "title": "Quetrex",
     "subtitle": "Mission Control for Your AI Agents",
     "greeting": "Hey {{name}}",
     "loading": "Loading dashboard...",
@@ -88,7 +88,7 @@
         "owner": "GitHub Repo Owner",
         "name": "GitHub Repo Name",
         "ownerPlaceholder": "barnent1",
-        "namePlaceholder": "sentra"
+        "namePlaceholder": "quetrex"
       },
       "voice": {
         "title": "Voice",

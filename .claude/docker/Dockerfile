@@ -1,4 +1,4 @@
-# Sentra AI Agent Docker Container
+# Quetrex AI Agent Docker Container
 # Phase 1: Docker Containerization Security
 #
 # This Dockerfile implements the security architecture defined in:
@@ -99,8 +99,8 @@ ENV DISABLE_AUTOUPDATER=true
 ENV DISABLE_TELEMETRY=true
 
 # Configure git for non-interactive use
-RUN git config --global user.name "Sentra AI Agent" && \
-    git config --global user.email "agent@sentra.dev" && \
+RUN git config --global user.name "Quetrex AI Agent" && \
+    git config --global user.email "agent@quetrex.dev" && \
     git config --global init.defaultBranch main
 
 # Health check: Verify all required tools are available

@@ -1,0 +1,495 @@
+#!/usr/bin/env python3
+"""
+Quetrex CLI - AI-Powered SaaS Factory
+
+A command-line tool for initializing and managing AI-powered development workflows.
+
+Usage:
+    quetrex init [directory]       # Initialize Quetrex in a project
+    quetrex test <spec> <dir>      # Create test project from specification
+    quetrex architect [session]    # Start voice architect session
+    quetrex orchestrate <session>  # Generate issues from specification
+    quetrex config                 # Show configuration
+    quetrex doctor                 # Check installation health
+
+Created by Glen Barnhardt with help from Claude Code
+"""
+
+import os
+import sys
+import shutil
+import subprocess
+import argparse
+import json
+from pathlib import Path
+from typing import Optional, Dict, Any
+
+# Version
+VERSION = "1.0.0"
+
+# Colors for terminal output
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    END = '\033[0m'
+    BOLD = '\033[1m'
+
+def print_header(text: str):
+    """Print colored header"""
+    print(f"\n{Colors.BOLD}{Colors.HEADER}{text}{Colors.END}\n")
+
+def print_success(text: str):
+    """Print success message"""
+    print(f"{Colors.GREEN}✅ {text}{Colors.END}")
+
+def print_error(text: str):
+    """Print error message"""
+    print(f"{Colors.RED}❌ {text}{Colors.END}")
+
+def print_warning(text: str):
+    """Print warning message"""
+    print(f"{Colors.YELLOW}⚠️  {text}{Colors.END}")
+
+def print_info(text: str):
+    """Print info message"""
+    print(f"{Colors.CYAN}ℹ️  {text}{Colors.END}")
+
+def get_quetrex_root() -> Path:
+    """Get the root directory of Quetrex CLI installation"""
+    # This script is in quetrex-cli/quetrex
+    # Quetrex root is the parent directory of quetrex-cli
+    script_dir = Path(__file__).parent.absolute()
+    return script_dir.parent
+
+def run_command(cmd: str, cwd: Optional[Path] = None, check: bool = True) -> subprocess.CompletedProcess:
+    """Run shell command and return result"""
+    return subprocess.run(
+        cmd,
+        shell=True,
+        cwd=cwd,
+        check=check,
+        capture_output=True,
+        text=True
+    )
+
+def copy_directory(src: Path, dest: Path, description: str):
+    """Copy directory with progress message"""
+    if src.exists():
+        shutil.copytree(src, dest, dirs_exist_ok=True)
+        print_success(f"Copied {description}")
+        return True
+    else:
+        print_warning(f"Source not found: {src}")
+        return False
+
+def create_config_file(target_dir: Path, project_name: str, repo_url: str = ""):
+    """Create .quetrex/config.yml"""
+    config = f"""project:
+  name: "{project_name}"
+  type: "nextjs"
+  initialized: "{subprocess.check_output(['date', '+%Y-%m-%d']).decode().strip()}"
+
+repository:
+  url: "{repo_url}"
+  main_branch: "main"
+
+agent:
+  max_execution_time: 45
+  max_api_calls: 150
+  max_file_changes: 75
+  require_tests: true
+  github_comments: true
+
+coverage:
+  global: 75
+  services: 90
+  utils: 90
+
+labels:
+  - "ai-feature"
+  - "p0"
+  - "p1"
+  - "p2"
+  - "foundation"
+  - "needs-help"
+"""
+
+    config_file = target_dir / ".quetrex" / "config.yml"
+    config_file.parent.mkdir(parents=True, exist_ok=True)
+    config_file.write_text(config)
+    print_success(f"Created configuration: {config_file}")
+
+def cmd_init(args):
+    """Initialize Quetrex in a project directory"""
+    print_header("🚀 Initializing Quetrex AI-Powered Development")
+
+    # Determine target directory
+    target_dir = Path(args.directory) if args.directory else Path.cwd()
+    target_dir = target_dir.absolute()
+
+    print_info(f"Target directory: {target_dir}")
+
+    if not target_dir.exists():
+        print_error(f"Directory does not exist: {target_dir}")
+        print_info("Create it first or use 'quetrex test' to create a test project")
+        sys.exit(1)
+
+    # Get Quetrex root
+    quetrex_root = get_quetrex_root()
+    print_info(f"Quetrex source: {quetrex_root}")
+
+    # Step 1: Copy .claude/ directory
+    print_header("📁 Step 1: Copying Claude Code infrastructure")
+    claude_src = quetrex_root / ".claude"
+    claude_dest = target_dir / ".claude"
+
+    if claude_src.exists():
+        copy_directory(claude_src / "agents", claude_dest / "agents", "11 specialized agents")
+        copy_directory(claude_src / "hooks", claude_dest / "hooks", "6-layer quality defense hooks")
+        copy_directory(claude_src / "skills", claude_dest / "skills", "7 progressive disclosure skills")
+        copy_directory(claude_src / "scripts", claude_dest / "scripts", "AI agent worker scripts")
+        copy_directory(claude_src / "docs", claude_dest / "docs", "Architecture documentation")
+
+        # Copy settings.json
+        settings_src = claude_src / "settings.json"
+        if settings_src.exists():
+            shutil.copy(settings_src, claude_dest / "settings.json")
+            print_success("Copied Claude Code settings")
+    else:
+        print_warning(f".claude/ directory not found at {claude_src}")
+
+    # Step 2: Copy .quetrex/ directory
+    print_header("📁 Step 2: Copying Quetrex scripts")
+    quetrex_src = quetrex_root / ".quetrex"
+    quetrex_dest = target_dir / ".quetrex"
+
+    if quetrex_src.exists():
+        copy_directory(quetrex_src / "scripts", quetrex_dest / "scripts", "Quetrex Python scripts")
+    else:
+        # Create empty .quetrex/scripts directory
+        (quetrex_dest / "scripts").mkdir(parents=True, exist_ok=True)
+        print_warning(".quetrex/ directory not found, created empty structure")
+
+    # Step 3: Copy GitHub Actions workflow
+    print_header("📁 Step 3: Setting up GitHub Actions")
+    github_src = quetrex_root / ".github" / "workflows" / "ai-agent.yml"
+    github_dest = target_dir / ".github" / "workflows" / "ai-agent.yml"
+
+    if github_src.exists():
+        github_dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(github_src, github_dest)
+        print_success("Copied GitHub Actions workflow")
+    else:
+        print_warning("GitHub Actions workflow not found")
+
+    # Step 4: Create configuration
+    print_header("⚙️  Step 4: Creating configuration")
+    project_name = target_dir.name
+
+    # Try to get repo URL from git remote
+    repo_url = ""
+    try:
+        result = run_command("git remote get-url origin", cwd=target_dir, check=False)
+        if result.returncode == 0:
+            repo_url = result.stdout.strip()
+    except:
+        pass
+
+    create_config_file(target_dir, project_name, repo_url)
+
+    # Step 5: Update .gitignore
+    print_header("📝 Step 5: Updating .gitignore")
+    gitignore = target_dir / ".gitignore"
+    gitignore_entries = [
+        "",
+        "# Quetrex",
+        ".quetrex/architect-sessions/*/session-history.md",
+        ".quetrex/architect-sessions/*/audio-recordings/",
+        ".quetrex/*.log",
+        ""
+    ]
+
+    if gitignore.exists():
+        content = gitignore.read_text()
+        if "# Quetrex" not in content:
+            with open(gitignore, 'a') as f:
+                f.write('\n'.join(gitignore_entries))
+            print_success("Updated .gitignore")
+        else:
+            print_info(".gitignore already contains Quetrex entries")
+    else:
+        gitignore.write_text('\n'.join(gitignore_entries))
+        print_success("Created .gitignore")
+
+    # Step 6: Summary
+    print_header("✨ Initialization Complete!")
+    print_info("Quetrex AI-Powered Development is now configured")
+    print()
+    print("Next steps:")
+    print("  1. Ensure GitHub CLI is authenticated: gh auth login")
+    print("  2. Create GitHub labels: quetrex init --labels (coming soon)")
+    print("  3. Start Voice Architect: quetrex architect <session-name>")
+    print("  4. Or run test: quetrex test <spec-name> <directory>")
+    print()
+
+def cmd_test(args):
+    """Create isolated test project from specification"""
+    print_header("🧪 Creating Test Project")
+
+    spec_name = args.spec
+    target_dir = Path(args.directory).absolute()
+
+    print_info(f"Specification: {spec_name}")
+    print_info(f"Target directory: {target_dir}")
+
+    # Check if target directory already exists
+    if target_dir.exists():
+        print_error(f"Directory already exists: {target_dir}")
+        print_info("Choose a different directory or delete the existing one")
+        sys.exit(1)
+
+    # Step 1: Create directory
+    print_header("📦 Step 1: Creating project directory")
+    target_dir.mkdir(parents=True)
+    print_success(f"Created {target_dir}")
+
+    # Step 2: Initialize Next.js project
+    if not args.skip_nextjs:
+        print_header("🎨 Step 2: Initializing Next.js project")
+        print_info("Running: npx create-next-app@latest")
+
+        # Build command as string for shell execution to handle prompts
+        cmd_str = ' '.join([
+            "npx", "create-next-app@latest", ".",
+            "--typescript",
+            "--tailwind",
+            "--eslint",
+            "--app",
+            "--no-src-dir",
+            "--import-alias", "'@/*'",
+            "--use-npm",
+            "--no-turbopack"
+        ])
+
+        # Use 'yes' command to auto-answer any remaining prompts with default (usually 'no')
+        env = os.environ.copy()
+        env['NEXT_TELEMETRY_DISABLED'] = '1'
+
+        result = subprocess.run(
+            f"printf 'n\\n' | {cmd_str}",
+            shell=True,
+            cwd=target_dir,
+            env=env
+        )
+        if result.returncode == 0:
+            print_success("Next.js project initialized")
+        else:
+            print_error("Failed to initialize Next.js project")
+            sys.exit(1)
+
+    # Step 3: Verify/Initialize git
+    print_header("🔧 Step 3: Verifying Git repository")
+
+    # Check if git is already initialized
+    git_check = run_command("git rev-parse --git-dir", cwd=target_dir, check=False)
+
+    if git_check.returncode == 0:
+        # Git already initialized (likely by create-next-app)
+        print_info("Git already initialized by create-next-app")
+
+        # Check if there are uncommitted changes
+        status_check = run_command("git status --porcelain", cwd=target_dir, check=False)
+        if status_check.stdout.strip():
+            # There are uncommitted changes
+            run_command("git add .", cwd=target_dir)
+            run_command('git commit -m "Add Quetrex infrastructure"', cwd=target_dir)
+            print_success("Committed Quetrex infrastructure")
+        else:
+            print_info("No changes to commit")
+    else:
+        # Git not initialized, create new repo
+        run_command("git init", cwd=target_dir)
+        run_command("git add .", cwd=target_dir)
+        run_command('git commit -m "Initial commit"', cwd=target_dir)
+        print_success("Git repository initialized")
+
+    # Step 4: Initialize Quetrex
+    print_header("🚀 Step 4: Running quetrex init")
+    args_init = argparse.Namespace(directory=str(target_dir))
+    cmd_init(args_init)
+
+    # Step 5: Copy specification
+    print_header("📋 Step 5: Copying specification")
+    quetrex_root = get_quetrex_root()
+    spec_src = quetrex_root / ".quetrex" / "architect-sessions" / spec_name
+    spec_dest = target_dir / ".quetrex" / "architect-sessions" / spec_name
+
+    if spec_src.exists():
+        copy_directory(spec_src, spec_dest, f"{spec_name} specification")
+    else:
+        print_warning(f"Specification not found: {spec_src}")
+        print_info("You'll need to create the specification manually")
+
+    # Step 6: Summary
+    print_header("✨ Test Project Ready!")
+    print()
+    print(f"Project created at: {target_dir}")
+    print()
+    print("Next steps:")
+    print(f"  cd {target_dir}")
+    print("  # Create GitHub repository:")
+    print(f"  gh repo create {target_dir.name} --private --source=. --remote=origin --push")
+    print("  # Generate issues:")
+    print(f"  quetrex orchestrate {spec_name}")
+    print()
+
+def cmd_doctor(args):
+    """Check installation health"""
+    print_header("🏥 Quetrex Health Check")
+
+    checks = []
+
+    # Check Git
+    try:
+        result = run_command("git --version", check=False)
+        if result.returncode == 0:
+            version = result.stdout.strip()
+            checks.append(("Git", True, version))
+        else:
+            checks.append(("Git", False, "Not installed"))
+    except:
+        checks.append(("Git", False, "Not installed"))
+
+    # Check GitHub CLI
+    try:
+        result = run_command("gh --version", check=False)
+        if result.returncode == 0:
+            version = result.stdout.strip().split('\n')[0]
+            checks.append(("GitHub CLI", True, version))
+        else:
+            checks.append(("GitHub CLI", False, "Not installed"))
+    except:
+        checks.append(("GitHub CLI", False, "Not installed"))
+
+    # Check Claude Code CLI
+    try:
+        result = run_command("claude --version", check=False)
+        if result.returncode == 0:
+            version = result.stdout.strip()
+            checks.append(("Claude Code CLI", True, version))
+        else:
+            checks.append(("Claude Code CLI", False, "Not installed"))
+    except:
+        checks.append(("Claude Code CLI", False, "Not installed"))
+
+    # Check Python
+    try:
+        result = run_command("python3 --version", check=False)
+        if result.returncode == 0:
+            version = result.stdout.strip()
+            checks.append(("Python", True, version))
+        else:
+            checks.append(("Python", False, "Not installed"))
+    except:
+        checks.append(("Python", False, "Not installed"))
+
+    # Check Node.js
+    try:
+        result = run_command("node --version", check=False)
+        if result.returncode == 0:
+            version = result.stdout.strip()
+            checks.append(("Node.js", True, version))
+        else:
+            checks.append(("Node.js", False, "Not installed"))
+    except:
+        checks.append(("Node.js", False, "Not installed"))
+
+    # Check environment variables
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    checks.append(("Anthropic API Key", bool(anthropic_key), "Configured" if anthropic_key else "Not configured"))
+
+    github_token = os.getenv("GITHUB_TOKEN")
+    checks.append(("GitHub Token", bool(github_token), "Configured" if github_token else "Not configured"))
+
+    # Check .claude/ directory
+    cwd = Path.cwd()
+    claude_dir = cwd / ".claude"
+    checks.append((".claude/ directory", claude_dir.exists(), str(claude_dir) if claude_dir.exists() else "Not found"))
+
+    # Print results
+    print()
+    for name, status, info in checks:
+        if status:
+            print_success(f"{name}: {info}")
+        else:
+            print_error(f"{name}: {info}")
+
+    # Overall status
+    print()
+    all_ok = all(status for _, status, _ in checks)
+    if all_ok:
+        print_success("All systems operational! 🚀")
+    else:
+        print_warning("Some components need attention")
+        print_info("Run 'quetrex init' to set up Quetrex infrastructure")
+
+def main():
+    """Main entry point"""
+    parser = argparse.ArgumentParser(
+        description="Quetrex CLI - AI-Powered SaaS Factory",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  quetrex init                              # Initialize in current directory
+  quetrex init ~/my-app                     # Initialize in specific directory
+  quetrex test bookmark-manager ~/test/bm   # Create test project
+  quetrex doctor                            # Check installation health
+
+For more information: https://github.com/barnent1/quetrex
+        """
+    )
+
+    parser.add_argument('--version', action='version', version=f'Quetrex CLI v{VERSION}')
+
+    subparsers = parser.add_subparsers(dest='command', help='Command to run')
+
+    # init command
+    parser_init = subparsers.add_parser('init', help='Initialize Quetrex in a project')
+    parser_init.add_argument('directory', nargs='?', help='Target directory (default: current)')
+    parser_init.set_defaults(func=cmd_init)
+
+    # test command
+    parser_test = subparsers.add_parser('test', help='Create test project from specification')
+    parser_test.add_argument('spec', help='Specification name (e.g., bookmark-manager-test)')
+    parser_test.add_argument('directory', help='Target directory for test project')
+    parser_test.add_argument('--skip-nextjs', action='store_true', help='Skip Next.js initialization')
+    parser_test.set_defaults(func=cmd_test)
+
+    # doctor command
+    parser_doctor = subparsers.add_parser('doctor', help='Check installation health')
+    parser_doctor.set_defaults(func=cmd_doctor)
+
+    # Parse arguments
+    args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
+
+    # Run command
+    try:
+        args.func(args)
+    except KeyboardInterrupt:
+        print()
+        print_warning("Operation cancelled")
+        sys.exit(1)
+    except Exception as e:
+        print_error(f"Error: {e}")
+        sys.exit(1)
+
+if __name__ == '__main__':
+    main()

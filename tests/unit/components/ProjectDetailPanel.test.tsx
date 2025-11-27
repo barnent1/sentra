@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ProjectDetailPanel } from '@/components/ProjectDetailPanel'
-import type { Project } from '@/services/sentra-api'
-import * as tauri from '@/services/sentra-api'
+import type { Project } from '@/services/quetrex-api'
+import * as tauri from '@/services/quetrex-api'
 
 // Mock the tauri module
-vi.mock('@/services/sentra-api', () => ({
+vi.mock('@/services/quetrex-api', () => ({
   getGitLog: vi.fn(),
   getGitStatus: vi.fn(),
   getGitDiff: vi.fn(),

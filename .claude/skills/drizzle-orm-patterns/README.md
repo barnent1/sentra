@@ -6,7 +6,7 @@
 
 ## Overview
 
-Comprehensive Drizzle ORM skill for Sentra with complete PostgreSQL patterns, edge runtime support, and automated validation.
+Comprehensive Drizzle ORM skill for Quetrex with complete PostgreSQL patterns, edge runtime support, and automated validation.
 
 ## Deliverables Summary
 
@@ -314,7 +314,7 @@ python3 .claude/skills/drizzle-orm-patterns/validate-queries.py $(git diff --cac
 
 ## Project Integration
 
-This skill integrates with Sentra's architecture:
+This skill integrates with Quetrex's architecture:
 
 - **ADR-002**: Drizzle ORM migration decision record
 - **CLAUDE.md**: Edge-first architecture documentation

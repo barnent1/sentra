@@ -12,7 +12,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Sentra - AI Agent Control Center",
+  title: "Quetrex - AI Agent Control Center",
   description: "Mission Control for Your AI Agents",
 };
 

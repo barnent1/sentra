@@ -8,7 +8,7 @@ Successfully connected the stored OpenAI API key from database settings to all O
 
 ### 1. Created `useSettings` Hook ✅
 
-**File:** `/Users/barnent1/Projects/sentra/src/hooks/useSettings.ts`
+**File:** `/Users/barnent1/Projects/quetrex/src/hooks/useSettings.ts`
 
 Features:
 - React Query integration for efficient caching
@@ -29,7 +29,7 @@ if (settings.openaiApiKey) {
 
 ### 2. Created `VoiceInitializer` Component ✅
 
-**File:** `/Users/barnent1/Projects/sentra/src/components/VoiceInitializer.tsx`
+**File:** `/Users/barnent1/Projects/quetrex/src/components/VoiceInitializer.tsx`
 
 Features:
 - Automatically initializes voice notifications on app load
@@ -46,7 +46,7 @@ Features:
 
 ### 3. Updated Root Layout ✅
 
-**File:** `/Users/barnent1/Projects/sentra/src/app/layout.tsx`
+**File:** `/Users/barnent1/Projects/quetrex/src/app/layout.tsx`
 
 Added `<VoiceInitializer />` inside the `AuthProvider` to ensure:
 - Voice notifications are initialized globally
@@ -55,7 +55,7 @@ Added `<VoiceInitializer />` inside the `AuthProvider` to ensure:
 
 ### 4. Created `SettingsWarning` Component ✅
 
-**File:** `/Users/barnent1/Projects/sentra/src/components/SettingsWarning.tsx`
+**File:** `/Users/barnent1/Projects/quetrex/src/components/SettingsWarning.tsx`
 
 Features:
 - Displays warning when required API keys are missing
@@ -115,30 +115,30 @@ Features:
 
 ## Files Modified
 
-1. `/Users/barnent1/Projects/sentra/src/hooks/useSettings.ts` (NEW)
-2. `/Users/barnent1/Projects/sentra/src/components/VoiceInitializer.tsx` (NEW)
-3. `/Users/barnent1/Projects/sentra/src/components/SettingsWarning.tsx` (NEW)
-4. `/Users/barnent1/Projects/sentra/src/app/layout.tsx` (MODIFIED)
+1. `/Users/barnent1/Projects/quetrex/src/hooks/useSettings.ts` (NEW)
+2. `/Users/barnent1/Projects/quetrex/src/components/VoiceInitializer.tsx` (NEW)
+3. `/Users/barnent1/Projects/quetrex/src/components/SettingsWarning.tsx` (NEW)
+4. `/Users/barnent1/Projects/quetrex/src/app/layout.tsx` (MODIFIED)
 
 ## Files Already Supporting Settings
 
 These files already use settings correctly:
 
-1. **`/Users/barnent1/Projects/sentra/src/lib/openai-realtime.ts`**
+1. **`/Users/barnent1/Projects/quetrex/src/lib/openai-realtime.ts`**
    - Reads API key from localStorage (lines 98-111)
    - Falls back to environment variable
    - Sends to `/api/realtime-token` endpoint
 
-2. **`/Users/barnent1/Projects/sentra/src/app/api/realtime-token/route.ts`**
+2. **`/Users/barnent1/Projects/quetrex/src/app/api/realtime-token/route.ts`**
    - Accepts API key from request body
    - Falls back to `process.env.OPENAI_API_KEY`
    - Generates ephemeral token
 
-3. **`/Users/barnent1/Projects/sentra/src/lib/voice-notifications.ts`**
+3. **`/Users/barnent1/Projects/quetrex/src/lib/voice-notifications.ts`**
    - Accepts API key as parameter to `initVoiceNotifications()`
    - Now receives key from `VoiceInitializer`
 
-4. **`/Users/barnent1/Projects/sentra/src/components/ArchitectChat.tsx`**
+4. **`/Users/barnent1/Projects/quetrex/src/components/ArchitectChat.tsx`**
    - Uses `getSettings()` to fetch settings
    - Passes key to RealtimeConversation
    - Passes key to chatWithArchitect (Anthropic)

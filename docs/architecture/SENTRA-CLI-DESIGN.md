@@ -1,15 +1,15 @@
-# Sentra CLI - Portable AI-Powered Development System
+# Quetrex CLI - Portable AI-Powered Development System
 
-**Problem:** We need to test Sentra's AI factory in clean project directories without interference from the main Sentra codebase.
+**Problem:** We need to test Quetrex's AI factory in clean project directories without interference from the main Quetrex codebase.
 
-**Solution:** Create a `sentra` CLI tool that can initialize the AI-powered infrastructure in any project directory.
+**Solution:** Create a `quetrex` CLI tool that can initialize the AI-powered infrastructure in any project directory.
 
 ---
 
 ## Design Goals
 
-1. **Portability** - Easy to install Sentra in any project (new or existing)
-2. **Test Isolation** - Run tests in clean directories separate from Sentra development
+1. **Portability** - Easy to install Quetrex in any project (new or existing)
+2. **Test Isolation** - Run tests in clean directories separate from Quetrex development
 3. **Simple Onboarding** - One command to get started
 4. **Distribution** - Can be published as Python package or standalone installer
 5. **No Lock-In** - All infrastructure is human-readable and modifiable
@@ -19,34 +19,34 @@
 ## CLI Commands
 
 ```bash
-# Initialize Sentra in current directory
-sentra init
+# Initialize Quetrex in current directory
+quetrex init
 
-# Initialize Sentra in new directory
-sentra init ~/my-saas-app
+# Initialize Quetrex in new directory
+quetrex init ~/my-saas-app
 
 # Create and run test project
-sentra test <spec-name> <target-directory>
-# Example: sentra test bookmark-manager ~/test-projects/bm-test
+quetrex test <spec-name> <target-directory>
+# Example: quetrex test bookmark-manager ~/test-projects/bm-test
 
 # Run voice architect interactively
-sentra architect [session-name]
+quetrex architect [session-name]
 
 # Run meta-orchestrator to generate issues
-sentra orchestrate <session-name>
+quetrex orchestrate <session-name>
 
 # Show configuration
-sentra config
+quetrex config
 
 # Check health of installation
-sentra doctor
+quetrex doctor
 ```
 
 ---
 
-## What `sentra init` Does
+## What `quetrex init` Does
 
-When you run `sentra init` in a directory, it:
+When you run `quetrex init` in a directory, it:
 
 ### 1. Creates Infrastructure Directories
 
@@ -59,14 +59,14 @@ project/
 │   ├── scripts/          # Copy ai-agent-worker.py, etc.
 │   ├── docs/             # Copy architecture docs
 │   └── settings.json     # Claude Code settings
-├── .sentra/
+├── .quetrex/
 │   ├── scripts/          # Copy all Python scripts
 │   ├── config.yml        # Project configuration
 │   └── .gitkeep
 ├── .github/
 │   └── workflows/
 │       └── ai-agent.yml  # Copy GitHub Actions workflow
-└── .gitignore            # Add .sentra entries
+└── .gitignore            # Add .quetrex entries
 ```
 
 ### 2. Installs Dependencies
@@ -77,7 +77,7 @@ project/
 
 ### 3. Creates Configuration
 
-**`.sentra/config.yml`:**
+**`.quetrex/config.yml`:**
 ```yaml
 project:
   name: "My SaaS App"
@@ -133,9 +133,9 @@ gh workflow list
 
 ---
 
-## What `sentra test` Does
+## What `quetrex test` Does
 
-When you run `sentra test bookmark-manager ~/test-projects/bm-test`, it:
+When you run `quetrex test bookmark-manager ~/test-projects/bm-test`, it:
 
 ### 1. Creates Isolated Project Directory
 
@@ -159,25 +159,25 @@ git commit -m "Initial commit"
 gh repo create bm-test --private --source=. --remote=origin --push
 ```
 
-### 3. Runs `sentra init`
+### 3. Runs `quetrex init`
 
-Copies all Sentra infrastructure into the clean project.
+Copies all Quetrex infrastructure into the clean project.
 
 ### 4. Copies Test Specification
 
 ```bash
-# Copy spec from Sentra development repo
-cp -r ~/Projects/sentra/.sentra/architect-sessions/bookmark-manager-test \
-      ~/test-projects/bm-test/.sentra/architect-sessions/
+# Copy spec from Quetrex development repo
+cp -r ~/Projects/quetrex/.quetrex/architect-sessions/bookmark-manager-test \
+      ~/test-projects/bm-test/.quetrex/architect-sessions/
 ```
 
 ### 5. Generates Issues
 
 ```bash
 # Run meta-orchestrator
-python3 .sentra/scripts/run-agent.py meta-orchestrator \
+python3 .quetrex/scripts/run-agent.py meta-orchestrator \
   --session bookmark-manager-test \
-  --output .sentra/dependency-graph-bookmark-test.yml
+  --output .quetrex/dependency-graph-bookmark-test.yml
 ```
 
 ### 6. Creates GitHub Issues (Optional)
@@ -188,8 +188,8 @@ echo "Generate 48 GitHub issues? (y/n)"
 read answer
 
 if [ "$answer" = "y" ]; then
-  python3 .sentra/scripts/create-issues.py \
-    .sentra/dependency-graph-bookmark-test.yml
+  python3 .quetrex/scripts/create-issues.py \
+    .quetrex/dependency-graph-bookmark-test.yml
 fi
 ```
 
@@ -206,20 +206,20 @@ fi
 
 ### Main CLI Entry Point
 
-**`sentra-cli/sentra`** (Python script with shebang):
+**`quetrex-cli/quetrex`** (Python script with shebang):
 
 ```python
 #!/usr/bin/env python3
 """
-Sentra CLI - AI-Powered SaaS Factory
+Quetrex CLI - AI-Powered SaaS Factory
 """
 import click
-from sentra_cli.commands import init, test, architect, orchestrate, config, doctor
+from quetrex_cli.commands import init, test, architect, orchestrate, config, doctor
 
 @click.group()
 @click.version_option(version='1.0.0')
 def cli():
-    """Sentra - AI-Powered SaaS Factory"""
+    """Quetrex - AI-Powered SaaS Factory"""
     pass
 
 cli.add_command(init.init_command)
@@ -236,23 +236,23 @@ if __name__ == '__main__':
 ### Directory Structure
 
 ```
-sentra-cli/
-├── sentra                 # Main executable
+quetrex-cli/
+├── quetrex                 # Main executable
 ├── setup.py               # Python package setup
 ├── requirements.txt       # Dependencies
 ├── README.md
-├── sentra_cli/
+├── quetrex_cli/
 │   ├── __init__.py
 │   ├── commands/
-│   │   ├── init.py        # sentra init
-│   │   ├── test.py        # sentra test
-│   │   ├── architect.py   # sentra architect
-│   │   ├── orchestrate.py # sentra orchestrate
-│   │   ├── config.py      # sentra config
-│   │   └── doctor.py      # sentra doctor
+│   │   ├── init.py        # quetrex init
+│   │   ├── test.py        # quetrex test
+│   │   ├── architect.py   # quetrex architect
+│   │   ├── orchestrate.py # quetrex orchestrate
+│   │   ├── config.py      # quetrex config
+│   │   └── doctor.py      # quetrex doctor
 │   ├── templates/         # Infrastructure templates
 │   │   ├── claude/        # .claude/ directory
-│   │   ├── sentra/        # .sentra/ directory
+│   │   ├── quetrex/        # .quetrex/ directory
 │   │   ├── github/        # .github/ workflows
 │   │   └── config.yml.tmpl
 │   └── utils/
@@ -272,60 +272,60 @@ sentra-cli/
 ### Method 1: Install from PyPI (Future)
 
 ```bash
-pip install sentra-cli
-sentra --version
+pip install quetrex-cli
+quetrex --version
 ```
 
 ### Method 2: Install from Git (Current)
 
 ```bash
-git clone https://github.com/barnent1/sentra.git
-cd sentra/sentra-cli
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex/quetrex-cli
 pip install -e .
-sentra --version
+quetrex --version
 ```
 
 ### Method 3: Standalone Installer
 
 ```bash
-curl -fsSL https://sentra.dev/install.sh | bash
-sentra --version
+curl -fsSL https://quetrex.dev/install.sh | bash
+quetrex --version
 ```
 
 ---
 
 ## Usage Examples
 
-### Example 1: Initialize Sentra in Existing Project
+### Example 1: Initialize Quetrex in Existing Project
 
 ```bash
 cd ~/my-existing-app
-sentra init
+quetrex init
 
 # Output:
 # ✅ Created .claude/ directory with 11 agents
-# ✅ Created .sentra/ directory with scripts
+# ✅ Created .quetrex/ directory with scripts
 # ✅ Created .github/workflows/ai-agent.yml
 # ✅ Installed Serena MCP
 # ✅ Created GitHub labels
-# ✅ Sentra initialized successfully!
+# ✅ Quetrex initialized successfully!
 #
 # Next steps:
-# 1. Run: sentra architect my-feature
+# 1. Run: quetrex architect my-feature
 # 2. Describe your feature to the voice architect
-# 3. Run: sentra orchestrate my-feature
+# 3. Run: quetrex orchestrate my-feature
 # 4. GitHub issues will be created and agents will start working
 ```
 
 ### Example 2: Test Bookmark Manager in Clean Directory
 
 ```bash
-sentra test bookmark-manager ~/test-projects/bm-test
+quetrex test bookmark-manager ~/test-projects/bm-test
 
 # Output:
 # 📦 Creating project directory: ~/test-projects/bm-test
 # 🎨 Initializing Next.js project...
-# 🔧 Running sentra init...
+# 🔧 Running quetrex init...
 # 📋 Copying bookmark-manager specification...
 # 🤖 Running meta-orchestrator...
 # ✅ Generated 48 issues with dependency graph
@@ -345,11 +345,11 @@ sentra test bookmark-manager ~/test-projects/bm-test
 
 ```bash
 cd ~/my-project
-sentra architect payment-system
+quetrex architect payment-system
 
 # Output:
 # 🎙️  Starting Voice Architect for session: payment-system
-# 📁 Session directory: .sentra/architect-sessions/payment-system/
+# 📁 Session directory: .quetrex/architect-sessions/payment-system/
 #
 # [Voice Architect begins conversation...]
 ```
@@ -357,10 +357,10 @@ sentra architect payment-system
 ### Example 4: Check Installation Health
 
 ```bash
-sentra doctor
+quetrex doctor
 
 # Output:
-# Sentra Health Check
+# Quetrex Health Check
 # ==================
 # ✅ Git: Installed (v2.39.0)
 # ✅ GitHub CLI: Installed (v2.40.0)
@@ -371,7 +371,7 @@ sentra doctor
 # ✅ GitHub Token: Configured
 # ✅ Serena MCP: Installed
 # ✅ .claude/ directory: Present (11 agents, 7 skills, 6 hooks)
-# ✅ .sentra/ directory: Present
+# ✅ .quetrex/ directory: Present
 # ✅ GitHub Actions: Enabled
 #
 # All systems operational! 🚀
@@ -392,18 +392,18 @@ sentra doctor
 - **Portable** - Works in any project (new or existing)
 
 ### For Distribution
-- **Easy to share** - `pip install sentra-cli`
-- **Easy to update** - `pip install --upgrade sentra-cli`
+- **Easy to share** - `pip install quetrex-cli`
+- **Easy to update** - `pip install --upgrade quetrex-cli`
 - **Cross-platform** - Works on macOS, Linux, Windows
 
 ---
 
 ## Next Steps
 
-1. **Implement `sentra init` command** - Core functionality for copying infrastructure
-2. **Implement `sentra test` command** - Automated test project creation
-3. **Create template system** - Efficient copying of .claude/, .sentra/, .github/ directories
-4. **Add `sentra doctor`** - Health check and troubleshooting
+1. **Implement `quetrex init` command** - Core functionality for copying infrastructure
+2. **Implement `quetrex test` command** - Automated test project creation
+3. **Create template system** - Efficient copying of .claude/, .quetrex/, .github/ directories
+4. **Add `quetrex doctor`** - Health check and troubleshooting
 5. **Package for distribution** - setup.py, PyPI publishing
 6. **Write documentation** - Usage guide, examples, troubleshooting
 
@@ -426,25 +426,25 @@ rendered = template.render(
     repo_url="https://github.com/user/repo"
 )
 
-with open('.sentra/config.yml', 'w') as f:
+with open('.quetrex/config.yml', 'w') as f:
     f.write(rendered)
 ```
 
 ### Copy vs Symlink
 
-For development, symlink to main Sentra repo:
+For development, symlink to main Quetrex repo:
 ```bash
-ln -s ~/Projects/sentra/.claude/agents .claude/agents
+ln -s ~/Projects/quetrex/.claude/agents .claude/agents
 ```
 
 For production, copy files:
 ```bash
-cp -r ~/Projects/sentra/.claude/agents .claude/agents
+cp -r ~/Projects/quetrex/.claude/agents .claude/agents
 ```
 
 ### GitHub Actions Container Image
 
-The `sentra test` command needs to build and push the Docker container image:
+The `quetrex test` command needs to build and push the Docker container image:
 
 ```bash
 # Build container image for test project
@@ -452,7 +452,7 @@ docker build -t ghcr.io/user/bm-test-agent:latest -f .claude/Dockerfile .
 docker push ghcr.io/user/bm-test-agent:latest
 
 # Update workflow to use project-specific image
-sed -i '' 's/sentra-agent:latest/bm-test-agent:latest/' .github/workflows/ai-agent.yml
+sed -i '' 's/quetrex-agent:latest/bm-test-agent:latest/' .github/workflows/ai-agent.yml
 ```
 
 ---

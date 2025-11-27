@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { Settings } from '@/components/Settings'
 import * as settingsLib from '@/lib/settings'
-import * as sentraApi from '@/services/sentra-api'
+import * as quetrexApi from '@/services/quetrex-api'
 
 // Mock the settings module
 vi.mock('@/lib/settings', () => ({
@@ -10,8 +10,8 @@ vi.mock('@/lib/settings', () => ({
   saveSettings: vi.fn(),
 }))
 
-// Mock the sentra-api module (for speakNotification)
-vi.mock('@/services/sentra-api', () => ({
+// Mock the quetrex-api module (for speakNotification)
+vi.mock('@/services/quetrex-api', () => ({
   speakNotification: vi.fn(),
 }))
 
@@ -37,7 +37,7 @@ describe('Settings', () => {
     vi.clearAllMocks()
     vi.mocked(settingsLib.getSettings).mockResolvedValue(mockSettings)
     vi.mocked(settingsLib.saveSettings).mockResolvedValue(undefined)
-    vi.mocked(sentraApi.speakNotification).mockResolvedValue(undefined)
+    vi.mocked(quetrexApi.speakNotification).mockResolvedValue(undefined)
   })
 
   describe('rendering', () => {
@@ -355,14 +355,14 @@ describe('Settings', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(sentraApi.speakNotification).toHaveBeenCalled()
+        expect(quetrexApi.speakNotification).toHaveBeenCalled()
       })
     })
 
     it('should handle test voice error', async () => {
       // ARRANGE
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
-      vi.mocked(sentraApi.speakNotification).mockRejectedValue(new Error('Voice test failed'))
+      vi.mocked(quetrexApi.speakNotification).mockRejectedValue(new Error('Voice test failed'))
 
       render(<Settings isOpen={true} onClose={mockOnClose} />)
 
@@ -402,7 +402,7 @@ describe('Settings', () => {
 
     it('should show testing state when testing voice', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.speakNotification).mockImplementation(
+      vi.mocked(quetrexApi.speakNotification).mockImplementation(
         () => new Promise((resolve) => setTimeout(resolve, 100))
       )
 
@@ -434,7 +434,7 @@ describe('Settings', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(sentraApi.speakNotification).toHaveBeenCalledWith(
+        expect(quetrexApi.speakNotification).toHaveBeenCalledWith(
           expect.stringContaining('Test User'),
           'alloy',  // Changed from 'nova' to match mock settings
           'sk-test-key'
@@ -461,7 +461,7 @@ describe('Settings', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(sentraApi.speakNotification).toHaveBeenCalledWith(
+        expect(quetrexApi.speakNotification).toHaveBeenCalledWith(
           expect.stringContaining('Hey there'),
           'alloy',  // Changed from 'nova' to match mock settings
           'sk-test-key'
@@ -492,7 +492,7 @@ describe('Settings', () => {
         expect(alertSpy).toHaveBeenCalledWith(
           expect.stringContaining('Ballad voice is only available in the Realtime API')
         )
-        expect(sentraApi.speakNotification).not.toHaveBeenCalled()
+        expect(quetrexApi.speakNotification).not.toHaveBeenCalled()
       })
 
       alertSpy.mockRestore()
@@ -537,7 +537,7 @@ describe('Settings', () => {
       })
 
       // ACT
-      const repoInput = screen.getByPlaceholderText('sentra') as HTMLInputElement
+      const repoInput = screen.getByPlaceholderText('quetrex') as HTMLInputElement
       fireEvent.change(repoInput, { target: { value: 'newrepo' } })
 
       // ASSERT

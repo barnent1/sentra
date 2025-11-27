@@ -1,14 +1,14 @@
 ---
 name: voice-system-expert
-description: Use when working with Sentra's voice interface, OpenAI Realtime API, WebRTC, or echo cancellation. Knows Sentra's specific voice architecture decisions and patterns. CRITICAL - prevents breaking working voice system.
+description: Use when working with Quetrex's voice interface, OpenAI Realtime API, WebRTC, or echo cancellation. Knows Quetrex's specific voice architecture decisions and patterns. CRITICAL - prevents breaking working voice system.
 allowed-tools: Read
 ---
 
-# Sentra Voice System Expert
+# Quetrex Voice System Expert
 
 ## CRITICAL: Read This First
 
-Sentra's voice system architecture is **extensively documented and battle-tested**. Before making ANY changes to voice-related code, you MUST read:
+Quetrex's voice system architecture is **extensively documented and battle-tested**. Before making ANY changes to voice-related code, you MUST read:
 
 1. **ADR-001-VOICE-ECHO-CANCELLATION.md** (definitive architectural decision)
 2. **docs/architecture/VOICE-SYSTEM.md** (technical implementation)
@@ -251,7 +251,7 @@ From ADR-001:
 
 ## Platform Context: Web Application
 
-**IMPORTANT:** Sentra is now a **pure web application**, not a Tauri desktop app.
+**IMPORTANT:** Quetrex is now a **pure web application**, not a Tauri desktop app.
 
 **Why this matters for voice:**
 - Browser echo cancellation works perfectly in all browsers
@@ -261,7 +261,7 @@ From ADR-001:
 - Just works™️
 
 **The WKWebView Problem (Historical):**
-Sentra was originally a Tauri desktop app. On macOS, Tauri uses WKWebView, which has a bug: **WebRTC audio playback doesn't work**. This forced us to try workarounds (AudioWorklet bypass, native audio routing), which all broke echo cancellation.
+Quetrex was originally a Tauri desktop app. On macOS, Tauri uses WKWebView, which has a bug: **WebRTC audio playback doesn't work**. This forced us to try workarounds (AudioWorklet bypass, native audio routing), which all broke echo cancellation.
 
 **Solution:** Convert to web application. Now echo cancellation works perfectly everywhere.
 
@@ -292,7 +292,7 @@ If you must modify voice code:
 3. `docs/development/abandoned-approaches/`
 
 **If you see mentions of:**
-- Tauri → Ignore (Sentra is web app now)
+- Tauri → Ignore (Quetrex is web app now)
 - WKWebView → Ignore (not relevant anymore)
 - AudioWorklet bypass → Don't implement (already tried, failed)
 - Manual mic toggling → Don't implement (not industry standard)

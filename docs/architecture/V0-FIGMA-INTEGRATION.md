@@ -28,7 +28,7 @@
 
 ### Goal
 
-Enable Sentra's voice architect to automatically extract visual UI information from design tools (V0, Figma) and combine with behavioral specifications to generate complete, production-ready implementations.
+Enable Quetrex's voice architect to automatically extract visual UI information from design tools (V0, Figma) and combine with behavioral specifications to generate complete, production-ready implementations.
 
 ### Current State (Phase 3)
 
@@ -110,7 +110,7 @@ Enable Sentra's voice architect to automatically extract visual UI information f
 ### User Story
 
 **As Glen (using voice architect):**
-> "I've designed my dashboard in V0. I want to describe the behavior (what happens when users click buttons, how data loads, etc.) without having to verbally describe every visual detail. Sentra should automatically extract the layout, components, and styling from V0, then I just tell it what each element DOES."
+> "I've designed my dashboard in V0. I want to describe the behavior (what happens when users click buttons, how data loads, etc.) without having to verbally describe every visual detail. Quetrex should automatically extract the layout, components, and styling from V0, then I just tell it what each element DOES."
 
 **Current experience (BAD):**
 ```
@@ -247,7 +247,7 @@ const file = await figma.getFile(fileKey);
 
 // Returns:
 {
-  name: "Sentra Dashboard",
+  name: "Quetrex Dashboard",
   document: {
     children: [
       {
@@ -517,7 +517,7 @@ GET https://api.figma.com/v1/files/:file_key/styles
 
 1. **User shares Figma link**
    ```
-   User: "Here's the design: https://figma.com/file/abc123/Sentra-Dashboard"
+   User: "Here's the design: https://figma.com/file/abc123/Quetrex-Dashboard"
    ```
 
 2. **Architect extracts file key**
@@ -614,10 +614,10 @@ const figma = new Figma({
 
 #### OAuth 2.0
 ```typescript
-// User authorizes Sentra to access their Figma files
+// User authorizes Quetrex to access their Figma files
 const authUrl = figma.getOAuthUrl({
   client_id: process.env.FIGMA_CLIENT_ID,
-  redirect_uri: 'https://sentra.app/auth/figma/callback',
+  redirect_uri: 'https://quetrex.app/auth/figma/callback',
   scope: 'file_read',
 });
 
@@ -856,9 +856,9 @@ Be as precise as possible with measurements and colors.
 │ Save Complete Specification                                     │
 │                                                                  │
 │ Files created:                                                  │
-│ - .sentra/architect-sessions/<project>/ui-screens.md           │
-│ - .sentra/architect-sessions/<project>/design-tokens.json      │
-│ - .sentra/architect-sessions/<project>/v0-exports/dashboard.tsx│
+│ - .quetrex/architect-sessions/<project>/ui-screens.md           │
+│ - .quetrex/architect-sessions/<project>/design-tokens.json      │
+│ - .quetrex/architect-sessions/<project>/v0-exports/dashboard.tsx│
 │ - tests/e2e/dashboard-interactions.spec.ts                     │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -1079,7 +1079,7 @@ Be as precise as possible with measurements and colors.
 1. **Implement V0 integration (MVP)**
    - Use screenshot + code extraction hybrid
    - Integrate into voice architect agent
-   - Test with real Sentra designs
+   - Test with real Quetrex designs
 
 2. **Validate approach with Glen**
    - Run full voice architect session with V0 design

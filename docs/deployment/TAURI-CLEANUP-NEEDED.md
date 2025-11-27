@@ -1,9 +1,9 @@
 # Tauri Cleanup - COMPLETED
 
-**Status**: RESOLVED - File renamed to `@/services/sentra-api`
+**Status**: RESOLVED - File renamed to `@/services/quetrex-api`
 **Date**: 2025-11-20
 
-**Note**: This file is kept for historical reference. The `@/lib/tauri` file has been renamed to `@/services/sentra-api` to better reflect its purpose as a typed API client for backend endpoints.
+**Note**: This file is kept for historical reference. The `@/lib/tauri` file has been renamed to `@/services/quetrex-api` to better reflect its purpose as a typed API client for backend endpoints.
 
 ---
 
@@ -13,45 +13,45 @@ The following files import `@/lib/tauri` and must be updated:
 
 ### Components (8 files)
 
-1. `/Users/barnent1/Projects/sentra/src/components/Settings.tsx`
+1. `/Users/barnent1/Projects/quetrex/src/components/Settings.tsx`
    - Likely using: Tauri store for settings
    - Replace with: localStorage
 
-2. `/Users/barnent1/Projects/sentra/src/components/ArchitectChat.tsx`
+2. `/Users/barnent1/Projects/quetrex/src/components/ArchitectChat.tsx`
    - Likely using: Tauri IPC or file system
    - Replace with: REST API calls
 
-3. `/Users/barnent1/Projects/sentra/src/components/NewProjectModal.tsx`
+3. `/Users/barnent1/Projects/quetrex/src/components/NewProjectModal.tsx`
    - Likely using: Tauri file system (directory picker)
    - Replace with: Text input for project path
 
-4. `/Users/barnent1/Projects/sentra/src/components/SpecViewer.tsx`
+4. `/Users/barnent1/Projects/quetrex/src/components/SpecViewer.tsx`
    - Likely using: Tauri file system
    - Replace with: Backend API
 
-5. `/Users/barnent1/Projects/sentra/src/components/ProjectDetailPanel.tsx`
+5. `/Users/barnent1/Projects/quetrex/src/components/ProjectDetailPanel.tsx`
    - Likely using: Tauri IPC
    - Replace with: REST API
 
-6. `/Users/barnent1/Projects/sentra/src/components/ActivityFeed.tsx`
+6. `/Users/barnent1/Projects/quetrex/src/components/ActivityFeed.tsx`
    - Likely using: Tauri IPC
    - Replace with: REST API
 
-7. `/Users/barnent1/Projects/sentra/src/components/PRReviewPanel.tsx`
+7. `/Users/barnent1/Projects/quetrex/src/components/PRReviewPanel.tsx`
    - Likely using: Tauri IPC
    - Replace with: REST API
 
 ### Hooks (3 files)
 
-8. `/Users/barnent1/Projects/sentra/src/hooks/useAgentStream.ts`
+8. `/Users/barnent1/Projects/quetrex/src/hooks/useAgentStream.ts`
    - Likely using: Tauri events/streaming
    - Replace with: WebSocket or SSE
 
-9. `/Users/barnent1/Projects/sentra/src/hooks/useGitHubIssue.ts`
+9. `/Users/barnent1/Projects/quetrex/src/hooks/useGitHubIssue.ts`
    - Likely using: Tauri IPC
    - Replace with: fetch/REST API
 
-10. `/Users/barnent1/Projects/sentra/src/hooks/useDashboard.ts`
+10. `/Users/barnent1/Projects/quetrex/src/hooks/useDashboard.ts`
     - Likely using: Tauri store or IPC
     - Replace with: localStorage + REST API
 
@@ -149,7 +149,7 @@ eventSource.onmessage = (event) => {
 
 If you need to deploy ASAP, create a stub file:
 
-### Create `/Users/barnent1/Projects/sentra/src/lib/tauri.ts`
+### Create `/Users/barnent1/Projects/quetrex/src/lib/tauri.ts`
 
 ```typescript
 /**
@@ -242,8 +242,8 @@ vercel  # or netlify deploy
 ## When Build Succeeds
 
 See:
-- `/Users/barnent1/Projects/sentra/docs/deployment/QUICK-START.md` - Deploy in 5 minutes
-- `/Users/barnent1/Projects/sentra/docs/deployment/CHECKLIST.md` - Full deployment checklist
+- `/Users/barnent1/Projects/quetrex/docs/deployment/QUICK-START.md` - Deploy in 5 minutes
+- `/Users/barnent1/Projects/quetrex/docs/deployment/CHECKLIST.md` - Full deployment checklist
 
 ---
 

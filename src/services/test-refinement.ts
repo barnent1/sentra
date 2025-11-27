@@ -347,7 +347,7 @@ export class TestRefinementService {
    * @returns Formatted prompt
    */
   generatePrompt(test: E2ETest): string {
-    return `You are an expert Playwright test generator for Sentra, a voice-first AI assistant web application.
+    return `You are an expert Playwright test generator for Quetrex, a voice-first AI assistant web application.
 
 Generate a Playwright E2E test based on this specification:
 
@@ -365,7 +365,7 @@ ${test.assertions.map((assertion, i) => `${i + 1}. ${assertion}`).join('\n')}
 2. Include proper data-testid selectors: \`[data-testid="element-name"]\`
 3. Add appropriate waitForTimeout for animations (default 200ms)
 4. Handle edge cases: Skip test if no data exists using \`if (await element.count() === 0) test.skip();\`
-5. Follow existing Sentra test patterns
+5. Follow existing Quetrex test patterns
 6. Use proper locators: \`page.locator('[data-testid="..."]')\`, \`page.getByRole('...')\`, \`page.getByText('...')\`
 7. Include proper assertions: \`expect(element).toBeVisible()\`, \`expect(element).toHaveText('...')\`, etc.
 8. Add comments for ARRANGE, ACT, ASSERT sections

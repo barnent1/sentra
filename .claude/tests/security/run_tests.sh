@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Security Test Runner for Sentra AI Agent Container
+# Security Test Runner for Quetrex AI Agent Container
 # Phase 1: Docker Containerization
 #
 # This script builds the container and runs all security tests.
@@ -21,7 +21,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-IMAGE_NAME="sentra-ai-agent:latest"
+IMAGE_NAME="quetrex-ai-agent:latest"
 DOCKERFILE_PATH=".claude/docker/Dockerfile"
 TEST_PATH=".claude/tests/security/test_container_security.py"
 
@@ -32,7 +32,7 @@ if [ "$1" = "--skip-build" ]; then
 fi
 
 echo -e "${BLUE}╔══════════════════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  Sentra AI Agent Container - Security Test Suite (Phase 1)      ║${NC}"
+echo -e "${BLUE}║  Quetrex AI Agent Container - Security Test Suite (Phase 1)      ║${NC}"
 echo -e "${BLUE}╚══════════════════════════════════════════════════════════════════╝${NC}"
 echo ""
 

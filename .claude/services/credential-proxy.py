@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Credential Proxy Service for Sentra AI Agents
+Credential Proxy Service for Quetrex AI Agents
 
 This service runs on the GitHub Actions host (outside container) and
 provides validated access to credentials. The containerized agent

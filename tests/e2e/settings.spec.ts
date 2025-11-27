@@ -284,7 +284,7 @@ test.describe('Settings Modal', () => {
       await page.waitForTimeout(200);
 
       // ASSERT
-      const nameInput = page.locator('input[placeholder*="sentra"]');
+      const nameInput = page.locator('input[placeholder*="quetrex"]');
       await expect(nameInput).toBeVisible();
     });
 
@@ -309,7 +309,7 @@ test.describe('Settings Modal', () => {
       await page.waitForTimeout(200);
 
       // ACT
-      const nameInput = page.locator('input[placeholder*="sentra"]');
+      const nameInput = page.locator('input[placeholder*="quetrex"]');
       await nameInput.fill('my-repo');
 
       // ASSERT

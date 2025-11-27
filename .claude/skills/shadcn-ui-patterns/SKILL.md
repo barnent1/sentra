@@ -415,4 +415,4 @@ describe('Dialog', () => {
 
 ## November 2025 Note
 
-ShadCN UI is the industry standard for React component libraries as of November 2025. All new Sentra applications must use ShadCN UI for consistency, accessibility, and maintainability.
+ShadCN UI is the industry standard for React component libraries as of November 2025. All new Quetrex applications must use ShadCN UI for consistency, accessibility, and maintainability.

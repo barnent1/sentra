@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { X, Github } from 'lucide-react';
-import { createProject, createGitHubRepo, getTemplates, getSettings, type Template } from '@/services/sentra-api';
+import { createProject, createGitHubRepo, getTemplates, getSettings, type Template } from '@/services/quetrex-api';
 
 interface NewProjectModalProps {
   isOpen: boolean;
@@ -133,24 +133,24 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
       setCreationError('');
 
       // Step 1: Create GitHub repository from template
-      setCreatingStep('Creating GitHub repository from Sentra template...');
+      setCreatingStep('Creating GitHub repository from Quetrex template...');
       const repo = await createGitHubRepo({
         name,
-        description: description || `Sentra AI-powered project: ${name}`,
+        description: description || `Quetrex AI-powered project: ${name}`,
         private: true,
       });
 
       console.log(`✓ GitHub repository created: ${repo.url}`);
 
-      // Step 2: Register project in Sentra
-      setCreatingStep('Setting up Sentra configuration...');
+      // Step 2: Register project in Quetrex
+      setCreatingStep('Setting up Quetrex configuration...');
       await createProject({
         name,
         path: repo.url,
         template
       });
 
-      console.log(`✓ Project registered in Sentra`);
+      console.log(`✓ Project registered in Quetrex`);
 
       setCreatingStep('Done!');
       onSuccess();
@@ -193,7 +193,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">Connect GitHub First</h3>
             <p className="text-slate-400 mb-6 max-w-md mx-auto">
-              To create projects with Sentra, you need to connect your GitHub account.
+              To create projects with Quetrex, you need to connect your GitHub account.
               This allows us to create repositories from templates and set up your project automatically.
             </p>
             <div className="flex gap-3 justify-center">

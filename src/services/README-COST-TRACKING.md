@@ -36,7 +36,7 @@ const tracker = new CostTracker();
 // Track an OpenAI call
 tracker.trackOpenAICall({
   model: 'gpt-4o',
-  projectId: 'sentra',
+  projectId: 'quetrex',
   inputTokens: 1000,
   outputTokens: 500,
 });
@@ -44,7 +44,7 @@ tracker.trackOpenAICall({
 // Track an Anthropic call
 tracker.trackAnthropicCall({
   model: 'claude-sonnet-4-5',
-  projectId: 'sentra',
+  projectId: 'quetrex',
   inputTokens: 2000,
   outputTokens: 1000,
 });
@@ -61,7 +61,7 @@ console.log(`Total calls: ${summary.totalCalls}`);
 import { initializeGlobalCostTracking, getGlobalCostTracker } from '@/lib/openai-interceptor';
 
 // Initialize once at app startup
-const tracker = initializeGlobalCostTracking('sentra');
+const tracker = initializeGlobalCostTracking('quetrex');
 
 // All OpenAI API calls will now be tracked automatically
 // No need to manually call trackOpenAICall()
@@ -116,7 +116,7 @@ trackOpenAICall(params: {
 // Chat completion
 tracker.trackOpenAICall({
   model: 'gpt-4o',
-  projectId: 'sentra',
+  projectId: 'quetrex',
   inputTokens: 1000,
   outputTokens: 500,
 });
@@ -124,14 +124,14 @@ tracker.trackOpenAICall({
 // Whisper transcription
 tracker.trackOpenAICall({
   model: 'whisper-1',
-  projectId: 'sentra',
+  projectId: 'quetrex',
   audioSeconds: 90, // 1.5 minutes
 });
 
 // Text-to-speech
 tracker.trackOpenAICall({
   model: 'tts-1',
-  projectId: 'sentra',
+  projectId: 'quetrex',
   characters: 50000,
 });
 ```
@@ -156,7 +156,7 @@ trackAnthropicCall(params: {
 ```typescript
 tracker.trackAnthropicCall({
   model: 'claude-sonnet-4-5',
-  projectId: 'sentra',
+  projectId: 'quetrex',
   inputTokens: 2000,
   outputTokens: 1000,
 });
@@ -215,9 +215,9 @@ getProjectCosts(projectId: string): ProjectCosts
 **Example:**
 
 ```typescript
-const sentraCosts = tracker.getProjectCosts('sentra');
-console.log(`Sentra total: $${sentraCosts.totalCost.toFixed(2)}`);
-console.log(`Sentra calls: ${sentraCosts.totalCalls}`);
+const quetrexCosts = tracker.getProjectCosts('quetrex');
+console.log(`Quetrex total: $${quetrexCosts.totalCost.toFixed(2)}`);
+console.log(`Quetrex calls: ${quetrexCosts.totalCalls}`);
 ```
 
 ##### getCostsByTimeRange()

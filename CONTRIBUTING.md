@@ -1,6 +1,6 @@
-# Contributing to Sentra
+# Contributing to Quetrex
 
-Thank you for your interest in contributing to Sentra! This document provides guidelines and standards for development.
+Thank you for your interest in contributing to Quetrex! This document provides guidelines and standards for development.
 
 ---
 
@@ -30,8 +30,8 @@ Thank you for your interest in contributing to Sentra! This document provides gu
 
 1. **Fork and clone**
    ```bash
-   git clone https://github.com/yourusername/sentra.git
-   cd sentra
+   git clone https://github.com/yourusername/quetrex.git
+   cd quetrex
    ```
 
 2. **Install dependencies**
@@ -365,7 +365,7 @@ If checks fail, the comment shows which thresholds were not met and links to det
 
 ## Quality Hooks
 
-Sentra has **3 hooks** that automatically enforce quality:
+Quetrex has **3 hooks** that automatically enforce quality:
 
 ### 1. PreToolUse Hook (`validate-bash.py`)
 
@@ -452,7 +452,7 @@ Create `.git/hooks/pre-push` to run quality checks before pushing:
 ```bash
 #!/bin/sh
 
-# Sentra Pre-Push Hook
+# Quetrex Pre-Push Hook
 # Runs quality checks before allowing push to remote
 
 echo "🔍 Running pre-push quality checks..."
@@ -530,7 +530,7 @@ exit 0
 
 ```bash
 # Navigate to project root
-cd /path/to/sentra
+cd /path/to/quetrex
 
 # Create the hook file
 cat > .git/hooks/pre-push << 'EOF'
@@ -786,7 +786,7 @@ export function VoiceRecorder() {
 ### Questions
 
 - Check [docs/](docs/) first
-- Search [GitHub Issues](https://github.com/yourusername/sentra/issues)
+- Search [GitHub Issues](https://github.com/yourusername/quetrex/issues)
 - Open new issue with `question` label
 
 ### Bugs
@@ -819,6 +819,6 @@ By contributing, you agree that your contributions will be licensed under the sa
 
 ---
 
-**Thank you for contributing to Sentra!**
+**Thank you for contributing to Quetrex!**
 
 Created by Glen Barnhardt with help from Claude Code

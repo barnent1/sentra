@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Sentra Pre-Push Hook
+# Quetrex Pre-Push Hook
 # Runs quality checks before allowing push to remote
 #
 # Installation:

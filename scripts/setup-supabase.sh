@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Sentra - Supabase Setup Script
+# Quetrex - Supabase Setup Script
 # This script sets up Supabase and runs database migrations
 
 set -e  # Exit on error
 
-echo "🚀 Sentra - Supabase Setup"
+echo "🚀 Quetrex - Supabase Setup"
 echo "================================"
 echo ""
 

@@ -12,17 +12,17 @@
 
 ## Context
 
-Sentra's E2E test generation system can automatically create Playwright tests from design specifications (see [ADR-004](./ADR-004-E2E-TEST-GENERATION.md)). We need to decide how developers interact with this system:
+Quetrex's E2E test generation system can automatically create Playwright tests from design specifications (see [ADR-004](./ADR-004-E2E-TEST-GENERATION.md)). We need to decide how developers interact with this system:
 
 **Option A: CLI-Only Tool**
-- Standalone command: `npx sentra generate-tests spec.yaml`
+- Standalone command: `npx quetrex generate-tests spec.yaml`
 - Developer runs manually when needed
 - No auto-triggering
 
 **Option B: Auto-Only Integration**
 - Tests generated automatically during spec approval workflow
 - No standalone CLI tool
-- Fully integrated into Sentra UI
+- Fully integrated into Quetrex UI
 
 **Option C: Hybrid Approach** ⭐
 - Both standalone CLI AND auto-trigger
@@ -36,7 +36,7 @@ Sentra's E2E test generation system can automatically create Playwright tests fr
 1. **Developer Experience:** Easy to use for both manual and automated workflows
 2. **Flexibility:** Support different team workflows (CI/CD, local dev, auto-generation)
 3. **Debugging:** Ability to test generation locally before committing
-4. **Integration:** Seamless integration with Sentra's spec approval workflow
+4. **Integration:** Seamless integration with Quetrex's spec approval workflow
 5. **Maintenance:** Single codebase serving both use cases
 
 ---
@@ -49,7 +49,7 @@ Sentra's E2E test generation system can automatically create Playwright tests fr
 
 1. **Best Developer Experience**
    - Manual control when debugging test generation
-   - Automatic when in "flow state" with Sentra
+   - Automatic when in "flow state" with Quetrex
    - No forced workflow
 
 2. **Flexibility**
@@ -76,13 +76,13 @@ Sentra's E2E test generation system can automatically create Playwright tests fr
 
 ```bash
 # Install globally
-npm install -g @sentra/test-generator
+npm install -g @quetrex/test-generator
 
 # Or use npx
-npx @sentra/test-generator generate spec.yaml
+npx @quetrex/test-generator generate spec.yaml
 
 # With options
-npx @sentra/test-generator generate spec.yaml \
+npx @quetrex/test-generator generate spec.yaml \
   --output tests/e2e/ \
   --format typescript \
   --dry-run
@@ -104,7 +104,7 @@ interface CLIOptions {
 ### Auto-Trigger Integration
 
 ```typescript
-// In Sentra's spec approval workflow
+// In Quetrex's spec approval workflow
 async function onSpecApproved(spec: Specification) {
   // 1. Generate E2E tests automatically
   const tests = await generateE2ETests(spec)
@@ -123,7 +123,7 @@ async function onSpecApproved(spec: Specification) {
 Both CLI and auto-trigger use the same core library:
 
 ```typescript
-import { TestGenerator } from '@sentra/test-generator'
+import { TestGenerator } from '@quetrex/test-generator'
 
 const generator = new TestGenerator({
   templateDir: '.claude/templates/e2e',
@@ -152,11 +152,11 @@ const tests = await generator.generate(spec)
 
 3. **CI/CD Integration**
    - CLI works in any pipeline
-   - No dependency on Sentra UI
+   - No dependency on Quetrex UI
    - Standard tooling
 
 4. **Lower Barrier to Entry**
-   - Try CLI without full Sentra setup
+   - Try CLI without full Quetrex setup
    - Gradual adoption path
    - Not locked into workflow
 
@@ -173,7 +173,7 @@ const tests = await generator.generate(spec)
    - Possible duplicate runs (CLI + auto)
 
 3. **Version Sync**
-   - CLI and Sentra must stay in sync
+   - CLI and Quetrex must stay in sync
    - Breaking changes affect both
    - Need versioning strategy
 
@@ -188,7 +188,7 @@ const tests = await generator.generate(spec)
 - Debugging test generation
 - CI/CD pipelines
 - One-off test generation
-- Teams not using full Sentra workflow
+- Teams not using full Quetrex workflow
 
 **Example:**
 ```bash
@@ -196,10 +196,10 @@ const tests = await generator.generate(spec)
 vim project-spec.yaml
 
 # Generate tests to see output
-npx @sentra/test-generator generate project-spec.yaml --dry-run
+npx @quetrex/test-generator generate project-spec.yaml --dry-run
 
 # Looks good? Write files
-npx @sentra/test-generator generate project-spec.yaml
+npx @quetrex/test-generator generate project-spec.yaml
 
 # Review generated tests
 git diff tests/e2e/
@@ -212,15 +212,15 @@ git commit -m "feat: add project spec and E2E tests"
 ### When to Use Auto-Trigger
 
 **✅ Good for:**
-- Rapid iteration with Sentra architect
+- Rapid iteration with Quetrex architect
 - Full automation workflows
-- Teams using Sentra for spec approval
+- Teams using Quetrex for spec approval
 - Reducing manual steps
 
 **Example:**
 ```bash
-# 1. Talk to Sentra architect
-Sentra: "Your spec is ready. Approve?"
+# 1. Talk to Quetrex architect
+Quetrex: "Your spec is ready. Approve?"
 
 # 2. Click "Approve" in UI
 # (Tests generated automatically)
@@ -239,7 +239,7 @@ Sentra: "Your spec is ready. Approve?"
 ### CLI Package Structure
 
 ```
-@sentra/test-generator/
+@quetrex/test-generator/
 ├── src/
 │   ├── cli/
 │   │   ├── index.ts          # CLI entry point
@@ -259,8 +259,8 @@ Sentra: "Your spec is ready. Approve?"
 ### Integration API
 
 ```typescript
-// For programmatic use (Sentra integration)
-import { generateE2ETests } from '@sentra/test-generator'
+// For programmatic use (Quetrex integration)
+import { generateE2ETests } from '@quetrex/test-generator'
 
 const result = await generateE2ETests({
   spec: specObject,
@@ -285,7 +285,7 @@ console.log(`Cost: $${result.cost.toFixed(2)}`)
 - ✅ Zero installation errors
 
 ### Week 2 (Integration)
-- ✅ Auto-trigger integrated into Sentra
+- ✅ Auto-trigger integrated into Quetrex
 - ✅ Both paths use same core
 - ✅ Version parity maintained
 - ✅ E2E tests for both workflows
@@ -324,7 +324,7 @@ console.log(`Cost: $${result.cost.toFixed(2)}`)
 **Cons:**
 - No manual control
 - Can't test locally
-- Locked into Sentra workflow
+- Locked into Quetrex workflow
 
 **Decision:** ❌ Rejected - Too restrictive
 
@@ -349,19 +349,19 @@ console.log(`Cost: $${result.cost.toFixed(2)}`)
 
 **Watch Mode:**
 ```bash
-npx @sentra/test-generator watch spec.yaml
+npx @quetrex/test-generator watch spec.yaml
 # Regenerates tests on spec file changes
 ```
 
 **Diff Mode:**
 ```bash
-npx @sentra/test-generator diff old-spec.yaml new-spec.yaml
+npx @quetrex/test-generator diff old-spec.yaml new-spec.yaml
 # Shows test changes before generating
 ```
 
 **Interactive Mode:**
 ```bash
-npx @sentra/test-generator generate --interactive
+npx @quetrex/test-generator generate --interactive
 # Prompts for spec details interactively
 ```
 
@@ -369,13 +369,13 @@ npx @sentra/test-generator generate --interactive
 
 **Multi-Spec Support:**
 ```bash
-npx @sentra/test-generator generate specs/**/*.yaml
+npx @quetrex/test-generator generate specs/**/*.yaml
 # Generates tests for all specs in directory
 ```
 
 **Custom Templates:**
 ```bash
-npx @sentra/test-generator generate spec.yaml \
+npx @quetrex/test-generator generate spec.yaml \
   --templates ./custom-templates/
 ```
 
@@ -392,9 +392,9 @@ npx @sentra/test-generator generate spec.yaml \
 **Implementation:** Phase 2.3 (E2E Test Generation)
 
 **Next Steps:**
-1. Create `@sentra/test-generator` package
+1. Create `@quetrex/test-generator` package
 2. Implement CLI interface
-3. Add to Sentra spec approval workflow
+3. Add to Quetrex spec approval workflow
 4. Write documentation for both approaches
 5. Publish to npm
 

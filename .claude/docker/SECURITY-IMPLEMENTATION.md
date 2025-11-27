@@ -7,7 +7,7 @@
 
 ## Overview
 
-This document summarizes the implementation of Phase 1 of Sentra's security architecture. Phase 1 provides container-level isolation for AI agent execution using Docker security features.
+This document summarizes the implementation of Phase 1 of Quetrex's security architecture. Phase 1 provides container-level isolation for AI agent execution using Docker security features.
 
 ## Deliverables
 
@@ -137,7 +137,7 @@ pip install -r .claude/tests/security/requirements.txt
 
 ### Build Container
 ```bash
-docker build -t sentra-ai-agent:latest -f .claude/docker/Dockerfile .
+docker build -t quetrex-ai-agent:latest -f .claude/docker/Dockerfile .
 ```
 
 ### Run Tests

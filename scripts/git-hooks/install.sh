@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Install Git Hooks for Sentra
+# Install Git Hooks for Quetrex
 # This script installs the pre-push hook to enforce quality checks
 
 set -e
@@ -18,14 +18,14 @@ NC='\033[0m' # No Color
 
 echo ""
 echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo "${BLUE}  Sentra Git Hooks Installation${NC}"
+echo "${BLUE}  Quetrex Git Hooks Installation${NC}"
 echo "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
 # Check if .git directory exists
 if [ ! -d "$PROJECT_ROOT/.git" ]; then
   echo "${RED}❌ Error: Not a git repository${NC}"
-  echo "   Run this script from inside the Sentra project directory"
+  echo "   Run this script from inside the Quetrex project directory"
   exit 1
 fi
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines the PostgreSQL database schema for managing multi-session voice architect conversations in Sentra. The schema supports full context preservation across sessions, enabling the architect to resume conversations without re-asking questions or losing conversation history.
+This document defines the PostgreSQL database schema for managing multi-session voice architect conversations in Quetrex. The schema supports full context preservation across sessions, enabling the architect to resume conversations without re-asking questions or losing conversation history.
 
 ## Design Principles
 

@@ -11,7 +11,7 @@ import { migrate } from 'drizzle-orm/postgres-js/migrator';
 import * as schema from '../src/db/schema';
 
 async function runMigration() {
-  console.log('🚀 Sentra - Database Migration');
+  console.log('🚀 Quetrex - Database Migration');
   console.log('================================\n');
 
   // Check for DATABASE_URL

@@ -89,12 +89,12 @@ This checklist ensures all security measures are implemented before deployment.
 
 ### 5. Authentication & Authorization
 
-- [ ] **API keys stored securely** (`~/.claude/sentra/settings.json`)
+- [ ] **API keys stored securely** (`~/.claude/quetrex/settings.json`)
 
 - [ ] **File permissions correct** on settings file
   ```bash
   # Should be 600 (user read/write only)
-  ls -la ~/.claude/sentra/settings.json
+  ls -la ~/.claude/quetrex/settings.json
   ```
 
 - [ ] **GitHub token has minimal scope** (`repo` only)

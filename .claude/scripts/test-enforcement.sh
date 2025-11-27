@@ -160,13 +160,13 @@ echo "Test 4: Check patterns.md exists"
 echo "---------------------------------"
 TESTS_RUN=$((TESTS_RUN + 1))
 
-if [ -f ".sentra/memory/patterns.md" ]; then
-  pattern_count=$(grep -c "^## Pattern:" .sentra/memory/patterns.md || echo "0")
-  file_size=$(wc -c < .sentra/memory/patterns.md)
+if [ -f ".quetrex/memory/patterns.md" ]; then
+  pattern_count=$(grep -c "^## Pattern:" .quetrex/memory/patterns.md || echo "0")
+  file_size=$(wc -c < .quetrex/memory/patterns.md)
   echo -e "${GREEN}✅ Found $pattern_count patterns in patterns.md ($file_size bytes)${NC}"
   TESTS_PASSED=$((TESTS_PASSED + 1))
 else
-  echo -e "${RED}❌ patterns.md not found at .sentra/memory/patterns.md${NC}"
+  echo -e "${RED}❌ patterns.md not found at .quetrex/memory/patterns.md${NC}"
   TESTS_FAILED=$((TESTS_FAILED + 1))
 fi
 

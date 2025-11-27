@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import MenubarPage from '@/app/menubar/page'
-import * as sentraApi from '@/services/sentra-api'
+import * as quetrexApi from '@/services/quetrex-api'
 
-// Mock sentra-api library
-vi.mock('@/services/sentra-api', () => ({
+// Mock quetrex-api library
+vi.mock('@/services/quetrex-api', () => ({
   getDashboardStats: vi.fn(),
 }))
 
@@ -19,13 +19,13 @@ describe('MenubarPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.mocked(sentraApi.getDashboardStats).mockResolvedValue(mockStats)
+    vi.mocked(quetrexApi.getDashboardStats).mockResolvedValue(mockStats)
   })
 
   describe('rendering', () => {
     it('should render loading state initially', () => {
       // ARRANGE
-      vi.mocked(sentraApi.getDashboardStats).mockImplementation(() => new Promise(() => {})) // Never resolves
+      vi.mocked(quetrexApi.getDashboardStats).mockImplementation(() => new Promise(() => {})) // Never resolves
 
       // ACT
       render(<MenubarPage />)
@@ -57,13 +57,13 @@ describe('MenubarPage', () => {
       })
     })
 
-    it('should render Sentra branding', async () => {
+    it('should render Quetrex branding', async () => {
       // ARRANGE & ACT
       render(<MenubarPage />)
 
       // ASSERT
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
         expect(screen.getByText('Quick Stats')).toBeInTheDocument()
       })
     })
@@ -75,7 +75,7 @@ describe('MenubarPage', () => {
       // ASSERT
       await waitFor(() => {
         expect(screen.getByText('Open Dashboard')).toBeInTheDocument()
-        expect(screen.getByText('Quit Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quit Quetrex')).toBeInTheDocument()
       })
     })
   })
@@ -83,7 +83,7 @@ describe('MenubarPage', () => {
   describe('stats display', () => {
     it('should show "Running" status when agents are active', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getDashboardStats).mockResolvedValue({ ...mockStats, activeAgents: 2 })
+      vi.mocked(quetrexApi.getDashboardStats).mockResolvedValue({ ...mockStats, activeAgents: 2 })
 
       // ACT
       render(<MenubarPage />)
@@ -96,7 +96,7 @@ describe('MenubarPage', () => {
 
     it('should show "Idle" status when no agents are active', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getDashboardStats).mockResolvedValue({ ...mockStats, activeAgents: 0 })
+      vi.mocked(quetrexApi.getDashboardStats).mockResolvedValue({ ...mockStats, activeAgents: 0 })
 
       // ACT
       render(<MenubarPage />)
@@ -109,7 +109,7 @@ describe('MenubarPage', () => {
 
     it('should show "Great!" for high success rate', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getDashboardStats).mockResolvedValue({ ...mockStats, successRate: 95 })
+      vi.mocked(quetrexApi.getDashboardStats).mockResolvedValue({ ...mockStats, successRate: 95 })
 
       // ACT
       render(<MenubarPage />)
@@ -122,7 +122,7 @@ describe('MenubarPage', () => {
 
     it('should show "Good" for lower success rate', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getDashboardStats).mockResolvedValue({ ...mockStats, successRate: 75 })
+      vi.mocked(quetrexApi.getDashboardStats).mockResolvedValue({ ...mockStats, successRate: 75 })
 
       // ACT
       render(<MenubarPage />)
@@ -150,7 +150,7 @@ describe('MenubarPage', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('show_main_window')
+        expect(quetrexApi.getDashboardStats).toHaveBeenCalledWith('show_main_window')
       })
     })
 
@@ -160,16 +160,16 @@ describe('MenubarPage', () => {
 
       // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByText('Quit Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quit Quetrex')).toBeInTheDocument()
       })
 
       // ACT
-      const quitButton = screen.getByText('Quit Sentra')
+      const quitButton = screen.getByText('Quit Quetrex')
       fireEvent.click(quitButton)
 
       // ASSERT
       await waitFor(() => {
-        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('quit_app')
+        expect(quetrexApi.getDashboardStats).toHaveBeenCalledWith('quit_app')
       })
     })
 
@@ -179,7 +179,7 @@ describe('MenubarPage', () => {
 
       // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
 
       // ACT
@@ -188,14 +188,14 @@ describe('MenubarPage', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('hide_menubar_window')
+        expect(quetrexApi.getDashboardStats).toHaveBeenCalledWith('hide_menubar_window')
       })
     })
 
     it('should handle errors when opening dashboard', async () => {
       // ARRANGE
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.mocked(sentraApi.getDashboardStats)
+      vi.mocked(quetrexApi.getDashboardStats)
         .mockResolvedValueOnce(mockStats) // Initial stats load
         .mockRejectedValueOnce(new Error('Failed to show window')) // Open dashboard fails
 
@@ -224,7 +224,7 @@ describe('MenubarPage', () => {
     it('should handle errors when quitting app', async () => {
       // ARRANGE
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.mocked(sentraApi.getDashboardStats)
+      vi.mocked(quetrexApi.getDashboardStats)
         .mockResolvedValueOnce(mockStats) // Initial stats load
         .mockRejectedValueOnce(new Error('Failed to quit')) // Quit fails
 
@@ -232,11 +232,11 @@ describe('MenubarPage', () => {
 
       // Wait for loading to complete
       await waitFor(() => {
-        expect(screen.getByText('Quit Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quit Quetrex')).toBeInTheDocument()
       })
 
       // ACT
-      const quitButton = screen.getByText('Quit Sentra')
+      const quitButton = screen.getByText('Quit Quetrex')
       fireEvent.click(quitButton)
 
       // ASSERT
@@ -261,7 +261,7 @@ describe('MenubarPage', () => {
 
       // Wait for initial load
       await waitFor(() => {
-        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('get_dashboard_stats')
+        expect(quetrexApi.getDashboardStats).toHaveBeenCalledWith('get_dashboard_stats')
       })
 
       // ASSERT - Should have set up a 30-second interval
@@ -278,7 +278,7 @@ describe('MenubarPage', () => {
 
       // Wait for initial load
       await waitFor(() => {
-        expect(sentraApi.getDashboardStats).toHaveBeenCalledWith('get_dashboard_stats')
+        expect(quetrexApi.getDashboardStats).toHaveBeenCalledWith('get_dashboard_stats')
       })
 
       // ACT
@@ -295,7 +295,7 @@ describe('MenubarPage', () => {
     it('should handle stats loading failure gracefully', async () => {
       // ARRANGE
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
-      vi.mocked(sentraApi.getDashboardStats).mockRejectedValue(new Error('Failed to load stats'))
+      vi.mocked(quetrexApi.getDashboardStats).mockRejectedValue(new Error('Failed to load stats'))
 
       // ACT
       render(<MenubarPage />)
@@ -313,7 +313,7 @@ describe('MenubarPage', () => {
 
     it('should display action buttons even when stats fail to load', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getDashboardStats).mockRejectedValue(new Error('Failed to load stats'))
+      vi.mocked(quetrexApi.getDashboardStats).mockRejectedValue(new Error('Failed to load stats'))
 
       // ACT
       render(<MenubarPage />)
@@ -321,7 +321,7 @@ describe('MenubarPage', () => {
       // ASSERT
       await waitFor(() => {
         expect(screen.getByText('Open Dashboard')).toBeInTheDocument()
-        expect(screen.getByText('Quit Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quit Quetrex')).toBeInTheDocument()
       })
     })
   })
@@ -333,7 +333,7 @@ describe('MenubarPage', () => {
       const statsPromise = new Promise((resolve) => {
         resolveStats = resolve
       })
-      vi.mocked(sentraApi.getDashboardStats).mockReturnValue(statsPromise as any)
+      vi.mocked(quetrexApi.getDashboardStats).mockReturnValue(statsPromise as any)
 
       // ACT
       render(<MenubarPage />)

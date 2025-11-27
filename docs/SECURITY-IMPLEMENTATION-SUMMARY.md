@@ -94,7 +94,7 @@ Implemented Next.js middleware with comprehensive security headers:
 
 **Verified**:
 - ✅ No hardcoded secrets in source code
-- ✅ Settings stored in `~/.claude/sentra/settings.json`
+- ✅ Settings stored in `~/.claude/quetrex/settings.json`
 - ✅ API keys use proper format validation
 - ✅ Logger sanitizes sensitive fields
 
@@ -198,7 +198,7 @@ Command::new("gh")
 ## Known Limitations (Acceptable Risk)
 
 ### 1. API Keys in Plain Text (Low Risk)
-- **Location**: `~/.claude/sentra/settings.json`
+- **Location**: `~/.claude/quetrex/settings.json`
 - **Mitigation**: OS-level filesystem encryption recommended
 - **Planned**: Encrypted storage in v0.2
 
@@ -323,7 +323,7 @@ Command::new("gh")
 
 ## Conclusion
 
-Sentra now has a **solid security foundation** with:
+Quetrex now has a **solid security foundation** with:
 - ✅ Comprehensive input validation
 - ✅ Security headers protecting against common attacks
 - ✅ Proper secrets management

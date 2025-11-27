@@ -12,7 +12,7 @@ A comprehensive versioning system for project specifications that enables:
 ## Directory Structure
 
 ```
-.sentra/specs/
+.quetrex/specs/
   {project-name}/
     {descriptive-name}.spec.{YYYYMMDD}.md          # Initial version
     {descriptive-name}.spec.{YYYYMMDD}.v2.md       # Same-day revision
@@ -26,7 +26,7 @@ A comprehensive versioning system for project specifications that enables:
 ### Example
 
 ```
-.sentra/specs/
+.quetrex/specs/
   tic-tac-toe/
     tic-tac-toe-application.spec.20251113.md
     tic-tac-toe-application.spec.20251113.v2.md
@@ -111,9 +111,9 @@ Each spec family (base name) has a JSON metadata file:
 **User Flow**:
 ```
 User: "I want to build a tic tac toe game"
-Sentra: [natural conversation about requirements]
+Quetrex: [natural conversation about requirements]
 User: "That sounds good, let's create the spec"
-Sentra: [generates spec, saves it]
+Quetrex: [generates spec, saves it]
 → Creates: tic-tac-toe/tic-tac-toe-application.spec.20251113.md
 ```
 
@@ -131,9 +131,9 @@ Sentra: [generates spec, saves it]
 **User Flow**:
 ```
 User: "Let's continue working on the tic tac toe spec"
-Sentra: [loads latest version, shows context]
+Quetrex: [loads latest version, shows context]
 User: "Add multiplayer support"
-Sentra: [generates updated spec]
+Quetrex: [generates updated spec]
 → Creates: tic-tac-toe/tic-tac-toe-application.spec.20251113.v2.md
 ```
 
@@ -155,7 +155,7 @@ Sentra: [generates updated spec]
 **User Flow**:
 ```
 User: "Let's create a spec for the AI opponent"
-Sentra: [generates spec for new feature]
+Quetrex: [generates spec for new feature]
 → Creates: tic-tac-toe/tic-tac-toe-ai-opponent.spec.20251113.md
 ```
 

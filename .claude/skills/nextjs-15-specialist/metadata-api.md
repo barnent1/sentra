@@ -30,7 +30,7 @@ Define metadata with exported object.
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'About Sentra',
+  title: 'About Quetrex',
   description: 'Voice-first AI assistant for developers',
 }
 
@@ -46,13 +46,13 @@ export default function AboutPage() {
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sentra - AI Development Platform',
+  title: 'Quetrex - AI Development Platform',
   description: 'Build faster with voice-first AI assistance',
   keywords: ['AI', 'development', 'voice assistant', 'Next.js'],
-  authors: [{ name: 'Sentra Team' }],
-  creator: 'Sentra',
-  publisher: 'Sentra Inc',
-  metadataBase: new URL('https://sentra.dev'),
+  authors: [{ name: 'Quetrex Team' }],
+  creator: 'Quetrex',
+  publisher: 'Quetrex Inc',
+  metadataBase: new URL('https://quetrex.dev'),
   alternates: {
     canonical: '/',
   },
@@ -71,11 +71,11 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Sentra',
-    default: 'Sentra - AI Development Platform',
+    template: '%s | Quetrex',
+    default: 'Quetrex - AI Development Platform',
   },
   description: 'Voice-first AI assistant for developers',
-  metadataBase: new URL('https://sentra.dev'),
+  metadataBase: new URL('https://quetrex.dev'),
 }
 
 export default function RootLayout({
@@ -321,13 +321,13 @@ Configure Open Graph metadata for social sharing.
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Sentra - AI Development Platform',
+  title: 'Quetrex - AI Development Platform',
   description: 'Voice-first AI assistant',
   openGraph: {
-    title: 'Sentra - AI Development Platform',
+    title: 'Quetrex - AI Development Platform',
     description: 'Voice-first AI assistant for developers',
-    url: 'https://sentra.dev',
-    siteName: 'Sentra',
+    url: 'https://quetrex.dev',
+    siteName: 'Quetrex',
     locale: 'en_US',
     type: 'website',
   },
@@ -352,8 +352,8 @@ export async function generateMetadata({
     openGraph: {
       title: project.name,
       description: project.description,
-      url: `https://sentra.dev/projects/${id}`,
-      siteName: 'Sentra',
+      url: `https://quetrex.dev/projects/${id}`,
+      siteName: 'Quetrex',
       images: [
         {
           url: project.coverImage,
@@ -389,8 +389,8 @@ export async function generateMetadata({
     openGraph: {
       title: post.title,
       description: post.excerpt,
-      url: `https://sentra.dev/blog/${slug}`,
-      siteName: 'Sentra Blog',
+      url: `https://quetrex.dev/blog/${slug}`,
+      siteName: 'Quetrex Blog',
       images: [
         {
           url: post.coverImage,
@@ -420,14 +420,14 @@ Configure Twitter Card metadata.
 ```typescript
 // app/page.tsx
 export const metadata: Metadata = {
-  title: 'Sentra',
+  title: 'Quetrex',
   description: 'Voice-first AI assistant',
   twitter: {
     card: 'summary',
-    title: 'Sentra - AI Development Platform',
+    title: 'Quetrex - AI Development Platform',
     description: 'Voice-first AI assistant for developers',
-    creator: '@sentra',
-    images: ['https://sentra.dev/og-image.png'],
+    creator: '@quetrex',
+    images: ['https://quetrex.dev/og-image.png'],
   },
 }
 ```
@@ -451,7 +451,7 @@ export async function generateMetadata({
       card: 'summary_large_image',
       title: post.title,
       description: post.excerpt,
-      creator: '@sentra',
+      creator: '@quetrex',
       images: [post.coverImage],
     },
   }
@@ -476,7 +476,7 @@ export async function generateMetadata({
     openGraph: {
       title: project.name,
       description: project.description,
-      url: `https://sentra.dev/projects/${id}`,
+      url: `https://quetrex.dev/projects/${id}`,
       images: [
         {
           url: project.coverImage,
@@ -508,17 +508,17 @@ Structured data for search engines.
 ```typescript
 // app/page.tsx
 export const metadata: Metadata = {
-  title: 'Sentra',
+  title: 'Quetrex',
   other: {
     'application/ld+json': JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Organization',
-      name: 'Sentra',
-      url: 'https://sentra.dev',
-      logo: 'https://sentra.dev/logo.png',
+      name: 'Quetrex',
+      url: 'https://quetrex.dev',
+      logo: 'https://quetrex.dev/logo.png',
       sameAs: [
-        'https://twitter.com/sentra',
-        'https://github.com/sentra',
+        'https://twitter.com/quetrex',
+        'https://github.com/quetrex',
       ],
     }),
   },
@@ -636,8 +636,8 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Sentra - AI Development Platform',
-    short_name: 'Sentra',
+    name: 'Quetrex - AI Development Platform',
+    short_name: 'Quetrex',
     description: 'Voice-first AI assistant for developers',
     start_url: '/',
     display: 'standalone',
@@ -664,11 +664,11 @@ export default function manifest(): MetadataRoute.Manifest {
 ```typescript
 // app/layout.tsx
 export const metadata: Metadata = {
-  title: 'Sentra',
+  title: 'Quetrex',
   description: 'AI Development Platform',
   appleWebApp: {
     capable: true,
-    title: 'Sentra',
+    title: 'Quetrex',
     statusBarStyle: 'black-translucent',
   },
 }
@@ -695,7 +695,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/', '/api/'],
       },
     ],
-    sitemap: 'https://sentra.dev/sitemap.xml',
+    sitemap: 'https://quetrex.dev/sitemap.xml',
   }
 }
 ```
@@ -710,7 +710,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await fetchAllPosts()
 
   const postEntries: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `https://sentra.dev/blog/${post.slug}`,
+    url: `https://quetrex.dev/blog/${post.slug}`,
     lastModified: post.updatedAt,
     changeFrequency: 'weekly',
     priority: 0.8,
@@ -718,13 +718,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     {
-      url: 'https://sentra.dev',
+      url: 'https://quetrex.dev',
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: 'https://sentra.dev/about',
+      url: 'https://quetrex.dev/about',
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,

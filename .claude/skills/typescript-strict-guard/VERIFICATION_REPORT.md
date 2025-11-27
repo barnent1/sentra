@@ -345,7 +345,7 @@ The TypeScript Strict Guard skill is **COMPLETE** and **PRODUCTION-READY**.
 **Next Steps:**
 - Skill is ready for immediate use
 - No additional work required
-- Can be referenced by all agents working on Sentra
+- Can be referenced by all agents working on Quetrex
 
 ---
 

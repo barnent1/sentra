@@ -18,7 +18,7 @@ Managing multiple AI-powered projects simultaneously creates visibility challeng
 4. **Should I pay attention?** - Does this project need my input or approval?
 5. **What happened while I was away?** - No historical view of agent actions
 
-Traditional project management tools aren't designed for AI agents that work autonomously. Sentra needs **mission control-style observability** that treats AI agents as first-class workers.
+Traditional project management tools aren't designed for AI agents that work autonomously. Quetrex needs **mission control-style observability** that treats AI agents as first-class workers.
 
 ---
 
@@ -29,14 +29,14 @@ Users should understand system state in < 5 seconds without drilling down.
 
 **Good Example:**
 ```
-● Sentra - Implementing voice queue (65%)
+● Quetrex - Implementing voice queue (65%)
 ○ E-commerce - Idle
 ● Blog - Waiting for spec approval
 ```
 
 **Bad Example:**
 ```
-Sentra: Status unknown, click for details
+Quetrex: Status unknown, click for details
 E-commerce: Status unknown, click for details
 Blog: Status unknown, click for details
 ```
@@ -156,7 +156,7 @@ Users can see **all projects at once** in a card grid:
 
 ### Git Tab
 
-**Purpose:** See code changes without leaving Sentra
+**Purpose:** See code changes without leaving Quetrex
 
 ```
 ┌─────────────────────────────────────────┐
@@ -248,7 +248,7 @@ Users can see **all projects at once** in a card grid:
 - WebSocket connection to GitHub Actions
 - Or: Poll GitHub Actions API every 5 seconds
 - Buffer last 500 lines in memory
-- Full logs stored in `.sentra/logs/`
+- Full logs stored in `.quetrex/logs/`
 
 ### Costs Tab
 
@@ -337,7 +337,7 @@ const PRICING = {
 ┌─────────────────────────────────────────┐
 │  Recent Activity (All Projects)         │
 ├─────────────────────────────────────────┤
-│  [14:35:42] Sentra                      │
+│  [14:35:42] Quetrex                      │
 │  ✅ Voice queue tests passing           │
 │                                         │
 │  [14:34:18] E-commerce                  │
@@ -349,7 +349,7 @@ const PRICING = {
 │  [14:28:33] Mobile App                  │
 │  ✅ PR #12 merged to main               │
 │                                         │
-│  [14:25:10] Sentra                      │
+│  [14:25:10] Quetrex                      │
 │  ✅ Committed: feat: add queue state    │
 └─────────────────────────────────────────┘
 ```
@@ -373,7 +373,7 @@ const PRICING = {
 
 ```
 ┌─────────────────────┐
-│ ● Sentra            │
+│ ● Quetrex            │
 │   [🔊] [View] [•••] │  ← Unmuted (will speak)
 └─────────────────────┘
 
@@ -436,7 +436,7 @@ const PRIORITY_RULES = {
 **High Priority Overrides Mute:**
 - "Spec approval needed for Blog project"
 - "Error in E-commerce: Tests failing"
-- "Sentra agent stuck, needs your help"
+- "Quetrex agent stuck, needs your help"
 
 ---
 
@@ -475,7 +475,7 @@ const PRIORITY_RULES = {
 │  └─────────────────────────────────────┘│
 │                                         │
 │  Top Projects by Activity:              │
-│  1. Sentra - 48 tasks                   │
+│  1. Quetrex - 48 tasks                   │
 │  2. E-commerce - 42 tasks               │
 │  3. Blog - 28 tasks                     │
 │                                         │
@@ -520,7 +520,7 @@ const PRIORITY_RULES = {
 │  └─────────────────────────────────────┘│
 │                                         │
 │  Breakdown by Project:                  │
-│  1. Sentra - $14.20 (30%)               │
+│  1. Quetrex - $14.20 (30%)               │
 │  2. E-commerce - $18.40 (39%)           │
 │  3. Blog - $10.80 (23%)                 │
 │  4. Mobile App - $3.92 (8%)             │
@@ -634,10 +634,10 @@ const PRIORITY_RULES = {
 Simplified version for iOS/Android:
 ```
 ┌─────────────────────┐
-│  Sentra Projects    │
+│  Quetrex Projects    │
 ├─────────────────────┤
 │                     │
-│  ● Sentra           │
+│  ● Quetrex           │
 │  Voice queue (65%)  │
 │                     │
 │  ○ E-commerce       │
@@ -653,13 +653,13 @@ Simplified version for iOS/Android:
 ### Push Notifications
 
 ```
-📱 Sentra: Spec approval needed
+📱 Quetrex: Spec approval needed
    Blog project ready for review
 
-📱 Sentra: PR ready for merge
+📱 Quetrex: PR ready for merge
    E-commerce checkout flow complete
 
-📱 Sentra: Error in Mobile App
+📱 Quetrex: Error in Mobile App
    Tests failing, needs your help
 ```
 
@@ -735,7 +735,7 @@ Simplified version for iOS/Android:
    - Budget alerts prevent overages
 
 4. **Reduced context switching**
-   - User stays in Sentra for 90%+ of workflow
+   - User stays in Quetrex for 90%+ of workflow
    - Rarely opens GitHub or terminal
 
 5. **Faster debugging**

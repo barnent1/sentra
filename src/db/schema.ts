@@ -1,7 +1,7 @@
 /**
  * Drizzle Database Schema
  *
- * Edge-compatible database schema for Sentra using Drizzle ORM.
+ * Edge-compatible database schema for Quetrex using Drizzle ORM.
  * Manages users, projects, agents, costs, activity tracking, and prototypes.
  *
  * This schema is optimized for Vercel Edge Runtime deployment.
@@ -458,7 +458,7 @@ export const prototypes = pgTable('prototypes', {
   v0ChatId: text('v0_chat_id').notNull(),
   v0DemoUrl: text('v0_demo_url'),
 
-  // Sentra Hosting
+  // Quetrex Hosting
   deploymentUrl: text('deployment_url').notNull(),
   deploymentStatus: text('deployment_status', {
     enum: ['pending', 'deploying', 'ready', 'error']

@@ -7,7 +7,7 @@
 
 ## Overview
 
-Sentra implements a 3-phase security architecture for running AI agents that execute untrusted code. This guide explains how credentials are protected, how to analyze audit logs, and security best practices.
+Quetrex implements a 3-phase security architecture for running AI agents that execute untrusted code. This guide explains how credentials are protected, how to analyze audit logs, and security best practices.
 
 ### Security Posture
 
@@ -58,7 +58,7 @@ Located in `.github/workflows/ai-agent.yml`:
 
 ```yaml
 container:
-  image: ghcr.io/barnent1/sentra-ai-agent:latest
+  image: ghcr.io/barnent1/quetrex-ai-agent:latest
   options: |
     --rm
     --read-only
@@ -198,7 +198,7 @@ env:
 **Risk:** Container can read environment variables
 ```bash
 # Attacker code
-docker run --rm sentra-ai-agent:latest env | grep TOKEN
+docker run --rm quetrex-ai-agent:latest env | grep TOKEN
 # Outputs: GITHUB_TOKEN=ghp_...
 ```
 
@@ -223,7 +223,7 @@ steps:
     run: |
       docker run --rm \
         --mount type=bind,source=/var/run/credential-proxy.sock,target=/var/run/credential-proxy.sock,readonly \
-        sentra-ai-agent:latest
+        quetrex-ai-agent:latest
 ```
 
 **Protection:**
@@ -235,7 +235,7 @@ steps:
 **Even if attacker compromises container:**
 ```bash
 # Attacker code
-docker run --rm sentra-ai-agent:latest env | grep TOKEN
+docker run --rm quetrex-ai-agent:latest env | grep TOKEN
 # Outputs: (nothing)
 
 # Attacker tries to access proxy

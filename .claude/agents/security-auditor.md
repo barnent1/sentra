@@ -8,7 +8,7 @@ model: sonnet
 
 # Security Auditor Agent
 
-You are a **Security specialist**. Your job is to identify and prevent security vulnerabilities in Sentra code.
+You are a **Security specialist**. Your job is to identify and prevent security vulnerabilities in Quetrex code.
 
 ## Core Principle
 
@@ -191,7 +191,7 @@ app.use(cors({ origin: '*' }))
 
 // ✅ SAFE: Specific origins
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['https://sentra.dev'],
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || ['https://quetrex.dev'],
   credentials: true
 }))
 ```

@@ -12,7 +12,7 @@ You are the Voice Architect, a specialized agent designed to help humans create 
 
 ## Core Mission
 
-Glen's vision: "It's so important that I don't have to keep going back and forth on how something should work. Sentra is designed to take me away from that stress."
+Glen's vision: "It's so important that I don't have to keep going back and forth on how something should work. Quetrex is designed to take me away from that stress."
 
 Your job is to ensure NOTHING is missed. You maintain memory across sessions, prompt for completeness, and create specifications so thorough that implementation agents never need to ask clarifying questions.
 
@@ -29,7 +29,7 @@ Your job is to ensure NOTHING is missed. You maintain memory across sessions, pr
 For each project, you maintain a session directory:
 
 ```
-.sentra/architect-sessions/<project-name>/
+.quetrex/architect-sessions/<project-name>/
 ├── session-history.md          # Chronological conversation log
 ├── decisions.yml               # All architectural decisions
 ├── coverage-checklist.yml      # What's discussed, what's missing
@@ -471,7 +471,7 @@ Let's start with the basics:
 - Technology preferences
 
 **You create:**
-- `.sentra/architect-sessions/<project-name>/` directory
+- `.quetrex/architect-sessions/<project-name>/` directory
 - `session-history.md` (first entry)
 - `requirements.md` (initial draft)
 - `coverage-checklist.yml` (initialized)
@@ -539,7 +539,7 @@ I'll walk through each category and confirm we have everything, then we can gene
 
 **You create:**
 ```
-.sentra/architect-sessions/<project-name>/READY.md
+.quetrex/architect-sessions/<project-name>/READY.md
 
 # <Project Name> - Specification Complete
 
@@ -566,13 +566,13 @@ I'll walk through each category and confirm we have everything, then we can gene
 ## Prototype
 
 ✅ Interactive prototype generated
-✅ Deployed to Sentra: https://bookmark-manager-prototype.sentra.app
+✅ Deployed to Quetrex: https://bookmark-manager-prototype.quetrex.app
 ✅ User approved design (2 iterations)
 ✅ E2E tests generated from prototype (12 tests)
 
 **Files:**
-- Specification: `.sentra/architect-sessions/bookmark-manager/spec.yml`
-- Prototype URL: `https://bookmark-manager-prototype.sentra.app`
+- Specification: `.quetrex/architect-sessions/bookmark-manager/spec.yml`
+- Prototype URL: `https://bookmark-manager-prototype.quetrex.app`
 - E2E Tests: `tests/e2e/bookmark-manager-interactions.spec.ts`
 
 ## Estimated Scope
@@ -622,11 +622,11 @@ Walk me through a user's interaction step-by-step...
 
 **You create:**
 ```
-.sentra/architect-sessions/<project-name>/v0-exports/
+.quetrex/architect-sessions/<project-name>/v0-exports/
 ├── dashboard.tsx (copy of V0 code)
 └── dashboard.png (screenshot)
 
-.sentra/architect-sessions/<project-name>/ui-screens.md
+.quetrex/architect-sessions/<project-name>/ui-screens.md
 # Dashboard Screen
 
 V0 Export: ./v0-exports/dashboard.tsx
@@ -665,7 +665,7 @@ Let's start with the most important screen - which one should we begin with?
 
 **You create:**
 ```yaml
-# .sentra/specs/screens/dashboard.yml
+# .quetrex/specs/screens/dashboard.yml
 
 screen: "Dashboard"
 route: "/dashboard"
@@ -971,7 +971,7 @@ I can now generate a working, interactive prototype that you can:
 - Use as the design reference for implementation
 
 The prototype will be:
-- Hosted on Sentra (https://<project>-prototype.sentra.app)
+- Hosted on Quetrex (https://<project>-prototype.quetrex.app)
 - Built with Next.js 15, React 19, shadcn/ui
 - Interactive (all navigation and core interactions work)
 - Deployed in ~30 seconds
@@ -987,7 +987,7 @@ Ready to generate the design? (Yes/No/Not yet)
 
 **Step 1: Save complete specification**
 
-Create comprehensive spec file at: `.sentra/architect-sessions/<project>/spec.yml`
+Create comprehensive spec file at: `.quetrex/architect-sessions/<project>/spec.yml`
 
 ```yaml
 project: "Bookmark Manager"
@@ -1034,7 +1034,7 @@ design_tokens:
 # You execute this command
 claude --agent design-agent \
   --task "Generate prototype from spec" \
-  --input ".sentra/architect-sessions/<project>/spec.yml"
+  --input ".quetrex/architect-sessions/<project>/spec.yml"
 ```
 
 **Step 3: Wait for prototype URL**
@@ -1043,7 +1043,7 @@ Design agent will:
 1. Translate spec to v0 prompt
 2. Call v0 Platform API
 3. Extract generated code
-4. Deploy to Sentra-hosted URL
+4. Deploy to Quetrex-hosted URL
 5. Save prototype record to database
 6. Return deployment URL
 
@@ -1052,7 +1052,7 @@ Design agent will:
 ```
 Prototype ready! 🎉
 
-View it here: https://bookmark-manager-prototype.sentra.app
+View it here: https://bookmark-manager-prototype.quetrex.app
 
 Try clicking around:
 - Add a bookmark (FAB button)
@@ -1104,7 +1104,7 @@ claude --agent design-agent \
 Updated!
 
 Refresh the prototype to see changes:
-https://bookmark-manager-prototype.sentra.app
+https://bookmark-manager-prototype.quetrex.app
 
 Changes applied:
 ✓ Sidebar moved to left side
@@ -1137,8 +1137,8 @@ This will take about 30 seconds...
 
 Done! Here's what I've created:
 
-📋 Specification: .sentra/architect-sessions/bookmark-manager/spec.yml
-🎨 Prototype: https://bookmark-manager-prototype.sentra.app
+📋 Specification: .quetrex/architect-sessions/bookmark-manager/spec.yml
+🎨 Prototype: https://bookmark-manager-prototype.quetrex.app
 🧪 E2E Tests: tests/e2e/bookmark-manager-interactions.spec.ts
 
 Ready to create GitHub issues for implementation?
@@ -1224,7 +1224,7 @@ If this continues, I'll save the specification and you can generate the prototyp
 
 **If deployment fails:**
 ```
-The prototype was generated by v0, but I couldn't deploy it to Sentra hosting.
+The prototype was generated by v0, but I couldn't deploy it to Quetrex hosting.
 
 Temporary v0 URL: https://v0.dev/t/abc123
 
@@ -1273,7 +1273,7 @@ behavior:
 
 **Step 1: Create screen spec YAML**
 
-Save to: `.sentra/architect-sessions/<project>/specs/<screen>.yml`
+Save to: `.quetrex/architect-sessions/<project>/specs/<screen>.yml`
 
 ```yaml
 screen: "Dashboard"
@@ -1461,7 +1461,7 @@ When voice architect marks project as "ready for implementation":
 
 ### Files Created
 
-- `.sentra/architect-sessions/<project>/specs/dashboard.yml`
+- `.quetrex/architect-sessions/<project>/specs/dashboard.yml`
 - `tests/e2e/dashboard-interactions.spec.ts`
 
 ### Next Steps
@@ -1501,7 +1501,7 @@ If offering prototype generation (≥90% confidence):
 - [ ] Design tokens defined (colors, spacing, typography)
 - [ ] User approved prototype offer
 - [ ] Prototype successfully generated via v0 API
-- [ ] Prototype deployed to Sentra-hosted URL
+- [ ] Prototype deployed to Quetrex-hosted URL
 - [ ] User tested prototype interactivity
 - [ ] User provided feedback (if needed)
 - [ ] Iterations applied and redeployed

@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "Sentra",
+    "title": "Quetrex",
     "subtitle": "Centro de Control para Tus Agentes de IA",
     "greeting": "Hola {{name}}",
     "loading": "Cargando panel de control...",
@@ -88,7 +88,7 @@
         "owner": "Propietario del Repositorio de GitHub",
         "name": "Nombre del Repositorio de GitHub",
         "ownerPlaceholder": "barnent1",
-        "namePlaceholder": "sentra"
+        "namePlaceholder": "quetrex"
       },
       "voice": {
         "title": "Voz",

@@ -7,7 +7,7 @@
  *
  * Usage:
  *   const tracker = new CostTracker();
- *   tracker.trackOpenAICall({ model: 'gpt-4o', projectId: 'sentra', inputTokens: 1000, outputTokens: 500 });
+ *   tracker.trackOpenAICall({ model: 'gpt-4o', projectId: 'quetrex', inputTokens: 1000, outputTokens: 500 });
  *   const summary = tracker.getCostSummary();
  */
 

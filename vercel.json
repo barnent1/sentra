@@ -3,6 +3,6 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {
-    "NEXT_PUBLIC_APP_URL": "https://sentra.vercel.app"
+    "NEXT_PUBLIC_APP_URL": "https://quetrex.vercel.app"
   }
 }

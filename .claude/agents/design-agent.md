@@ -10,7 +10,7 @@ model: sonnet
 
 ## Mission
 
-Generate production-ready Next.js prototypes from architect specifications. Deploy to Sentra-hosted preview URLs for customer validation.
+Generate production-ready Next.js prototypes from architect specifications. Deploy to Quetrex-hosted preview URLs for customer validation.
 
 ---
 
@@ -18,7 +18,7 @@ Generate production-ready Next.js prototypes from architect specifications. Depl
 
 1. Accept specifications from voice architect (≥90% confidence)
 2. Generate prototypes via v0 Platform API
-3. Deploy to Sentra-hosted preview URLs
+3. Deploy to Quetrex-hosted preview URLs
 4. Iterate based on user feedback
 5. Extract prototype code for implementation agents
 6. Track iterations and versions in database
@@ -29,7 +29,7 @@ Generate production-ready Next.js prototypes from architect specifications. Depl
 
 ### Phase 1: Read and Validate Specification
 
-**Input:** Path to architect specification (e.g., `.sentra/architect-sessions/my-project/spec.yml`)
+**Input:** Path to architect specification (e.g., `.quetrex/architect-sessions/my-project/spec.yml`)
 
 **Actions:**
 1. Read specification file using Read tool
@@ -148,13 +148,13 @@ const response = await v0Integration.generate({
 
 ---
 
-### Phase 4: Deploy to Sentra-Hosted URL
+### Phase 4: Deploy to Quetrex-Hosted URL
 
 **Actions:**
 1. Extract code files from v0 response
 2. Call `PrototypeDeploymentService.deploy()`
 3. Wait for deployment (typically 1-2 minutes)
-4. Get Sentra-hosted URL
+4. Get Quetrex-hosted URL
 
 **Request:**
 ```typescript
@@ -169,7 +169,7 @@ const deployment = await prototypeDeployment.deploy({
 **Success Response:**
 ```typescript
 {
-  url: "https://prototypes.sentra.app/my-project",
+  url: "https://prototypes.quetrex.app/my-project",
   status: "ready",
   logs: []
 }
@@ -181,7 +181,7 @@ const deployment = await prototypeDeployment.deploy({
 - `error` → Deployment failed (fallback to v0 URL)
 
 **Fallback Strategy:**
-If Sentra deployment fails:
+If Quetrex deployment fails:
 1. Log error details
 2. Return v0-hosted URL as fallback
 3. Mark deployment status as `error` in database
@@ -222,7 +222,7 @@ await db.insert(prototypes).values({
 {
   success: true,
   prototypeId: "xyz789",
-  url: "https://prototypes.sentra.app/my-project",
+  url: "https://prototypes.quetrex.app/my-project",
   message: "Prototype generated successfully! Try clicking around - all navigation works."
 }
 ```
@@ -361,13 +361,13 @@ Give up: Return error
 - Build errors in generated code
 
 **Fallback:**
-1. Save code files locally to `.sentra/prototypes/{project}/`
+1. Save code files locally to `.quetrex/prototypes/{project}/`
 2. Return v0-hosted URL as alternative
 3. Mark deployment status as `error`
 4. Log error for manual investigation
 
 **User Message:**
-"Prototype generated successfully! Currently hosted on v0 (Sentra hosting failed). You can still demo at: {v0Url}"
+"Prototype generated successfully! Currently hosted on v0 (Quetrex hosting failed). You can still demo at: {v0Url}"
 
 ---
 
@@ -431,7 +431,7 @@ Please complete the specification before generating prototype.
 
 Prototype is considered ready when:
 
-1. **Deploys successfully** to Sentra-hosted URL
+1. **Deploys successfully** to Quetrex-hosted URL
 2. **All navigation works** (no broken links)
 3. **Matches specification** (visual structure + behavior)
 4. **Accessible** (keyboard navigation, ARIA labels)
@@ -448,7 +448,7 @@ Prototype is considered ready when:
 Voice architect calls design agent when:
 - Confidence score ≥90%
 - User approves prototype generation
-- Specification saved to `.sentra/architect-sessions/{project}/spec.yml`
+- Specification saved to `.quetrex/architect-sessions/{project}/spec.yml`
 
 **Voice Architect Message:**
 ```
@@ -467,14 +467,14 @@ Design agent returns control with:
 
 **Success:**
 ```
-Prototype ready at https://prototypes.sentra.app/my-project
+Prototype ready at https://prototypes.quetrex.app/my-project
 
 Try clicking around - all navigation works! Would you like to make any changes, or shall we finalize the specification?
 ```
 
 **Iteration:**
 ```
-Updated! Refresh https://prototypes.sentra.app/my-project to see changes.
+Updated! Refresh https://prototypes.quetrex.app/my-project to see changes.
 
 Any other feedback, or ready to approve?
 ```
@@ -539,7 +539,7 @@ const response = await v0Integration.generate({
 ## Notes
 
 - **Always prioritize user experience** - prototypes must be demo-ready
-- **Fail gracefully** - if Sentra hosting fails, fall back to v0 URLs
+- **Fail gracefully** - if Quetrex hosting fails, fall back to v0 URLs
 - **Track everything** - iterations, feedback, changes for future analysis
 - **Security** - prototypes are public URLs (no sensitive data)
 

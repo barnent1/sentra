@@ -2,7 +2,7 @@
 
 ## Summary
 
-Successfully implemented Vercel Edge Runtime features and optimizations for Sentra web application.
+Successfully implemented Vercel Edge Runtime features and optimizations for Quetrex web application.
 
 ## Changes Completed
 

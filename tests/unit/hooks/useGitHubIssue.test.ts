@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useGitHubIssue, type CreateIssueOptions } from '@/hooks/useGitHubIssue'
-import * as tauri from '@/services/sentra-api'
+import * as tauri from '@/services/quetrex-api'
 
 // Mock the tauri module
-vi.mock('@/services/sentra-api', () => ({
+vi.mock('@/services/quetrex-api', () => ({
   createGithubIssue: vi.fn(),
 }))
 

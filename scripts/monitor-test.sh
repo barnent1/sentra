@@ -5,7 +5,7 @@
 
 set -e
 
-echo "🔍 Monitoring Sentra Test Execution"
+echo "🔍 Monitoring Quetrex Test Execution"
 echo "===================================="
 echo ""
 echo "📊 Current Status (refreshes every 30 seconds)"
@@ -14,7 +14,7 @@ echo ""
 
 while true; do
     clear
-    echo "🔍 Sentra Test Execution Monitor"
+    echo "🔍 Quetrex Test Execution Monitor"
     echo "===================================="
     echo "Time: $(date)"
     echo ""

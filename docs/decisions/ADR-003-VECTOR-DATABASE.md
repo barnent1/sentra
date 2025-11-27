@@ -12,12 +12,12 @@
 
 ## Context
 
-Sentra's Voice Architect agent is designed to maintain memory across multi-session conversations, building comprehensive SaaS specifications through progressive interaction. The agent must preserve conversation context, extract architectural decisions, and enable semantic search across all project knowledge.
+Quetrex's Voice Architect agent is designed to maintain memory across multi-session conversations, building comprehensive SaaS specifications through progressive interaction. The agent must preserve conversation context, extract architectural decisions, and enable semantic search across all project knowledge.
 
 ### Current State
 
 - **Agent:** Voice Architect (Claude Opus 4)
-- **Memory System:** File-based (YAML/Markdown in `.sentra/architect-sessions/`)
+- **Memory System:** File-based (YAML/Markdown in `.quetrex/architect-sessions/`)
 - **Limitation:** No semantic search capability
 - **Scale Target:** 1,000 → 100,000 documented features across all projects
 
@@ -34,7 +34,7 @@ The current file-based memory system has critical limitations:
 ### User Requirement
 
 Glen's vision (from `voice-architect.md`):
-> "It's so important that I don't have to keep going back and forth on how something should work. Sentra is designed to take me away from that stress."
+> "It's so important that I don't have to keep going back and forth on how something should work. Quetrex is designed to take me away from that stress."
 
 The Voice Architect must:
 - Recall ALL relevant context from previous sessions
@@ -526,7 +526,7 @@ Migrate to Pinecone/Qdrant if:
 
 ### Internal Documentation
 
-- `CLAUDE.md` - Sentra project context
+- `CLAUDE.md` - Quetrex project context
 - `docs/decisions/ADR-002-DRIZZLE-ORM-MIGRATION.md` - ORM decision rationale
 - `.claude/agents/voice-architect.md` - Voice Architect requirements
 - `drizzle/migrations/0000_steady_thunderball.sql` - Existing schema

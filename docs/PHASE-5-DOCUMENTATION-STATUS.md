@@ -22,7 +22,7 @@ Phase 5 documentation initiative has created **3 comprehensive user guides** (50
 
 **Location:** `/docs/guides/MULTI-SESSION-ARCHITECT.md`
 
-**Audience:** Developers using Sentra
+**Audience:** Developers using Quetrex
 
 **Contents:**
 - How multi-session conversations work
@@ -46,7 +46,7 @@ Phase 5 documentation initiative has created **3 comprehensive user guides** (50
 
 **Location:** `/docs/guides/E2E-TEST-GENERATION.md`
 
-**Audience:** Developers contributing to Sentra
+**Audience:** Developers contributing to Quetrex
 
 **Contents:**
 - Hybrid approach (templates + LLM)
@@ -102,7 +102,7 @@ Phase 5 documentation initiative has created **3 comprehensive user guides** (50
 **Suggested Structure:**
 
 ```markdown
-# Contributing to Sentra
+# Contributing to Quetrex
 
 ## Getting Started
 
@@ -115,8 +115,8 @@ Phase 5 documentation initiative has created **3 comprehensive user guides** (50
 
 1. Clone repository
 ```bash
-git clone https://github.com/barnent1/sentra.git
-cd sentra
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex
 ```
 
 2. Install dependencies
@@ -262,7 +262,7 @@ npm test              # All tests
 **Suggested Structure:**
 
 ```markdown
-# Sentra Quick Start Guide
+# Quetrex Quick Start Guide
 
 **Goal:** Get productive in 30 minutes
 
@@ -277,8 +277,8 @@ Install:
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/barnent1/sentra.git
-cd sentra
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex
 ```
 
 ### 2. Install Dependencies
@@ -294,7 +294,7 @@ cp .env.example .env.local
 Edit `.env.local`:
 ```bash
 # Database
-DATABASE_URL="postgresql://user:pass@localhost:5432/sentra"
+DATABASE_URL="postgresql://user:pass@localhost:5432/quetrex"
 
 # AI Services (optional for Phase 1)
 OPENAI_API_KEY="sk-..."
@@ -307,10 +307,10 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ### 4. Database Setup
 ```bash
 # Create database
-createdb sentra
+createdb quetrex
 
 # Install pgvector extension
-psql sentra -c "CREATE EXTENSION vector;"
+psql quetrex -c "CREATE EXTENSION vector;"
 
 # Run migrations
 npm run db:migrate
@@ -352,7 +352,7 @@ Track completion percentage reaching 90%+
 When ready, approve spec generation
 
 ### 6. Review Implementation
-Agent creates PR automatically - review in Sentra
+Agent creates PR automatically - review in Quetrex
 
 ## Common Commands
 
@@ -563,7 +563,7 @@ Generate final specification (requires readiness ≥ 90%).
 ```json
 {
   "specificationId": "spec_789",
-  "specificationPath": ".sentra/specs/v1-main-feature-spec.md",
+  "specificationPath": ".quetrex/specs/v1-main-feature-spec.md",
   "readinessScore": 92,
   "generatedAt": "2025-11-23T14:35:00Z",
   "githubIssue": {
@@ -748,7 +748,7 @@ API keys are decrypted only when needed:
 
 ## Context
 
-Sentra's architect AI must produce specifications of sufficient quality for Fortune 500 companies to implement features without ambiguity or gaps.
+Quetrex's architect AI must produce specifications of sufficient quality for Fortune 500 companies to implement features without ambiguity or gaps.
 
 ## Decision
 
@@ -916,10 +916,10 @@ jq -r 'select(.status=="REJECTED")' <log> | wc -l
 ### Database Backup
 ```bash
 # Automated via cron
-pg_dump sentra > /backups/sentra-$(date +%Y%m%d).sql
+pg_dump quetrex > /backups/quetrex-$(date +%Y%m%d).sql
 
 # Verify backup
-psql -f /backups/sentra-$(date +%Y%m%d).sql test_db
+psql -f /backups/quetrex-$(date +%Y%m%d).sql test_db
 ```
 
 ## Weekly Maintenance
@@ -927,19 +927,19 @@ psql -f /backups/sentra-$(date +%Y%m%d).sql test_db
 ### Log Rotation
 ```bash
 # Archive old logs
-gzip /var/log/sentra/*.log.1
+gzip /var/log/quetrex/*.log.1
 
 # Delete logs >90 days
-find /var/log/sentra -name "*.gz" -mtime +90 -delete
+find /var/log/quetrex -name "*.gz" -mtime +90 -delete
 ```
 
 ### Performance Tuning
 ```bash
 # Analyze slow queries
-psql sentra -c "SELECT query, calls, total_time FROM pg_stat_statements ORDER BY total_time DESC LIMIT 10;"
+psql quetrex -c "SELECT query, calls, total_time FROM pg_stat_statements ORDER BY total_time DESC LIMIT 10;"
 
 # Rebuild indexes
-psql sentra -c "REINDEX DATABASE sentra;"
+psql quetrex -c "REINDEX DATABASE quetrex;"
 ```
 
 [More detailed procedures...]
@@ -958,7 +958,7 @@ Add section for multi-session architect:
 ```markdown
 ## Multi-Session Architect
 
-Sentra's architect is designed for **multi-day, multi-week conversations**:
+Quetrex's architect is designed for **multi-day, multi-week conversations**:
 
 - **Perfect Memory** - Never re-asks answered questions
 - **Session Resume** - Continue after days/weeks with smart context loading
@@ -994,7 +994,7 @@ Tests generated automatically from specifications:
 **Suggested Structure:**
 
 ```markdown
-# Sentra Demo Video Script
+# Quetrex Demo Video Script
 
 **Duration:** 5 minutes
 **Audience:** Developers
@@ -1018,10 +1018,10 @@ Back to ChatGPT with error logs.
 
 ## Scene 2: The Solution (0:45-1:30)
 
-[Screen: Sentra dashboard, click "Chat with Architect"]
+[Screen: Quetrex dashboard, click "Chat with Architect"]
 
 **Voiceover:**
-"With Sentra, you just talk."
+"With Quetrex, you just talk."
 
 [Demo: Voice input]
 "Add user authentication with email and password, magic link fallback, and session management."
@@ -1051,7 +1051,7 @@ Back to ChatGPT with error logs.
 [Screen: Progress indicators, confidence scores]
 
 **Voiceover:**
-"Sentra tracks objective quality metrics across 10 categories.
+"Quetrex tracks objective quality metrics across 10 categories.
 When you hit 90% confidence, specs are ready for enterprise teams."
 
 [Screen: Generate specification button]
@@ -1078,13 +1078,13 @@ Zero context switching."
 
 ## Scene 6: Call to Action (4:30-5:00)
 
-[Screen: Sentra logo, links]
+[Screen: Quetrex logo, links]
 
 **Voiceover:**
 "Stop context switching. Start building.
 
-Try Sentra today.
-github.com/barnent1/sentra"
+Try Quetrex today.
+github.com/barnent1/quetrex"
 
 [End]
 ```

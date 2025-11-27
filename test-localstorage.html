@@ -39,7 +39,7 @@
     </style>
 </head>
 <body>
-    <h1>Test Sentra localStorage Settings</h1>
+    <h1>Test Quetrex localStorage Settings</h1>
 
     <div>
         <h2>Save Settings</h2>
@@ -78,13 +78,13 @@
                 language: 'en',
             };
 
-            localStorage.setItem('sentra_settings', JSON.stringify(settings));
+            localStorage.setItem('quetrex_settings', JSON.stringify(settings));
             document.getElementById('output').textContent =
                 'Settings saved to localStorage:\n\n' + JSON.stringify(settings, null, 2);
         }
 
         function loadTestSettings() {
-            const stored = localStorage.getItem('sentra_settings');
+            const stored = localStorage.getItem('quetrex_settings');
             if (stored) {
                 const settings = JSON.parse(stored);
                 document.getElementById('output').textContent =
@@ -96,7 +96,7 @@
         }
 
         function clearTestSettings() {
-            localStorage.removeItem('sentra_settings');
+            localStorage.removeItem('quetrex_settings');
             document.getElementById('output').textContent =
                 'Settings cleared from localStorage';
         }

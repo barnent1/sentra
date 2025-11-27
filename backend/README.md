@@ -1,6 +1,6 @@
-# Sentra Backend API
+# Quetrex Backend API
 
-Express.js backend server providing cloud features for the Sentra AI Agent Control Center.
+Express.js backend server providing cloud features for the Quetrex AI Agent Control Center.
 
 ## Features
 

@@ -70,7 +70,7 @@ Every INSERT, UPDATE, DELETE is automatically logged with:
 
 ## Cost Comparison
 
-### Real-World Example: Sentra Bookmark Manager
+### Real-World Example: Quetrex Bookmark Manager
 
 **Assumptions:**
 - 4M bookmarks
@@ -714,7 +714,7 @@ Total: 10.8 GB
 Cost: $1.35/month ($16/year)
 ```
 
-**Large App (Sentra Bookmarks):**
+**Large App (Quetrex Bookmarks):**
 ```
 Bookmarks: 4M × 10% × 2KB × 3 months × 1.5 = 3.6 GB
 Users: 100K × 2% × 1KB × 12 months × 1.5 = 3.6 GB
@@ -1226,11 +1226,11 @@ ALTER TABLE bookmarks ENABLE TRIGGER ALL;
 ### Related Guides
 
 - [Supabase Setup Guide](./SUPABASE-SETUP.md)
-- [Sentra Standard Stack](../../SENTRA-STANDARD-STACK-FINAL.md)
+- [Quetrex Standard Stack](../../QUETREX-STANDARD-STACK-FINAL.md)
 
 ### Example Projects
 
-- [Sentra Bookmark Manager](../../) - 4M records with audit trails
+- [Quetrex Bookmark Manager](../../) - 4M records with audit trails
 - [Supabase Examples](https://github.com/supabase/supabase/tree/master/examples)
 
 ---
@@ -1252,7 +1252,7 @@ You've now implemented enterprise-grade audit trails for your Supabase project:
 4. Add audit history UI to your app
 5. Test restore procedures
 
-**Questions?** Check the [Troubleshooting](#troubleshooting) section or [open an issue](https://github.com/barnent1/sentra/issues).
+**Questions?** Check the [Troubleshooting](#troubleshooting) section or [open an issue](https://github.com/barnent1/quetrex/issues).
 
 ---
 

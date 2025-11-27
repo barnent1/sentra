@@ -655,7 +655,7 @@ export async function sendVerificationEmail(userId: string): Promise<void> {
     to: user.email,
     subject: 'Verify Your Email',
     html: `
-      <p>Welcome to Sentra!</p>
+      <p>Welcome to Quetrex!</p>
       <p>Please verify your email address by clicking the link below:</p>
       <a href="${verifyUrl}">${verifyUrl}</a>
       <p>This link expires in 24 hours.</p>
@@ -719,8 +719,8 @@ export async function generateMFASecret(userId: string): Promise<{
 
   // Generate secret
   const secret = speakeasy.generateSecret({
-    name: `Sentra (${user.email})`,
-    issuer: 'Sentra',
+    name: `Quetrex (${user.email})`,
+    issuer: 'Quetrex',
     length: 32,
   })
 
@@ -1250,9 +1250,9 @@ export async function sendMagicLink(email: string): Promise<void> {
 
   await sendEmail({
     to: email,
-    subject: 'Sign in to Sentra',
+    subject: 'Sign in to Quetrex',
     html: `
-      <p>Click the link below to sign in to Sentra:</p>
+      <p>Click the link below to sign in to Quetrex:</p>
       <a href="${loginUrl}">${loginUrl}</a>
       <p>This link expires in 15 minutes.</p>
       <p>If you didn't request this, please ignore this email.</p>

@@ -3,7 +3,7 @@
 **Mission:** Make it IMPOSSIBLE to ship broken code to production.
 
 **Last Updated:** November 12, 2025
-**Project:** Sentra - AI Agent Control Center
+**Project:** Quetrex - AI Agent Control Center
 **Author:** Glen Barnhardt (with Claude Code)
 
 ---

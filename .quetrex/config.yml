@@ -1,0 +1,30 @@
+# Quetrex Project Configuration
+
+project:
+  name: quetrex
+  description: AI Agent Control Center - Mission Control for Your AI Agents
+  version: 1.0.0
+  github_repo: "barnent1/quetrex"
+
+agent_controls:
+  max_execution_time: 30m
+  max_api_calls: 150
+  max_file_changes: 75
+  require_tests: true
+  auto_merge: false
+
+cost_controls:
+  max_monthly_spend: 200  # Higher for building Quetrex
+  max_per_issue: 10       # More complex tasks
+  alert_threshold: 160
+
+safety_nets:
+  - build_must_pass
+  - tests_must_pass
+  - lint_must_pass
+  - no_secrets_committed
+
+phase_i_automation:
+  enabled: true
+  github_label: ai-feature
+  webhook_enabled: false  # Will enable after repo creation

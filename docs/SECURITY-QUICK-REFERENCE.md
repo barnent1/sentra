@@ -1,6 +1,6 @@
 # Security Quick Reference
 
-Quick guide for developers working on Sentra. Read this BEFORE making changes.
+Quick guide for developers working on Quetrex. Read this BEFORE making changes.
 
 ## 🚨 Golden Rules
 
@@ -217,7 +217,7 @@ test; rm -rf /
 ### If you discover a vulnerability:
 
 1. **DO NOT** open a public GitHub issue
-2. **DO** email security@sentra.ai immediately
+2. **DO** email security@quetrex.ai immediately
 3. **DO** include:
    - Vulnerability type (XSS, injection, etc)
    - Affected file(s)

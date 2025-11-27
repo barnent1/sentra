@@ -1,4 +1,4 @@
-# Sentra
+# Quetrex
 
 **Stop context switching. Start building.**
 
@@ -6,7 +6,7 @@ A voice-first AI control center that lets you talk to your codebase and watch AI
 
 Created by Glen Barnhardt with the help of Claude Code
 
-[![Web App](https://img.shields.io/badge/Web%20App-Live-blue.svg)](https://sentra.app)
+[![Web App](https://img.shields.io/badge/Web%20App-Live-blue.svg)](https://quetrex.app)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-15.5-black.svg)](https://nextjs.org/)
 [![Test Coverage](https://img.shields.io/badge/coverage-75%25+-brightgreen.svg)](docs/TESTING.md)
@@ -43,11 +43,11 @@ Sound familiar?
 
 ## The Solution
 
-**With Sentra, you just talk:**
+**With Quetrex, you just talk:**
 
 > "Add user authentication with email and password, magic link fallback, and session management"
 
-**Sentra does the rest:**
+**Quetrex does the rest:**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -98,19 +98,19 @@ Sound familiar?
 
 **Result: 30 seconds of talking. 8 minutes of implementation. Zero context switching.**
 
-You stay in Sentra. No browser tabs. No terminal windows. No copying code.
+You stay in Quetrex. No browser tabs. No terminal windows. No copying code.
 
 ---
 
-## What Makes Sentra Different
+## What Makes Quetrex Different
 
 ### 1. Voice-First, Always
 
-Most AI coding tools make you type. Sentra makes you talk.
+Most AI coding tools make you type. Quetrex makes you talk.
 
 - **Natural conversation** with AI architect about what you want to build
 - **2 implementations**: HTTP API (works everywhere) + Realtime API (1-2s latency)
-- **Smart context**: Sentra knows your codebase, your patterns, your standards
+- **Smart context**: Quetrex knows your codebase, your patterns, your standards
 - **Versioned specs**: See exactly what will be built before approving
 
 ### 2. Mission Control for Multiple Projects
@@ -119,10 +119,10 @@ Stop juggling terminal windows and GitHub tabs. See everything at once.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│  📊 Sentra Dashboard                                    🔔 3   ⚙️      │
+│  📊 Quetrex Dashboard                                    🔔 3   ⚙️      │
 ├────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  🟢 sentra-frontend               🟡 auth-service                      │
+│  🟢 quetrex-frontend               🟡 auth-service                      │
 │  ├─ feat: PR review UI            ├─ fix: token refresh               │
 │  ├─ ▓▓▓▓▓▓▓▓▓░░░░░ 67%          ├─ ▓▓░░░░░░░░░░░ 18%               │
 │  └─ Agent: Building...  $1.23     └─ Waiting for approval  $0        │
@@ -138,7 +138,7 @@ Stop juggling terminal windows and GitHub tabs. See everything at once.
 │  Recent Activity                                                       │
 │  • auth-service: Tests passing (94% coverage)            2 mins ago   │
 │  • api-gateway: Pull request #67 created                 8 mins ago   │
-│  • sentra-frontend: Agent started implementation         12 mins ago  │
+│  • quetrex-frontend: Agent started implementation         12 mins ago  │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -146,7 +146,7 @@ Stop juggling terminal windows and GitHub tabs. See everything at once.
 
 ### 3. In-App PR Review (No GitHub Tab Needed)
 
-Review, approve, and merge pull requests without leaving Sentra.
+Review, approve, and merge pull requests without leaving Quetrex.
 
 - **Inline diff viewer** with syntax highlighting
 - **File tree navigation** to jump between changes
@@ -156,7 +156,7 @@ Review, approve, and merge pull requests without leaving Sentra.
 
 ### 4. Automation That Actually Works
 
-Most CI/CD breaks when you need it most. Sentra's automation is bulletproof.
+Most CI/CD breaks when you need it most. Quetrex's automation is bulletproof.
 
 **6-Layer Defense System:**
 1. **PreToolUse Hook** - Blocks dangerous commands before execution (`git commit --no-verify` → BLOCKED)
@@ -279,14 +279,14 @@ See [Roadmap](docs/roadmap/) for detailed plans.
 
 ## Quick Start
 
-**Live Demo:** https://sentra.vercel.app
+**Live Demo:** https://quetrex.vercel.app
 
 ### Local Development (5 Minutes)
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/barnent1/sentra.git
-cd sentra
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex
 
 # 2. Install dependencies
 npm install
@@ -358,7 +358,7 @@ That's it. The agent takes over from there.
 ## Project Structure
 
 ```
-sentra/
+quetrex/
 ├── src/                      # Next.js application
 │   ├── app/                  # App Router pages
 │   ├── components/           # React components
@@ -379,7 +379,7 @@ sentra/
 │   │   └── ai-agent-worker.py # Agent implementation worker
 │   └── settings.json         # Agent configuration
 │
-├── .sentra/                  # Project data
+├── .quetrex/                  # Project data
 │   ├── specs/                # Versioned specifications
 │   ├── memory/               # Project context
 │   └── config.yml            # Automation settings
@@ -542,7 +542,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for complete guidelines.
 
 **Total: 3+ hours of active work**
 
-**Sentra Workflow:**
+**Quetrex Workflow:**
 
 ```
 You: "Add real-time notifications using WebSockets. Store in
@@ -580,7 +580,7 @@ We welcome contributions! This is an early-stage project with lots of opportunit
 
 **How to Contribute:**
 1. Read [CONTRIBUTING.md](CONTRIBUTING.md)
-2. Check [Issues](https://github.com/barnent1/sentra/issues) for `good first issue` label
+2. Check [Issues](https://github.com/barnent1/quetrex/issues) for `good first issue` label
 3. Fork the repo and create a feature branch
 4. Write tests FIRST (TDD approach)
 5. Ensure all quality checks pass
@@ -606,7 +606,7 @@ We welcome contributions! This is an early-stage project with lots of opportunit
 
 **We're building the operating system for AI-powered development.**
 
-Today, Sentra is a web application that helps you build features faster with voice and automation.
+Today, Quetrex is a web application that helps you build features faster with voice and automation.
 
 Future planned features:
 - **Multi-user** (teams, real-time collaboration)
@@ -623,7 +623,7 @@ Future planned features:
 ## FAQ
 
 **Q: Does this replace developers?**
-A: No. Sentra makes developers more productive. You still make all the decisions - what to build, how to architect it, whether the implementation is correct. Sentra just handles the tedious parts (writing boilerplate, running tests, creating PRs).
+A: No. Quetrex makes developers more productive. You still make all the decisions - what to build, how to architect it, whether the implementation is correct. Quetrex just handles the tedious parts (writing boilerplate, running tests, creating PRs).
 
 **Q: What if the AI makes mistakes?**
 A: That's why we have the 6-layer defense system and in-app PR review. Every change goes through TypeScript checks, linting, tests, and human review. Nothing gets merged without your approval.
@@ -639,7 +639,7 @@ A: Depends on usage. Typical costs:
 A: Yes. See [Security Architecture](docs/architecture/SECURITY-ARCHITECTURE.md). Phase 1 (Docker isolation) is implemented. Phase 2 (credential proxy) is in progress. Phase 3 (gVisor) planned for Q1 2026.
 
 **Q: Can I use this in production?**
-A: Sentra itself is early-stage (use at your own risk). But the code Sentra generates? Absolutely - just review it carefully like you would any PR.
+A: Quetrex itself is early-stage (use at your own risk). But the code Quetrex generates? Absolutely - just review it carefully like you would any PR.
 
 **Q: Does it work on mobile?**
 A: The web interface is responsive and works on tablets. Full mobile optimization is planned for Phase 3.
@@ -674,13 +674,13 @@ MIT License - See [LICENSE](LICENSE) file for details.
 ## Get Started
 
 ```bash
-git clone https://github.com/barnent1/sentra.git
-cd sentra
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex
 npm install
 npm run dev
 ```
 
-**Questions?** Open a [GitHub Issue](https://github.com/barnent1/sentra/issues)
+**Questions?** Open a [GitHub Issue](https://github.com/barnent1/quetrex/issues)
 
 **Want to contribute?** Read [CONTRIBUTING.md](CONTRIBUTING.md)
 

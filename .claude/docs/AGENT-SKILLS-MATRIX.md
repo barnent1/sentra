@@ -4,7 +4,7 @@ This matrix shows which skills each agent uses. Agents are kept small by referen
 
 ## Matrix View
 
-| Agent | quality-gates | architecture-patterns | code-review-standards | typescript-strict-guard | nextjs-15-specialist | drizzle-orm-patterns | react-19-patterns | zod-validation-patterns | security-sentinel | tdd-enforcer | voice-system-expert | sentra-architect | semantic-code-hunter |
+| Agent | quality-gates | architecture-patterns | code-review-standards | typescript-strict-guard | nextjs-15-specialist | drizzle-orm-patterns | react-19-patterns | zod-validation-patterns | security-sentinel | tdd-enforcer | voice-system-expert | quetrex-architect | semantic-code-hunter |
 |-------|--------------|---------------------|---------------------|----------------------|-------------------|-------------------|------------------|----------------------|------------------|-------------|-------------------|----------------|-------------------|
 | **orchestrator** | ✅ | ✅ | | | | | | | | | | | |
 | **test-writer** | ✅ | ✅ | | | | | | | | ✅ | | | |
@@ -34,7 +34,7 @@ This matrix shows which skills each agent uses. Agents are kept small by referen
 | **tdd-enforcer** | 1 | test-writer |
 | **voice-system-expert** | 1 | voice-architect |
 | **semantic-code-hunter** | 1 | codebase-archaeologist |
-| **sentra-architect** | 0 | (available for all agents via main context) |
+| **quetrex-architect** | 0 | (available for all agents via main context) |
 
 ## Agent Details
 

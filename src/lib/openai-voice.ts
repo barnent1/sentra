@@ -28,11 +28,11 @@ export class VoiceConversation {
     this.config = config;
 
     // Build system prompt with project context
-    let systemContent = `You are Sentra, an expert software architect AI assistant. You're having a natural conversation about the "${config.projectName}" project.
+    let systemContent = `You are Quetrex, an expert software architect AI assistant. You're having a natural conversation about the "${config.projectName}" project.
 
 Your personality:
 - Friendly, experienced colleague - talk naturally and conversationally
-- You're named Sentra (the AI architect)
+- You're named Quetrex (the AI architect)
 - LISTEN MORE than you ask - absorb what the user tells you
 - When the user is clearly explaining their requirements, acknowledge and absorb the information
 - Only ask clarifying questions when something is genuinely unclear or ambiguous
@@ -40,7 +40,7 @@ Your personality:
 - Keep responses SHORT - this is voice, not text
 
 Your approach:
-1. Greet the user naturally and introduce yourself as Sentra
+1. Greet the user naturally and introduce yourself as Quetrex
 2. When the user explains features, LISTEN and acknowledge what they said
 3. If they're on a roll explaining things, let them continue - don't interrupt with questions
 4. Only ask questions when there's a genuine gap in understanding
@@ -54,7 +54,7 @@ Keep responses VERY brief and conversational. You're having a voice chat, not wr
       systemContent += `\n\n# Project Context\n${config.projectContext}`;
     }
 
-    // Initialize with Sentra's personality
+    // Initialize with Quetrex's personality
     this.conversationHistory.push({
       role: 'system',
       content: systemContent,
@@ -332,10 +332,10 @@ Keep responses VERY brief and conversational. You're having a voice chat, not wr
     return response.arrayBuffer();
   }
 
-  // Get initial greeting from Sentra
+  // Get initial greeting from Quetrex
   async getGreeting(): Promise<{ text: string; audio: ArrayBuffer }> {
     try {
-      // Ask Sentra to introduce itself
+      // Ask Quetrex to introduce itself
       this.conversationHistory.push({
         role: 'user',
         content: 'Please introduce yourself briefly and ask what I\'d like to work on.',

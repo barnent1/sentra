@@ -145,7 +145,7 @@ Once changes are committed:
 3. **Run Security Tests (Local):**
    ```bash
    # Start Docker daemon
-   docker build -t sentra-ai-agent:latest -f .claude/docker/Dockerfile .
+   docker build -t quetrex-ai-agent:latest -f .claude/docker/Dockerfile .
    pytest .claude/tests/security/test_container_security.py -v
    ```
 

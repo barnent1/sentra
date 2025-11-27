@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Security Vulnerability Scanner for Sentra
+Security Vulnerability Scanner for Quetrex
 
 Scans codebase for common security vulnerabilities.
 Run before every commit and deployment.

@@ -6,7 +6,7 @@
 
 ## Executive Summary
 
-Sentra has undergone a comprehensive accessibility audit and remediation. This document summarizes the findings, fixes implemented, and remaining work.
+Quetrex has undergone a comprehensive accessibility audit and remediation. This document summarizes the findings, fixes implemented, and remaining work.
 
 ### Compliance Status
 
@@ -157,7 +157,7 @@ select:focus-visible {
 
 **Example:**
 ```tsx
-<img src="/sentra-logo.png" alt="Sentra" className="w-16 h-16" />
+<img src="/quetrex-logo.png" alt="Quetrex" className="w-16 h-16" />
 ```
 
 #### 8. ✅ No Screen Reader Documentation
@@ -433,7 +433,7 @@ button:focus-visible {
 
 ## Conclusion
 
-Sentra has made significant progress toward WCAG 2.1 AA compliance. The application now provides:
+Quetrex has made significant progress toward WCAG 2.1 AA compliance. The application now provides:
 
 ✅ Full keyboard navigation with shortcuts
 ✅ Skip links for quick navigation
@@ -442,7 +442,7 @@ Sentra has made significant progress toward WCAG 2.1 AA compliance. The applicat
 ✅ Screen reader compatibility
 ✅ Comprehensive accessibility documentation
 
-While some issues remain (primarily in test automation and advanced features), the core user experience is now accessible to users with disabilities. Continued focus on accessibility in new features and regular audits will ensure Sentra remains inclusive.
+While some issues remain (primarily in test automation and advanced features), the core user experience is now accessible to users with disabilities. Continued focus on accessibility in new features and regular audits will ensure Quetrex remains inclusive.
 
 ### Next Steps
 
@@ -458,4 +458,4 @@ While some issues remain (primarily in test automation and advanced features), t
 **Audit Completed:** November 13, 2025
 **Auditor:** Glen Barnhardt with help from Claude Code
 **Next Review:** March 1, 2026
-**Questions:** glen@sentra.dev
+**Questions:** glen@quetrex.dev

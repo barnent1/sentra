@@ -49,7 +49,7 @@ npm-debug.log*
 # ✅ Provide template without real values
 
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/sentra"
+DATABASE_URL="postgresql://user:password@localhost:5432/quetrex"
 
 # OpenAI
 OPENAI_API_KEY="sk-proj-YOUR_KEY_HERE"
@@ -264,18 +264,18 @@ export async function verifyToken(token: string): Promise<any> {
 ```bash
 # ✅ Rotate database password
 # Step 1: Create new user with new password
-CREATE USER sentra_new WITH PASSWORD 'new-secure-password';
-GRANT ALL PRIVILEGES ON DATABASE sentra TO sentra_new;
+CREATE USER quetrex_new WITH PASSWORD 'new-secure-password';
+GRANT ALL PRIVILEGES ON DATABASE quetrex TO quetrex_new;
 
 # Step 2: Update application environment
-DATABASE_URL="postgresql://sentra_new:new-secure-password@localhost:5432/sentra"
+DATABASE_URL="postgresql://quetrex_new:new-secure-password@localhost:5432/quetrex"
 
 # Step 3: Deploy application
 
 # Step 4: Wait for all connections to drain
 
 # Step 5: Remove old user
-DROP USER sentra_old;
+DROP USER quetrex_old;
 ```
 
 ---
@@ -482,7 +482,7 @@ export async function getSecret(secretName: string): Promise<string> {
 }
 
 // Usage
-const apiKey = await getSecret('sentra/openai-api-key')
+const apiKey = await getSecret('quetrex/openai-api-key')
 ```
 
 ### HashiCorp Vault
@@ -508,7 +508,7 @@ export async function getSecret(path: string): Promise<any> {
 }
 
 // Usage
-const secrets = await getSecret('secret/data/sentra/production')
+const secrets = await getSecret('secret/data/quetrex/production')
 const apiKey = secrets.openai_api_key
 ```
 

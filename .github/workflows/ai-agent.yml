@@ -1,4 +1,4 @@
-name: Sentra AI Agent Worker
+name: Quetrex AI Agent Worker
 
 # Triggers when issue is labeled with "ai-feature"
 on:
@@ -44,7 +44,7 @@ jobs:
     # - ~/workspace: Working directory for git operations
     # - ~/.claude/telemetry: Claude Code logs
     container:
-      image: ghcr.io/${{ github.repository_owner }}/sentra-agent:latest
+      image: ghcr.io/${{ github.repository_owner }}/quetrex-agent:latest
       options: >-
         --cap-drop=ALL
         --security-opt=no-new-privileges
@@ -111,8 +111,8 @@ jobs:
             git checkout -b "$BRANCH_NAME"
           fi
 
-          git config user.name "Sentra AI Agent"
-          git config user.email "agent@sentra.dev"
+          git config user.name "Quetrex AI Agent"
+          git config user.email "agent@quetrex.dev"
 
       - name: Run AI Agent
         env:

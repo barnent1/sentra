@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Sentra Dev Server Manager
+# Quetrex Dev Server Manager
 # Ensures only one instance of the dev server runs at a time
 
 set -e

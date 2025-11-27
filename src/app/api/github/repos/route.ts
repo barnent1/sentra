@@ -1,6 +1,6 @@
 /**
  * POST /api/github/repos
- * Create a new GitHub repository from Sentra template
+ * Create a new GitHub repository from Quetrex template
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -90,13 +90,13 @@ export async function POST(request: NextRequest) {
     console.log(`[GitHub] Creating repository ${targetOwner}/${name} from template`);
 
     // Create repository from template
-    // Template: Barnhardt-Enterprises-Inc/sentra-template-nextjs
+    // Template: Barnhardt-Enterprises-Inc/quetrex-template-nextjs
     const { data: repo } = await octokit.rest.repos.createUsingTemplate({
       template_owner: 'Barnhardt-Enterprises-Inc',
-      template_repo: 'sentra-template-nextjs',
+      template_repo: 'quetrex-template-nextjs',
       name,
       owner: targetOwner,
-      description: description || `Sentra AI-powered project: ${name}`,
+      description: description || `Quetrex AI-powered project: ${name}`,
       private: isPrivate,
       include_all_branches: false,
     });

@@ -1,6 +1,6 @@
 # Screen Reader Testing Guide
 
-Guide for testing Sentra with screen readers to ensure accessibility.
+Guide for testing Quetrex with screen readers to ensure accessibility.
 
 ## VoiceOver on macOS
 
@@ -26,21 +26,21 @@ Guide for testing Sentra with screen readers to ensure accessibility.
 | `VO + J` | Next form control |
 | `VO + A` | Read page from current position |
 
-### Testing Sentra with VoiceOver
+### Testing Quetrex with VoiceOver
 
 #### 1. Initial Page Load
 
 **Expected Experience:**
 ```
-"Sentra - AI Agent Control Center. Web content. Has 2 items.
+"Quetrex - AI Agent Control Center. Web content. Has 2 items.
 Skip to main content, link.
 Skip to projects, link.
-Sentra, heading level 1.
+Quetrex, heading level 1.
 AI Mission Control Center."
 ```
 
 **Test Steps:**
-1. Open Sentra in Safari or Chrome
+1. Open Quetrex in Safari or Chrome
 2. Turn on VoiceOver (`Cmd + F5`)
 3. VoiceOver should announce page title and first skip link
 4. Verify page structure is announced correctly
@@ -140,7 +140,7 @@ Cancel, button."
 | `K` | Next link |
 | `D` | Next landmark |
 
-### Testing Sentra with NVDA
+### Testing Quetrex with NVDA
 
 #### 1. Browse Mode vs Focus Mode
 

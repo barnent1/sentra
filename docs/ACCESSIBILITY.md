@@ -4,11 +4,11 @@
 
 ## Our Commitment
 
-Sentra is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards.
+Quetrex is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards.
 
 ## Conformance Status
 
-Sentra aims to conform to the **Web Content Accessibility Guidelines (WCAG) 2.1 Level AA** standards. These guidelines explain how to make web content more accessible for people with disabilities and user-friendly for everyone.
+Quetrex aims to conform to the **Web Content Accessibility Guidelines (WCAG) 2.1 Level AA** standards. These guidelines explain how to make web content more accessible for people with disabilities and user-friendly for everyone.
 
 ### Current Compliance Level
 
@@ -18,7 +18,7 @@ Sentra aims to conform to the **Web Content Accessibility Guidelines (WCAG) 2.1 
 
 ### Keyboard Navigation
 
-Sentra fully supports keyboard navigation:
+Quetrex fully supports keyboard navigation:
 
 - **Tab**: Navigate forward through interactive elements
 - **Shift+Tab**: Navigate backward through interactive elements
@@ -30,7 +30,7 @@ See [Keyboard Shortcuts Documentation](./KEYBOARD-SHORTCUTS.md) for a complete l
 
 ### Screen Reader Support
 
-Sentra is compatible with the following screen readers:
+Quetrex is compatible with the following screen readers:
 
 - **macOS**: VoiceOver (tested with Safari and Chrome)
 - **Windows**: NVDA (tested with Chrome and Firefox)
@@ -97,7 +97,7 @@ We are aware of the following accessibility issues and are working to address th
 
 ## Testing Methodology
 
-Sentra's accessibility is tested using:
+Quetrex's accessibility is tested using:
 
 ### Automated Testing
 
@@ -123,11 +123,11 @@ We conduct regular user testing sessions with people who:
 
 ## Feedback and Contact
 
-We welcome feedback on the accessibility of Sentra. If you encounter accessibility barriers:
+We welcome feedback on the accessibility of Quetrex. If you encounter accessibility barriers:
 
 ### How to Report Issues
 
-1. **GitHub Issues**: Open an issue at [github.com/barnent1/sentra/issues](https://github.com/barnent1/sentra/issues)
+1. **GitHub Issues**: Open an issue at [github.com/barnent1/quetrex/issues](https://github.com/barnent1/quetrex/issues)
    - Use the label: `accessibility`
    - Describe the issue in detail
    - Include:
@@ -136,13 +136,13 @@ We welcome feedback on the accessibility of Sentra. If you encounter accessibili
      - Assistive technology you're using (if any)
      - Steps to reproduce the issue
 
-2. **Email**: accessibility@sentra.dev (monitored weekly)
+2. **Email**: accessibility@quetrex.dev (monitored weekly)
 
 3. **Expected Response Time**: We aim to respond to accessibility issues within 2 business days
 
 ## Technical Specifications
 
-Sentra's accessibility relies on the following technologies:
+Quetrex's accessibility relies on the following technologies:
 
 - **Semantic HTML5**: Proper use of HTML elements for meaning
 - **ARIA 1.2**: Accessible Rich Internet Applications specification
@@ -151,7 +151,7 @@ Sentra's accessibility relies on the following technologies:
 
 ### Browser Compatibility
 
-Sentra is tested and supported on:
+Quetrex is tested and supported on:
 
 - **Chrome**: Version 100+
 - **Firefox**: Version 100+
@@ -160,7 +160,7 @@ Sentra is tested and supported on:
 
 ### Assistive Technology Compatibility
 
-Sentra is tested with:
+Quetrex is tested with:
 
 - **Screen Readers**: JAWS, NVDA, VoiceOver
 - **Voice Control**: Dragon NaturallySpeaking, Voice Control (macOS)
@@ -169,7 +169,7 @@ Sentra is tested with:
 
 ## Standards and Guidelines
 
-Sentra strives to meet the following standards:
+Quetrex strives to meet the following standards:
 
 - **WCAG 2.1 Level AA**: Web Content Accessibility Guidelines
 - **Section 508**: U.S. federal accessibility standards
@@ -195,7 +195,7 @@ We will conduct a comprehensive accessibility audit and update this statement qu
 
 If you are not satisfied with our response to your accessibility feedback, you may escalate through the following channels:
 
-1. **Internal Escalation**: Contact the project maintainer at glen@sentra.dev
+1. **Internal Escalation**: Contact the project maintainer at glen@quetrex.dev
 2. **Community Standards**: Report to our Code of Conduct committee
 3. **Legal Compliance**: Contact your local accessibility authority
 
@@ -207,7 +207,7 @@ If you are not satisfied with our response to your accessibility feedback, you m
 
 ---
 
-**Commitment to Accessibility**: Accessibility is a core value at Sentra. We believe technology should be available to everyone, regardless of ability. This is an ongoing journey, and we appreciate your patience and feedback as we work to make Sentra as accessible as possible.
+**Commitment to Accessibility**: Accessibility is a core value at Quetrex. We believe technology should be available to everyone, regardless of ability. This is an ongoing journey, and we appreciate your patience and feedback as we work to make Quetrex as accessible as possible.
 
 *Last reviewed by: Glen Barnhardt, Project Maintainer*
 *Next review date: March 1, 2026*

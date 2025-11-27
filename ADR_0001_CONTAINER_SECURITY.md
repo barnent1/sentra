@@ -1,4 +1,4 @@
-# ADR-0001: Container Security Architecture for Sentra AI Agent System
+# ADR-0001: Container Security Architecture for Quetrex AI Agent System
 
 **Status:** PROPOSED (Awaiting Glen's Decision)  
 **Date:** November 12, 2025  
@@ -10,7 +10,7 @@
 
 ## Context
 
-Sentra runs untrusted AI-generated code (from Claude) in GitHub Actions workflows. This code has direct access to:
+Quetrex runs untrusted AI-generated code (from Claude) in GitHub Actions workflows. This code has direct access to:
 - `$GITHUB_TOKEN` (can modify repository, create backdoors)
 - `$ANTHROPIC_API_KEY` (can drain API credits, modify settings)
 - Entire runner filesystem
@@ -82,7 +82,7 @@ Sentra runs untrusted AI-generated code (from Claude) in GitHub Actions workflow
 
 ---
 
-### Option C: Sentra's Choice - Comprehensive 3-Phase Approach
+### Option C: Quetrex's Choice - Comprehensive 3-Phase Approach
 **Pros:**
 - Phases 1+2 = production-ready (85% secure)
 - Phase 3 = industry-leading (95%+ secure)
@@ -157,7 +157,7 @@ jobs:
     
     # NEW: Use container for isolation
     container:
-      image: ghcr.io/barnent1/sentra-ai-agent:latest
+      image: ghcr.io/barnent1/quetrex-ai-agent:latest
       options: |
         --rm
         --read-only
@@ -215,27 +215,27 @@ jobs:
 
 ```bash
 # Test 1: Cannot modify /etc
-docker run --rm sentra-ai-agent:latest \
+docker run --rm quetrex-ai-agent:latest \
   touch /etc/test.txt
 # Expected: Permission denied
 
 # Test 2: Can write to /tmp
-docker run --rm sentra-ai-agent:latest \
+docker run --rm quetrex-ai-agent:latest \
   echo test > /tmp/test.txt && cat /tmp/test.txt
 # Expected: "test"
 
 # Test 3: /tmp is not executable
-docker run --rm sentra-ai-agent:latest \
+docker run --rm quetrex-ai-agent:latest \
   echo '#!/bin/sh' > /tmp/test.sh && chmod +x /tmp/test.sh && /tmp/test.sh
 # Expected: Permission denied
 
 # Test 4: Process limit enforced
-docker run --rm --pids-limit=10 sentra-ai-agent:latest \
+docker run --rm --pids-limit=10 quetrex-ai-agent:latest \
   bash -c 'for i in {1..100}; do ( sleep infinity ) & done'
 # Expected: killed after ~10 processes
 
 # Test 5: Memory limit enforced
-docker run --rm --memory=100m sentra-ai-agent:latest \
+docker run --rm --memory=100m quetrex-ai-agent:latest \
   python3 -c "import array; a = array.array('i', range(100000000))"
 # Expected: OOMKilled
 ```
@@ -443,7 +443,7 @@ jobs:
     runs-on: ubuntu-latest
     
     container:
-      image: sentra-ai-agent:latest
+      image: quetrex-ai-agent:latest
       options: |
         --rm
         --read-only
@@ -556,7 +556,7 @@ Phase 3 Success (future):
 
 ### Why not AWS Lambda?
 - Limited to 15-minute execution time
-- Sentra tasks can take 30-45 minutes
+- Quetrex tasks can take 30-45 minutes
 - More expensive ($2-3 per task)
 - Overkill for most small tasks
 

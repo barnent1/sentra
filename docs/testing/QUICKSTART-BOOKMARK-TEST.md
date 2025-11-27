@@ -1,6 +1,6 @@
 # Quick Start: Bookmark Manager Test
 
-This guide walks through running a complete end-to-end test of the Sentra AI-Powered SaaS Factory using the bookmark manager specification.
+This guide walks through running a complete end-to-end test of the Quetrex AI-Powered SaaS Factory using the bookmark manager specification.
 
 **Goal:** Create a clean, isolated test project where AI agents build a complete bookmark manager application from scratch.
 
@@ -8,7 +8,7 @@ This guide walks through running a complete end-to-end test of the Sentra AI-Pow
 
 ## Prerequisites
 
-✅ Sentra CLI installed (`sentra --version` should work)
+✅ Quetrex CLI installed (`quetrex --version` should work)
 ✅ GitHub CLI authenticated (`gh auth status`)
 ✅ Docker installed and running
 ✅ Environment variables: `ANTHROPIC_API_KEY` (for AI agents)
@@ -19,13 +19,13 @@ This guide walks through running a complete end-to-end test of the Sentra AI-Pow
 
 ```bash
 # Create isolated test project
-sentra test bookmark-manager-test ~/test-projects/bookmark-manager
+quetrex test bookmark-manager-test ~/test-projects/bookmark-manager
 
 # What this does:
 # ✅ Creates ~/test-projects/bookmark-manager/
 # ✅ Runs: npx create-next-app@latest (Next.js 15 + TypeScript + Tailwind)
 # ✅ Initializes git repository
-# ✅ Copies all Sentra infrastructure (.claude/, .sentra/, .github/)
+# ✅ Copies all Quetrex infrastructure (.claude/, .quetrex/, .github/)
 # ✅ Copies bookmark-manager-test specification
 ```
 
@@ -38,7 +38,7 @@ sentra test bookmark-manager-test ~/test-projects/bookmark-manager
 ✅ Next.js project initialized
 🔧 Step 3: Initializing Git repository
 ✅ Git repository initialized
-🚀 Step 4: Running sentra init
+🚀 Step 4: Running quetrex init
 ✅ Copied 11 specialized agents
 ✅ Copied 6-layer quality defense hooks
 ✅ Copied 7 progressive disclosure skills
@@ -88,7 +88,7 @@ docker push ghcr.io/YOUR_GITHUB_USERNAME/bookmark-manager-agent:latest
 ```bash
 # Update .github/workflows/ai-agent.yml to use your container
 sed -i '' "s/\${{ github.repository_owner }}/YOUR_GITHUB_USERNAME/g" .github/workflows/ai-agent.yml
-sed -i '' 's/sentra-agent:latest/bookmark-manager-agent:latest/g' .github/workflows/ai-agent.yml
+sed -i '' 's/quetrex-agent:latest/bookmark-manager-agent:latest/g' .github/workflows/ai-agent.yml
 
 # Commit and push
 git add .github/workflows/ai-agent.yml
@@ -123,17 +123,17 @@ The bookmark manager specification is already copied. Now generate the dependenc
 cd ~/test-projects/bookmark-manager
 
 # Check that specification exists
-ls -la .sentra/architect-sessions/bookmark-manager-test/
+ls -la .quetrex/architect-sessions/bookmark-manager-test/
 
 # Generate dependency graph (48 issues)
-# Note: This should already exist, copied from Sentra repo
-ls -la ~/Projects/sentra/.sentra/dependency-graph-bookmark-test.yml
+# Note: This should already exist, copied from Quetrex repo
+ls -la ~/Projects/quetrex/.quetrex/dependency-graph-bookmark-test.yml
 
 # Copy dependency graph to test project
-cp ~/Projects/sentra/.sentra/dependency-graph-bookmark-test.yml .sentra/dependency-graph.yml
+cp ~/Projects/quetrex/.quetrex/dependency-graph-bookmark-test.yml .quetrex/dependency-graph.yml
 
 # Copy issue templates
-cp -r ~/Projects/sentra/.sentra/issues-bookmark-test .sentra/issues
+cp -r ~/Projects/quetrex/.quetrex/issues-bookmark-test .quetrex/issues
 ```
 
 ---
@@ -147,17 +147,17 @@ cd ~/test-projects/bookmark-manager
 
 # Create Issue #1: Setup Next.js 15 + TypeScript
 gh issue create --title "[BM-001] Setup Next.js 15 + TypeScript project structure" \
-  --body-file .sentra/issues/issue-001.md \
+  --body-file .quetrex/issues/issue-001.md \
   --label "ai-feature,p0,bookmark-test,foundation"
 
 # Create Issue #2: Setup Prisma ORM
 gh issue create --title "[BM-002] Setup Prisma ORM with PostgreSQL and SQLite" \
-  --body-file .sentra/issues/issue-002.md \
+  --body-file .quetrex/issues/issue-002.md \
   --label "ai-feature,p0,bookmark-test,foundation"
 
 # Create Issue #3: Setup Vitest + Playwright
 gh issue create --title "[BM-003] Setup Vitest + Playwright testing infrastructure" \
-  --body-file .sentra/issues/issue-003.md \
+  --body-file .quetrex/issues/issue-003.md \
   --label "ai-feature,p0,bookmark-test,foundation"
 ```
 
@@ -170,7 +170,7 @@ cat > create-all-issues.sh << 'EOF'
 set -e
 
 for i in {1..48}; do
-  issue_file=".sentra/issues/issue-$(printf "%03d" $i).md"
+  issue_file=".quetrex/issues/issue-$(printf "%03d" $i).md"
 
   if [ -f "$issue_file" ]; then
     # Extract title from markdown front matter
@@ -426,7 +426,7 @@ docker rmi ghcr.io/YOUR_USERNAME/bookmark-manager-agent:latest
 ## Summary
 
 **What we tested:**
-1. ✅ Sentra CLI tool (`sentra test`)
+1. ✅ Quetrex CLI tool (`quetrex test`)
 2. ✅ Test project isolation
 3. ✅ Specification → Issue generation
 4. ✅ GitHub Actions workflow
@@ -450,5 +450,5 @@ docker rmi ghcr.io/YOUR_USERNAME/bookmark-manager-agent:latest
 **Ready to run the test?**
 
 ```bash
-sentra test bookmark-manager-test ~/test-projects/bookmark-manager
+quetrex test bookmark-manager-test ~/test-projects/bookmark-manager
 ```

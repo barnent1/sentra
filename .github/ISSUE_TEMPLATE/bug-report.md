@@ -34,7 +34,7 @@ assignees: ''
 - **OS:** [e.g., macOS 14.0, Windows 11, Ubuntu 22.04]
 - **Browser:** [e.g., Chrome 120, Safari 18, Firefox 121]
 - **Node version:** [e.g., 18.17.0]
-- **Sentra version:** [e.g., 0.1.0 or commit hash]
+- **Quetrex version:** [e.g., 0.1.0 or commit hash]
 
 ## Error Logs
 

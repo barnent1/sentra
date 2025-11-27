@@ -103,7 +103,7 @@ export class RealtimeConversation {
         try {
           // Check if localStorage is available (in browser)
           if (typeof window !== 'undefined') {
-            const settingsStr = localStorage.getItem('sentra_settings');
+            const settingsStr = localStorage.getItem('quetrex_settings');
             if (settingsStr) {
               const settings = JSON.parse(settingsStr);
               apiKey = settings.openaiApiKey;
@@ -402,7 +402,7 @@ export class RealtimeConversation {
   }
 
   private sendSessionUpdate() {
-    const instructions = `You are Sentra, a professional software architect helping plan ${this.config.projectName || 'a software project'}.
+    const instructions = `You are Quetrex, a professional software architect helping plan ${this.config.projectName || 'a software project'}.
 
 YOUR JOB:
 Gather COMPLETE requirements for production-ready specs. Be thorough - no detail is too small.

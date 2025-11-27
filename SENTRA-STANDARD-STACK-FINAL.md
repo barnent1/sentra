@@ -1,4 +1,4 @@
-# Sentra Standard Stack - FINAL DECISION
+# Quetrex Standard Stack - FINAL DECISION
 
 **Date:** 2025-11-19
 **Status:** ✅ **LOCKED IN**
@@ -48,7 +48,7 @@ Code Quality:
 
 **Primary Reason:** Vercel Edge Runtime Compatibility
 
-Sentra uses Next.js 15 deployed on Vercel with full access to latest features:
+Quetrex uses Next.js 15 deployed on Vercel with full access to latest features:
 - **Vercel Edge Functions** - Ultra-low latency globally (blocked by Prisma)
 - **Next.js 15 Server Actions** - Modern data mutations (limited with Prisma)
 - **Edge Runtime** - 0ms cold starts worldwide (requires edge-compatible ORM)
@@ -401,7 +401,7 @@ supabase
 
 ### Configuration
 
-✅ `.sentra/config/stack.yml` - Complete stack specification
+✅ `.quetrex/config/stack.yml` - Complete stack specification
   - Supabase as default database platform
   - Drizzle as default ORM
   - Supabase Auth as default authentication
@@ -419,7 +419,7 @@ supabase
   - Production deployment
   - Troubleshooting
 
-✅ `SENTRA-STANDARD-STACK-FINAL.md` - This document
+✅ `QUETREX-STANDARD-STACK-FINAL.md` - This document
   - Final stack declaration
   - Migration path from MongoDB
   - Performance optimization
@@ -436,14 +436,14 @@ supabase
 3. **Test with subset of data** before full migration
 4. **Monitor costs** in Supabase dashboard
 
-### For New Sentra Projects
+### For New Quetrex Projects
 
-1. **Use `sentra test`** command (will include Supabase setup)
+1. **Use `quetrex test`** command (will include Supabase setup)
 2. **Choose US East region** when creating Supabase project
 3. **Follow** `docs/setup/SUPABASE-SETUP.md` for integration
 4. **Start building** - everything is configured!
 
-### For Sentra Development
+### For Quetrex Development
 
 1. **Update setup scripts** to include Supabase initialization
 2. **Update bookmark manager test** to use Supabase
@@ -461,12 +461,12 @@ supabase
 - **Discord**: https://discord.supabase.com
 - **GitHub**: https://github.com/supabase/supabase
 
-### Sentra Resources
+### Quetrex Resources
 
-- **Stack Config**: `.sentra/config/stack.yml`
+- **Stack Config**: `.quetrex/config/stack.yml`
 - **Setup Guide**: `docs/setup/SUPABASE-SETUP.md`
-- **Standard Stack Doc**: `docs/architecture/SENTRA-STANDARD-STACK.md`
-- **CLI Tool**: `sentra-cli/sentra`
+- **Standard Stack Doc**: `docs/architecture/QUETREX-STANDARD-STACK.md`
+- **CLI Tool**: `quetrex-cli/quetrex`
 
 ---
 

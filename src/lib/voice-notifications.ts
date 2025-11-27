@@ -14,7 +14,7 @@
  * // Queue a notification (will be spoken in order, respecting priority and mute settings)
  * await queueVoiceNotification({
  *   text: 'Build completed successfully',
- *   projectName: 'sentra',
+ *   projectName: 'quetrex',
  *   priority: 'info'
  * });
  * ```

@@ -9,7 +9,7 @@
 
 ## Overview
 
-This document defines the vector database schema for Sentra's Voice Architect agent memory system. The schema enables semantic search across multi-session conversations, preserving context and enabling intelligent recall of architectural decisions.
+This document defines the vector database schema for Quetrex's Voice Architect agent memory system. The schema enables semantic search across multi-session conversations, preserving context and enabling intelligent recall of architectural decisions.
 
 ### Design Principles
 
@@ -873,7 +873,7 @@ COPY (
 import { Pinecone } from '@pinecone-database/pinecone';
 
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
-const index = pc.index('sentra-architect');
+const index = pc.index('quetrex-architect');
 
 // Batch upsert
 const vectors = conversations.map(c => ({

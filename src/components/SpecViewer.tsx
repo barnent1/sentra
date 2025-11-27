@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Check, XCircle, ChevronDown, FileText, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import type { SpecInfo, SpecVersion } from '@/services/sentra-api';
+import type { SpecInfo, SpecVersion } from '@/services/quetrex-api';
 
 interface SpecViewerProps {
   isOpen: boolean;
@@ -40,7 +40,7 @@ export function SpecViewer({
     if (!specInfo) return;
 
     try {
-      const { getSpecVersions } = await import('@/services/sentra-api');
+      const { getSpecVersions } = await import('@/services/quetrex-api');
       const versionList = await getSpecVersions(projectName, projectPath, specInfo.id);
       setVersions(versionList);
     } catch (error) {
@@ -59,7 +59,7 @@ export function SpecViewer({
     if (!specInfo) return;
 
     try {
-      const { getSpec } = await import('@/services/sentra-api');
+      const { getSpec } = await import('@/services/quetrex-api');
       const { content, info } = await getSpec(projectName, projectPath, specInfo.id, versionFile);
       setCurrentContent(content);
       setCurrentInfo(info);

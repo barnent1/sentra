@@ -1,6 +1,6 @@
-# Sentra Project Checklist
+# Quetrex Project Checklist
 
-Track all features, components, and tasks across the entire Sentra project.
+Track all features, components, and tasks across the entire Quetrex project.
 
 **Last Updated:** 2025-11-13
 **Overall Completion:** 28%
@@ -74,13 +74,13 @@ Track all features, components, and tasks across the entire Sentra project.
 
 - [✅] Frontend spec storage (TypeScript)
   - Functions in `src/lib/tauri.ts`
-  - Saves to `.sentra/specs/pending-spec.md`
+  - Saves to `.quetrex/specs/pending-spec.md`
   - Priority: P0
 
-- [✅] Change storage to `.sentra/specs/`
-  - Pending specs: `.sentra/specs/pending-spec.md`
-  - Approved specs: `.sentra/specs/approved-spec.md`
-  - Archive: `.sentra/specs/archive/YYYY-MM-DD-HH-MM.md`
+- [✅] Change storage to `.quetrex/specs/`
+  - Pending specs: `.quetrex/specs/pending-spec.md`
+  - Approved specs: `.quetrex/specs/approved-spec.md`
+  - Archive: `.quetrex/specs/archive/YYYY-MM-DD-HH-MM.md`
   - Priority: P1
   - Status: Complete
 
@@ -144,7 +144,7 @@ Track all features, components, and tasks across the entire Sentra project.
   - Priority: P0
 
 - [❌] Real project scanning (not mock data)
-  - Scan filesystem for `.sentra/` directories
+  - Scan filesystem for `.quetrex/` directories
   - Load actual project data
   - Priority: P1
   - Estimate: 2-3 days
@@ -212,7 +212,7 @@ Track all features, components, and tasks across the entire Sentra project.
   - Project name input (validation)
   - Location picker with Browse button
   - Template selection (4 templates)
-  - Options checkboxes (Git, GitHub, Sentra, deps)
+  - Options checkboxes (Git, GitHub, Quetrex, deps)
   - Priority: P1
   - Estimate: 1 day
 
@@ -228,7 +228,7 @@ Track all features, components, and tasks across the entire Sentra project.
   - Create directory structure
   - Initialize Git repository
   - Create GitHub repository (optional)
-  - Add `.sentra/` directory
+  - Add `.quetrex/` directory
   - Install dependencies
   - Tauri command: `create_project`
   - Priority: P1
@@ -348,7 +348,7 @@ Track all features, components, and tasks across the entire Sentra project.
 - [📋] Cost tracking integration
   - Track API calls (count, tokens, cost)
   - GitHub Actions minutes
-  - Store in `.sentra/telemetry/costs.json`
+  - Store in `.quetrex/telemetry/costs.json`
   - Priority: P2
   - Estimate: 4-5 days
 
@@ -356,7 +356,7 @@ Track all features, components, and tasks across the entire Sentra project.
 
 - [📋] Task breakdown generation
   - Agent analyzes task and creates 3-7 checkpoints
-  - Stores in `.sentra/tasks/current.yml`
+  - Stores in `.quetrex/tasks/current.yml`
   - Priority: P1
   - Estimate: 2-3 days
 
@@ -367,7 +367,7 @@ Track all features, components, and tasks across the entire Sentra project.
   - Estimate: 1-2 days
 
 - [📋] File watchers for real-time updates
-  - Watch `.sentra/tasks/current.yml`
+  - Watch `.quetrex/tasks/current.yml`
   - Tauri emits events on file change
   - Dashboard updates progress bar
   - Priority: P1
@@ -434,7 +434,7 @@ Track all features, components, and tasks across the entire Sentra project.
   - Priority: P0
 
 - [✅] Project context loading
-  - Reads `.sentra/` files
+  - Reads `.quetrex/` files
   - Builds comprehensive prompt
   - Priority: P0
 
@@ -560,7 +560,7 @@ Track all features, components, and tasks across the entire Sentra project.
 
 - [❌] Backend telemetry collection
   - Log all agent actions
-  - Store in `.sentra/telemetry/`
+  - Store in `.quetrex/telemetry/`
   - Structured JSON format
   - Priority: P1
   - Estimate: 3-4 days
@@ -643,9 +643,9 @@ Track all features, components, and tasks across the entire Sentra project.
 ### Project Tracking
 
 - [✅] File-based storage
-  - `.sentra/config.yml` for project config
-  - `.sentra/memory/` for context
-  - `.sentra/specs/` for specs
+  - `.quetrex/config.yml` for project config
+  - `.quetrex/memory/` for context
+  - `.quetrex/specs/` for specs
   - Priority: P0
 
 - [✅] Project struct (Rust)
@@ -659,7 +659,7 @@ Track all features, components, and tasks across the entire Sentra project.
   - Priority: P0
 
 - [📋] Real project scanning
-  - Scan filesystem for `.sentra/` directories
+  - Scan filesystem for `.quetrex/` directories
   - Load from multiple locations
   - Priority: P1
   - Estimate: 2-3 days
@@ -777,7 +777,7 @@ Track all features, components, and tasks across the entire Sentra project.
   - Location: `src-tauri/src/watcher.rs`
   - Priority: P0
 
-- [📋] Watch `.sentra/tasks/current.yml` for progress updates
+- [📋] Watch `.quetrex/tasks/current.yml` for progress updates
   - Emit events on file change
   - Priority: P1
   - Estimate: 1-2 days
@@ -1460,7 +1460,7 @@ Track all features, components, and tasks across the entire Sentra project.
 
 ### Low Risk Items
 
-6. **Sentra not good enough to build itself**
+6. **Quetrex not good enough to build itself**
    - Likelihood: LOW
    - Impact: MEDIUM (slower development)
    - Mitigation: Start manual, transition gradually
@@ -1560,4 +1560,4 @@ Track all features, components, and tasks across the entire Sentra project.
 5. **Update Estimates:** Refine time estimates as work progresses
 6. **Celebrate Progress:** Check off completed items and update percentages!
 
-**Remember:** This is a living document. Keep it updated as Sentra evolves.
+**Remember:** This is a living document. Keep it updated as Quetrex evolves.

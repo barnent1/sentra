@@ -9,7 +9,7 @@ Usage:
     python validate-patterns.py [directory]
 
 Example:
-    python validate-patterns.py /Users/barnent1/Projects/sentra/src
+    python validate-patterns.py /Users/barnent1/Projects/quetrex/src
 """
 
 import os
@@ -277,7 +277,7 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: python validate-patterns.py <directory>")
         print("\nExample:")
-        print("  python validate-patterns.py /Users/barnent1/Projects/sentra/src")
+        print("  python validate-patterns.py /Users/barnent1/Projects/quetrex/src")
         sys.exit(1)
 
     directory = sys.argv[1]

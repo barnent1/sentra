@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Activity, Folder, DollarSign, TrendingUp, ExternalLink, X, Power } from "lucide-react";
-import { getDashboardStats, type DashboardStats } from "@/services/sentra-api";
+import { getDashboardStats, type DashboardStats } from "@/services/quetrex-api";
 
 export default function MenubarPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -53,15 +53,15 @@ export default function MenubarPage() {
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 flex items-center justify-center">
             <Image
-              src="/sentra-logo.png"
-              alt="Sentra"
+              src="/quetrex-logo.png"
+              alt="Quetrex"
               width={32}
               height={32}
               priority
             />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-[#FAFAFA]">Sentra</h1>
+            <h1 className="text-sm font-bold text-[#FAFAFA]">Quetrex</h1>
             <p className="text-xs text-[#A1A1AA]">Quick Stats</p>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function MenubarPage() {
                 className="w-full px-4 py-2 bg-[#0A0A0B] hover:bg-[#27272A] border border-[#27272A] text-[#A1A1AA] hover:text-[#FAFAFA] rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
               >
                 <Power className="w-4 h-4" />
-                Quit Sentra
+                Quit Quetrex
               </button>
             </div>
 

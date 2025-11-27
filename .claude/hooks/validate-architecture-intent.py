@@ -18,7 +18,7 @@ from typing import Dict, List, Tuple
 
 def load_patterns() -> Dict[str, Dict]:
     """Load patterns from patterns.md"""
-    patterns_file = Path('.sentra/memory/patterns.md')
+    patterns_file = Path('.quetrex/memory/patterns.md')
 
     if not patterns_file.exists():
         return {}
@@ -113,7 +113,7 @@ File: {file_path}
 
 Issue: Component fetches data but doesn't use SSE pattern.
 
-Sentra's architecture requires Server-Sent Events for ALL reactive data.
+Quetrex's architecture requires Server-Sent Events for ALL reactive data.
 
 Current code: Uses fetch/axios in useEffect (requires page refresh)
 Required code: Use EventSource or useSSEValue hook
@@ -123,7 +123,7 @@ Fix options:
 2. If data is static: Remove useEffect, fetch in Server Component
 3. If truly one-time: Add comment explaining why SSE not needed
 
-See: .sentra/memory/patterns.md (pattern-sse-reactive-data)
+See: .quetrex/memory/patterns.md (pattern-sse-reactive-data)
 See: docs/architecture/DATA-FETCHING.md
 
 ❌ BLOCKED until pattern is followed.
@@ -149,7 +149,7 @@ File: {file_path}
 
 Issue: Using 'any' type violates TypeScript strict mode.
 
-Sentra requires explicit types for all code.
+Quetrex requires explicit types for all code.
 
 Current code: Uses 'any' type
 Required code: Use specific types
@@ -159,7 +159,7 @@ Fix options:
 2. Use 'unknown' and add type guard
 3. Use generic type parameter
 
-See: .sentra/memory/patterns.md (pattern-typescript-strict)
+See: .quetrex/memory/patterns.md (pattern-typescript-strict)
 
 ❌ BLOCKED until fixed.
 """
@@ -193,7 +193,7 @@ Required code: Remove 'use client' OR remove async
 
 Fix: Server components are async, client components use hooks.
 
-See: .sentra/memory/patterns.md (pattern-client-component-boundaries)
+See: .quetrex/memory/patterns.md (pattern-client-component-boundaries)
 
 ❌ BLOCKED until fixed.
 """
@@ -256,7 +256,7 @@ export async function POST(request: Request) {{
 }}
 ```
 
-See: .sentra/memory/patterns.md (pattern-zod-validation)
+See: .quetrex/memory/patterns.md (pattern-zod-validation)
 
 ❌ BLOCKED until validation added.
 """

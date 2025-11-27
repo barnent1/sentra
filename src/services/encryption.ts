@@ -24,7 +24,7 @@ const PBKDF2_ITERATIONS = 100000;
 const PBKDF2_DIGEST = 'sha256';
 
 // Static salt for PBKDF2 (in production, consider per-user salts)
-const SALT = 'sentra-encryption-salt-v1';
+const SALT = 'quetrex-encryption-salt-v1';
 
 /**
  * Get encryption key from environment

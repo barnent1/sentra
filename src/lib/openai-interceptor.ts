@@ -6,7 +6,7 @@
  *
  * Usage:
  *   import { createOpenAIInterceptor } from '@/lib/openai-interceptor';
- *   const tracker = createOpenAIInterceptor(costTracker, 'sentra');
+ *   const tracker = createOpenAIInterceptor(costTracker, 'quetrex');
  *   // All OpenAI calls will now be tracked automatically
  */
 

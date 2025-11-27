@@ -1,4 +1,4 @@
-# HANDOVER: Sentra Web App Conversion
+# HANDOVER: Quetrex Web App Conversion
 
 **Status:** IN PROGRESS (Multiple agents working in parallel)
 **Date:** 2025-11-17
@@ -220,7 +220,7 @@ export interface Settings {
   language: string;
 }
 
-const SETTINGS_KEY = 'sentra-settings';
+const SETTINGS_KEY = 'quetrex-settings';
 
 const DEFAULT_SETTINGS: Settings = {
   userName: '',
@@ -299,12 +299,12 @@ For production, consider:
 1. **README.md** (currently describes desktop app):
 ```markdown
 # Before:
-"Sentra is a native desktop application..."
+"Quetrex is a native desktop application..."
 "Install: Download .dmg for macOS..."
 
 # After:
-"Sentra is a web-based AI assistant platform..."
-"Access: Visit https://sentra.app or run locally..."
+"Quetrex is a web-based AI assistant platform..."
+"Access: Visit https://quetrex.app or run locally..."
 
 # Add:
 ## Web App Deployment
@@ -314,7 +314,7 @@ For production, consider:
 
 2. **CLAUDE.md** (project context):
 ```markdown
-# Update "What is Sentra?" section:
+# Update "What is Quetrex?" section:
 Before: "Native desktop apps (macOS, Windows, Linux) built with Tauri 2.x"
 After: "Progressive Web App (PWA) with Next.js 15"
 
@@ -381,7 +381,7 @@ vercel
   "outputDirectory": ".next",
   "framework": "nextjs",
   "env": {
-    "NEXT_PUBLIC_APP_URL": "https://sentra.vercel.app"
+    "NEXT_PUBLIC_APP_URL": "https://quetrex.vercel.app"
   }
 }
 ```
@@ -435,8 +435,8 @@ CMD ["npm", "start"]
 
 **Deploy:**
 ```bash
-docker build -t sentra .
-docker run -p 3000:3000 -d sentra
+docker build -t quetrex .
+docker run -p 3000:3000 -d quetrex
 ```
 
 **Environment Variables (Required):**
@@ -444,7 +444,7 @@ docker run -p 3000:3000 -d sentra
 Create `.env.local` (or configure in deployment platform):
 ```bash
 # App Configuration
-NEXT_PUBLIC_APP_URL=https://sentra.app
+NEXT_PUBLIC_APP_URL=https://quetrex.app
 
 # Optional: If using backend API
 # DATABASE_URL=postgresql://...
@@ -488,7 +488,7 @@ All these stay EXACTLY as-is:
 ### Icons, Logos, Branding
 
 Everything visual stays identical:
-- Sentra logo (wherever it is)
+- Quetrex logo (wherever it is)
 - Project icons
 - Voice mic/speaker icons
 - Color scheme (violet accents, dark backgrounds)
@@ -549,8 +549,8 @@ Almost all TypeScript code is web-compatible:
   ```json
   // public/manifest.json
   {
-    "name": "Sentra",
-    "short_name": "Sentra",
+    "name": "Quetrex",
+    "short_name": "Quetrex",
     "start_url": "/",
     "display": "standalone",
     "icons": [...]
@@ -578,7 +578,7 @@ let content = fs::read_to_string(path)?;
 **Option 1: localStorage (Simple):**
 ```typescript
 // Store small data client-side
-localStorage.setItem('sentra-settings', JSON.stringify(settings));
+localStorage.setItem('quetrex-settings', JSON.stringify(settings));
 ```
 
 **Option 2: Cloud Storage (Full-Featured):**

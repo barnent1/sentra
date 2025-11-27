@@ -1,4 +1,4 @@
-# Git Hooks for Sentra
+# Git Hooks for Quetrex
 
 This directory contains Git hooks that enforce quality standards before pushing code.
 

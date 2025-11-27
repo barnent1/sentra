@@ -6,7 +6,7 @@ allowed-tools: Read, Grep, Glob, WebFetch
 
 # Next.js 15 + App Router Specialist
 
-**Complete Next.js 15 reference for Sentra development.**
+**Complete Next.js 15 reference for Quetrex development.**
 
 This skill provides comprehensive guidance on all Next.js 15 App Router patterns, ensuring agents implement modern Next.js correctly the first time.
 
@@ -81,7 +81,7 @@ This skill includes comprehensive guides covering every Next.js 15 pattern:
 - Parallel data fetching (Promise.all)
 - Sequential data fetching (waterfall prevention)
 - Streaming data (Suspense boundaries)
-- Server-Sent Events (SSE for Sentra voice)
+- Server-Sent Events (SSE for Quetrex voice)
 - Data mutations (Server Actions)
 - Optimistic updates (useOptimistic)
 - Form handling (useFormStatus, useActionState)
@@ -287,7 +287,7 @@ export async function generateMetadata({
 
 ---
 
-## Best Practices for Sentra
+## Best Practices for Quetrex
 
 ### 1. Default to Server Components
 
@@ -508,7 +508,7 @@ The validator checks for:
 4. Handle Server Actions correctly
 5. Optimize metadata and SEO
 6. Avoid common Next.js mistakes
-7. Follow Sentra's architecture guidelines
+7. Follow Quetrex's architecture guidelines
 
 **When in doubt:**
 - Read the specific guide (links above)

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { createGithubIssue } from '@/services/sentra-api';
+import { createGithubIssue } from '@/services/quetrex-api';
 
 export interface CreateIssueOptions {
   title: string;

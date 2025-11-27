@@ -198,7 +198,7 @@ architecture-patterns/      nextjs-15-specialist/        tdd-enforcer/
 code-review-standards/      quality-gates/               typescript-strict-guard/
 drizzle-orm-patterns/       react-19-patterns/           voice-system-expert/
 react-19-patterns/          security-sentinel/           zod-validation-patterns/
-semantic-code-hunter/       sentra-architect/
+semantic-code-hunter/       quetrex-architect/
 ```
 **Result:** 13 skills present ✅
 

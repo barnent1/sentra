@@ -1,7 +1,7 @@
 {
-  "name": "sentra",
+  "name": "quetrex",
   "version": "0.1.0",
-  "description": "AI Agent Control Center - Native Mac App",
+  "description": "AI Agent Control Center - Voice-First AI Assistant",
   "author": "Glen Barnhardt",
   "private": true,
   "scripts": {

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Mic, MessageSquare, Keyboard, History, PanelLeftClose, PanelLeft } from 'lucide-react';
-import { getSettings, chatWithArchitect, getProjectContext, type ConversationMessage } from '@/services/sentra-api';
+import { getSettings, chatWithArchitect, getProjectContext, type ConversationMessage } from '@/services/quetrex-api';
 import { RealtimeConversation } from '@/lib/openai-realtime';
 import { SessionHistory } from './SessionHistory';
 import type { ArchitectSession, ArchitectConversation } from '@/db/schema';
@@ -131,7 +131,7 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath, proje
 
       // Rebuild conversation text ref
       conversationTextRef.current = loadedMessages
-        .map((m) => `${m.role === 'user' ? 'User' : 'Sentra'}: ${m.content}`)
+        .map((m) => `${m.role === 'user' ? 'User' : 'Quetrex'}: ${m.content}`)
         .join('\n\n');
 
       console.log('✅ Resumed session:', sessionId, 'with', loadedMessages.length, 'messages');
@@ -256,7 +256,7 @@ export function ArchitectChat({ isOpen, onClose, projectName, projectPath, proje
                 { ...last, content: last.content + text },
               ];
             } else {
-              conversationTextRef.current += `Sentra: ${text}`;
+              conversationTextRef.current += `Quetrex: ${text}`;
               return [...prev, { role: 'assistant', content: text, timestamp: new Date() }];
             }
           });
@@ -412,7 +412,7 @@ Please provide a technical specification summarizing the requirements and implem
       // Save the spec
       if (projectPath) {
         console.log('💾 Saving spec...');
-        const { saveSpec } = await import('@/services/sentra-api');
+        const { saveSpec } = await import('@/services/quetrex-api');
         const specInfo = await saveSpec(projectName, projectPath, spec);
         console.log(`✅ Spec saved: ${specInfo.title} (v${specInfo.version})`);
       }
@@ -481,7 +481,7 @@ Please provide a technical specification summarizing the requirements and implem
                 <Mic className="w-6 h-6 text-violet-400" />
               )}
               <div>
-                <h2 className="text-xl font-semibold text-white">Sentra</h2>
+                <h2 className="text-xl font-semibold text-white">Quetrex</h2>
                 <p className="text-sm text-slate-400">{projectName}</p>
               </div>
             </div>
@@ -604,14 +604,14 @@ Please provide a technical specification summarizing the requirements and implem
                       {isProcessing && !isListening && (
                         <>
                           <div className="text-violet-400 text-xl font-medium mb-2" data-testid="listening-status">
-                            Sentra is thinking...
+                            Quetrex is thinking...
                           </div>
                           <p className="text-slate-400 text-sm max-w-md">Processing your message</p>
                         </>
                       )}
                       {!isListening && !isProcessing && (
                         <>
-                          <div className="text-slate-400 text-xl font-medium mb-2" data-testid="listening-status">Sentra is ready</div>
+                          <div className="text-slate-400 text-xl font-medium mb-2" data-testid="listening-status">Quetrex is ready</div>
                           <p className="text-slate-400 text-sm max-w-md">
                             Starting conversation...
                           </p>

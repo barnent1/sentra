@@ -1,6 +1,6 @@
-# Sentra Release Quickstart
+# Quetrex Release Quickstart
 
-**Fast reference for releasing Sentra - bookmark this page!**
+**Fast reference for releasing Quetrex - bookmark this page!**
 
 Created by Glen Barnhardt with help from Claude Code
 
@@ -19,7 +19,7 @@ git push origin main
 git push origin v$(jq -r .version package.json)
 ```
 
-**Monitor:** https://github.com/barnent1/sentra/actions
+**Monitor:** https://github.com/barnent1/quetrex/actions
 
 ---
 
@@ -109,7 +109,7 @@ git push origin v1.0.1  # Replace with your version
 
 ```bash
 # Open GitHub Actions
-open https://github.com/barnent1/sentra/actions
+open https://github.com/barnent1/quetrex/actions
 
 # Or use GitHub CLI
 gh run list --workflow=release.yml
@@ -120,10 +120,10 @@ gh run watch
 
 ```bash
 # Open releases page
-open https://github.com/barnent1/sentra/releases/latest
+open https://github.com/barnent1/quetrex/releases/latest
 
 # Check artifacts downloaded
-curl -I https://github.com/barnent1/sentra/releases/download/v1.0.1/Sentra_1.0.1_macOS_universal.dmg
+curl -I https://github.com/barnent1/quetrex/releases/download/v1.0.1/Quetrex_1.0.1_macOS_universal.dmg
 ```
 
 ---
@@ -232,8 +232,8 @@ gh run view <run-id> --log
 ## Quick Links
 
 - [Full Release Process Documentation](./RELEASE-PROCESS.md)
-- [GitHub Actions](https://github.com/barnent1/sentra/actions)
-- [Latest Release](https://github.com/barnent1/sentra/releases/latest)
+- [GitHub Actions](https://github.com/barnent1/quetrex/actions)
+- [Latest Release](https://github.com/barnent1/quetrex/releases/latest)
 - [CHANGELOG](../CHANGELOG.md)
 
 ---

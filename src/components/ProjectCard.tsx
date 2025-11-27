@@ -3,7 +3,7 @@
 import { Volume2, Copy, HelpCircle, ExternalLink } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import type { Project, SpecInfo } from "@/services/sentra-api";
+import type { Project, SpecInfo } from "@/services/quetrex-api";
 import "@/lib/i18n"; // Initialize i18n
 
 interface ProjectCardProps {

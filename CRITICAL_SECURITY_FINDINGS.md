@@ -1,4 +1,4 @@
-# CRITICAL SECURITY FINDINGS: Sentra vs Claude Code for Web
+# CRITICAL SECURITY FINDINGS: Quetrex vs Claude Code for Web
 
 **Date:** November 12, 2025  
 **Author:** Glen Barnhardt (Technical Research via Claude Code)  
@@ -9,11 +9,11 @@
 
 ## EXECUTIVE SUMMARY
 
-Sentra's agentic AI system has **5 CRITICAL SECURITY GAPS** that must be addressed before production deployment. Claude Code for Web uses industry-leading isolation techniques that Sentra completely lacks.
+Quetrex's agentic AI system has **5 CRITICAL SECURITY GAPS** that must be addressed before production deployment. Claude Code for Web uses industry-leading isolation techniques that Quetrex completely lacks.
 
 ### The Bottom Line
 
-Claude Code for Web is built for security. Sentra is built for functionality. If Sentra is running unrestricted AI agents on your infrastructure, **your credentials are at risk**.
+Claude Code for Web is built for security. Quetrex is built for functionality. If Quetrex is running unrestricted AI agents on your infrastructure, **your credentials are at risk**.
 
 ---
 
@@ -35,7 +35,7 @@ Claude Code for Web is built for security. Sentra is built for functionality. If
 
 **Claude Code Solution:** Credentials stored in external proxy, never exposed to process.
 
-**Sentra Solution (Required):**
+**Quetrex Solution (Required):**
 - Implement credential proxy service
 - Credentials validated before attachment
 - Audit trail of all token usage
@@ -60,7 +60,7 @@ Claude Code for Web is built for security. Sentra is built for functionality. If
 
 **Claude Code Solution:** gVisor + bubblewrap removes direct filesystem access.
 
-**Sentra Solution (Quick Win):**
+**Quetrex Solution (Quick Win):**
 - Use Docker container with read-only root filesystem
 - Mount `/tmp/` as ephemeral tmpfs
 - Cost: 2-3 days engineering
@@ -85,7 +85,7 @@ Claude Code for Web is built for security. Sentra is built for functionality. If
 
 **Claude Code Solution:** Ephemeral containers destroy all state after each session.
 
-**Sentra Solution:**
+**Quetrex Solution:**
 - Use `container` directive in workflow (forces fresh container each job)
 - Cost: 1 day engineering
 
@@ -108,7 +108,7 @@ Claude Code for Web is built for security. Sentra is built for functionality. If
 
 **Claude Code Solution:** Proxy service model - credentials never in same process.
 
-**Sentra Solution (Phase 2):**
+**Quetrex Solution (Phase 2):**
 - Implement credential proxy sidecar
 - Pass credential requests through IPC
 - Cost: 4-5 days engineering
@@ -133,7 +133,7 @@ Claude Code for Web is built for security. Sentra is built for functionality. If
 
 **Claude Code Solution:** gVisor intercepts all syscalls, no direct kernel access.
 
-**Sentra Solution (Long-term):**
+**Quetrex Solution (Long-term):**
 - Phase 1: Docker (reasonable isolation)
 - Phase 2: gVisor (Google's sandbox runtime)
 - Cost: 15-20 days engineering (Phase 2)
@@ -151,7 +151,7 @@ jobs:
   ai-agent-work:
     runs-on: ubuntu-latest
     container:
-      image: sentra-ai-agent:latest
+      image: quetrex-ai-agent:latest
       options: |
         --rm
         --read-only
@@ -378,31 +378,31 @@ After implementation, verify:
 
 ```bash
 # Test 1: Filesystem isolation
-docker run --rm -v /etc:/etc:ro sentra-ai-agent:latest \
+docker run --rm -v /etc:/etc:ro quetrex-ai-agent:latest \
   cat /etc/passwd  # Should FAIL
 
 # Test 2: Capability dropping
-docker run --rm --cap-drop=ALL sentra-ai-agent:latest \
+docker run --rm --cap-drop=ALL quetrex-ai-agent:latest \
   whoami  # Should return 'claude-agent'
 
 # Test 3: Process limits
-docker run --rm --pids-limit=10 sentra-ai-agent:latest \
+docker run --rm --pids-limit=10 quetrex-ai-agent:latest \
   (fork bomb)  # Should be killed gracefully
 
 # Test 4: Memory limits
-docker run --rm --memory=2g sentra-ai-agent:latest \
+docker run --rm --memory=2g quetrex-ai-agent:latest \
   (memory hog)  # Should be killed when exceeding 2GB
 
 # Test 5: Credential not in memory
-docker run --rm -e GITHUB_TOKEN=secret123 sentra-ai-agent:latest \
+docker run --rm -e GITHUB_TOKEN=secret123 quetrex-ai-agent:latest \
   grep -r GITHUB_TOKEN /proc/self/  # Should return nothing
 ```
 
 ---
 
-## COMPARISON: Sentra vs Claude Code for Web
+## COMPARISON: Quetrex vs Claude Code for Web
 
-| Feature | Sentra (Now) | Sentra (After Fixes) | Claude Code for Web |
+| Feature | Quetrex (Now) | Quetrex (After Fixes) | Claude Code for Web |
 |---------|--------------|---------------------|-------------------|
 | **Network Isolation** | None | Proxy-based | Proxy + DNS |
 | **Filesystem Isolation** | None | Docker (read-only) | gVisor + bubblewrap |
@@ -413,7 +413,7 @@ docker run --rm -e GITHUB_TOKEN=secret123 sentra-ai-agent:latest \
 | **Audit Trail** | Basic | Structured logs | Full proxy logs |
 | **Syscall Filtering** | None | None (Docker) | gVisor (all syscalls) |
 
-**Summary:** After fixes, Sentra will be ~80-85% as secure as Claude Code for Web. The remaining 15-20% gap is the gVisor kernel-level isolation (long-term investment).
+**Summary:** After fixes, Quetrex will be ~80-85% as secure as Claude Code for Web. The remaining 15-20% gap is the gVisor kernel-level isolation (long-term investment).
 
 ---
 

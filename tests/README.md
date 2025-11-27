@@ -1,6 +1,6 @@
-# Sentra Testing Infrastructure
+# Quetrex Testing Infrastructure
 
-This directory contains all test files for the Sentra project. The testing infrastructure is built on **Vitest** with comprehensive coverage requirements.
+This directory contains all test files for the Quetrex project. The testing infrastructure is built on **Vitest** with comprehensive coverage requirements.
 
 ## Directory Structure
 

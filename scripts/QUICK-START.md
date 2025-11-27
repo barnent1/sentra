@@ -1,6 +1,6 @@
-# Sentra Quick Start Guide
+# Quetrex Quick Start Guide
 
-5-minute guide to get up and running with Sentra AI-Powered SaaS Factory.
+5-minute guide to get up and running with Quetrex AI-Powered SaaS Factory.
 
 ---
 
@@ -8,9 +8,9 @@
 
 ```bash
 # 1. Clone and setup
-git clone https://github.com/barnent1/sentra.git
-cd sentra
-./scripts/setup-sentra.sh
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex
+./scripts/setup-quetrex.sh
 
 # 2. Wait for setup to complete
 # Script will install everything automatically
@@ -22,7 +22,7 @@ cd sentra
 
 ```bash
 # Initialize new project
-python .sentra/scripts/init-project.py --name "my-project"
+python .quetrex/scripts/init-project.py --name "my-project"
 
 # Start Voice Architect
 claude
@@ -42,7 +42,7 @@ Voice Architect will guide you through:
 
 ```bash
 # Analyze existing codebase
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 
 # Review analysis
 cat docs/existing-codebase/ANALYSIS-SUMMARY.md
@@ -107,14 +107,14 @@ npm run test:e2e
 
 ```bash
 # View project dashboard
-python .sentra/scripts/dashboard-generator.py --serve
+python .quetrex/scripts/dashboard-generator.py --serve
 # Opens browser to http://localhost:8000
 
 # Check metrics
-python .sentra/scripts/metrics-collector.py --summary
+python .quetrex/scripts/metrics-collector.py --summary
 
 # View progress
-cat .sentra/architect-sessions/my-project/progress.json
+cat .quetrex/architect-sessions/my-project/progress.json
 ```
 
 ---
@@ -151,16 +151,16 @@ claude
 
 ```bash
 # New project
-python .sentra/scripts/init-project.py --name "project"
+python .quetrex/scripts/init-project.py --name "project"
 
 # Existing project
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 
 # Dashboard
-python .sentra/scripts/dashboard-generator.py --serve
+python .quetrex/scripts/dashboard-generator.py --serve
 
 # Metrics
-python .sentra/scripts/metrics-collector.py --summary
+python .quetrex/scripts/metrics-collector.py --summary
 ```
 
 ---
@@ -171,26 +171,26 @@ python .sentra/scripts/metrics-collector.py --summary
 
 ```
 CLAUDE.md                          # Instructions for Claude
-.sentra/README.md                  # Sentra system overview
-.sentra/memory/patterns.md         # Architectural patterns
+.quetrex/README.md                  # Quetrex system overview
+.quetrex/memory/patterns.md         # Architectural patterns
 ```
 
 ### Project Files
 
 ```
-.sentra/architect-sessions/[name]/ # Project sessions and specs
+.quetrex/architect-sessions/[name]/ # Project sessions and specs
 docs/specs/                        # Feature specifications
 docs/existing-codebase/            # Existing code analysis
-.sentra/protection/                # Protection rules
+.quetrex/protection/                # Protection rules
 ```
 
 ### Scripts
 
 ```
-scripts/setup-sentra.sh            # Complete setup
+scripts/setup-quetrex.sh            # Complete setup
 scripts/install-serena.sh          # Serena MCP only
-.sentra/scripts/init-project.py    # New project
-.sentra/scripts/init-existing-project.py  # Existing project
+.quetrex/scripts/init-project.py    # New project
+.quetrex/scripts/init-existing-project.py  # Existing project
 ```
 
 ---
@@ -229,7 +229,7 @@ After setup:
 
 1. **Read the docs:**
    - `CLAUDE.md` - Project instructions
-   - `.sentra/README.md` - Sentra overview
+   - `.quetrex/README.md` - Quetrex overview
    - `scripts/INSTALLATION.md` - Detailed installation
 
 2. **Choose your path:**
@@ -239,19 +239,19 @@ After setup:
 3. **Start building:**
    - Enable appropriate Skill
    - Describe what you want to build
-   - Let Sentra coordinate the implementation
+   - Let Quetrex coordinate the implementation
 
 4. **Monitor progress:**
    - View dashboard: `dashboard-generator.py --serve`
    - Check coverage: `npm test -- --coverage`
-   - Review sessions: `.sentra/architect-sessions/`
+   - Review sessions: `.quetrex/architect-sessions/`
 
 ---
 
 ## Support
 
 - **Documentation:** Full docs in `docs/` directory
-- **Issues:** https://github.com/barnent1/sentra/issues
+- **Issues:** https://github.com/barnent1/quetrex/issues
 - **Claude Code:** https://docs.claude.com/claude-code
 
 ---
@@ -274,6 +274,6 @@ After setup:
 
 ---
 
-**Ready to build?** Start with `./scripts/setup-sentra.sh`
+**Ready to build?** Start with `./scripts/setup-quetrex.sh`
 
 **Author:** Glen Barnhardt with help from Claude Code

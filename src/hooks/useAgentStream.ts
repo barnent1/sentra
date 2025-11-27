@@ -6,7 +6,7 @@ import {
   stopAgentStream,
   getAgentLogs,
   type AgentStreamLine,
-} from '@/services/sentra-api';
+} from '@/services/quetrex-api';
 
 export interface UseAgentStreamOptions {
   /**
@@ -79,7 +79,7 @@ export interface UseAgentStreamReturn {
  *
  * @example
  * ```tsx
- * const { lines, isConnected } = useAgentStream('sentra-42');
+ * const { lines, isConnected } = useAgentStream('quetrex-42');
  *
  * return (
  *   <div>

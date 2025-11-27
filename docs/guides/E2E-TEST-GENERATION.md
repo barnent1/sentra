@@ -1,13 +1,13 @@
 # E2E Test Generation Guide
 
-**Audience:** Developers contributing to Sentra
+**Audience:** Developers contributing to Quetrex
 **Last Updated:** 2025-11-23
 
 ---
 
 ## Overview
 
-Sentra automatically generates E2E (end-to-end) tests from design specifications using a hybrid approach: **templates for common patterns** (70% of tests) + **LLM generation for complex scenarios** (30% of tests).
+Quetrex automatically generates E2E (end-to-end) tests from design specifications using a hybrid approach: **templates for common patterns** (70% of tests) + **LLM generation for complex scenarios** (30% of tests).
 
 This guide explains how the system works, how to review generated tests, and how to customize or extend the test generation system.
 
@@ -25,7 +25,7 @@ This guide explains how the system works, how to review generated tests, and how
 
 ### The Hybrid Approach
 
-Sentra uses two methods to generate tests:
+Quetrex uses two methods to generate tests:
 
 **1. Template-Based (70% of tests)**
 - Pre-built Mustache templates
@@ -145,7 +145,7 @@ test('{{testName}}', async ({ page }) => {
 ```typescript
 // Input: Test spec
 const prompt = `
-Generate a Playwright E2E test for Sentra based on this spec:
+Generate a Playwright E2E test for Quetrex based on this spec:
 
 Test: "should preserve mute state across multiple toggles"
 Steps:
@@ -159,7 +159,7 @@ Steps:
   - Refresh page
   - Verify mute state persisted
 
-Follow Sentra's test patterns:
+Follow Quetrex's test patterns:
 - AAA structure (Arrange, Act, Assert)
 - Use data-testid selectors
 - Include waitForTimeout for animations
@@ -223,7 +223,7 @@ tests/e2e/
 
 ### 6 Core Templates
 
-Sentra provides 6 templates covering 91.8% of existing tests:
+Quetrex provides 6 templates covering 91.8% of existing tests:
 
 #### 1. CRUD Operations Template
 
@@ -746,7 +746,7 @@ npm run test:template -- tooltip
 
 ```typescript
 const prompt = `
-You are an expert Playwright test generator for Sentra.
+You are an expert Playwright test generator for Quetrex.
 
 Generate an E2E test based on this specification:
 
@@ -757,7 +757,7 @@ Requirements:
 2. Include proper data-testid selectors when available
 3. Add appropriate waitForTimeout for animations (200ms for modals, 100ms for tooltips)
 4. Handle edge cases (skip if no data, check count before accessing)
-5. Follow existing test patterns from Sentra codebase
+5. Follow existing test patterns from Quetrex codebase
 
 Existing test examples (similar scenarios):
 ${relevantExamples}

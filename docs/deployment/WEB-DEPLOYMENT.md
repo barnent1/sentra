@@ -1,4 +1,4 @@
-# Sentra Web Deployment Guide
+# Quetrex Web Deployment Guide
 
 **Last Updated:** 2025-11-19
 **Status:** Production Ready
@@ -23,7 +23,7 @@
 
 ## Overview
 
-Sentra is a Next.js 15 web application that can be deployed to any platform supporting Node.js. This guide covers deployment to popular hosting platforms.
+Quetrex is a Next.js 15 web application that can be deployed to any platform supporting Node.js. This guide covers deployment to popular hosting platforms.
 
 ### Deployment Checklist
 
@@ -47,13 +47,13 @@ Sentra is a Next.js 15 web application that can be deployed to any platform supp
 
 - GitHub account
 - Vercel account (free tier available)
-- Sentra repository forked/cloned
+- Quetrex repository forked/cloned
 
 ### Step 1: Connect Repository
 
 1. Go to [vercel.com](https://vercel.com)
 2. Click **"New Project"**
-3. Select your Sentra repository
+3. Select your Quetrex repository
 4. Vercel auto-detects Next.js configuration
 
 ### Step 2: Configure Environment Variables
@@ -68,7 +68,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 # Database (automatically provided by Vercel Postgres)
 # If using Vercel Postgres, this is auto-configured
 # If using external Postgres:
-DATABASE_URL=postgresql://user:pass@host:5432/sentra
+DATABASE_URL=postgresql://user:pass@host:5432/quetrex
 
 # Optional
 NEXT_PUBLIC_APP_URL=https://yourapp.vercel.app
@@ -100,7 +100,7 @@ For optimal edge performance with Drizzle:
 ### Step 4: Custom Domain
 
 1. Go to **Settings** → **Domains**
-2. Add your custom domain (e.g., `sentra.yourcompany.com`)
+2. Add your custom domain (e.g., `quetrex.yourcompany.com`)
 3. Update DNS records as instructed
 4. SSL certificate is automatically provisioned
 
@@ -138,7 +138,7 @@ vercel --prod
 
 1. Go to [netlify.com](https://netlify.com)
 2. Click **"Add new site"** → **"Import an existing project"**
-3. Connect GitHub and select Sentra repository
+3. Connect GitHub and select Quetrex repository
 
 ### Step 2: Build Settings
 
@@ -270,14 +270,14 @@ sudo apt install -y nginx
 # Create database and user
 sudo -u postgres psql
 
-CREATE DATABASE sentra;
-CREATE USER sentra_user WITH PASSWORD 'your-secure-password';
-GRANT ALL PRIVILEGES ON DATABASE sentra TO sentra_user;
-ALTER DATABASE sentra OWNER TO sentra_user;
+CREATE DATABASE quetrex;
+CREATE USER quetrex_user WITH PASSWORD 'your-secure-password';
+GRANT ALL PRIVILEGES ON DATABASE quetrex TO quetrex_user;
+ALTER DATABASE quetrex OWNER TO quetrex_user;
 \q
 
 # Run Drizzle migrations
-cd /path/to/sentra
+cd /path/to/quetrex
 npm run db:migrate
 ```
 
@@ -285,15 +285,15 @@ npm run db:migrate
 
 ```bash
 # Clone repository
-git clone https://github.com/barnent1/sentra.git
-cd sentra
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex
 
 # Install dependencies
 npm install
 
 # Create .env.production
 cat > .env.production << EOF
-DATABASE_URL=postgresql://sentra_user:your-secure-password@localhost:5432/sentra
+DATABASE_URL=postgresql://quetrex_user:your-secure-password@localhost:5432/quetrex
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 NEXT_PUBLIC_APP_URL=https://your-domain.com
@@ -311,7 +311,7 @@ npm run build
 npm install -g pm2
 
 # Start application
-pm2 start npm --name sentra -- start
+pm2 start npm --name quetrex -- start
 
 # Save PM2 configuration
 pm2 save
@@ -323,7 +323,7 @@ pm2 startup
 ### Step 5: Configure Nginx
 
 ```nginx
-# /etc/nginx/sites-available/sentra
+# /etc/nginx/sites-available/quetrex
 server {
     listen 80;
     server_name your-domain.com;
@@ -344,7 +344,7 @@ server {
 
 ```bash
 # Enable site
-sudo ln -s /etc/nginx/sites-available/sentra /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/quetrex /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 ```
@@ -377,7 +377,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 # Database connection string (Drizzle + @vercel/postgres)
 # For Vercel: Automatically provided when using Vercel Postgres
 # For other platforms:
-DATABASE_URL=postgresql://user:pass@host:5432/sentra
+DATABASE_URL=postgresql://user:pass@host:5432/quetrex
 
 # Vercel Postgres connection pooling (automatic on Vercel)
 # POSTGRES_URL=postgresql://...
@@ -437,12 +437,12 @@ echo ".env.production" >> .gitignore
 
 1. **Add Domain**
    - Vercel Dashboard → Settings → Domains
-   - Enter your domain: `sentra.yourcompany.com`
+   - Enter your domain: `quetrex.yourcompany.com`
 
 2. **Update DNS Records**
    - Add CNAME record:
      ```
-     CNAME: sentra.yourcompany.com → cname.vercel-dns.com
+     CNAME: quetrex.yourcompany.com → cname.vercel-dns.com
      ```
 
 3. **Verify**
@@ -485,8 +485,8 @@ Create `/public/manifest.json`:
 
 ```json
 {
-  "name": "Sentra - AI Control Center",
-  "short_name": "Sentra",
+  "name": "Quetrex - AI Control Center",
+  "short_name": "Quetrex",
   "description": "Voice-first AI assistant for developers",
   "start_url": "/",
   "display": "standalone",
@@ -518,7 +518,7 @@ export const metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Sentra'
+    title: 'Quetrex'
   }
 }
 ```
@@ -694,9 +694,9 @@ Before going live:
 
 **Documentation:** [docs/README.md](../README.md)
 
-**Issues:** [GitHub Issues](https://github.com/barnent1/sentra/issues)
+**Issues:** [GitHub Issues](https://github.com/barnent1/quetrex/issues)
 
-**Community:** [Discord](https://discord.gg/sentra) (coming soon)
+**Community:** [Discord](https://discord.gg/quetrex) (coming soon)
 
 ---
 
@@ -706,7 +706,7 @@ Before going live:
 
 ### Drizzle ORM
 
-Sentra uses Drizzle ORM (not Prisma) for edge compatibility.
+Quetrex uses Drizzle ORM (not Prisma) for edge compatibility.
 
 **Why Drizzle:**
 - ✅ Works in Vercel Edge Runtime

@@ -46,7 +46,7 @@ describe('Translated Components', () => {
         </I18nextProvider>
       );
 
-      expect(screen.getByText(/dashboard|sentra/i)).toBeInTheDocument();
+      expect(screen.getByText(/dashboard|quetrex/i)).toBeInTheDocument();
     });
 
     it('should display translated subtitle', () => {

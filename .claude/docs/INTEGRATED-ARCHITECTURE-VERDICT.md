@@ -1,6 +1,6 @@
-# Integrated Architecture Verdict: Sentra
+# Integrated Architecture Verdict: Quetrex
 
-**Question:** Is Sentra following Anthropic's integrated agent + skill architecture?
+**Question:** Is Quetrex following Anthropic's integrated agent + skill architecture?
 
 **Answer:** **70% YES** ✅ (Good foundation, needs refinement)
 
@@ -21,7 +21,7 @@
 - ❌ Knowledge duplicated across agents (violates DRY)
 - ❌ No executable skill code (validate.py)
 
-**Verdict:** Sentra has the RIGHT STRUCTURE but missing the INTEGRATION LAYER that makes agents + skills truly composable.
+**Verdict:** Quetrex has the RIGHT STRUCTURE but missing the INTEGRATION LAYER that makes agents + skills truly composable.
 
 ---
 
@@ -76,7 +76,7 @@ Without the `skills:` field, agents can't auto-load organizational knowledge. Th
 
 ---
 
-## Why This Matters for Sentra
+## Why This Matters for Quetrex
 
 ### Current Problem:
 ```
@@ -250,7 +250,7 @@ Create missing skills:
 **Go with Option A: Full Migration**
 
 **Rationale:**
-1. Sentra is building the moat for Fortune 500 companies
+1. Quetrex is building the moat for Fortune 500 companies
 2. You said "If it's not TOP KNOTCH, we need to make it top knotch"
 3. 16-20 hours is minimal investment for long-term maintainability
 4. We're already at 70% - finishing the last 30% is easier than you think
@@ -264,7 +264,7 @@ Anthropic designed this for a reason:
 - Progressive disclosure (load what you need)
 - Executable validation (deterministic, 0 tokens)
 
-Sentra should use it fully.
+Quetrex should use it fully.
 
 ---
 
@@ -294,7 +294,7 @@ All in `.claude/docs/`
 
 **Bottom Line:**
 
-Sentra is 70% there. The foundation is solid. Adding the integration layer (skills field + core skills + progressive disclosure) will get us to 100% and deliver the full benefits of Anthropic's architecture.
+Quetrex is 70% there. The foundation is solid. Adding the integration layer (skills field + core skills + progressive disclosure) will get us to 100% and deliver the full benefits of Anthropic's architecture.
 
 **This is the difference between "good" and "top knotch."**
 

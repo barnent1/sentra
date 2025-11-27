@@ -260,7 +260,7 @@ test.describe('Accessibility - WCAG 2.1 AA Compliance', () => {
     // ASSERT
     expect(title).toBeTruthy();
     expect(title.length).toBeGreaterThan(0);
-    expect(title).toContain('Sentra');
+    expect(title).toContain('Quetrex');
   });
 
   test('should have descriptive button text', async ({ page }) => {

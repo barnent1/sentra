@@ -1,6 +1,6 @@
-# Sentra Deployment Guide
+# Quetrex Deployment Guide
 
-**Production deployment guide for Sentra**
+**Production deployment guide for Quetrex**
 
 Last Updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
@@ -22,7 +22,7 @@ Last Updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
 ## Overview
 
-Sentra is currently a **native macOS application** with GitHub Actions-based automation. This guide covers:
+Quetrex is currently a **native macOS application** with GitHub Actions-based automation. This guide covers:
 
 - **Phase 1** (Current): macOS app + GitHub Actions + Docker isolation
 - **Phase 2** (Weeks 2-4): Credential proxy + Database layer
@@ -34,9 +34,9 @@ Sentra is currently a **native macOS application** with GitHub Actions-based aut
 ┌─────────────────────────────────────────────────────────┐
 │ User's Mac                                              │
 │ ┌─────────────────────────────────────────────────────┐ │
-│ │ Sentra.app (Tauri)                                  │ │
+│ │ Quetrex.app (Tauri)                                  │ │
 │ │ - Voice interface (OpenAI APIs)                     │ │
-│ │ - Spec management (local .sentra/ directory)        │ │
+│ │ - Spec management (local .quetrex/ directory)        │ │
 │ │ - Dashboard UI (Next.js)                            │ │
 │ └─────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────┘
@@ -44,7 +44,7 @@ Sentra is currently a **native macOS application** with GitHub Actions-based aut
                           │ Creates GitHub Issue
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│ GitHub (github.com/barnent1/sentra)                     │
+│ GitHub (github.com/barnent1/quetrex)                     │
 │ ┌─────────────────────────────────────────────────────┐ │
 │ │ GitHub Actions                                      │ │
 │ │ ┌─────────────────────────────────────────────────┐ │ │
@@ -59,7 +59,7 @@ Sentra is currently a **native macOS application** with GitHub Actions-based aut
                           │ Creates Pull Request
                           ↓
 ┌─────────────────────────────────────────────────────────┐
-│ User Reviews PR in Sentra                               │
+│ User Reviews PR in Quetrex                               │
 │ - In-app diff viewer                                    │
 │ - Approve & merge without leaving app                   │
 └─────────────────────────────────────────────────────────┘
@@ -137,7 +137,7 @@ TAURI_SKIP_DEVSERVER_CHECK=false
 
 ```bash
 # ===== Database (PostgreSQL) =====
-DATABASE_URL=postgresql://user:password@localhost:5432/sentra
+DATABASE_URL=postgresql://user:password@localhost:5432/quetrex
 
 # ===== Redis (Caching) =====
 REDIS_URL=redis://localhost:6379
@@ -154,11 +154,11 @@ SESSION_TIMEOUT=86400  # 24 hours in seconds
 SENTRY_DSN=https://...@sentry.io/...
 
 # ===== Analytics =====
-ANALYTICS_ENDPOINT=https://analytics.sentra.dev
+ANALYTICS_ENDPOINT=https://analytics.quetrex.dev
 ANALYTICS_API_KEY=...
 
 # ===== Custom Runners =====
-RUNNER_ENDPOINT=https://runners.sentra.dev
+RUNNER_ENDPOINT=https://runners.quetrex.dev
 RUNNER_API_KEY=...
 ```
 
@@ -225,8 +225,8 @@ npm test:run        # Tests
 npm run tauri:build
 
 # Output location:
-# src-tauri/target/release/bundle/macos/Sentra.app
-# src-tauri/target/release/bundle/dmg/Sentra_1.0.0_x64.dmg
+# src-tauri/target/release/bundle/macos/Quetrex.app
+# src-tauri/target/release/bundle/dmg/Quetrex_1.0.0_x64.dmg
 ```
 
 #### 4. Code Signing (Optional but Recommended)
@@ -255,7 +255,7 @@ npm run tauri:build
 ```bash
 # Notarize with Apple
 xcrun notarytool submit \
-  "src-tauri/target/release/bundle/dmg/Sentra_1.0.0_x64.dmg" \
+  "src-tauri/target/release/bundle/dmg/Quetrex_1.0.0_x64.dmg" \
   --apple-id "your@email.com" \
   --team-id "TEAM_ID" \
   --password "app-specific-password" \
@@ -263,7 +263,7 @@ xcrun notarytool submit \
 
 # Staple notarization ticket
 xcrun stapler staple \
-  "src-tauri/target/release/bundle/dmg/Sentra_1.0.0_x64.dmg"
+  "src-tauri/target/release/bundle/dmg/Quetrex_1.0.0_x64.dmg"
 ```
 
 ### Distribution Options
@@ -280,7 +280,7 @@ xcrun stapler staple \
 
 **Option 3: Homebrew Cask (Future)**
 ```bash
-brew install --cask sentra
+brew install --cask quetrex
 ```
 
 ---
@@ -289,7 +289,7 @@ brew install --cask sentra
 
 ### 1. Create GitHub Secrets
 
-Navigate to: `https://github.com/barnent1/sentra/settings/secrets/actions`
+Navigate to: `https://github.com/barnent1/quetrex/settings/secrets/actions`
 
 Add the following secrets:
 
@@ -330,7 +330,7 @@ jobs:
             -w /workspace \
             -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
             -e GITHUB_TOKEN=$GITHUB_TOKEN \
-            sentra-agent:latest \
+            quetrex-agent:latest \
             python .claude/scripts/ai-agent-worker.py ${{ github.event.issue.number }}
 ```
 
@@ -340,19 +340,19 @@ Build and push the agent Docker image:
 
 ```bash
 # Build image
-docker build -t sentra-agent:latest -f .claude/Dockerfile .
+docker build -t quetrex-agent:latest -f .claude/Dockerfile .
 
 # Test locally
 docker run --rm \
   -v $(pwd):/workspace \
   -w /workspace \
   -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
-  sentra-agent:latest \
+  quetrex-agent:latest \
   python .claude/scripts/ai-agent-worker.py
 
 # Push to registry (if using private registry)
-docker tag sentra-agent:latest ghcr.io/barnent1/sentra-agent:latest
-docker push ghcr.io/barnent1/sentra-agent:latest
+docker tag quetrex-agent:latest ghcr.io/barnent1/quetrex-agent:latest
+docker push ghcr.io/barnent1/quetrex-agent:latest
 ```
 
 ### 4. Testing the Workflow
@@ -472,10 +472,10 @@ sudo apt-get install postgresql-15
 sudo systemctl start postgresql
 
 # Create database
-createdb sentra
+createdb quetrex
 
 # Create user
-createuser -P sentra_user
+createuser -P quetrex_user
 # Enter password when prompted
 ```
 
@@ -490,7 +490,7 @@ npm install @prisma/client
 npx prisma init
 
 # Update DATABASE_URL in .env.local
-DATABASE_URL="postgresql://sentra_user:password@localhost:5432/sentra"
+DATABASE_URL="postgresql://quetrex_user:password@localhost:5432/quetrex"
 
 # Create schema
 # Edit prisma/schema.prisma
@@ -603,7 +603,7 @@ redis-cli ping
 # Expected: PONG
 ```
 
-**Usage in Sentra:**
+**Usage in Quetrex:**
 - Session caching
 - Real-time updates (pub/sub)
 - Rate limiting
@@ -703,7 +703,7 @@ cargo install tauri-cli --force
 1. Check logs:
    ```bash
    # macOS
-   ~/Library/Logs/Sentra/
+   ~/Library/Logs/Quetrex/
    ```
 
 2. Verify environment variables:
@@ -714,7 +714,7 @@ cargo install tauri-cli --force
 
 3. Reset app data:
    ```bash
-   rm -rf ~/.sentra
+   rm -rf ~/.quetrex
    ```
 
 ### GitHub Actions Failures
@@ -735,7 +735,7 @@ cargo install tauri-cli --force
 
 3. Test Docker image locally:
    ```bash
-   docker run --rm -it sentra-agent:latest bash
+   docker run --rm -it quetrex-agent:latest bash
    # Test commands inside container
    ```
 
@@ -814,7 +814,7 @@ cargo install tauri-cli --force
 - **[GitHub Actions](https://docs.github.com/en/actions)** - Workflow documentation
 - **[Docker](https://docs.docker.com/)** - Container documentation
 
-### Sentra-Specific
+### Quetrex-Specific
 
 - **[Security Architecture](architecture/SECURITY-ARCHITECTURE.md)** - Complete security design
 - **[CLAUDE.md](../CLAUDE.md)** - Project context and standards
@@ -822,7 +822,7 @@ cargo install tauri-cli --force
 
 ---
 
-**Questions?** Open a [GitHub Issue](https://github.com/barnent1/sentra/issues) with the `deployment` label.
+**Questions?** Open a [GitHub Issue](https://github.com/barnent1/quetrex/issues) with the `deployment` label.
 
 **Need help with deployment?** Check existing issues or ask in Discussions.
 

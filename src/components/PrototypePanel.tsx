@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { X, ExternalLink, Loader2 } from 'lucide-react';
-import type { Prototype } from '@/services/sentra-api';
-import { getPrototypes, iteratePrototype } from '@/services/sentra-api';
+import type { Prototype } from '@/services/quetrex-api';
+import { getPrototypes, iteratePrototype } from '@/services/quetrex-api';
 
 interface PrototypePanelProps {
   projectId: string;

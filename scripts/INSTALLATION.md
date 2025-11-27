@@ -1,6 +1,6 @@
-# Sentra Installation Guide
+# Quetrex Installation Guide
 
-Complete guide for setting up the Sentra AI-Powered SaaS Factory system.
+Complete guide for setting up the Quetrex AI-Powered SaaS Factory system.
 
 ---
 
@@ -21,17 +21,17 @@ Complete guide for setting up the Sentra AI-Powered SaaS Factory system.
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/barnent1/sentra.git
-cd sentra
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex
 
 # 2. Run complete setup
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 
 # 3. Initialize for NEW project
-python .sentra/scripts/init-project.py --name "your-project-name"
+python .quetrex/scripts/init-project.py --name "your-project-name"
 
 # OR initialize for EXISTING project
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 ```
 
 That's it! You're ready to build.
@@ -64,12 +64,12 @@ claude --version    # Any recent version
 
 ## Installation Scripts
 
-### 1. setup-sentra.sh
+### 1. setup-quetrex.sh
 
 **Complete system setup** - Installs everything you need.
 
 ```bash
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 ```
 
 **What it does:**
@@ -82,7 +82,7 @@ claude --version    # Any recent version
 7. Tests Skills activation
 
 **Output:**
-- `.sentra/` directory structure
+- `.quetrex/` directory structure
 - `docs/` directory structure
 - `requirements.txt` (if not exists)
 - Updated `.gitignore`
@@ -125,11 +125,11 @@ claude
 **New project initialization** - For building from scratch.
 
 ```bash
-python .sentra/scripts/init-project.py --name "project-name"
+python .quetrex/scripts/init-project.py --name "project-name"
 ```
 
 **What it does:**
-1. Creates `.sentra/architect-sessions/[project-name]/` structure
+1. Creates `.quetrex/architect-sessions/[project-name]/` structure
 2. Generates session templates
 3. Creates coverage checklist (all 0%)
 4. Creates progress tracker
@@ -142,7 +142,7 @@ python .sentra/scripts/init-project.py --name "project-name"
 
 **Output:**
 ```
-.sentra/architect-sessions/project-name/
+.quetrex/architect-sessions/project-name/
 ├── sessions/
 │   └── session-001-initial-architecture.md
 ├── specs/
@@ -159,7 +159,7 @@ python .sentra/scripts/init-project.py --name "project-name"
 **Existing project initialization** - For adding to current codebase.
 
 ```bash
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 ```
 
 **What it does:**
@@ -171,7 +171,7 @@ python .sentra/scripts/init-existing-project.py
 6. Generates safety guidelines
 
 **Use when:**
-- Adding Sentra to existing project
+- Adding Quetrex to existing project
 - Need to protect current functionality
 - Want to maintain existing patterns
 
@@ -182,7 +182,7 @@ docs/existing-codebase/
 └── patterns/
     └── detected-patterns.md
 
-.sentra/protection/
+.quetrex/protection/
 └── protection-rules.yml
 ```
 
@@ -194,10 +194,10 @@ docs/existing-codebase/
 
 ```bash
 # 1. Complete setup
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 
 # 2. Initialize new project
-python .sentra/scripts/init-project.py --name "bookmark-manager"
+python .quetrex/scripts/init-project.py --name "bookmark-manager"
 
 # 3. Start Voice Architect
 claude
@@ -213,20 +213,20 @@ claude
 
 ---
 
-### Example 2: Adding Sentra to Existing Project
+### Example 2: Adding Quetrex to Existing Project
 
 ```bash
 # 1. Complete setup
-./scripts/setup-sentra.sh
+./scripts/setup-quetrex.sh
 
 # 2. Analyze existing codebase
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 
 # 3. Review analysis
 cat docs/existing-codebase/ANALYSIS-SUMMARY.md
 
 # 4. Review protection rules
-cat .sentra/protection/protection-rules.yml
+cat .quetrex/protection/protection-rules.yml
 
 # 5. Start adding features safely
 claude
@@ -255,8 +255,8 @@ claude
 After complete setup:
 
 ```
-sentra/
-├── .sentra/                          # Sentra configuration
+quetrex/
+├── .quetrex/                          # Quetrex configuration
 │   ├── architect-sessions/           # Project sessions
 │   │   └── [project-name]/
 │   │       ├── sessions/             # Session history
@@ -271,7 +271,7 @@ sentra/
 │   │   └── protection-rules.yml
 │   ├── memory/                       # Pattern memory
 │   │   └── patterns.md
-│   └── README.md                     # Sentra overview
+│   └── README.md                     # Quetrex overview
 │
 ├── docs/                             # Documentation
 │   ├── specs/                        # Feature specifications
@@ -286,7 +286,7 @@ sentra/
 │   └── features/                     # Feature documentation
 │
 ├── scripts/                          # Build scripts
-│   ├── setup-sentra.sh               # Complete setup
+│   ├── setup-quetrex.sh               # Complete setup
 │   ├── install-serena.sh             # Serena MCP install
 │   └── INSTALLATION.md               # This file
 │
@@ -402,13 +402,13 @@ yarn install
 **Solution:**
 ```bash
 # Check existing projects
-ls .sentra/architect-sessions/
+ls .quetrex/architect-sessions/
 
 # Use different name
-python .sentra/scripts/init-project.py --name "project-name-v2"
+python .quetrex/scripts/init-project.py --name "project-name-v2"
 
 # OR remove old project
-rm -rf .sentra/architect-sessions/old-project-name
+rm -rf .quetrex/architect-sessions/old-project-name
 ```
 
 ---
@@ -427,7 +427,7 @@ git add .
 git commit -m "Initial commit"
 
 # Retry initialization
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 ```
 
 ---
@@ -440,7 +440,7 @@ After installation:
 
 ```bash
 # 1. Initialize project
-python .sentra/scripts/init-project.py --name "your-project"
+python .quetrex/scripts/init-project.py --name "your-project"
 
 # 2. Start Voice Architect
 claude
@@ -454,7 +454,7 @@ claude
 
 ```bash
 # 1. Analyze codebase
-python .sentra/scripts/init-existing-project.py
+python .quetrex/scripts/init-existing-project.py
 
 # 2. Review analysis
 cat docs/existing-codebase/ANALYSIS-SUMMARY.md
@@ -471,8 +471,8 @@ claude
 
 ## Support
 
-- **Documentation:** See `CLAUDE.md` and `.sentra/README.md`
-- **Issues:** https://github.com/barnent1/sentra/issues
+- **Documentation:** See `CLAUDE.md` and `.quetrex/README.md`
+- **Issues:** https://github.com/barnent1/quetrex/issues
 - **Claude Code Docs:** https://docs.claude.com/claude-code
 
 ---

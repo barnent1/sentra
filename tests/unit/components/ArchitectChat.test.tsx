@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ArchitectChat } from '@/components/ArchitectChat'
-import * as tauri from '@/services/sentra-api'
+import * as tauri from '@/services/quetrex-api'
 import { RealtimeConversation } from '@/lib/openai-realtime'
 
 // Mock the tauri module
-vi.mock('@/services/sentra-api', () => ({
+vi.mock('@/services/quetrex-api', () => ({
   getSettings: vi.fn(),
   chatWithArchitect: vi.fn(),
   getProjectContext: vi.fn(),
@@ -133,7 +133,7 @@ describe('ArchitectChat', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
     })
 
@@ -310,7 +310,7 @@ describe('ArchitectChat', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
 
       // ACT
@@ -338,7 +338,7 @@ describe('ArchitectChat', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
 
       // Switch to text mode
@@ -381,7 +381,7 @@ describe('ArchitectChat', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
 
       // Switch to text mode
@@ -417,7 +417,7 @@ describe('ArchitectChat', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
 
       // Switch to text mode
@@ -455,7 +455,7 @@ describe('ArchitectChat', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
 
       // Switch to text mode
@@ -494,7 +494,7 @@ describe('ArchitectChat', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
 
       // Switch to text mode
@@ -600,7 +600,7 @@ describe('ArchitectChat', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
 
       // ACT
@@ -693,7 +693,7 @@ describe('ArchitectChat', () => {
       )
 
       await waitFor(() => {
-        expect(screen.getByText('Sentra')).toBeInTheDocument()
+        expect(screen.getByText('Quetrex')).toBeInTheDocument()
       })
 
       // ASSERT - Verify RealtimeConversation was created with audio callback

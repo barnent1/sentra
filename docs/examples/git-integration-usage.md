@@ -11,7 +11,7 @@ The Git integration provides three main commands:
 
 ## TypeScript Types
 
-All types are exported from `@/services/sentra-api`:
+All types are exported from `@/services/quetrex-api`:
 
 ```typescript
 import {
@@ -22,14 +22,14 @@ import {
   getGitLog,
   getGitDiff,
   getGitStatus
-} from '@/services/sentra-api';
+} from '@/services/quetrex-api';
 ```
 
 ## Example 1: Display Recent Commits
 
 ```tsx
 import { useState, useEffect } from 'react';
-import { getGitLog, GitCommit } from '@/services/sentra-api';
+import { getGitLog, GitCommit } from '@/services/quetrex-api';
 
 export function CommitHistory({ projectPath }: { projectPath: string }) {
   const [commits, setCommits] = useState<GitCommit[]>([]);
@@ -76,7 +76,7 @@ export function CommitHistory({ projectPath }: { projectPath: string }) {
 
 ```tsx
 import { useState, useEffect } from 'react';
-import { getGitStatus, GitStatus } from '@/services/sentra-api';
+import { getGitStatus, GitStatus } from '@/services/quetrex-api';
 
 export function RepoStatus({ projectPath }: { projectPath: string }) {
   const [status, setStatus] = useState<GitStatus | null>(null);
@@ -151,7 +151,7 @@ export function RepoStatus({ projectPath }: { projectPath: string }) {
 
 ```tsx
 import { useState, useEffect } from 'react';
-import { getGitDiff, GitDiff } from '@/services/sentra-api';
+import { getGitDiff, GitDiff } from '@/services/quetrex-api';
 
 export function CommitDiff({
   projectPath,
@@ -224,7 +224,7 @@ This is the recommended implementation for the observability dashboard's Git tab
 
 ```tsx
 import { useState, useEffect } from 'react';
-import { getGitLog, getGitDiff, GitCommit, GitDiff } from '@/services/sentra-api';
+import { getGitLog, getGitDiff, GitCommit, GitDiff } from '@/services/quetrex-api';
 
 export function GitTab({ projectPath }: { projectPath: string }) {
   const [commits, setCommits] = useState<GitCommit[]>([]);

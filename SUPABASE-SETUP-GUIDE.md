@@ -1,4 +1,4 @@
-# Supabase Setup Guide for Sentra
+# Supabase Setup Guide for Quetrex
 
 Complete guide to set up Supabase database and run migrations.
 
@@ -18,7 +18,7 @@ If you already have a Supabase project, skip to Step 2.
 2. **Create New Project:**
    - Click "New Project"
    - **Organization:** Select or create your organization
-   - **Project Name:** `sentra` or your preferred name
+   - **Project Name:** `quetrex` or your preferred name
    - **Database Password:** Generate strong password (save it!)
    - **Region:** Choose closest to your users
      - US East (North Virginia) - us-east-1
@@ -65,7 +65,7 @@ If you already have a Supabase project, skip to Step 2.
 
 1. **Create `.env.local` file:**
    ```bash
-   cd /Users/barnent1/Projects/sentra
+   cd /Users/barnent1/Projects/quetrex
    touch .env.local
    ```
 
@@ -181,7 +181,7 @@ npm run drizzle:migrate
 ## Step 6: Configure Vercel Environment Variables
 
 1. **Go to Vercel Dashboard:**
-   - Visit: https://vercel.com/barnhardt-enterprises-inc/sentra/settings/environment-variables
+   - Visit: https://vercel.com/barnhardt-enterprises-inc/quetrex/settings/environment-variables
 
 2. **Add Environment Variables:**
 
@@ -211,7 +211,7 @@ npm run drizzle:migrate
    - `GITHUB_TOKEN`
    - `JWT_SECRET`
    - `JWT_REFRESH_SECRET`
-   - `NEXT_PUBLIC_APP_URL` = `https://sentra-b3h4t0zv6-barnhardt-enterprises-inc.vercel.app`
+   - `NEXT_PUBLIC_APP_URL` = `https://quetrex-b3h4t0zv6-barnhardt-enterprises-inc.vercel.app`
 
 3. **Save Variables:**
    - Click **Save** after adding each
@@ -246,7 +246,7 @@ Or trigger redeploy from Vercel dashboard:
    - Check if data appears in Supabase Table Editor
 
 2. **Test production:**
-   - Visit https://sentra-b3h4t0zv6-barnhardt-enterprises-inc.vercel.app
+   - Visit https://quetrex-b3h4t0zv6-barnhardt-enterprises-inc.vercel.app
    - Register a new user
    - Verify in Supabase Dashboard
 
@@ -362,5 +362,5 @@ Once database is set up:
 ---
 
 **Generated:** 2025-11-19
-**Project:** Sentra
+**Project:** Quetrex
 **Migration:** Prisma → Drizzle + Supabase

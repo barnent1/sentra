@@ -1,6 +1,6 @@
-# Sentra Testing Guide
+# Quetrex Testing Guide
 
-**Comprehensive guide to testing in Sentra**
+**Comprehensive guide to testing in Quetrex**
 
 Last Updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
@@ -24,7 +24,7 @@ Last Updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
 ## Overview
 
-Sentra uses a comprehensive testing strategy with **mandatory coverage requirements** enforced by the 6-layer defense system.
+Quetrex uses a comprehensive testing strategy with **mandatory coverage requirements** enforced by the 6-layer defense system.
 
 ### Testing Stack
 
@@ -32,7 +32,7 @@ Sentra uses a comprehensive testing strategy with **mandatory coverage requireme
 - **Playwright** - End-to-end tests
 - **Testing Library** - React component tests
 - **Coverage: V8** - Code coverage reporting
-- **Cargo Test** - (No longer applicable - Sentra is now a web application)
+- **Cargo Test** - (No longer applicable - Quetrex is now a web application)
 
 ### Why Testing Matters
 
@@ -725,7 +725,7 @@ cargo test --verbose
 
 ### What is Mock Mode?
 
-Sentra supports **mock mode** for development and testing without real API calls.
+Quetrex supports **mock mode** for development and testing without real API calls.
 
 ### Configuring Mock Mode
 
@@ -951,7 +951,7 @@ export default defineConfig({
 - **[Testing Library](https://testing-library.com/)** - React testing utilities
 - **[Jest DOM](https://github.com/testing-library/jest-dom)** - Custom matchers
 
-### Sentra-Specific
+### Quetrex-Specific
 
 - **[Contributing Guide](../CONTRIBUTING.md)** - Development standards
 - **[CLAUDE.md](../CLAUDE.md)** - Project context and standards
@@ -965,7 +965,7 @@ export default defineConfig({
 
 ---
 
-**Questions?** Open a [GitHub Issue](https://github.com/barnent1/sentra/issues) with the `testing` label.
+**Questions?** Open a [GitHub Issue](https://github.com/barnent1/quetrex/issues) with the `testing` label.
 
 **Found a bug in tests?** Please report it - tests should never lie!
 

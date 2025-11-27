@@ -1,6 +1,6 @@
-# Contributing to Sentra
+# Contributing to Quetrex
 
-**Thank you for considering contributing to Sentra!** This guide will help you get started with development, testing, and submitting changes.
+**Thank you for considering contributing to Quetrex!** This guide will help you get started with development, testing, and submitting changes.
 
 ---
 
@@ -40,14 +40,14 @@ Before you begin, ensure you have:
 
 ```bash
 # 1. Fork the repository on GitHub
-# Click "Fork" button at https://github.com/barnent1/sentra
+# Click "Fork" button at https://github.com/barnent1/quetrex
 
 # 2. Clone your fork
-git clone git@github.com:YOUR_USERNAME/sentra.git
-cd sentra
+git clone git@github.com:YOUR_USERNAME/quetrex.git
+cd quetrex
 
 # 3. Add upstream remote
-git remote add upstream git@github.com:barnent1/sentra.git
+git remote add upstream git@github.com:barnent1/quetrex.git
 
 # 4. Install dependencies
 npm install
@@ -92,14 +92,14 @@ DATABASE_URL=postgresql://...      # PostgreSQL connection string (future)
 # GitHub Integration (for agent automation)
 GITHUB_TOKEN=ghp_...               # Personal access token
 GITHUB_OWNER=barnent1              # Repository owner
-GITHUB_REPO=sentra                 # Repository name
+GITHUB_REPO=quetrex                 # Repository name
 ```
 
 **Security Note:** Never commit `.env.local` to git. It's already in `.gitignore`.
 
 ### Database Setup (Future - Phase 2)
 
-Currently, Sentra uses file-based storage. Database integration coming in Phase 2.
+Currently, Quetrex uses file-based storage. Database integration coming in Phase 2.
 
 When database is added:
 
@@ -270,7 +270,7 @@ docs: update contributing guide with testing requirements
 
 ### TypeScript Strict Mode (Mandatory)
 
-Sentra uses **TypeScript strict mode** with zero tolerance for type violations.
+Quetrex uses **TypeScript strict mode** with zero tolerance for type violations.
 
 **✅ DO:**
 ```typescript
@@ -396,7 +396,7 @@ export function Dashboard() {
 
 ### Test-Driven Development (TDD)
 
-**Sentra follows TDD strictly. Write tests FIRST, then implementation.**
+**Quetrex follows TDD strictly. Write tests FIRST, then implementation.**
 
 **TDD Workflow:**
 1. **Write test** describing desired behavior
@@ -605,7 +605,7 @@ If applicable, add screenshots.
 - OS: [e.g., macOS 14.0]
 - Browser: [e.g., Chrome 120]
 - Node version: [e.g., 18.17.0]
-- Sentra version: [e.g., 0.1.0]
+- Quetrex version: [e.g., 0.1.0]
 
 **Additional context**
 Any other context about the problem.
@@ -651,7 +651,7 @@ Links to related issues or PRs.
 
 ### 6-Layer Defense System
 
-Sentra's quality enforcement prevents bugs from being committed:
+Quetrex's quality enforcement prevents bugs from being committed:
 
 **Layer 1: PreToolUse Hook**
 - Blocks dangerous commands before execution
@@ -815,10 +815,10 @@ npm run test:ui
 
 ### Communication
 
-- **Questions:** Open a [GitHub Issue](https://github.com/barnent1/sentra/issues) with `question` label
+- **Questions:** Open a [GitHub Issue](https://github.com/barnent1/quetrex/issues) with `question` label
 - **Bugs:** Use bug report template
 - **Feature Ideas:** Use feature request template
-- **Security:** Email security@sentra.app (do not open public issue)
+- **Security:** Email security@quetrex.app (do not open public issue)
 
 ### Before Asking
 
@@ -868,7 +868,7 @@ npm run build               # Production build
 4. Follow TDD workflow
 5. Submit your first PR
 
-**Welcome to the Sentra community!**
+**Welcome to the Quetrex community!**
 
 ---
 

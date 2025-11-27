@@ -1,10 +1,10 @@
 # Drizzle ORM Patterns - Complete PostgreSQL Reference
 
-**Use when:** Working with database operations, schema design, migrations, or queries in Sentra.
+**Use when:** Working with database operations, schema design, migrations, or queries in Quetrex.
 
 ## Overview
 
-This skill provides comprehensive Drizzle ORM patterns for PostgreSQL with Vercel Edge Runtime support. Drizzle is Sentra's chosen ORM because it's edge-first, type-safe, and supports all deployment targets.
+This skill provides comprehensive Drizzle ORM patterns for PostgreSQL with Vercel Edge Runtime support. Drizzle is Quetrex's chosen ORM because it's edge-first, type-safe, and supports all deployment targets.
 
 ## Why Drizzle?
 
@@ -286,7 +286,7 @@ For Drizzle-specific questions:
 - GitHub Issues: https://github.com/drizzle-team/drizzle-orm/issues
 - Discord: https://discord.gg/drizzle
 
-For Sentra-specific questions:
+For Quetrex-specific questions:
 - Check CLAUDE.md project documentation
 - Review architecture docs in `/docs/architecture/`
 - Ask in team Slack channel

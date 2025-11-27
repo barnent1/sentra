@@ -1,6 +1,6 @@
 # Settings API Reference
 
-**Audience:** Developers managing Sentra configuration
+**Audience:** Developers managing Quetrex configuration
 **Last Updated:** 2025-11-23
 
 ---
@@ -9,7 +9,7 @@
 
 The Settings API manages user preferences, API key storage, project configuration, and security settings. All sensitive data (API keys, tokens) is encrypted at rest using AES-256-GCM.
 
-**Base URL:** `https://your-sentra-instance.com/api`
+**Base URL:** `https://your-quetrex-instance.com/api`
 
 **Authentication:** Bearer token (JWT) required for all endpoints
 
@@ -57,7 +57,7 @@ Retrieve all user preferences.
 
 **Example:**
 ```bash
-curl https://your-sentra-instance.com/api/settings/user \
+curl https://your-quetrex-instance.com/api/settings/user \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -129,7 +129,7 @@ interface UpdateUserSettingsRequest {
 
 **Example:**
 ```bash
-curl -X PATCH https://your-sentra-instance.com/api/settings/user \
+curl -X PATCH https://your-quetrex-instance.com/api/settings/user \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -173,7 +173,7 @@ Retrieve stored API keys (returns masked values for security).
 
 **Example:**
 ```bash
-curl https://your-sentra-instance.com/api/settings/api-keys \
+curl https://your-quetrex-instance.com/api/settings/api-keys \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -240,7 +240,7 @@ interface SetApiKeyRequest {
 
 **Example:**
 ```bash
-curl -X PUT https://your-sentra-instance.com/api/settings/api-keys/openai \
+curl -X PUT https://your-quetrex-instance.com/api/settings/api-keys/openai \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -280,7 +280,7 @@ Remove a stored API key from database.
 
 **Example:**
 ```bash
-curl -X DELETE https://your-sentra-instance.com/api/settings/api-keys/openai \
+curl -X DELETE https://your-quetrex-instance.com/api/settings/api-keys/openai \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -310,7 +310,7 @@ Retrieve settings for a specific project.
 
 **Example:**
 ```bash
-curl https://your-sentra-instance.com/api/settings/projects/proj_abc123 \
+curl https://your-quetrex-instance.com/api/settings/projects/proj_abc123 \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -378,7 +378,7 @@ interface UpdateProjectSettingsRequest {
 
 **Example:**
 ```bash
-curl -X PATCH https://your-sentra-instance.com/api/settings/projects/proj_abc123 \
+curl -X PATCH https://your-quetrex-instance.com/api/settings/projects/proj_abc123 \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -427,7 +427,7 @@ curl -X PATCH https://your-sentra-instance.com/api/settings/projects/proj_abc123
 
 ### How API Keys Are Encrypted
 
-Sentra uses **AES-256-GCM** (Galois/Counter Mode) for API key encryption.
+Quetrex uses **AES-256-GCM** (Galois/Counter Mode) for API key encryption.
 
 **Encryption Flow:**
 
@@ -508,7 +508,7 @@ const deriveKey = async (password: string, salt: Uint8Array): Promise<CryptoKey>
 
 ## Environment Variable Fallbacks
 
-If API key is not in database, Sentra checks environment variables as fallback.
+If API key is not in database, Quetrex checks environment variables as fallback.
 
 ### Priority Order
 
@@ -589,7 +589,7 @@ console.log('OpenAI key:', maskApiKey(apiKey))
 **2. Rotate keys regularly**
 ```bash
 # Every 90 days minimum
-curl -X PUT https://your-sentra-instance.com/api/settings/api-keys/openai \
+curl -X PUT https://your-quetrex-instance.com/api/settings/api-keys/openai \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{"apiKey": "NEW_KEY"}'
 ```
@@ -676,7 +676,7 @@ DELETE /api/settings/api-keys/:id  - 5 req/min
 ```typescript
 import axios from 'axios'
 
-const API_BASE = 'https://your-sentra-instance.com/api'
+const API_BASE = 'https://your-quetrex-instance.com/api'
 const TOKEN = 'your-jwt-token'
 
 const headers = {
@@ -740,7 +740,7 @@ async function updateProjectNotifications(projectId: string, enabled: boolean) {
 ```python
 import requests
 
-API_BASE = 'https://your-sentra-instance.com/api'
+API_BASE = 'https://your-quetrex-instance.com/api'
 TOKEN = 'your-jwt-token'
 
 headers = {
@@ -785,31 +785,31 @@ def get_api_keys():
 
 ```bash
 # Get user settings
-curl https://your-sentra-instance.com/api/settings/user \
+curl https://your-quetrex-instance.com/api/settings/user \
   -H "Authorization: Bearer $TOKEN"
 
 # Update theme
-curl -X PATCH https://your-sentra-instance.com/api/settings/user \
+curl -X PATCH https://your-quetrex-instance.com/api/settings/user \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"preferences": {"theme": "dark"}}'
 
 # Set OpenAI API key
-curl -X PUT https://your-sentra-instance.com/api/settings/api-keys/openai \
+curl -X PUT https://your-quetrex-instance.com/api/settings/api-keys/openai \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"apiKey": "sk-proj-abcdefghijklmnopqrstuvwxyz"}'
 
 # Get API keys (masked)
-curl https://your-sentra-instance.com/api/settings/api-keys \
+curl https://your-quetrex-instance.com/api/settings/api-keys \
   -H "Authorization: Bearer $TOKEN"
 
 # Delete API key
-curl -X DELETE https://your-sentra-instance.com/api/settings/api-keys/openai \
+curl -X DELETE https://your-quetrex-instance.com/api/settings/api-keys/openai \
   -H "Authorization: Bearer $TOKEN"
 
 # Update project settings
-curl -X PATCH https://your-sentra-instance.com/api/settings/projects/proj_abc123 \
+curl -X PATCH https://your-quetrex-instance.com/api/settings/projects/proj_abc123 \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

@@ -264,7 +264,7 @@ These files are kept for historical context but not actively maintained:
 ### Next Steps
 1. Verify all documentation is accurate
 2. Test voice functionality across browsers
-3. Deploy to production (https://sentra.app)
+3. Deploy to production (https://quetrex.app)
 4. Update any remaining references if found
 5. Monitor for any breaking changes
 

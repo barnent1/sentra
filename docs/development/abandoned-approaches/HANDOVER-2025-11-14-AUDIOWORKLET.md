@@ -70,7 +70,7 @@ Native macOS Audio (CoreAudio) → SPEAKERS ✅
 ## Implementation Details
 
 ### File 1: AudioWorklet Processor
-**Location:** `/Users/barnent1/Projects/sentra/public/webrtc-audio-processor.js`
+**Location:** `/Users/barnent1/Projects/quetrex/public/webrtc-audio-processor.js`
 
 **Purpose:** Capture and convert audio in dedicated audio thread
 
@@ -96,7 +96,7 @@ registerProcessor('webrtc-audio-processor', WebRTCAudioProcessor);
 ---
 
 ### File 2: TypeScript WebRTC Manager
-**Location:** `/Users/barnent1/Projects/sentra/src/lib/openai-realtime.ts`
+**Location:** `/Users/barnent1/Projects/quetrex/src/lib/openai-realtime.ts`
 
 **Changes Made:**
 1. **Added AudioWorklet detection** (lines 55-76)
@@ -134,7 +134,7 @@ registerProcessor('webrtc-audio-processor', WebRTCAudioProcessor);
 ---
 
 ### File 3: Rust Audio Commands
-**Location:** `/Users/barnent1/Projects/sentra/src-tauri/src/commands.rs`
+**Location:** `/Users/barnent1/Projects/quetrex/src-tauri/src/commands.rs`
 
 **New Commands Added:**
 
@@ -181,7 +181,7 @@ thread_local! {
 ---
 
 ### File 4: Tauri Command Registration
-**Location:** `/Users/barnent1/Projects/sentra/src-tauri/src/lib.rs`
+**Location:** `/Users/barnent1/Projects/quetrex/src-tauri/src/lib.rs`
 
 **Changes:** (lines 119-121)
 ```rust
@@ -231,9 +231,9 @@ thread_local! {
 
 **1. Start Fresh Server**
 ```bash
-cd /Users/barnent1/Projects/sentra
+cd /Users/barnent1/Projects/quetrex
 rm -rf .next out  # Clear Next.js cache
-pkill -9 Sentra   # Kill any lingering processes
+pkill -9 Quetrex   # Kill any lingering processes
 npm run tauri dev
 ```
 
@@ -308,7 +308,7 @@ let sink = Sink::try_new(&handle).unwrap();
 #### 4. Check Audio Permissions
 ```bash
 # Verify microphone permission is granted
-ls -la /Users/barnent1/Projects/sentra/src-tauri/Info.plist
+ls -la /Users/barnent1/Projects/quetrex/src-tauri/Info.plist
 # Should contain NSMicrophoneUsageDescription
 ```
 
@@ -372,7 +372,7 @@ lsof -ti:9001 | xargs kill -9
 **Why not:** Abandons Tauri investment, much larger bundle size
 
 ### 4. HTTP API Fallback (Always Available)
-**Location:** `/Users/barnent1/Projects/sentra/src/lib/openai-voice.ts`
+**Location:** `/Users/barnent1/Projects/quetrex/src/lib/openai-voice.ts`
 **Latency:** 3-5 seconds
 **Status:** Already implemented and working
 **Use case:** Can be offered as "compatibility mode" if AudioWorklet fails
@@ -484,5 +484,5 @@ The AudioWorklet bridge implementation is **technically sound and follows proven
 
 **Document prepared by:** Claude Code
 **For:** Glen Barnhardt
-**Project:** Sentra - WebRTC Voice Implementation
+**Project:** Quetrex - WebRTC Voice Implementation
 **Date:** November 14, 2025, 19:30 PST

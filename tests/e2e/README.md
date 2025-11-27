@@ -1,6 +1,6 @@
 # E2E Test Suite - Comprehensive Coverage
 
-This directory contains comprehensive end-to-end tests for the Sentra application using Playwright.
+This directory contains comprehensive end-to-end tests for the Quetrex application using Playwright.
 
 ## Test Files Overview
 

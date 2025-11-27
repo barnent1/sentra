@@ -7,7 +7,7 @@
 
 ## Overview
 
-This runbook covers routine maintenance tasks for Sentra's production environment including backups, updates, monitoring, and cost optimization.
+This runbook covers routine maintenance tasks for Quetrex's production environment including backups, updates, monitoring, and cost optimization.
 
 ---
 
@@ -30,7 +30,7 @@ This runbook covers routine maintenance tasks for Sentra's production environmen
 
 ```bash
 # 1. Check service health
-curl https://sentra.vercel.app/api/health
+curl https://quetrex.vercel.app/api/health
 
 # 2. Review error logs (last 24 hours)
 vercel logs --since=24h | grep ERROR
@@ -81,15 +81,15 @@ vercel rollback <DEPLOYMENT_URL>
 
 ```bash
 # Full backup (when database is added)
-pg_dump -h $DB_HOST -U $DB_USER -d sentra_db \
-  > backups/sentra_$(date +%Y%m%d).sql
+pg_dump -h $DB_HOST -U $DB_USER -d quetrex_db \
+  > backups/quetrex_$(date +%Y%m%d).sql
 
 # Compress
-gzip backups/sentra_$(date +%Y%m%d).sql
+gzip backups/quetrex_$(date +%Y%m%d).sql
 
 # Upload to S3 (or storage provider)
-aws s3 cp backups/sentra_$(date +%Y%m%d).sql.gz \
-  s3://sentra-backups/weekly/
+aws s3 cp backups/quetrex_$(date +%Y%m%d).sql.gz \
+  s3://quetrex-backups/weekly/
 ```
 
 **Retention Policy:**
@@ -102,11 +102,11 @@ aws s3 cp backups/sentra_$(date +%Y%m%d).sql.gz \
 
 ```bash
 # Archive old logs
-find /var/log/sentra -name "*.log" -mtime +7 \
+find /var/log/quetrex -name "*.log" -mtime +7 \
   -exec gzip {} \;
 
 # Delete logs older than 90 days
-find /var/log/sentra -name "*.log.gz" -mtime +90 \
+find /var/log/quetrex -name "*.log.gz" -mtime +90 \
   -exec rm {} \;
 ```
 
@@ -257,7 +257,7 @@ pg_restore --table=users backup.sql | psql $DATABASE_URL
 psql $DATABASE_URL -c "VACUUM FULL ANALYZE;"
 
 # Reindex (improve query performance)
-psql $DATABASE_URL -c "REINDEX DATABASE sentra_db;"
+psql $DATABASE_URL -c "REINDEX DATABASE quetrex_db;"
 
 # Check table sizes
 psql $DATABASE_URL -c "
@@ -495,7 +495,7 @@ node --max-old-space-size=4096 index.js
 
 ```bash
 # Enable slow query log
-psql $DATABASE_URL -c "ALTER DATABASE sentra_db SET log_min_duration_statement = 1000;"
+psql $DATABASE_URL -c "ALTER DATABASE quetrex_db SET log_min_duration_statement = 1000;"
 
 # Check slow queries
 psql $DATABASE_URL -c "SELECT query, calls, mean_exec_time FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10;"

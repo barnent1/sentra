@@ -1,5 +1,5 @@
 {
-  "description": "Claude Code settings for Sentra - Bug-proof agentic system",
+  "description": "Claude Code settings for Quetrex - Bug-proof agentic system",
   "permission": {
     "deny": [
       "Bash(git commit*--no-verify*)",

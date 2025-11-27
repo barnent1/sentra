@@ -1,6 +1,6 @@
 # System Design
 
-**Complete architecture of Sentra AI Agent Control Center**
+**Complete architecture of Quetrex AI Agent Control Center**
 
 Last Updated: 2025-11-13
 
@@ -8,7 +8,7 @@ Last Updated: 2025-11-13
 
 ## Overview
 
-Sentra is a **voice-first AI platform** that combines natural conversation with automated agent execution for software development.
+Quetrex is a **voice-first AI platform** that combines natural conversation with automated agent execution for software development.
 
 ### Architecture at a Glance
 
@@ -19,7 +19,7 @@ Sentra is a **voice-first AI platform** that combines natural conversation with 
                        │ Voice
                        ↓
 ┌─────────────────────────────────────────────────────────────┐
-│                   Sentra Native App (Tauri)                  │
+│                   Quetrex Native App (Tauri)                  │
 │  ┌─────────────────────────────────────────────────────────┐│
 │  │          Next.js Frontend (React 19)                     ││
 │  │  • Voice UI (ArchitectChat component)                    ││
@@ -38,7 +38,7 @@ Sentra is a **voice-first AI platform** that combines natural conversation with 
                        │ File System
                        ↓
 ┌─────────────────────────────────────────────────────────────┐
-│             .sentra/ Local Storage                           │
+│             .quetrex/ Local Storage                           │
 │  • specs/ - Specification files (versioned)                 │
 │  • memory/ - Project context and learnings                  │
 │  • metrics/ - Quality metrics and analytics                 │
@@ -98,7 +98,7 @@ Sentra is a **voice-first AI platform** that combines natural conversation with 
 - `watcher.rs` - File system monitoring
 
 **Storage**
-- File-based (.sentra/ directory)
+- File-based (.quetrex/ directory)
 - JSON for structured data
 - Markdown for specs and documentation
 - No database layer (yet - planned Phase 2)
@@ -180,7 +180,7 @@ Rust backend:
   - Generate unique ID
   - Create version file (v1)
   - Save metadata (title, date, status)
-  - Write to .sentra/specs/{project}/{spec-id}/
+  - Write to .quetrex/specs/{project}/{spec-id}/
     ↓
 UI shows SpecViewer modal
   - Markdown rendering
@@ -222,7 +222,7 @@ Workflow job starts:
     ↓
 Python agent worker (ai-agent-worker.py):
   1. Fetch issue details via gh CLI
-  2. Load project context (.sentra/config.yml, CLAUDE.md)
+  2. Load project context (.quetrex/config.yml, CLAUDE.md)
   3. Build comprehensive prompt
   4. Call Anthropic SDK (Claude)
   5. Execute file changes requested by Claude
@@ -296,7 +296,7 @@ src-tauri/src/                    # Rust backend
 ### Local Data
 
 ```
-.sentra/                          # Local project data
+.quetrex/                          # Local project data
 ├── specs/
 │   └── {project-name}/
 │       └── {spec-id}/
@@ -320,9 +320,9 @@ src-tauri/src/                    # Rust backend
 
 ### Why Claude Code CLI (Not Anthropic SDK)
 
-Sentra's agent automation uses **Claude Code CLI** as the execution engine, NOT direct Anthropic SDK calls. This is a critical architecture decision.
+Quetrex's agent automation uses **Claude Code CLI** as the execution engine, NOT direct Anthropic SDK calls. This is a critical architecture decision.
 
-**See:** [.claude/docs/ARCHITECTURE-AGENT-WORKER.md](/Users/barnent1/Projects/sentra/.claude/docs/ARCHITECTURE-AGENT-WORKER.md) for complete rationale.
+**See:** [.claude/docs/ARCHITECTURE-AGENT-WORKER.md](/Users/barnent1/Projects/quetrex/.claude/docs/ARCHITECTURE-AGENT-WORKER.md) for complete rationale.
 
 #### Key Benefits
 
@@ -458,7 +458,7 @@ class RealtimeConversation {
 
 **File Structure:**
 ```
-.sentra/specs/{project}/{spec-id}/
+.quetrex/specs/{project}/{spec-id}/
 ├── metadata.json      # { id, title, versions: [], approved_version }
 ├── spec-v1.md         # Initial version
 ├── spec-v2.md         # After first edit
@@ -701,7 +701,7 @@ Creates distributable .app bundle:
 - Installer generation
 - Update manifest
 
-**Output:** `src-tauri/target/release/bundle/macos/Sentra.app`
+**Output:** `src-tauri/target/release/bundle/macos/Quetrex.app`
 
 ---
 
@@ -712,7 +712,7 @@ Creates distributable .app bundle:
 **PostgreSQL + Prisma:**
 ```
 ┌──────────────────────┐
-│   Sentra Native App   │
+│   Quetrex Native App   │
 │  (Tauri + Next.js)    │
 └──────────┬───────────┘
            │

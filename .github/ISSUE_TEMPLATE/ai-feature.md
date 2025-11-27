@@ -37,7 +37,7 @@ assignees: ''
 **Patterns to Follow:**
 <!-- Reference existing patterns or architectural decisions -->
 - See `src/components/...` for similar implementation
-- Follow patterns in `.sentra/memory/patterns.md`
+- Follow patterns in `.quetrex/memory/patterns.md`
 
 **Dependencies:**
 <!-- List any new packages needed or existing services to integrate with -->

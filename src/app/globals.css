@@ -69,53 +69,53 @@
   }
 }
 
-/* Custom Sentra Mission Control styles */
+/* Custom Quetrex Mission Control styles */
 @layer utilities {
-  .sentra-glass {
+  .quetrex-glass {
     @apply bg-background/80 backdrop-blur-xl border border-border/50;
   }
 
-  .sentra-card {
+  .quetrex-card {
     @apply bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46] hover:shadow-lg;
   }
 
-  .sentra-card-compact {
+  .quetrex-card-compact {
     @apply bg-[#18181B] border border-[#27272A] rounded-lg p-5 transition-all hover:border-[#3f3f46];
   }
 
-  .sentra-status-running {
+  .quetrex-status-running {
     @apply bg-green-500/20 text-green-400 border-green-500/50;
   }
 
-  .sentra-status-idle {
+  .quetrex-status-idle {
     @apply bg-muted text-muted-foreground border-border;
   }
 
-  .sentra-status-error {
+  .quetrex-status-error {
     @apply bg-destructive/20 text-red-400 border-destructive/50;
   }
 
-  .sentra-progress-bar {
+  .quetrex-progress-bar {
     @apply w-full h-2 bg-[#27272A] rounded-full overflow-hidden;
   }
 
-  .sentra-progress-fill-active {
+  .quetrex-progress-fill-active {
     @apply h-full bg-violet-600 transition-all duration-300;
   }
 
-  .sentra-progress-fill-idle {
+  .quetrex-progress-fill-idle {
     @apply h-full bg-gray-600 transition-all duration-300;
   }
 
-  .sentra-status-dot-active {
+  .quetrex-status-dot-active {
     @apply w-3 h-3 rounded-full bg-green-500 animate-pulse;
   }
 
-  .sentra-status-dot-idle {
+  .quetrex-status-dot-idle {
     @apply w-3 h-3 rounded-full bg-gray-500;
   }
 
-  .sentra-status-dot-error {
+  .quetrex-status-dot-error {
     @apply w-3 h-3 rounded-full bg-red-500 animate-pulse;
   }
 

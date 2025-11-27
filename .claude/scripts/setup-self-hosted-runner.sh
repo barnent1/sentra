@@ -1,15 +1,15 @@
 #!/bin/bash
-# Self-Hosted GitHub Actions Runner Setup for Sentra
+# Self-Hosted GitHub Actions Runner Setup for Quetrex
 # This allows running AI agents using your local Claude Code (Max Pro subscription)
 # Instead of paying API credits!
 
 set -e
 
 RUNNER_DIR="$HOME/actions-runner"
-REPO_URL="https://github.com/barnent1/sentra"
+REPO_URL="https://github.com/barnent1/quetrex"
 
 echo "================================================"
-echo "  Sentra Self-Hosted Runner Setup"
+echo "  Quetrex Self-Hosted Runner Setup"
 echo "================================================"
 echo ""
 echo "This will set up a GitHub Actions runner on your Mac."
@@ -64,7 +64,7 @@ rm actions-runner.tar.gz
 # Get fresh registration token
 echo ""
 echo "Getting registration token..."
-TOKEN=$(gh api -X POST repos/barnent1/sentra/actions/runners/registration-token --jq '.token')
+TOKEN=$(gh api -X POST repos/barnent1/quetrex/actions/runners/registration-token --jq '.token')
 
 if [ -z "$TOKEN" ]; then
     echo "ERROR: Could not get registration token."
@@ -75,7 +75,7 @@ fi
 # Configure the runner
 echo ""
 echo "Configuring runner..."
-./config.sh --url "$REPO_URL" --token "$TOKEN" --name "sentra-mac-runner" --labels "self-hosted,macOS,ARM64,sentra" --work "_work" --unattended
+./config.sh --url "$REPO_URL" --token "$TOKEN" --name "quetrex-mac-runner" --labels "self-hosted,macOS,ARM64,quetrex" --work "_work" --unattended
 
 echo ""
 echo "================================================"

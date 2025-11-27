@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the comprehensive E2E test suite for the critical spec approval workflow in Sentra. These tests cover the complete user journey from spec creation to GitHub issue generation and agent workflow triggering.
+This document describes the comprehensive E2E test suite for the critical spec approval workflow in Quetrex. These tests cover the complete user journey from spec creation to GitHub issue generation and agent workflow triggering.
 
 **Test File**: `tests/e2e/spec-approval-workflow.spec.ts`
 

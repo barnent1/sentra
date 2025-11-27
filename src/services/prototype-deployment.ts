@@ -4,7 +4,7 @@
  * Deploys prototypes to Vercel preview URLs.
  *
  * Phase 1 (Fallback): Returns v0 URLs if Vercel API unavailable
- * Phase 2 (Current): Deploy to actual Vercel preview (prototypes.sentra.app)
+ * Phase 2 (Current): Deploy to actual Vercel preview (prototypes.quetrex.app)
  *
  * Features:
  * - Deploy prototypes with automatic URL generation
@@ -157,7 +157,7 @@ const deployments = new Map<string, DeploymentRecord>();
  * Manages deployment of prototypes to preview URLs.
  *
  * **Phase 2 (Current):**
- * - Deploy to Vercel preview (prototypes.sentra.app)
+ * - Deploy to Vercel preview (prototypes.quetrex.app)
  * - Real Vercel API integration
  * - Automatic fallback to v0 URLs if Vercel unavailable
  * - Deployment status polling
@@ -209,7 +209,7 @@ export class PrototypeDeploymentService {
   /**
    * Deploy a prototype
    *
-   * Phase 2: Deploys to Vercel preview (prototypes.sentra.app)
+   * Phase 2: Deploys to Vercel preview (prototypes.quetrex.app)
    * Falls back to Phase 1 (v0 URLs) if Vercel API unavailable
    *
    * @param request - Deployment request with files and metadata
@@ -267,8 +267,8 @@ export class PrototypeDeploymentService {
     // Map Vercel readyState to our status
     const status = this.mapVercelStatus(deployment.readyState);
 
-    // Generate Sentra-hosted URL
-    const url = `https://${sanitizedName}-${request.prototypeId}.prototypes.sentra.app`;
+    // Generate Quetrex-hosted URL
+    const url = `https://${sanitizedName}-${request.prototypeId}.prototypes.quetrex.app`;
 
     // Store deployment record
     const record: DeploymentRecord = {

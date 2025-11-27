@@ -10,9 +10,9 @@
 
 ## Overview
 
-Enable users to review and approve pull requests entirely within Sentra, without opening GitHub in a browser. View diffs, check test results, and merge PRs with one click.
+Enable users to review and approve pull requests entirely within Quetrex, without opening GitHub in a browser. View diffs, check test results, and merge PRs with one click.
 
-**Vision:** Reduce PR workflow from 7 steps across 3 apps to 2 clicks in Sentra.
+**Vision:** Reduce PR workflow from 7 steps across 3 apps to 2 clicks in Quetrex.
 
 ---
 
@@ -33,10 +33,10 @@ Enable users to review and approve pull requests entirely within Sentra, without
 8. User clicks "Approve"
 9. User clicks "Merge pull request"
 10. User clicks "Confirm merge"
-11. User returns to Sentra
+11. User returns to Quetrex
 
 **Pain Points:**
-- Context switching (Sentra → Email → Browser → Sentra)
+- Context switching (Quetrex → Email → Browser → Quetrex)
 - GitHub UI is cluttered, slow
 - Hard to see full picture of changes
 - Must wait for page loads
@@ -48,11 +48,11 @@ Enable users to review and approve pull requests entirely within Sentra, without
 
 **Steps:**
 1. Agent creates PR
-2. Sentra voice notification: "PR ready for review"
+2. Quetrex voice notification: "PR ready for review"
 3. User clicks [Review & Approve] in dashboard
 4. User reviews diff inline
 5. User clicks [Approve & Merge]
-6. Done, stays in Sentra
+6. Done, stays in Quetrex
 
 **Benefits:**
 - Zero context switching
@@ -86,12 +86,12 @@ Enable users to review and approve pull requests entirely within Sentra, without
 **2. Voice Notification**
 
 ```
-Sentra (speaking): "Pull request #42 is ready for review in Sentra project"
+Quetrex (speaking): "Pull request #42 is ready for review in Quetrex project"
 
 [Toast notification appears]
 ┌─────────────────────────────────────────┐
 │ PR #42 Ready for Review                 │
-│ Sentra: Implement voice queue           │
+│ Quetrex: Implement voice queue           │
 │                                         │
 │ [Review Now]  [Dismiss]                 │
 └─────────────────────────────────────────┘
@@ -102,7 +102,7 @@ Sentra (speaking): "Pull request #42 is ready for review in Sentra project"
 ```
 Recent Activity:
 ┌─────────────────────────────────────────┐
-│ [14:35:42] Sentra                       │
+│ [14:35:42] Quetrex                       │
 │ ✅ PR #42 ready for review              │
 │    [Review & Approve]                   │
 └─────────────────────────────────────────┘
@@ -305,7 +305,7 @@ export class GitHubAPIService {
       repo,
       pull_number: number,
       event: 'APPROVE',
-      body: 'Approved via Sentra'
+      body: 'Approved via Quetrex'
     })
   }
 
@@ -619,7 +619,7 @@ pub async fn github_approve_pr(
     octocrab
         .pulls(&owner, &repo)
         .create_review(pr_number, octocrab::models::pulls::ReviewEvent::Approve)
-        .body("Approved via Sentra")
+        .body("Approved via Quetrex")
         .send()
         .await
         .map_err(|e| e.to_string())?;
@@ -671,7 +671,7 @@ fn get_github_token() -> Result<String, String> {
 
 1. Agent completes task
 2. Agent creates PR on GitHub
-3. Sentra detects new PR (polling GitHub API every 30s)
+3. Quetrex detects new PR (polling GitHub API every 30s)
 4. Voice notification: "PR #42 ready for review"
 5. User clicks [Review & Approve] in Git tab
 6. Modal opens, showing diff
@@ -720,14 +720,14 @@ use tauri_plugin_keyring::KeyringExt;
 #[tauri::command]
 pub async fn save_github_token(token: String) -> Result<(), String> {
     let keyring = app.keyring();
-    keyring.set("sentra.github_token", &token)
+    keyring.set("quetrex.github_token", &token)
         .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub async fn get_github_token() -> Result<String, String> {
     let keyring = app.keyring();
-    keyring.get("sentra.github_token")
+    keyring.get("quetrex.github_token")
         .map_err(|_| "No GitHub token found".to_string())
 }
 ```
@@ -844,7 +844,7 @@ test('full PR review workflow', async () => {
   // Create test PR
   const pr = await createTestPR()
 
-  // Load in Sentra
+  // Load in Quetrex
   const prData = await invoke('github_get_pr', {
     owner: 'test',
     repo: 'test-repo',
@@ -883,7 +883,7 @@ test('review and merge PR from dashboard', async ({ page }) => {
   await page.goto('/')
 
   // Open project detail
-  await page.click('[data-testid="project-sentra"] [data-testid="view"]')
+  await page.click('[data-testid="project-quetrex"] [data-testid="view"]')
 
   // Go to Git tab
   await page.click('[data-testid="tab-git"]')

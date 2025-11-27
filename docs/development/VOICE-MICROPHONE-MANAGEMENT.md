@@ -82,7 +82,7 @@ session: {
 
 ### Deprecated Pattern 1: Manual Microphone Toggling
 
-Previously, Sentra attempted to manually toggle the microphone on every turn:
+Previously, Quetrex attempted to manually toggle the microphone on every turn:
 
 ```typescript
 // ❌ WRONG - Do not do this

@@ -1,16 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import type { AgentStreamLine } from '@/services/sentra-api';
+import type { AgentStreamLine } from '@/services/quetrex-api';
 
-// Mock web-based sentra-api wrapper
-vi.mock('@/services/sentra-api', () => ({
+// Mock web-based quetrex-api wrapper
+vi.mock('@/services/quetrex-api', () => ({
   startAgentStream: vi.fn(),
   stopAgentStream: vi.fn(),
   getAgentLogs: vi.fn(),
 }));
 
 import { useAgentStream } from '@/hooks/useAgentStream';
-import { startAgentStream, stopAgentStream, getAgentLogs } from '@/services/sentra-api';
+import { startAgentStream, stopAgentStream, getAgentLogs } from '@/services/quetrex-api';
 
 const mockStartAgentStream = vi.mocked(startAgentStream);
 const mockStopAgentStream = vi.mocked(stopAgentStream);

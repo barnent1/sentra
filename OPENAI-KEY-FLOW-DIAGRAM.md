@@ -173,7 +173,7 @@ settings table:
 
 ```typescript
 {
-  sentra_settings: {
+  quetrex_settings: {
     openaiApiKey: 'sk-...',
     // ... other settings
   }
@@ -273,7 +273,7 @@ import { queueVoiceNotification } from '@/lib/voice-notifications';
 // Anywhere in the app after VoiceInitializer runs:
 await queueVoiceNotification({
   text: 'Build completed successfully',
-  projectName: 'sentra',
+  projectName: 'quetrex',
   priority: 'info'
 });
 ```

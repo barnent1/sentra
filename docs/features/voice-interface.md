@@ -1,12 +1,12 @@
 # Voice Interface
 
-**How Sentra's voice conversations work**
+**How Quetrex's voice conversations work**
 
 ---
 
 ## Overview
 
-Sentra provides **two voice conversation implementations** for talking to the Architect AI:
+Quetrex provides **two voice conversation implementations** for talking to the Architect AI:
 
 1. **HTTP API** - Whisper STT + GPT-4 + TTS (reliable, works everywhere)
 2. **Realtime API** - WebSocket streaming (faster, better UX)
@@ -281,7 +281,7 @@ conversation.cleanup()
 
 **The Industry Standard Approach:**
 
-Sentra uses the same pattern as ChatGPT voice, Google Meet, and all modern WebRTC voice applications:
+Quetrex uses the same pattern as ChatGPT voice, Google Meet, and all modern WebRTC voice applications:
 
 **Always-On Microphone + Browser Echo Cancellation**
 - Microphone track remains enabled throughout the entire conversation
@@ -322,7 +322,7 @@ session: {
 ```
 
 **Deprecated Approach (Do Not Use):**
-Previously, Sentra tried manually toggling `track.enabled` on every turn (pause when AI speaks, resume when finished). This is NOT the industry standard and causes bugs. The codebase still contains deprecated `pauseRecording()` and `resumeRecording()` methods that should not be used.
+Previously, Quetrex tried manually toggling `track.enabled` on every turn (pause when AI speaks, resume when finished). This is NOT the industry standard and causes bugs. The codebase still contains deprecated `pauseRecording()` and `resumeRecording()` methods that should not be used.
 
 ---
 
@@ -399,7 +399,7 @@ curl https://api.openai.com/v1/models \
 **Realtime API connection fails:**
 ```bash
 # Check proxy is running
-lsof -i :9001  # Should show Sentra process
+lsof -i :9001  # Should show Quetrex process
 
 # Check API key in settings
 # Settings → OpenAI API Key
@@ -414,7 +414,7 @@ lsof -i :9001  # Should show Sentra process
 
 ### Overview
 
-Sentra uses **rodio** for cross-platform audio playback in the Rust (Tauri) backend. This ensures voice notifications work consistently on macOS, Windows, and Linux.
+Quetrex uses **rodio** for cross-platform audio playback in the Rust (Tauri) backend. This ensures voice notifications work consistently on macOS, Windows, and Linux.
 
 ### Implementation
 
@@ -571,7 +571,7 @@ source.start();
 
 ### Under Consideration
 
-- **Voice commands** - "Sentra, create a new spec"
+- **Voice commands** - "Quetrex, create a new spec"
 - **Voice authentication** - Speaker recognition
 - **Conversation branching** - Fork conversations
 - **Voice notes** - Record ideas without full conversation

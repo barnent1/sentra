@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { PrototypePanel } from '@/components/PrototypePanel'
-import type { Prototype } from '@/services/sentra-api'
-import * as sentraApi from '@/services/sentra-api'
+import type { Prototype } from '@/services/quetrex-api'
+import * as quetrexApi from '@/services/quetrex-api'
 
-// Mock the sentra-api module
-vi.mock('@/services/sentra-api', () => ({
+// Mock the quetrex-api module
+vi.mock('@/services/quetrex-api', () => ({
   getPrototypes: vi.fn(),
   iteratePrototype: vi.fn(),
 }))
@@ -17,11 +17,11 @@ describe('PrototypePanel', () => {
       projectId: 'project-1',
       v0ChatId: 'chat-1',
       v0DemoUrl: 'https://v0.dev/demo-1',
-      deploymentUrl: 'https://project-1-prototype.sentra.app',
+      deploymentUrl: 'https://project-1-prototype.quetrex.app',
       deploymentStatus: 'ready',
       title: 'Dashboard Redesign',
       description: 'Modern dashboard with mission control design',
-      specPath: '.sentra/specs/dashboard-spec.yml',
+      specPath: '.quetrex/specs/dashboard-spec.yml',
       files: null,
       version: 2,
       parentId: null,
@@ -33,11 +33,11 @@ describe('PrototypePanel', () => {
       projectId: 'project-1',
       v0ChatId: 'chat-2',
       v0DemoUrl: 'https://v0.dev/demo-2',
-      deploymentUrl: 'https://project-1-settings.sentra.app',
+      deploymentUrl: 'https://project-1-settings.quetrex.app',
       deploymentStatus: 'deploying',
       title: 'Settings Modal',
       description: 'User settings with dark theme',
-      specPath: '.sentra/specs/settings-spec.yml',
+      specPath: '.quetrex/specs/settings-spec.yml',
       files: null,
       version: 1,
       parentId: null,
@@ -49,11 +49,11 @@ describe('PrototypePanel', () => {
       projectId: 'project-1',
       v0ChatId: 'chat-3',
       v0DemoUrl: 'https://v0.dev/demo-3',
-      deploymentUrl: 'https://project-1-error.sentra.app',
+      deploymentUrl: 'https://project-1-error.quetrex.app',
       deploymentStatus: 'error',
       title: 'Login Form',
       description: 'Authentication flow',
-      specPath: '.sentra/specs/login-spec.yml',
+      specPath: '.quetrex/specs/login-spec.yml',
       files: null,
       version: 1,
       parentId: null,
@@ -71,7 +71,7 @@ describe('PrototypePanel', () => {
   describe('rendering', () => {
     it('should render empty state when no prototypes exist', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -84,7 +84,7 @@ describe('PrototypePanel', () => {
 
     it('should render loading state while fetching prototypes', () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockImplementation(() => new Promise(() => {}))
+      vi.mocked(quetrexApi.getPrototypes).mockImplementation(() => new Promise(() => {}))
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -95,7 +95,7 @@ describe('PrototypePanel', () => {
 
     it('should render list of prototypes', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue(mockPrototypes)
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue(mockPrototypes)
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -110,7 +110,7 @@ describe('PrototypePanel', () => {
 
     it('should render prototype descriptions', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue(mockPrototypes)
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue(mockPrototypes)
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -123,7 +123,7 @@ describe('PrototypePanel', () => {
 
     it('should render version numbers', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue(mockPrototypes)
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue(mockPrototypes)
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -143,7 +143,7 @@ describe('PrototypePanel', () => {
   describe('deployment status', () => {
     it('should show "Ready" badge for ready prototypes', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -159,7 +159,7 @@ describe('PrototypePanel', () => {
 
     it('should show "Deploying" badge for deploying prototypes', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[1]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[1]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -175,7 +175,7 @@ describe('PrototypePanel', () => {
 
     it('should show "Error" badge for failed prototypes', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[2]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[2]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -195,7 +195,7 @@ describe('PrototypePanel', () => {
         ...mockPrototypes[0],
         deploymentStatus: 'pending',
       }
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([pendingPrototype])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([pendingPrototype])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -212,7 +212,7 @@ describe('PrototypePanel', () => {
   describe('view prototype button', () => {
     it('should render View Prototype button for ready prototypes', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -228,7 +228,7 @@ describe('PrototypePanel', () => {
 
     it('should disable View Prototype button for deploying prototypes', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[1]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[1]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -242,7 +242,7 @@ describe('PrototypePanel', () => {
 
     it('should disable View Prototype button for error prototypes', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[2]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[2]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -256,7 +256,7 @@ describe('PrototypePanel', () => {
 
     it('should open prototype in new tab when clicked', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
       const mockWindowOpen = vi.spyOn(window, 'open').mockImplementation(() => null)
 
       // ACT
@@ -268,7 +268,7 @@ describe('PrototypePanel', () => {
       })
 
       // ASSERT
-      expect(mockWindowOpen).toHaveBeenCalledWith('https://project-1-prototype.sentra.app', '_blank', 'noopener,noreferrer')
+      expect(mockWindowOpen).toHaveBeenCalledWith('https://project-1-prototype.quetrex.app', '_blank', 'noopener,noreferrer')
 
       mockWindowOpen.mockRestore()
     })
@@ -277,7 +277,7 @@ describe('PrototypePanel', () => {
   describe('iterate button', () => {
     it('should render Iterate button for all prototypes', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -292,7 +292,7 @@ describe('PrototypePanel', () => {
 
     it('should open iterate modal when clicked', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -309,7 +309,7 @@ describe('PrototypePanel', () => {
 
     it('should render feedback textarea in modal', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -325,8 +325,8 @@ describe('PrototypePanel', () => {
 
     it('should submit iteration feedback', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
-      vi.mocked(sentraApi.iteratePrototype).mockResolvedValue(undefined)
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.iteratePrototype).mockResolvedValue(undefined)
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -343,14 +343,14 @@ describe('PrototypePanel', () => {
 
       // ASSERT
       await waitFor(() => {
-        expect(sentraApi.iteratePrototype).toHaveBeenCalledWith('proto-1', 'Move sidebar to left side')
+        expect(quetrexApi.iteratePrototype).toHaveBeenCalledWith('proto-1', 'Move sidebar to left side')
       })
     })
 
     it('should close modal after successful iteration', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
-      vi.mocked(sentraApi.iteratePrototype).mockResolvedValue(undefined)
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.iteratePrototype).mockResolvedValue(undefined)
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -373,7 +373,7 @@ describe('PrototypePanel', () => {
 
     it('should disable submit button when feedback is empty', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -389,7 +389,7 @@ describe('PrototypePanel', () => {
 
     it('should close modal when cancel button is clicked', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -417,7 +417,7 @@ describe('PrototypePanel', () => {
 
     it('should render when isOpen is true', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -428,7 +428,7 @@ describe('PrototypePanel', () => {
 
     it('should call onClose when close button is clicked', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -442,7 +442,7 @@ describe('PrototypePanel', () => {
 
     it('should call onClose when backdrop is clicked', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -456,7 +456,7 @@ describe('PrototypePanel', () => {
 
     it('should close when Escape key is pressed', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -471,7 +471,7 @@ describe('PrototypePanel', () => {
   describe('styling', () => {
     it('should use dark theme colors', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -485,7 +485,7 @@ describe('PrototypePanel', () => {
 
     it('should have proper border styling', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -502,7 +502,7 @@ describe('PrototypePanel', () => {
   describe('error handling', () => {
     it('should show error message when fetch fails', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockRejectedValue(new Error('Network error'))
+      vi.mocked(quetrexApi.getPrototypes).mockRejectedValue(new Error('Network error'))
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -515,8 +515,8 @@ describe('PrototypePanel', () => {
 
     it('should show error message when iteration fails', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
-      vi.mocked(sentraApi.iteratePrototype).mockRejectedValue(new Error('API error'))
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.iteratePrototype).mockRejectedValue(new Error('API error'))
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -541,7 +541,7 @@ describe('PrototypePanel', () => {
   describe('accessibility', () => {
     it('should have proper ARIA labels', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([mockPrototypes[0]])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -557,7 +557,7 @@ describe('PrototypePanel', () => {
 
     it('should have accessible close button', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue([])
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue([])
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)
@@ -571,7 +571,7 @@ describe('PrototypePanel', () => {
   describe('sorting', () => {
     it('should sort prototypes by creation date (newest first)', async () => {
       // ARRANGE
-      vi.mocked(sentraApi.getPrototypes).mockResolvedValue(mockPrototypes)
+      vi.mocked(quetrexApi.getPrototypes).mockResolvedValue(mockPrototypes)
 
       // ACT
       render(<PrototypePanel projectId="project-1" isOpen={true} onClose={mockOnClose} />)

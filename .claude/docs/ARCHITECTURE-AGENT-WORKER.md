@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-Sentra uses **Claude Code CLI** as the agent execution engine for GitHub issue automation, NOT direct Anthropic SDK calls. This document explains why this architectural decision was made and why it must not be reversed.
+Quetrex uses **Claude Code CLI** as the agent execution engine for GitHub issue automation, NOT direct Anthropic SDK calls. This document explains why this architectural decision was made and why it must not be reversed.
 
 ## The Decision
 
@@ -546,10 +546,10 @@ ONLY if ALL of the following are true:
 ## References
 
 - **Claude Code Documentation:** https://docs.claude.com/claude-code
-- **Agent Ecosystem:** `/Users/barnent1/Projects/sentra/.claude/agents/`
-- **Quality Hooks:** `/Users/barnent1/Projects/sentra/.claude/hooks/`
-- **Implementation:** `/Users/barnent1/Projects/sentra/.claude/scripts/ai-agent-worker.py`
-- **Project Context:** `/Users/barnent1/Projects/sentra/CLAUDE.md`
+- **Agent Ecosystem:** `/Users/barnent1/Projects/quetrex/.claude/agents/`
+- **Quality Hooks:** `/Users/barnent1/Projects/quetrex/.claude/hooks/`
+- **Implementation:** `/Users/barnent1/Projects/quetrex/.claude/scripts/ai-agent-worker.py`
+- **Project Context:** `/Users/barnent1/Projects/quetrex/CLAUDE.md`
 
 ---
 

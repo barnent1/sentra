@@ -12,7 +12,7 @@
 
 ## Context
 
-Sentra is a voice-first AI assistant web application built with Next.js 15 and deployed on Vercel. The project aims to use the latest technology stack and leverage all available Vercel features for optimal performance.
+Quetrex is a voice-first AI assistant web application built with Next.js 15 and deployed on Vercel. The project aims to use the latest technology stack and leverage all available Vercel features for optimal performance.
 
 ### Current State
 

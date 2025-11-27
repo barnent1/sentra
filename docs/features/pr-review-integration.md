@@ -2,13 +2,13 @@
 
 ## Overview
 
-The PR review modal now connects to GitHub's REST API through the Sentra backend, allowing users to review and merge pull requests directly from the application without opening GitHub in the browser.
+The PR review modal now connects to GitHub's REST API through the Quetrex backend, allowing users to review and merge pull requests directly from the application without opening GitHub in the browser.
 
 ## Architecture
 
 ```
 Frontend (PRReviewPanel)
-    ↓ API calls via sentra-api.ts
+    ↓ API calls via quetrex-api.ts
 Backend API (/api/github/*)
     ↓ Authenticated with user's GitHub token
 GitHub REST API
@@ -70,7 +70,7 @@ Error messages are user-friendly and actionable.
 
 ### Frontend Integration
 
-**File**: `src/services/sentra-api.ts`
+**File**: `src/services/quetrex-api.ts`
 
 Updated functions to call backend instead of returning mock data:
 - `getPullRequest()` - Calls `/api/github/pr/:owner/:repo/:number`
@@ -106,7 +106,7 @@ Users need a GitHub Personal Access Token with:
 2. Click "Generate new token (classic)"
 3. Select scopes: `repo`, `pull_request`
 4. Generate token and copy it
-5. In Sentra: Settings → GitHub Token → Paste token
+5. In Quetrex: Settings → GitHub Token → Paste token
 
 ### Security
 
@@ -265,7 +265,7 @@ Response: {
 - `backend/src/controllers/github.ts` - GitHub API controller
 - `backend/src/routes/github.ts` - GitHub API routes
 - `backend/src/server.ts` - Route registration
-- `src/services/sentra-api.ts` - Frontend API client
+- `src/services/quetrex-api.ts` - Frontend API client
 - `src/components/PRReviewPanel.tsx` - PR review UI
 - `src/db/schema.ts` - Database schema (githubToken field)
 - `src/services/encryption.ts` - Token encryption service

@@ -61,7 +61,7 @@ class MockDeploymentService {
   async deploy(files: CodeFile[], prototypeId: string): Promise<DeploymentResponse> {
     // Mock successful deployment
     return {
-      url: `https://prototypes.sentra.app/${prototypeId}`,
+      url: `https://prototypes.quetrex.app/${prototypeId}`,
       status: 'ready',
     };
   }
@@ -99,7 +99,7 @@ describe('Prototype Generation Workflow Integration', () => {
 
   beforeAll(async () => {
     // Initialize test database connection
-    const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/sentra_test';
+    const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/quetrex_test';
     const sql = postgres(databaseUrl);
     db = drizzle(sql, { schema });
 
@@ -107,7 +107,7 @@ describe('Prototype Generation Workflow Integration', () => {
     const [user] = await db
       .insert(users)
       .values({
-        email: 'test-prototype@sentra.app',
+        email: 'test-prototype@quetrex.app',
         password: 'hashed_password',
         name: 'Prototype Test User',
       })
@@ -238,7 +238,7 @@ describe('Prototype Generation Workflow Integration', () => {
       // ASSERT: Prototype created successfully
       expect(prototype).toBeDefined();
       expect(prototype.v0ChatId).toBe('chat-123');
-      expect(prototype.deploymentUrl).toContain('prototypes.sentra.app');
+      expect(prototype.deploymentUrl).toContain('prototypes.quetrex.app');
       expect(prototype.deploymentStatus).toBe('ready');
       expect(prototype.title).toBe('Dashboard');
       expect(prototype.files).toHaveLength(2);
@@ -382,7 +382,7 @@ describe('Prototype Generation Workflow Integration', () => {
           projectId: testProjectId,
           v0ChatId: 'chat-789',
           v0DemoUrl: 'https://v0.dev/chat/chat-789',
-          deploymentUrl: 'https://prototypes.sentra.app/proto-789',
+          deploymentUrl: 'https://prototypes.quetrex.app/proto-789',
           deploymentStatus: 'ready',
           title: 'Profile Page',
           description: 'User profile management',
@@ -463,7 +463,7 @@ describe('Prototype Generation Workflow Integration', () => {
           projectId: testProjectId,
           v0ChatId: 'chat-multi',
           v0DemoUrl: 'https://v0.dev/chat/chat-multi',
-          deploymentUrl: 'https://prototypes.sentra.app/proto-multi',
+          deploymentUrl: 'https://prototypes.quetrex.app/proto-multi',
           deploymentStatus: 'ready',
           title: 'Multi-Iteration Test',
           description: 'Testing multiple iterations',
@@ -537,7 +537,7 @@ describe('Prototype Generation Workflow Integration', () => {
 
     it('should preserve deployment URL across iterations', async () => {
       // ARRANGE: Prototype with specific URL
-      const originalUrl = 'https://prototypes.sentra.app/proto-preserve';
+      const originalUrl = 'https://prototypes.quetrex.app/proto-preserve';
 
       const [original] = await db
         .insert(prototypes)
@@ -750,7 +750,7 @@ describe('Prototype Generation Workflow Integration', () => {
         projectId: testProjectId,
         v0ChatId: 'chat-complete',
         v0DemoUrl: 'https://v0.dev/chat/chat-complete',
-        deploymentUrl: 'https://prototypes.sentra.app/proto-complete',
+        deploymentUrl: 'https://prototypes.quetrex.app/proto-complete',
         deploymentStatus: 'ready' as const,
         title: 'Complete Prototype',
         description: 'Prototype with all fields',
@@ -770,7 +770,7 @@ describe('Prototype Generation Workflow Integration', () => {
       expect(prototype.projectId).toBe(testProjectId);
       expect(prototype.v0ChatId).toBe('chat-complete');
       expect(prototype.v0DemoUrl).toBe('https://v0.dev/chat/chat-complete');
-      expect(prototype.deploymentUrl).toBe('https://prototypes.sentra.app/proto-complete');
+      expect(prototype.deploymentUrl).toBe('https://prototypes.quetrex.app/proto-complete');
       expect(prototype.deploymentStatus).toBe('ready');
       expect(prototype.title).toBe('Complete Prototype');
       expect(prototype.description).toBe('Prototype with all fields');
@@ -787,7 +787,7 @@ describe('Prototype Generation Workflow Integration', () => {
         {
           projectId: testProjectId,
           v0ChatId: 'chat-query-1',
-          deploymentUrl: 'https://prototypes.sentra.app/proto-query-1',
+          deploymentUrl: 'https://prototypes.quetrex.app/proto-query-1',
           deploymentStatus: 'ready' as const,
           title: 'Query Test 1',
           description: 'First prototype',
@@ -797,7 +797,7 @@ describe('Prototype Generation Workflow Integration', () => {
         {
           projectId: testProjectId,
           v0ChatId: 'chat-query-2',
-          deploymentUrl: 'https://prototypes.sentra.app/proto-query-2',
+          deploymentUrl: 'https://prototypes.quetrex.app/proto-query-2',
           deploymentStatus: 'ready' as const,
           title: 'Query Test 2',
           description: 'Second prototype',
@@ -830,7 +830,7 @@ describe('Prototype Generation Workflow Integration', () => {
       await db.insert(prototypes).values({
         projectId: testProjectId,
         v0ChatId: uniqueChatId,
-        deploymentUrl: 'https://prototypes.sentra.app/proto-unique',
+        deploymentUrl: 'https://prototypes.quetrex.app/proto-unique',
         deploymentStatus: 'ready',
         title: 'Unique Chat ID Test',
         description: 'Testing unique chat ID query',
@@ -857,7 +857,7 @@ describe('Prototype Generation Workflow Integration', () => {
         .values({
           projectId: testProjectId,
           v0ChatId: 'chat-status-update',
-          deploymentUrl: 'https://prototypes.sentra.app/proto-status',
+          deploymentUrl: 'https://prototypes.quetrex.app/proto-status',
           deploymentStatus: 'deploying',
           title: 'Status Update Test',
           description: 'Testing status updates',
@@ -888,7 +888,7 @@ describe('Prototype Generation Workflow Integration', () => {
         .values({
           projectId: testProjectId,
           v0ChatId: 'chat-delete-test',
-          deploymentUrl: 'https://prototypes.sentra.app/proto-delete',
+          deploymentUrl: 'https://prototypes.quetrex.app/proto-delete',
           deploymentStatus: 'ready',
           title: 'Delete Test',
           description: 'Testing deletion',
@@ -926,7 +926,7 @@ describe('Prototype Generation Workflow Integration', () => {
         .values({
           projectId: testProjectId,
           v0ChatId: 'chat-with-iterations',
-          deploymentUrl: 'https://prototypes.sentra.app/proto-iterations',
+          deploymentUrl: 'https://prototypes.quetrex.app/proto-iterations',
           deploymentStatus: 'ready',
           title: 'Prototype with Iterations',
           description: 'Testing iteration queries',

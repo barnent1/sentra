@@ -34,7 +34,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-[#0A0A0B] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="bg-[#18181B] border border-[#27272A] rounded-lg p-8">
-          <h1 className="text-2xl font-bold text-white mb-6">Sign In to Sentra</h1>
+          <h1 className="text-2xl font-bold text-white mb-6">Sign In to Quetrex</h1>
 
           {error && (
             <div

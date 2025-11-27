@@ -1,6 +1,6 @@
-# Supabase Setup Guide for Sentra
+# Supabase Setup Guide for Quetrex
 
-**The Sentra Standard Stack uses Supabase as the all-in-one backend platform.**
+**The Quetrex Standard Stack uses Supabase as the all-in-one backend platform.**
 
 This guide walks you through setting up Supabase for your project, from creating your first project to deploying to production.
 
@@ -541,7 +541,7 @@ ALTER PUBLICATION supabase_realtime ADD TABLE your_table;
 1. **Read Supabase Docs**: https://supabase.com/docs
 2. **Join Discord**: https://discord.supabase.com
 3. **Example Apps**: https://github.com/supabase/supabase/tree/master/examples
-4. **Sentra Templates**: Check `.sentra/templates/` for starter code
+4. **Quetrex Templates**: Check `.quetrex/templates/` for starter code
 
 ---
 

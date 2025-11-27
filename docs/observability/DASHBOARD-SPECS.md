@@ -28,7 +28,7 @@
 
 ### Purpose
 
-The Sentra Observability Dashboard provides real-time visibility into:
+The Quetrex Observability Dashboard provides real-time visibility into:
 - Voice architect session metrics
 - E2E test generation performance
 - Security event monitoring
@@ -79,7 +79,7 @@ Events → Redis (real-time) → Aggregator → PostgreSQL (historical)
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│ Sentra Observability                                    [Filter] │
+│ Quetrex Observability                                    [Filter] │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌────────────┐ │

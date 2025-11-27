@@ -10,7 +10,7 @@
 
 ## Overview
 
-The Sentra dashboard is the central hub for monitoring and managing AI-powered projects. It provides real-time visibility into agent activity, project status, and system health.
+The Quetrex dashboard is the central hub for monitoring and managing AI-powered projects. It provides real-time visibility into agent activity, project status, and system health.
 
 ---
 
@@ -45,8 +45,8 @@ pub async fn get_projects() -> Result<Vec<Project>, String> {
     // Returns hardcoded mock data
     Ok(vec![
         Project {
-            id: "sentra".to_string(),
-            name: "Sentra".to_string(),
+            id: "quetrex".to_string(),
+            name: "Quetrex".to_string(),
             status: "active".to_string(),
             // ... mock fields
         },
@@ -106,10 +106,10 @@ Transform from minimalistic single-project view to **mission control center** fo
 **Current (Phase 1):**
 ```
 ┌─────────────────────────────────────────┐
-│  Sentra Dashboard                       │
+│  Quetrex Dashboard                       │
 ├─────────────────────────────────────────┤
 │  Projects:                              │
-│  - Sentra (mock)                        │
+│  - Quetrex (mock)                        │
 │  - E-commerce (mock)                    │
 │  - Blog (mock)                          │
 │                                         │
@@ -124,11 +124,11 @@ Transform from minimalistic single-project view to **mission control center** fo
 **Planned (Mission Control):**
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  Sentra                      [Projects] [Analytics] [Costs] │
+│  Quetrex                      [Projects] [Analytics] [Costs] │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌─────────────────────┐  ┌─────────────────────┐          │
-│  │ ● Sentra            │  │ ● E-commerce        │  [+ New] │
+│  │ ● Quetrex            │  │ ● E-commerce        │  [+ New] │
 │  │                     │  │                     │          │
 │  │ Voice queue (65%)   │  │ Checkout flow (45%) │          │
 │  │ ████████░░░░        │  │ ██████░░░░░░        │          │
@@ -175,7 +175,7 @@ Transform from minimalistic single-project view to **mission control center** fo
 2. `mkdir my-project && cd my-project`
 3. `git init`
 4. `gh repo create`
-5. Manually configure Sentra
+5. Manually configure Quetrex
 6. Start voice conversation
 
 **Monitoring Progress:**
@@ -190,14 +190,14 @@ Transform from minimalistic single-project view to **mission control center** fo
 3. Navigates to PR
 4. Reviews diff
 5. Clicks "Approve and merge"
-6. Returns to Sentra
+6. Returns to Quetrex
 
-**Total Context Switches:** 5+ (Sentra → Terminal → GitHub → Browser → Sentra)
+**Total Context Switches:** 5+ (Quetrex → Terminal → GitHub → Browser → Quetrex)
 
 ### Planned Workflow (Mission Control)
 
 **Creating a Project:**
-1. User clicks [+ New Project] in Sentra
+1. User clicks [+ New Project] in Quetrex
 2. Enters name, selects template (Next.js, Python, etc.)
 3. Clicks [Create]
 4. Project appears in dashboard, ready to use
@@ -207,16 +207,16 @@ Transform from minimalistic single-project view to **mission control center** fo
 2. Sees all projects with real status indicators
 3. Clicks [View] on active project
 4. Sees real-time logs, progress breakdown, next steps
-5. Stays in Sentra
+5. Stays in Quetrex
 
 **Reviewing PRs:**
-1. Sentra voice: "PR ready for review in E-commerce"
+1. Quetrex voice: "PR ready for review in E-commerce"
 2. User clicks [Review & Approve] in dashboard
 3. Views diff inline
 4. Clicks [Approve & Merge]
-5. Stays in Sentra
+5. Stays in Quetrex
 
-**Total Context Switches:** 0 (Everything in Sentra)
+**Total Context Switches:** 0 (Everything in Quetrex)
 
 ---
 
@@ -364,7 +364,7 @@ Dashboard (shows fake projects)
 Frontend (React)
     ↓ invoke('get_projects')
 Rust Backend
-    ↓ scan filesystem for .sentra/ dirs
+    ↓ scan filesystem for .quetrex/ dirs
     ↓ read config.yml files
     ↓ poll GitHub Actions API
     ↓ aggregate data
@@ -482,7 +482,7 @@ test('calculates progress from checkpoints', () => {
 ```typescript
 // tests/integration/github-api.test.ts
 test('fetches real PR data from GitHub', async () => {
-  const pr = await githubApi.getPullRequest('sentra', 42)
+  const pr = await githubApi.getPullRequest('quetrex', 42)
 
   expect(pr.number).toBe(42)
   expect(pr.title).toBeDefined()
@@ -497,11 +497,11 @@ test('multi-project dashboard workflow', async ({ page }) => {
   await page.goto('/')
 
   // Should show project cards
-  await expect(page.getByTestId('project-card-sentra')).toBeVisible()
+  await expect(page.getByTestId('project-card-quetrex')).toBeVisible()
   await expect(page.getByTestId('project-card-ecommerce')).toBeVisible()
 
   // Click view on first project
-  await page.click('[data-testid="project-card-sentra"] [data-testid="view-button"]')
+  await page.click('[data-testid="project-card-quetrex"] [data-testid="view-button"]')
 
   // Detail panel should slide in
   await expect(page.getByRole('dialog')).toBeVisible()
@@ -531,7 +531,7 @@ test('review and merge PR in-app', async ({ page }) => {
   await page.goto('/')
 
   // Open project detail
-  await page.click('[data-testid="project-card-sentra"] [data-testid="view-button"]')
+  await page.click('[data-testid="project-card-quetrex"] [data-testid="view-button"]')
 
   // Go to Git tab
   await page.click('[data-testid="tab-git"]')
@@ -561,7 +561,7 @@ test('dashboard matches design', async ({ page }) => {
 test('dark theme colors correct', async ({ page }) => {
   await page.goto('/')
 
-  const card = page.getByTestId('project-card-sentra')
+  const card = page.getByTestId('project-card-quetrex')
   const bg = await card.evaluate(el => getComputedStyle(el).backgroundColor)
 
   expect(bg).toBe('rgb(24, 24, 27)') // #18181B

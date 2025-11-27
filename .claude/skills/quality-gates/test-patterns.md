@@ -1,6 +1,6 @@
 # Test Patterns
 
-TDD patterns, AAA structure, and coverage requirements for Sentra.
+TDD patterns, AAA structure, and coverage requirements for Quetrex.
 
 ## Test-Driven Development (TDD)
 

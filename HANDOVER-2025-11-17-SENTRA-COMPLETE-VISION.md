@@ -1,13 +1,13 @@
-# Sentra Complete Vision - Implementation Handover
+# Quetrex Complete Vision - Implementation Handover
 **Date:** 2025-11-17
 **Author:** Glen Barnhardt with Claude Code
-**Context:** 80k tokens used - Complete system design for Sentra as AI-Powered SaaS Factory
+**Context:** 80k tokens used - Complete system design for Quetrex as AI-Powered SaaS Factory
 
 ---
 
 ## Executive Summary
 
-Sentra has evolved from a voice-first AI assistant into **the world's first AI-Powered SaaS Factory**. This document captures the complete vision and architecture for building production SaaS applications with 65-70% autonomous development.
+Quetrex has evolved from a voice-first AI assistant into **the world's first AI-Powered SaaS Factory**. This document captures the complete vision and architecture for building production SaaS applications with 65-70% autonomous development.
 
 **Core Innovation:**
 - Human + AI Architect create comprehensive specs upfront (1-3 weeks)
@@ -21,9 +21,9 @@ Sentra has evolved from a voice-first AI assistant into **the world's first AI-P
 ## Vision Statement
 
 **From Glen:**
-> "I envision using platforms like Vercel V0, Figma to build the UI/UX upfront then tie that to our functionality design. With all of that done upfront, we just need to take the spec and break it up so that we can fire off multiple issues at once, each with their own team of agents to do the work. I only come into the loop at the beginning and for course corrections. Sentra is designed to take me away from that stress and out of the loop."
+> "I envision using platforms like Vercel V0, Figma to build the UI/UX upfront then tie that to our functionality design. With all of that done upfront, we just need to take the spec and break it up so that we can fire off multiple issues at once, each with their own team of agents to do the work. I only come into the loop at the beginning and for course corrections. Quetrex is designed to take me away from that stress and out of the loop."
 
-**Sentra's Promise:**
+**Quetrex's Promise:**
 - **Simple features:** 80-90% autonomous
 - **Major applications:** 65-70% autonomous
 - **Full rewrites:** 60-65% autonomous (with codebase analysis)
@@ -50,7 +50,7 @@ Sentra has evolved from a voice-first AI assistant into **the world's first AI-P
 2. **Meta-Orchestrator Agent** (breaks specs into parallelizable issues)
 3. **Dependency Tracking System** (prevents conflicts, sequences work)
 4. **V0 → Figma Automation** (export V0 designs to Figma)
-5. **Figma → Sentra Import** (pull designs into .sentra/specs/)
+5. **Figma → Quetrex Import** (pull designs into .quetrex/specs/)
 6. **Codebase Archaeologist Agent** (analyzes existing projects)
 7. **Dashboard Interface** (project progress visualization)
 
@@ -65,7 +65,7 @@ Multi-session architect that builds comprehensive SaaS specifications through vo
 
 **Memory System:**
 ```
-.sentra/architect-sessions/<project-name>/
+.quetrex/architect-sessions/<project-name>/
 ├── session-history.md          # Chronological conversation log
 ├── decisions.yml               # All architectural decisions
 ├── coverage-checklist.yml      # What's discussed, what's missing
@@ -102,7 +102,7 @@ For each screen, Architect captures:
 - Responsive breakpoints
 
 **Why This Matters:**
-Glen said: "It's so important that I don't have to keep going back and forth on how something should work. Sentra is designed to take me away from that stress."
+Glen said: "It's so important that I don't have to keep going back and forth on how something should work. Quetrex is designed to take me away from that stress."
 
 By documenting behavior upfront, test agents know EXACTLY what to test, implementation agents know EXACTLY what to build, and Glen never has to explain the same thing twice.
 
@@ -136,7 +136,7 @@ Automate export of Vercel V0 designs into Figma for design system management.
 
 **Option B: Figma REST API (Fully Automated)**
 ```python
-# .sentra/scripts/v0-to-figma.py
+# .quetrex/scripts/v0-to-figma.py
 def export_v0_to_figma(v0_url, figma_file_id):
     # 1. Fetch V0 design via API
     # 2. Convert to Figma format
@@ -154,22 +154,22 @@ def export_v0_to_figma(v0_url, figma_file_id):
 
 ---
 
-## Component 3: Figma → Sentra Import
+## Component 3: Figma → Quetrex Import
 
 ### Purpose
-Pull Figma designs into `.sentra/specs/` as structured YAML for agent consumption.
+Pull Figma designs into `.quetrex/specs/` as structured YAML for agent consumption.
 
 ### Implementation
 
 ```python
-# .sentra/scripts/figma-import.py
+# .quetrex/scripts/figma-import.py
 def import_figma_design(figma_url, architect_session_dir):
     # 1. Fetch from Figma API
     # 2. Parse screens and components
     # 3. Extract design tokens (colors, spacing, typography)
     # 4. Load architect's behavioral specs
     # 5. Merge visual + behavioral
-    # 6. Save to .sentra/specs/screens/*.yml
+    # 6. Save to .quetrex/specs/screens/*.yml
 ```
 
 ### Output Format
@@ -294,7 +294,7 @@ Any changes MUST maintain backwards compatibility!
 
 **Phase 7: Protection Rules Generation**
 ```yaml
-# .sentra/protection-rules.yml
+# .quetrex/protection-rules.yml
 
 protection_rules:
   - name: "No changes to payment logic without human approval"
@@ -341,7 +341,7 @@ docs/existing-codebase/
 ├── business-logic/
 │   ├── critical-paths.md
 │   └── payment-processing.md
-└── .sentra/
+└── .quetrex/
     ├── protection-rules.yml
     └── patterns.md
 ```
@@ -414,7 +414,7 @@ Glen's vision: "Fire off multiple issues at once, each with their own team of ag
 **Phase 3: Dependency Mapping**
 
 ```yaml
-# .sentra/dependency-graph.yml
+# .quetrex/dependency-graph.yml
 
 batch_1:
   name: "Foundation"
@@ -510,7 +510,7 @@ batch_3:
 **Phase 5: Progress Tracking**
 
 ```
-Sentra Project Dashboard
+Quetrex Project Dashboard
 =======================
 
 Project: Bookmark Manager SaaS
@@ -591,11 +591,11 @@ Serena MCP: Loaded only when skill invokes it
 → Leaves 199k for conversation
 ```
 
-### Recommended Skills for Sentra
+### Recommended Skills for Quetrex
 
-**1. sentra-architect**
+**1. quetrex-architect**
 - Ensures TDD, TypeScript strict, Next.js patterns
-- Reads CLAUDE.md and .sentra/memory/patterns.md
+- Reads CLAUDE.md and .quetrex/memory/patterns.md
 - Validates architectural compliance
 
 **2. semantic-code-hunter**
@@ -624,7 +624,7 @@ Serena MCP: Loaded only when skill invokes it
 - Input validation requirements
 
 **7. voice-system-expert**
-- Sentra-specific voice architecture
+- Quetrex-specific voice architecture
 - Always-on microphone + browser AEC
 - Critical decision from ADR-001
 
@@ -673,7 +673,7 @@ uvx --from git+https://github.com/oraios/serena serena project index
 
 **2. Install Serena MCP** (1 day)
 - Setup and configure
-- Pre-index Sentra codebase
+- Pre-index Quetrex codebase
 - Test semantic search
 
 **3. Build Codebase Archaeologist** (3-5 days)
@@ -681,7 +681,7 @@ uvx --from git+https://github.com/oraios/serena serena project index
 - API contract documentation
 - Pattern extraction
 - Protection rules generation
-- Test on Sentra itself
+- Test on Quetrex itself
 
 ### Phase 2: Architect System (Week 3-4)
 
@@ -692,7 +692,7 @@ uvx --from git+https://github.com/oraios/serena serena project index
 - Completeness prompting
 - Test with pilot project
 
-**5. Figma → Sentra Import** (3-5 days)
+**5. Figma → Quetrex Import** (3-5 days)
 - Figma API integration
 - Parse screens and components
 - Extract design tokens
@@ -869,7 +869,7 @@ uvx --from git+https://github.com/oraios/serena serena project index
 - Single issue at a time
 - No parallel execution
 
-### Sentra's Differentiation
+### Quetrex's Differentiation
 
 **Unique capabilities:**
 1. **Project-level orchestration** (Meta-Orchestrator)
@@ -883,7 +883,7 @@ uvx --from git+https://github.com/oraios/serena serena project index
 **Category creation:**
 - Cursor: "AI pair programmer"
 - Devin: "AI software engineer"
-- **Sentra: "AI-Powered SaaS Factory"**
+- **Quetrex: "AI-Powered SaaS Factory"**
 
 ---
 
@@ -950,9 +950,9 @@ uvx --from git+https://github.com/oraios/serena serena project index
 
 ### Short Term (Weeks 2-4)
 
-5. **Build Codebase Archaeologist** - Test on Sentra itself
+5. **Build Codebase Archaeologist** - Test on Quetrex itself
 6. **Build Voice Architect** - Multi-session spec builder
-7. **Figma integration** - Import designs to .sentra/specs/
+7. **Figma integration** - Import designs to .quetrex/specs/
 
 ### Medium Term (Weeks 5-8)
 
@@ -997,7 +997,7 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 
 ## Conclusion
 
-Sentra is positioned to revolutionize software development by automating 65-70% of SaaS application building while maintaining production-quality standards.
+Quetrex is positioned to revolutionize software development by automating 65-70% of SaaS application building while maintaining production-quality standards.
 
 **The complete workflow:**
 ```

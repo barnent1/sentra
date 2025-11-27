@@ -2,13 +2,13 @@
 
 ## Overview
 
-A comprehensive spec versioning system has been designed and implemented for Sentra, replacing the simple `pending-spec.md` approach with a robust, multi-version specification management system.
+A comprehensive spec versioning system has been designed and implemented for Quetrex, replacing the simple `pending-spec.md` approach with a robust, multi-version specification management system.
 
 ## What Was Implemented
 
 ### 1. Backend (Rust) ✅
 
-**New Module**: `/Users/barnent1/Projects/sentra/src-tauri/src/specs.rs`
+**New Module**: `/Users/barnent1/Projects/quetrex/src-tauri/src/specs.rs`
 
 **Commands**:
 - `save_spec` - Save new spec or create version
@@ -34,10 +34,10 @@ A comprehensive spec versioning system has been designed and implemented for Sen
 ### 2. Frontend (TypeScript/React) ✅
 
 **Updated Files**:
-- `/Users/barnent1/Projects/sentra/src/lib/tauri.ts` - Added spec versioning commands
-- `/Users/barnent1/Projects/sentra/src/components/SpecViewer.tsx` - Enhanced with versioning UI
-- `/Users/barnent1/Projects/sentra/src/components/ArchitectChat.tsx` - Uses new saveSpec
-- `/Users/barnent1/Projects/sentra/src-tauri/src/commands.rs` - Loads specs for projects
+- `/Users/barnent1/Projects/quetrex/src/lib/tauri.ts` - Added spec versioning commands
+- `/Users/barnent1/Projects/quetrex/src/components/SpecViewer.tsx` - Enhanced with versioning UI
+- `/Users/barnent1/Projects/quetrex/src/components/ArchitectChat.tsx` - Uses new saveSpec
+- `/Users/barnent1/Projects/quetrex/src-tauri/src/commands.rs` - Loads specs for projects
 
 **New Features in SpecViewer**:
 - Version dropdown selector
@@ -55,7 +55,7 @@ A comprehensive spec versioning system has been designed and implemented for Sen
 ### 3. Directory Structure
 
 ```
-.sentra/specs/
+.quetrex/specs/
   {project-slug}/
     {spec-slug}.spec.{YYYYMMDD}.md              # Initial version
     {spec-slug}.spec.{YYYYMMDD}.v2.md           # Same-day revision
@@ -66,7 +66,7 @@ A comprehensive spec versioning system has been designed and implemented for Sen
 
 **Example**:
 ```
-.sentra/specs/
+.quetrex/specs/
   tic-tac-toe/
     tic-tac-toe-application.spec.20251113.md
     tic-tac-toe-application.spec.20251113.v2.md
@@ -153,7 +153,7 @@ A comprehensive spec versioning system has been designed and implemented for Sen
 
 ### Unit Tests (To Be Implemented)
 
-Location: `/Users/barnent1/Projects/sentra/src-tauri/src/specs.rs`
+Location: `/Users/barnent1/Projects/quetrex/src-tauri/src/specs.rs`
 
 Tests needed:
 - ✅ Title extraction from markdown

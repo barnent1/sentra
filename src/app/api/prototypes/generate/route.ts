@@ -122,7 +122,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       designTokens: spec.design_tokens,
     });
 
-    // Deploy to Sentra-hosted environment
+    // Deploy to Quetrex-hosted environment
     const deploymentService = new PrototypeDeploymentService();
     const deployment = await deploymentService.deploy({
       projectName: project.name,

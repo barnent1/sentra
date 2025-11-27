@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document defines how Sentra's voice architect resumes multi-session conversations. The goal is to provide seamless continuity across sessions without re-asking questions, while giving users control over how much context they want to review.
+This document defines how Quetrex's voice architect resumes multi-session conversations. The goal is to provide seamless continuity across sessions without re-asking questions, while giving users control over how much context they want to review.
 
 ## Design Principles
 

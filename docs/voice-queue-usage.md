@@ -62,7 +62,7 @@ import { queueVoiceNotification } from '@/lib/voice-notifications';
 // Queue a notification with priority
 await queueVoiceNotification({
   text: 'Build completed successfully',
-  projectName: 'sentra',
+  projectName: 'quetrex',
   priority: 'info' // or 'warning' or 'error'
 });
 ```
@@ -80,14 +80,14 @@ import {
 } from '@/lib/voice-notifications';
 
 // Simple notifications
-await notifySuccess('sentra', 'Tests passed');
+await notifySuccess('quetrex', 'Tests passed');
 await notifyWarning('workcell', 'Low memory detected');
 await notifyError('aidio', 'Deployment failed');
 
 // Agent lifecycle notifications
-await notifyAgentStart('sentra', 'Implement voice queue');
-await notifyAgentCompletion('sentra', 'Implement voice queue');
-await notifyAgentFailure('sentra', 'Implement voice queue', 'Tests failed');
+await notifyAgentStart('quetrex', 'Implement voice queue');
+await notifyAgentCompletion('quetrex', 'Implement voice queue');
+await notifyAgentFailure('quetrex', 'Implement voice queue', 'Tests failed');
 ```
 
 ### 4. Mute/Unmute Projects
@@ -96,14 +96,14 @@ await notifyAgentFailure('sentra', 'Implement voice queue', 'Tests failed');
 import { setProjectMuted, isProjectMuted } from '@/lib/voice-notifications';
 
 // Mute a project (no voice notifications)
-setProjectMuted('sentra', true);
+setProjectMuted('quetrex', true);
 
 // Unmute a project
-setProjectMuted('sentra', false);
+setProjectMuted('quetrex', false);
 
 // Check mute status
-if (isProjectMuted('sentra')) {
-  console.log('Sentra is muted');
+if (isProjectMuted('quetrex')) {
+  console.log('Quetrex is muted');
 }
 ```
 
@@ -129,7 +129,7 @@ import { clearVoiceQueue, clearProjectNotifications } from '@/lib/voice-notifica
 clearVoiceQueue();
 
 // Clear notifications for a specific project
-clearProjectNotifications('sentra');
+clearProjectNotifications('quetrex');
 ```
 
 ### 7. Cleanup
@@ -165,13 +165,13 @@ This delay is in addition to the TTS playback time.
 The queue handles multiple projects simultaneously:
 
 ```typescript
-// These will be spoken in order, but sentra can be muted independently
-await notifySuccess('sentra', 'Build complete');
+// These will be spoken in order, but quetrex can be muted independently
+await notifySuccess('quetrex', 'Build complete');
 await notifySuccess('workcell', 'Deploy complete');
 await notifyError('aidio', 'Test failed'); // This will jump ahead (higher priority)
 
-// Mute sentra - its messages will be filtered out
-setProjectMuted('sentra', true);
+// Mute quetrex - its messages will be filtered out
+setProjectMuted('quetrex', true);
 ```
 
 ## Testing

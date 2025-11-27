@@ -1,4 +1,4 @@
-# Sentra Voice System Architecture
+# Quetrex Voice System Architecture
 
 **Document Version:** 1.0
 **Last Updated:** November 15, 2025
@@ -24,7 +24,7 @@
 
 ## Overview
 
-Sentra implements a sophisticated dual-approach voice system that enables natural conversations with AI. The system intelligently switches between two architectures based on platform capabilities:
+Quetrex implements a sophisticated dual-approach voice system that enables natural conversations with AI. The system intelligently switches between two architectures based on platform capabilities:
 
 - **Primary:** WebRTC with OpenAI Realtime API (low latency, 100-200ms)
 - **Fallback:** HTTP API with Whisper + GPT-4 + TTS (reliable, 3-5s latency)
@@ -50,7 +50,7 @@ Sentra implements a sophisticated dual-approach voice system that enables natura
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Sentra Voice System                      │
+│                     Quetrex Voice System                      │
 ├─────────────────────────────────────────────────────────────┤
 │                                                               │
 │  ┌──────────────────┐         ┌──────────────────┐          │
@@ -84,14 +84,14 @@ Sentra implements a sophisticated dual-approach voice system that enables natura
 
 ### Why Two Approaches?
 
-Sentra uses a dual-approach strategy to balance performance with reliability:
+Quetrex uses a dual-approach strategy to balance performance with reliability:
 
 1. **WebRTC (Primary)** - Best user experience when it works
 2. **HTTP API (Fallback)** - Guaranteed to work everywhere
 
 ### Selection Strategy
 
-Sentra uses the **WebRTC (Realtime) approach by default** for all browsers:
+Quetrex uses the **WebRTC (Realtime) approach by default** for all browsers:
 
 ```typescript
 // Primary: Use WebRTC for best performance
@@ -437,7 +437,7 @@ conversationHistory: Array<{ role: string; content: string }> = [];
 // Initialize with system prompt
 conversationHistory.push({
   role: 'system',
-  content: 'You are Sentra, an expert software architect...'
+  content: 'You are Quetrex, an expert software architect...'
 });
 
 // Add user message
@@ -1127,7 +1127,7 @@ sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
   "SELECT * FROM access WHERE service='kTCCServiceMicrophone';"
 ```
 
-Ensure Sentra/Tauri has microphone access.
+Ensure Quetrex/Tauri has microphone access.
 
 ---
 
@@ -1383,7 +1383,7 @@ Phase 4: Testing
 - Audio synchronization issues
 - Buffer underruns/overruns
 
-**Reference:** See `/Users/barnent1/Projects/sentra/HANDOVER-2025-11-14-AUDIOWORKLET.md`
+**Reference:** See `/Users/barnent1/Projects/quetrex/HANDOVER-2025-11-14-AUDIOWORKLET.md`
 
 ---
 
@@ -1569,7 +1569,7 @@ case 'conversation.item.input_audio_transcription.completed':
 
 2. **System Prompt:**
    ```typescript
-   const instructions = `Eres Sentra, un asistente de IA experto en arquitectura de software...`;
+   const instructions = `Eres Quetrex, un asistente de IA experto en arquitectura de software...`;
    ```
 
 3. **Voice Selection:**
@@ -1767,7 +1767,7 @@ fetch(url, {
 {
   "model": "gpt-4o",
   "messages": [
-    { "role": "system", "content": "You are Sentra..." },
+    { "role": "system", "content": "You are Quetrex..." },
     { "role": "user", "content": "Hello, how are you?" }
   ],
   "temperature": 0.8,

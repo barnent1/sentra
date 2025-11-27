@@ -1,10 +1,10 @@
 # Database Documentation
 
-This document describes the database architecture, setup, and usage for the Sentra project.
+This document describes the database architecture, setup, and usage for the Quetrex project.
 
 ## Overview
 
-Sentra uses **Prisma ORM** with:
+Quetrex uses **Prisma ORM** with:
 - **SQLite** for local development (fast, file-based)
 - **PostgreSQL** for production (scalable, cloud-ready)
 
@@ -257,14 +257,14 @@ beforeEach(async () => {
 
 1. **Create PostgreSQL database**:
    ```sql
-   CREATE DATABASE sentra;
-   CREATE USER sentra_user WITH PASSWORD 'secure_password';
-   GRANT ALL PRIVILEGES ON DATABASE sentra TO sentra_user;
+   CREATE DATABASE quetrex;
+   CREATE USER quetrex_user WITH PASSWORD 'secure_password';
+   GRANT ALL PRIVILEGES ON DATABASE quetrex TO quetrex_user;
    ```
 
 2. **Update environment variable**:
    ```bash
-   DATABASE_URL="postgresql://sentra_user:secure_password@localhost:5432/sentra"
+   DATABASE_URL="postgresql://quetrex_user:secure_password@localhost:5432/quetrex"
    ```
 
 3. **Run migrations**:

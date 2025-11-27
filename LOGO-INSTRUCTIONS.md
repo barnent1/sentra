@@ -1,4 +1,4 @@
-# Sentra Logo Setup
+# Quetrex Logo Setup
 
 ## Your Logo
 
@@ -8,14 +8,14 @@ The dashboard is ready to use your green beaker/flask icon!
 
 Save your logo image as:
 ```
-/Users/barnent1/Projects/claude-code-base/sentra/public/sentra-icon.png
+/Users/barnent1/Projects/claude-code-base/quetrex/public/quetrex-icon.png
 ```
 
 ## Recommended Specs
 
 - **Format:** PNG with transparency
 - **Size:** 512x512 or 1024x1024 pixels
-- **Name:** `sentra-icon.png` (exactly)
+- **Name:** `quetrex-icon.png` (exactly)
 
 ## What Happens
 

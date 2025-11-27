@@ -1,13 +1,13 @@
 # Multi-Session Architect Guide
 
-**Audience:** Developers using Sentra
+**Audience:** Developers using Quetrex
 **Last Updated:** 2025-11-23
 
 ---
 
 ## Overview
 
-Sentra's voice architect is designed for **multi-day, multi-week conversations** about complex software projects. Unlike traditional AI assistants that forget everything when you close the tab, Sentra's architect maintains perfect memory across sessions and picks up exactly where you left off.
+Quetrex's voice architect is designed for **multi-day, multi-week conversations** about complex software projects. Unlike traditional AI assistants that forget everything when you close the tab, Quetrex's architect maintains perfect memory across sessions and picks up exactly where you left off.
 
 ### Key Features
 
@@ -81,7 +81,7 @@ Every software project needs answers in 10 key areas. The architect systematical
 
 ### Step 1: Create Project
 
-1. Navigate to the Sentra dashboard
+1. Navigate to the Quetrex dashboard
 2. Click **"New Project"**
 3. Enter project details:
    - **Name:** e.g., "Bookmark Manager SaaS"
@@ -698,7 +698,7 @@ coverage:
 
 **Key Takeaways:**
 
-1. **Multi-Session by Design** - Sentra's architect is built for multi-day, multi-week conversations
+1. **Multi-Session by Design** - Quetrex's architect is built for multi-day, multi-week conversations
 2. **Perfect Memory** - Never re-asks questions, maintains full context
 3. **Objective Quality** - 90%+ confidence score = Fortune 500 spec quality
 4. **User Choice** - Control recap detail when resuming

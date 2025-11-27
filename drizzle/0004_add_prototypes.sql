@@ -1,7 +1,7 @@
 -- Migration: Add prototype generation tables
 -- Date: 2025-11-24
 -- Description: Enables v0 integration for prototype generation and iteration
--- Related: .sentra/DESIGN-GENERATION-SPEC.md
+-- Related: .quetrex/DESIGN-GENERATION-SPEC.md
 
 -- ============================================================================
 -- STEP 1: Create prototypes table
@@ -15,7 +15,7 @@ CREATE TABLE prototypes (
   v0_chat_id TEXT NOT NULL,
   v0_demo_url TEXT,
 
-  -- Sentra Hosting
+  -- Quetrex Hosting
   deployment_url TEXT NOT NULL,
   deployment_status TEXT NOT NULL CHECK (deployment_status IN ('pending', 'deploying', 'ready', 'error')),
 
@@ -73,7 +73,7 @@ COMMENT ON TABLE prototype_iterations IS 'Iteration history for prototype refine
 
 COMMENT ON COLUMN prototypes.v0_chat_id IS 'v0 chat ID for iteration API calls';
 COMMENT ON COLUMN prototypes.v0_demo_url IS 'Original v0-hosted demo URL';
-COMMENT ON COLUMN prototypes.deployment_url IS 'Sentra-hosted preview URL';
+COMMENT ON COLUMN prototypes.deployment_url IS 'Quetrex-hosted preview URL';
 COMMENT ON COLUMN prototypes.deployment_status IS 'Deployment status: pending, deploying, ready, error';
 COMMENT ON COLUMN prototypes.files IS 'JSON array of generated code files';
 COMMENT ON COLUMN prototypes.version IS 'Iteration version number (starts at 1)';

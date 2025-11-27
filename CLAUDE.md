@@ -1,12 +1,12 @@
-# Sentra Project Context
+# Quetrex Project Context
 
-This document is loaded into every Claude Code session. It provides essential context about the Sentra project to ensure consistent, high-quality development.
+This document is loaded into every Claude Code session. It provides essential context about the Quetrex project to ensure consistent, high-quality development.
 
 ---
 
 ## Table of Contents
 
-- [What is Sentra?](#what-is-sentra)
+- [What is Quetrex?](#what-is-quetrex)
 - [Architecture Overview](#architecture-overview)
   - [Technology Stack](#technology-stack)
   - [Security Architecture](#security-architecture)
@@ -27,9 +27,9 @@ This document is loaded into every Claude Code session. It provides essential co
 
 ---
 
-## What is Sentra?
+## What is Quetrex?
 
-Sentra is a **voice-first AI assistant web application** that provides:
+Quetrex is a **voice-first AI assistant web application** that provides:
 - **Modern web interface** using Next.js 15 with App Router
 - **Universal browser access** on any platform (macOS, Windows, Linux)
 - **Cloud backend** for synchronization and collaboration
@@ -73,7 +73,7 @@ Create the most natural way to interact with AI - through voice - while maintain
 **Infrastructure:** GitHub Actions (Phases 1-2), Custom runners with gVisor (Phase 3)
 
 **Approved Security Model (Glen Barnhardt, Nov 12, 2025):**
-Sentra implements a 3-phase security architecture for AI agent isolation:
+Quetrex implements a 3-phase security architecture for AI agent isolation:
 
 **Phase 1: Docker Containerization (THIS WEEK)**
 - AI agents run in isolated Docker containers on GitHub Actions
@@ -124,7 +124,7 @@ Sentra implements a 3-phase security architecture for AI agent isolation:
 ### Project Structure
 
 ```
-sentra/
+quetrex/
 ├── src/
 │   ├── app/              # Next.js App Router pages
 │   ├── components/       # React components
@@ -333,7 +333,7 @@ export function VoiceRecorder() {
 
 ## AI Agent Guidelines
 
-When working on Sentra with Claude Code agents:
+When working on Quetrex with Claude Code agents:
 
 ### DO:
 - **Write tests FIRST** (TDD approach)
@@ -371,7 +371,7 @@ When working on Sentra with Claude Code agents:
 
 ## Agent + Skill Architecture
 
-**Sentra uses a 2-layer knowledge system:**
+**Quetrex uses a 2-layer knowledge system:**
 
 ### Layer 1: Specialized Skills (10 skills, 51+ files, ~60,000 lines)
 
@@ -391,8 +391,8 @@ When working on Sentra with Claude Code agents:
 - **tdd-enforcer** - TDD workflow, AAA pattern, coverage requirements
 
 **Project-Specific Skills**:
-- **voice-system-expert** - Sentra voice architecture, echo cancellation, WebRTC
-- **sentra-architect** - Sentra-specific patterns and architecture decisions
+- **voice-system-expert** - Quetrex voice architecture, echo cancellation, WebRTC
+- **quetrex-architect** - Quetrex-specific patterns and architecture decisions
 - **semantic-code-hunter** - Serena MCP integration for semantic code search
 
 ### Layer 2: Specialized Agents (11 agents, ~7,000 lines)
@@ -499,7 +499,7 @@ The voice-architect agent helps create comprehensive SaaS specifications through
 - Creating comprehensive specifications that eliminate back-and-forth
 
 **How it works:**
-1. Voice Architect maintains session history in `.sentra/architect-sessions/<project>/`
+1. Voice Architect maintains session history in `.quetrex/architect-sessions/<project>/`
 2. Tracks 10 coverage areas: requirements, personas, database, API, UI, security, integrations, performance, deployment, testing
 3. Prompts for missing areas and ensures 90%+ completeness before marking ready
 4. Documents behavior (not just visuals) for every screen
@@ -507,7 +507,7 @@ The voice-architect agent helps create comprehensive SaaS specifications through
 
 **Session files created:**
 ```
-.sentra/architect-sessions/<project>/
+.quetrex/architect-sessions/<project>/
 ├── session-history.md          # Conversation log
 ├── decisions.yml               # Architectural decisions
 ├── coverage-checklist.yml      # What's discussed, what's missing
@@ -605,7 +605,7 @@ Required environment variables (create `.env` file in project root):
 
 ```bash
 # Database (PostgreSQL - edge-compatible with Drizzle)
-DATABASE_URL="postgresql://user:pass@localhost:5432/sentra"
+DATABASE_URL="postgresql://user:pass@localhost:5432/quetrex"
 # Vercel deployment: Uses @vercel/postgres automatically
 
 # OpenAI (optional for Phase 1)
@@ -620,7 +620,7 @@ DATABASE_URL="postgresql://user:pass@localhost:5432/sentra"
 
 ## Resources
 
-- **Repository**: https://github.com/barnent1/sentra
+- **Repository**: https://github.com/barnent1/quetrex
 - **Documentation**: `/docs` directory
 - **Dashboard Design**: `/docs/roadmap/dashboard-redesign.md`
 - **Observability Vision**: `/docs/roadmap/observability.md`
@@ -665,7 +665,7 @@ DATABASE_URL="postgresql://user:pass@localhost:5432/sentra"
 
 **ORM Decision:** Drizzle (not Prisma)
 
-Sentra uses Drizzle ORM to enable Vercel Edge Runtime capabilities:
+Quetrex uses Drizzle ORM to enable Vercel Edge Runtime capabilities:
 - **Vercel Edge Functions** - Ultra-low latency globally
 - **Next.js 15 Server Actions** - Full support without limitations
 - **Edge Runtime** - 0ms cold starts worldwide

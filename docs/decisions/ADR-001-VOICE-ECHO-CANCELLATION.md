@@ -12,7 +12,7 @@
 
 ## Context
 
-Sentra implements a voice-first AI assistant using OpenAI's Realtime API over WebRTC. During development, we encountered a critical challenge: how to prevent echo loops (the AI hearing its own voice through the user's microphone and responding to itself).
+Quetrex implements a voice-first AI assistant using OpenAI's Realtime API over WebRTC. During development, we encountered a critical challenge: how to prevent echo loops (the AI hearing its own voice through the user's microphone and responding to itself).
 
 ### The Problem Space
 
@@ -318,11 +318,11 @@ Trust the industry pattern. It works.
 
 ## Update: November 2025 - Web App Decision
 
-**Final Decision:** Convert Sentra to a pure web application
+**Final Decision:** Convert Quetrex to a pure web application
 
 **Context:** WKWebView on macOS cannot play WebRTC audio (Apple platform bug). All workarounds (AudioWorklet bypass, manual mic toggling) break echo cancellation. Voice is the core product feature.
 
-**Decision:** Deploy Sentra as a web application accessible via browser instead of desktop app.
+**Decision:** Deploy Quetrex as a web application accessible via browser instead of desktop app.
 
 **Reasoning:**
 1. **Browser echo cancellation works perfectly** - Chrome, Safari, Firefox, Edge all have excellent AEC

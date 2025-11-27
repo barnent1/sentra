@@ -153,7 +153,7 @@ describe('PrototypeDeploymentService', () => {
 
       // ASSERT: Verify Vercel deployment
       expect(result).toBeDefined();
-      expect(result.url).toContain('prototypes.sentra.app'); // Phase 2: Sentra URL
+      expect(result.url).toContain('prototypes.quetrex.app'); // Phase 2: Quetrex URL
       expect(result.status).toBe('ready');
       expect(result.deploymentId).toBeDefined();
       expect(mockFetch).toHaveBeenCalledWith(
@@ -222,7 +222,7 @@ describe('PrototypeDeploymentService', () => {
 
       // ASSERT
       expect(result.url).toContain('my-awesome-project');
-      expect(result.url).toContain('prototypes.sentra.app');
+      expect(result.url).toContain('prototypes.quetrex.app');
     });
 
     it('should throw DeploymentValidationError for empty project name', async () => {

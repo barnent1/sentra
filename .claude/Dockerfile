@@ -1,4 +1,4 @@
-# Sentra AI Agent - Secure Docker Container
+# Quetrex AI Agent - Secure Docker Container
 # Phase 1: Docker Containerization for GitHub Actions
 # Decision: ADR_0001_CONTAINER_SECURITY.md
 # Author: Glen Barnhardt (with Claude Code)
@@ -87,7 +87,7 @@ ENTRYPOINT ["python3.11"]
 CMD [".claude/scripts/ai-agent-worker.py"]
 
 # Metadata
-LABEL org.opencontainers.image.title="Sentra AI Agent"
+LABEL org.opencontainers.image.title="Quetrex AI Agent"
 LABEL org.opencontainers.image.description="Secure containerized AI agent for automated development tasks"
 LABEL org.opencontainers.image.authors="Glen Barnhardt"
 LABEL org.opencontainers.image.version="1.0.0-phase1"

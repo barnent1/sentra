@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Sentra will be documented in this file.
+All notable changes to Quetrex will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2025-11-13
 
 ### Added
-- Initial release of Sentra AI Agent Control Center
+- Initial release of Quetrex AI Agent Control Center
 - Native macOS desktop application built with Tauri 2.x
 - Next.js 15 frontend with App Router and React Server Components
 - Multi-project dashboard for managing AI-powered projects
@@ -56,7 +56,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **Release Notes**
 
-This is the initial development release of Sentra. The platform is under active development and may have breaking changes between versions.
+This is the initial development release of Quetrex. The platform is under active development and may have breaking changes between versions.
 
 For detailed release information and documentation, visit:
 - [Release Process](docs/RELEASE-PROCESS.md)

@@ -92,7 +92,7 @@ describe('Security Phase 2: Credential Proxy Integration', () => {
       const request: CredentialRequest = {
         service: 'github',
         operation: 'clone',
-        resource: 'github.com/barnent1/sentra',
+        resource: 'github.com/barnent1/quetrex',
         metadata: {
           issue_number: 123,
           branch: 'feature/test',
@@ -181,7 +181,7 @@ describe('Security Phase 2: Credential Proxy Integration', () => {
       const request: CredentialRequest = {
         service: 'github',
         operation: 'clone',
-        resource: 'github.com/barnent1/sentra',
+        resource: 'github.com/barnent1/quetrex',
       };
 
       // ACT: Mock credential request and logging
@@ -265,7 +265,7 @@ describe('Security Phase 2: Credential Proxy Integration', () => {
       const request: CredentialRequest = {
         service: 'github',
         operation: 'clone',
-        resource: 'github.com/barnent1/sentra',
+        resource: 'github.com/barnent1/quetrex',
       };
 
       // ACT: Create audit entry
@@ -390,7 +390,7 @@ describe('Security Phase 2: Credential Proxy Integration', () => {
       const request: CredentialRequest = {
         service: 'github',
         operation: 'clone',
-        resource: 'github.com/barnent1/sentra',
+        resource: 'github.com/barnent1/quetrex',
         metadata: {
           issue_number: 123,
           branch: 'feature/security-phase-2',

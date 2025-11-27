@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Settings as SettingsIcon, Volume2, Globe, CheckCircle, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getSettings, saveSettings, type Settings as SettingsType } from '@/lib/settings';
-import { speakNotification } from '@/services/sentra-api';
+import { speakNotification } from '@/services/quetrex-api';
 import '@/lib/i18n'; // Initialize i18n
 
 // Toast notification types
@@ -331,7 +331,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                   type="text"
                   value={settings.githubRepoName}
                   onChange={(e) => setSettings({ ...settings, githubRepoName: e.target.value })}
-                  placeholder="sentra"
+                  placeholder="quetrex"
                   className="w-full bg-slate-800 border border-violet-500/20 rounded-lg px-4 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-violet-500/50"
                 />
               </div>

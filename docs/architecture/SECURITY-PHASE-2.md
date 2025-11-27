@@ -11,7 +11,7 @@
 
 ## Executive Summary
 
-Phase 2 of Sentra's security architecture eliminates the **most critical security vulnerability** in the system: credential exposure to AI-generated code. By implementing a Unix socket-based credential proxy service, we prevent prompt injection attacks from stealing GitHub tokens and API keys.
+Phase 2 of Quetrex's security architecture eliminates the **most critical security vulnerability** in the system: credential exposure to AI-generated code. By implementing a Unix socket-based credential proxy service, we prevent prompt injection attacks from stealing GitHub tokens and API keys.
 
 ### Key Achievements
 
@@ -52,14 +52,14 @@ Phase 2 of Sentra's security architecture eliminates the **most critical securit
 
 ### The Problem
 
-After Phase 1 (Docker containerization), Sentra still has a CRITICAL security gap:
+After Phase 1 (Docker containerization), Quetrex still has a CRITICAL security gap:
 
 **Credentials are exposed in container environment variables.**
 
 ```yaml
 # CURRENT (Phase 1) - VULNERABLE
 container:
-  image: sentra-ai-agent:latest
+  image: quetrex-ai-agent:latest
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}        # ❌ EXPOSED
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }} # ❌ EXPOSED
@@ -80,7 +80,7 @@ container:
 ```yaml
 # PHASE 2 - SECURE
 container:
-  image: sentra-ai-agent:latest
+  image: quetrex-ai-agent:latest
   env: {}  # ✅ NO CREDENTIALS
   volumes:
     - /var/run/credential-proxy.sock:/var/run/credential-proxy.sock:ro
@@ -359,7 +359,7 @@ ls -la /var/run/credential-proxy.sock
 docker run --rm \
   --mount type=bind,source=/var/run/credential-proxy.sock,target=/var/run/credential-proxy.sock,readonly \
   # ... other options
-  sentra-ai-agent:latest
+  quetrex-ai-agent:latest
 ```
 
 **Mount type:** `bind` (bind mount, not volume)
@@ -392,7 +392,7 @@ docker run --rm \
 │     request = {                                              │
 │         "service": "github",                                 │
 │         "operation": "clone",                                │
-│         "resource": "github.com/barnent1/sentra",            │
+│         "resource": "github.com/barnent1/quetrex",            │
 │         "pid": os.getpid(),                                  │
 │         "timestamp": "2025-11-13T10:15:30Z"                  │
 │     }                                                        │
@@ -510,7 +510,7 @@ docker run --rm \
 │   "timestamp": "2025-11-13T10:15:30.123Z",                   │
 │   "service": "github",                                       │
 │   "operation": "clone",                                      │
-│   "resource": "github.com/barnent1/sentra",                  │
+│   "resource": "github.com/barnent1/quetrex",                  │
 │   "status": "GRANTED",                                       │
 │   "requester_pid": 42,                                       │
 │   "credential_format": "ghp_****" (first 4 chars only)       │
@@ -679,7 +679,7 @@ ALLOWED_RESOURCES = {
     "github": {
         "repository_patterns": [
             r"^github\.com/barnent1/.*",  # Our repos
-            r"^github\.com/sentra-ai/.*"   # Org repos
+            r"^github\.com/quetrex-ai/.*"   # Org repos
         ]
     }
 }
@@ -722,7 +722,7 @@ ALLOWED_RESOURCES = {
   "request_id": "req_abc123def456",
   "service": "github",
   "operation": "clone",
-  "resource": "github.com/barnent1/sentra",
+  "resource": "github.com/barnent1/quetrex",
   "status": "GRANTED",
   "requester": {
     "pid": 42,
@@ -819,7 +819,7 @@ ALLOWED_RESOURCES = {
   "request_id": "req_abc123",
   "service": "github",
   "operation": "clone",
-  "resource": "github.com/barnent1/sentra",
+  "resource": "github.com/barnent1/quetrex",
   "status": "GRANTED",
   "requester": {
     "pid": 42,
@@ -887,7 +887,7 @@ ALLOWED_RESOURCES = {
   "request_id": "req_ghi789",
   "service": "github",
   "operation": "delete_repo",
-  "resource": "github.com/barnent1/sentra",
+  "resource": "github.com/barnent1/quetrex",
   "status": "REJECTED",
   "requester": {
     "pid": 42,
@@ -957,7 +957,7 @@ cat /tmp/credential-audit.log | \
 {
   "service": "github",
   "operation": "clone",
-  "resource": "github.com/barnent1/sentra",
+  "resource": "github.com/barnent1/quetrex",
   "metadata": {
     "issue_number": 123,
     "branch": "feature/security-phase-2"
@@ -976,7 +976,7 @@ cat /tmp/credential-audit.log | \
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `resource` | string | Resource being accessed | `"github.com/barnent1/sentra"` |
+| `resource` | string | Resource being accessed | `"github.com/barnent1/quetrex"` |
 | `metadata` | object | Additional context (for audit, not validation) | `{"issue_number": 123}` |
 
 ---
@@ -1054,7 +1054,7 @@ cat /tmp/credential-audit.log | \
 {
   "service": "github",
   "operation": "clone",
-  "resource": "github.com/barnent1/sentra"
+  "resource": "github.com/barnent1/quetrex"
 }
 ```
 
@@ -1073,7 +1073,7 @@ cat /tmp/credential-audit.log | \
 
 **Container uses:**
 ```bash
-git clone https://x-access-token:ghp_vX2k9mP4nR7sQ1wL8jC3dF6hT5bN0yU@github.com/barnent1/sentra
+git clone https://x-access-token:ghp_vX2k9mP4nR7sQ1wL8jC3dF6hT5bN0yU@github.com/barnent1/quetrex
 ```
 
 ---
@@ -1758,7 +1758,7 @@ token = get_credential('github', 'clone')  # Logged & validated
       --memory=2g \
       --cpus=2 \
       -v ${{ github.workspace }}:/workspace:ro \
-      sentra-ai-agent:latest \
+      quetrex-ai-agent:latest \
       ${{ github.event.issue.number }}
 ```
 
@@ -1912,13 +1912,13 @@ gh run view $RUN_ID --log | grep "credential-proxy"
 # Check socket exists in container
 docker run --rm \
   --mount type=bind,source=/var/run/credential-proxy.sock,target=/var/run/credential-proxy.sock \
-  sentra-ai-agent:latest \
+  quetrex-ai-agent:latest \
   ls -la /var/run/credential-proxy.sock
 
 # Check socket permissions
 docker run --rm \
   --mount type=bind,source=/var/run/credential-proxy.sock,target=/var/run/credential-proxy.sock \
-  sentra-ai-agent:latest \
+  quetrex-ai-agent:latest \
   test -S /var/run/credential-proxy.sock && echo "Socket accessible"
 ```
 
@@ -1980,17 +1980,17 @@ gh run view $RUN_ID --log | grep "ERROR"
 
 ### Related Documents
 
-- **Security Architecture:** `/Users/barnent1/Projects/sentra/docs/architecture/SECURITY-ARCHITECTURE.md`
+- **Security Architecture:** `/Users/barnent1/Projects/quetrex/docs/architecture/SECURITY-ARCHITECTURE.md`
   - Overall security design (3 phases)
   - Threat model
   - Phase 1 and Phase 3 details
 
-- **Agent Architecture:** `/Users/barnent1/Projects/sentra/.claude/docs/ARCHITECTURE-AGENT-WORKER.md`
+- **Agent Architecture:** `/Users/barnent1/Projects/quetrex/.claude/docs/ARCHITECTURE-AGENT-WORKER.md`
   - Why we use Claude Code CLI
   - Agent execution design
   - Context on agent ecosystem
 
-- **Project Context:** `/Users/barnent1/Projects/sentra/CLAUDE.md`
+- **Project Context:** `/Users/barnent1/Projects/quetrex/CLAUDE.md`
   - Project overview
   - Development standards
   - Security model summary

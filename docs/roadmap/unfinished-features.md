@@ -8,7 +8,7 @@ Last Updated: 2025-11-13
 
 ## Overview
 
-Sentra is in **early implementation** phase. Many features are working, but several are incomplete or use mock data. This document tracks what's not finished and the plan to complete it.
+Quetrex is in **early implementation** phase. Many features are working, but several are incomplete or use mock data. This document tracks what's not finished and the plan to complete it.
 
 **Status Legend:**
 - 🚧 **In Progress** - Actively being worked on
@@ -64,7 +64,7 @@ Sentra is in **early implementation** phase. Many features are working, but seve
 3. **Project Creation UI**
    - [+ New Project] button
    - Template selection (Next.js, Python FastAPI, React Native, Blank)
-   - Auto-initialization (Git, GitHub, Sentra tracking)
+   - Auto-initialization (Git, GitHub, Quetrex tracking)
    - No terminal needed
 
 4. **Voice Queue System**
@@ -80,7 +80,7 @@ Sentra is in **early implementation** phase. Many features are working, but seve
    - Progress breakdown with checkpoints
 
 6. **In-App PR Review**
-   - View PRs without leaving Sentra
+   - View PRs without leaving Quetrex
    - Inline diff viewer with syntax highlighting
    - File tree navigation
    - Approve/merge with one click
@@ -145,15 +145,15 @@ Sentra is in **early implementation** phase. Many features are working, but seve
 ### Current State: File-Based Storage
 
 **What We Have:**
-- Specs stored in `.sentra/specs/` as markdown files
+- Specs stored in `.quetrex/specs/` as markdown files
 - Settings stored in Tauri app data
 - No persistent database
 - No cloud sync
 
 **Files:**
-- `.sentra/specs/` - Spec files (versioned)
-- `.sentra/memory/` - Project context
-- `.sentra/config.yml` - Configuration
+- `.quetrex/specs/` - Spec files (versioned)
+- `.quetrex/memory/` - Project context
+- `.quetrex/config.yml` - Configuration
 
 **Why File-Based:**
 Simpler for Phase 1. No server setup needed. Easy to version control.
@@ -245,7 +245,7 @@ model Agent {
 ### Current State: Full Window App
 
 **What We Have:**
-- Full Sentra app window
+- Full Quetrex app window
 - Standard macOS window controls
 - Dock icon
 
@@ -260,7 +260,7 @@ model Agent {
 **Phase 1 (Month 2):**
 
 **Features:**
-- Menu bar icon (Sentra logo)
+- Menu bar icon (Quetrex logo)
 - Quick actions:
   - "Chat with Architect" (opens voice modal)
   - "View recent specs"
@@ -554,7 +554,7 @@ const secret = OTPAuth.Secret.generate()
 
 // Generate QR code
 const totp = new OTPAuth.TOTP({
-  issuer: 'Sentra',
+  issuer: 'Quetrex',
   label: user.email,
   secret: secret,
 })

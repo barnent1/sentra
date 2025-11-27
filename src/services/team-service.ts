@@ -63,7 +63,7 @@ export class TeamService {
   private sql: ReturnType<typeof postgres>;
 
   private constructor() {
-    const databaseUrl = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/sentra_test';
+    const databaseUrl = process.env.DATABASE_URL || 'postgresql://test:test@localhost:5432/quetrex_test';
     this.sql = postgres(databaseUrl, { max: 10 });
     this.db = drizzle(this.sql);
   }

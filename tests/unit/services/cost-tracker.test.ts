@@ -41,7 +41,7 @@ describe('CostTracker', () => {
             timestamp: new Date('2025-11-13T10:00:00Z'),
             provider: 'openai' as const,
             model: 'gpt-4o',
-            projectId: 'sentra',
+            projectId: 'quetrex',
             inputTokens: 1000,
             outputTokens: 500,
             cost: 0.045,
@@ -61,7 +61,7 @@ describe('CostTracker', () => {
     it('should track GPT-4 chat completion call', () => {
       const call = tracker.trackOpenAICall({
         model: 'gpt-4o',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         inputTokens: 1000,
         outputTokens: 500,
       });
@@ -105,7 +105,7 @@ describe('CostTracker', () => {
       // Whisper pricing: $0.006 per minute
       const call = tracker.trackOpenAICall({
         model: 'whisper-1',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         audioSeconds: 90, // 1.5 minutes
       });
 
@@ -119,7 +119,7 @@ describe('CostTracker', () => {
       // TTS pricing: $0.015 per 1M characters
       const call = tracker.trackOpenAICall({
         model: 'tts-1',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         characters: 50000, // 50K characters
       });
 
@@ -131,7 +131,7 @@ describe('CostTracker', () => {
       // TTS-HD pricing: $0.030 per 1M characters
       const call = tracker.trackOpenAICall({
         model: 'tts-1-hd',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         characters: 100000,
       });
 
@@ -165,7 +165,7 @@ describe('CostTracker', () => {
     it('should track Claude Sonnet call', () => {
       const call = tracker.trackAnthropicCall({
         model: 'claude-sonnet-4-5',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         inputTokens: 2000,
         outputTokens: 1000,
       });
@@ -231,14 +231,14 @@ describe('CostTracker', () => {
       // Add sample data
       tracker.trackOpenAICall({
         model: 'gpt-4o',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         inputTokens: 1000,
         outputTokens: 500,
       });
 
       tracker.trackOpenAICall({
         model: 'whisper-1',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         audioSeconds: 60,
       });
 
@@ -285,9 +285,9 @@ describe('CostTracker', () => {
     it('should break down costs by project', () => {
       const summary = tracker.getCostSummary();
 
-      expect(summary.byProject.sentra).toBeDefined();
+      expect(summary.byProject.quetrex).toBeDefined();
       expect(summary.byProject.blog).toBeDefined();
-      expect(summary.byProject.sentra.calls).toBe(2);
+      expect(summary.byProject.quetrex.calls).toBe(2);
       expect(summary.byProject.blog.calls).toBe(1);
     });
 
@@ -303,14 +303,14 @@ describe('CostTracker', () => {
     beforeEach(() => {
       tracker.trackOpenAICall({
         model: 'gpt-4o',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         inputTokens: 1000,
         outputTokens: 500,
       });
 
       tracker.trackOpenAICall({
         model: 'whisper-1',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         audioSeconds: 60,
       });
 
@@ -323,10 +323,10 @@ describe('CostTracker', () => {
     });
 
     it('should return costs for specific project', () => {
-      const sentraCosts = tracker.getProjectCosts('sentra');
+      const quetrexCosts = tracker.getProjectCosts('quetrex');
 
-      expect(sentraCosts.totalCost).toBeGreaterThan(0);
-      expect(sentraCosts.totalCalls).toBe(2);
+      expect(quetrexCosts.totalCost).toBeGreaterThan(0);
+      expect(quetrexCosts.totalCalls).toBe(2);
     });
 
     it('should only include calls from specified project', () => {
@@ -359,7 +359,7 @@ describe('CostTracker', () => {
           timestamp: now,
           provider: 'openai',
           model: 'gpt-4o',
-          projectId: 'sentra',
+          projectId: 'quetrex',
           inputTokens: 1000,
           outputTokens: 500,
           cost: 0.01,
@@ -369,7 +369,7 @@ describe('CostTracker', () => {
           timestamp: yesterday,
           provider: 'openai',
           model: 'gpt-4o',
-          projectId: 'sentra',
+          projectId: 'quetrex',
           inputTokens: 1000,
           outputTokens: 500,
           cost: 0.01,
@@ -426,7 +426,7 @@ describe('CostTracker', () => {
           timestamp: new Date('2025-11-13T10:00:00Z'),
           provider: 'openai',
           model: 'gpt-4o',
-          projectId: 'sentra',
+          projectId: 'quetrex',
           inputTokens: 1000,
           outputTokens: 500,
           cost: 0.01,
@@ -436,7 +436,7 @@ describe('CostTracker', () => {
           timestamp: new Date('2025-11-13T14:00:00Z'),
           provider: 'openai',
           model: 'gpt-4o',
-          projectId: 'sentra',
+          projectId: 'quetrex',
           inputTokens: 1000,
           outputTokens: 500,
           cost: 0.01,
@@ -528,7 +528,7 @@ describe('CostTracker', () => {
     it('should export calls to JSON format', () => {
       tracker.trackOpenAICall({
         model: 'gpt-4o',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         inputTokens: 1000,
         outputTokens: 500,
       });
@@ -549,7 +549,7 @@ describe('CostTracker', () => {
             timestamp: new Date('2025-11-13T10:00:00Z'),
             provider: 'openai' as const,
             model: 'gpt-4o',
-            projectId: 'sentra',
+            projectId: 'quetrex',
             inputTokens: 1000,
             outputTokens: 500,
             cost: 0.01,
@@ -573,7 +573,7 @@ describe('CostTracker', () => {
           timestamp: originalTimestamp,
           provider: 'openai',
           model: 'gpt-4o',
-          projectId: 'sentra',
+          projectId: 'quetrex',
           inputTokens: 1000,
           outputTokens: 500,
           cost: 0.01,
@@ -594,7 +594,7 @@ describe('CostTracker', () => {
       // Add various calls with different costs
       tracker.trackOpenAICall({
         model: 'gpt-4o',
-        projectId: 'sentra',
+        projectId: 'quetrex',
         inputTokens: 10000, // Expensive
         outputTokens: 5000,
       });

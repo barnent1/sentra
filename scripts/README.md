@@ -1,6 +1,6 @@
-# Sentra Scripts
+# Quetrex Scripts
 
-Automation scripts for development, building, and releasing Sentra.
+Automation scripts for development, building, and releasing Quetrex.
 
 Created by Glen Barnhardt with help from Claude Code
 
@@ -91,7 +91,7 @@ Next steps:
      git push origin v1.0.1
 
   4. Monitor the release workflow:
-     https://github.com/barnent1/sentra/actions
+     https://github.com/barnent1/quetrex/actions
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
@@ -243,7 +243,7 @@ git push origin main
 git push origin v$(jq -r .version package.json)
 
 # 4. Monitor
-open https://github.com/barnent1/sentra/actions
+open https://github.com/barnent1/quetrex/actions
 ```
 
 ---

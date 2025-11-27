@@ -1,6 +1,6 @@
-# Sentra Documentation
+# Quetrex Documentation
 
-**Complete guide to Sentra - Voice-First AI Control Center**
+**Complete guide to Quetrex - Voice-First AI Control Center**
 
 Last Updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
@@ -22,11 +22,11 @@ Last Updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
 ## Quick Navigation
 
-### New to Sentra? Start Here
+### New to Quetrex? Start Here
 
-1. **[Installation Guide](getting-started/installation.md)** - Get Sentra running in 10 minutes
+1. **[Installation Guide](getting-started/installation.md)** - Get Quetrex running in 10 minutes
 2. **[Main README](../README.md)** - Project overview, vision, and quick start
-3. **[Feature Overview](#features)** - What Sentra can do
+3. **[Feature Overview](#features)** - What Quetrex can do
 
 ### Developers? Go Here
 
@@ -35,7 +35,7 @@ Last Updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 3. **[Contributing Guide](../CONTRIBUTING.md)** - Standards and best practices
 4. **[Architecture Overview](#architecture)** - System design and patterns
 
-### Deploying Sentra?
+### Deploying Quetrex?
 
 1. **[Deployment Guide](DEPLOYMENT.md)** - Production setup and configuration
 2. **[Security Architecture](architecture/SECURITY-ARCHITECTURE.md)** - 3-phase security model
@@ -49,7 +49,7 @@ Last Updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
 | Guide | Description | Time | Audience |
 |-------|-------------|------|----------|
-| [Installation Guide](getting-started/installation.md) | Install dependencies and run Sentra | 10 min | Everyone |
+| [Installation Guide](getting-started/installation.md) | Install dependencies and run Quetrex | 10 min | Everyone |
 
 ### Prerequisites
 
@@ -63,8 +63,8 @@ Last Updated: 2025-11-13 by Glen Barnhardt with help from Claude Code
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/barnent1/sentra.git
-cd sentra
+git clone https://github.com/barnent1/quetrex.git
+cd quetrex
 
 # 2. Install dependencies
 npm install
@@ -79,7 +79,7 @@ cp .env.example .env.local
 npm run tauri:dev
 ```
 
-**First time using Sentra?** See [Installation Guide](getting-started/installation.md) for detailed instructions.
+**First time using Quetrex?** See [Installation Guide](getting-started/installation.md) for detailed instructions.
 
 ---
 
@@ -132,7 +132,7 @@ npm run tauri:dev
 ### Project Structure
 
 ```
-sentra/
+quetrex/
 ├── src/                      # Next.js frontend
 │   ├── app/                  # App Router pages
 │   ├── components/           # React components
@@ -158,7 +158,7 @@ sentra/
 │   │   └── ai-agent-worker.py # Agent implementation worker
 │   └── settings.json         # Agent configuration
 │
-├── .sentra/                  # Project data
+├── .quetrex/                  # Project data
 │   ├── specs/                # Versioned specifications
 │   ├── memory/               # Project context
 │   └── config.yml            # Automation settings
@@ -206,7 +206,7 @@ sentra/
 
 #### 1. Voice-First Interface
 
-Talk to Sentra's Architect AI using natural language:
+Talk to Quetrex's Architect AI using natural language:
 - **HTTP API** (3-5s latency) - Simple, reliable, works everywhere
 - **Realtime API** (1-2s latency) - Fast, streaming, better UX
 - **Auto-silence detection** - No need to press stop
@@ -308,7 +308,7 @@ See [Contributing Guide](../CONTRIBUTING.md) for complete standards.
 
 ### Overview
 
-Sentra uses **Vitest** for unit/integration tests and **Playwright** for E2E tests.
+Quetrex uses **Vitest** for unit/integration tests and **Playwright** for E2E tests.
 
 ### Quick Start
 
@@ -470,14 +470,14 @@ We welcome contributions! Here's how to get started:
    - [Main README](../README.md) - Project overview
 
 2. **Find Work**
-   - Check [GitHub Issues](https://github.com/barnent1/sentra/issues)
+   - Check [GitHub Issues](https://github.com/barnent1/quetrex/issues)
    - Look for `good first issue` label
    - Review [Roadmap](roadmap/) for planned features
 
 3. **Set Up Environment**
    ```bash
-   git clone https://github.com/yourusername/sentra.git
-   cd sentra
+   git clone https://github.com/yourusername/quetrex.git
+   cd quetrex
    npm install
    npm run tauri:dev
    ```
@@ -505,14 +505,14 @@ See [Contributing Guide](../CONTRIBUTING.md) for complete guidelines.
 
 ### General
 
-**Q: What is Sentra?**
-A: Sentra is a voice-first AI control center that lets you talk to your codebase and watch AI agents implement features while you review in-app.
+**Q: What is Quetrex?**
+A: Quetrex is a voice-first AI control center that lets you talk to your codebase and watch AI agents implement features while you review in-app.
 
 **Q: Why "voice-first"?**
-A: Talking is faster than typing. Sentra makes AI coding feel like having a conversation with a senior developer.
+A: Talking is faster than typing. Quetrex makes AI coding feel like having a conversation with a senior developer.
 
 **Q: How is this different from ChatGPT/Claude?**
-A: Sentra integrates directly with your codebase, creates GitHub issues, runs agents in isolation, and handles the entire implementation workflow - all without leaving the app.
+A: Quetrex integrates directly with your codebase, creates GitHub issues, runs agents in isolation, and handles the entire implementation workflow - all without leaving the app.
 
 ### Technical
 
@@ -526,12 +526,12 @@ A: Simpler for Phase 1, easy to version control, transparent, no server dependen
 A: Phase 1 (current): 60-70% risk reduction via Docker. Phase 2 (weeks 2-4): Additional 30% via credential proxy. Phase 3 (Q1 2026): Remaining 15% via gVisor.
 
 **Q: Can I use this in production?**
-A: Sentra itself is early-stage (use at your own risk). But the code Sentra generates? Absolutely - just review it carefully like any PR.
+A: Quetrex itself is early-stage (use at your own risk). But the code Quetrex generates? Absolutely - just review it carefully like any PR.
 
 ### Support
 
 **Q: Where do I get help?**
-A: Check [docs/](.), search [GitHub Issues](https://github.com/barnent1/sentra/issues), or open a new issue.
+A: Check [docs/](.), search [GitHub Issues](https://github.com/barnent1/quetrex/issues), or open a new issue.
 
 **Q: How do I report bugs?**
 A: Open GitHub issue with `bug` label. Include steps to reproduce, environment details, and logs.
@@ -554,9 +554,9 @@ A: Check [Roadmap](roadmap/) first, then open GitHub issue with `enhancement` la
 
 ### Community
 
-- **[GitHub Repository](https://github.com/barnent1/sentra)** - Source code
-- **[GitHub Issues](https://github.com/barnent1/sentra/issues)** - Bugs and features
-- **[GitHub Discussions](https://github.com/barnent1/sentra/discussions)** - Q&A and ideas
+- **[GitHub Repository](https://github.com/barnent1/quetrex)** - Source code
+- **[GitHub Issues](https://github.com/barnent1/quetrex/issues)** - Bugs and features
+- **[GitHub Discussions](https://github.com/barnent1/quetrex/discussions)** - Q&A and ideas
 
 ---
 
@@ -571,7 +571,7 @@ A: Check [Roadmap](roadmap/) first, then open GitHub issue with `enhancement` la
 
 ---
 
-**Questions?** Check the documentation above or open a [GitHub Issue](https://github.com/barnent1/sentra/issues).
+**Questions?** Check the documentation above or open a [GitHub Issue](https://github.com/barnent1/quetrex/issues).
 
 **Want to contribute?** Read [CONTRIBUTING.md](../CONTRIBUTING.md) and start building!
 

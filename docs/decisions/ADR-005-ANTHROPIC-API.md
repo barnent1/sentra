@@ -12,11 +12,11 @@
 
 ## Context
 
-Sentra's E2E test generation system uses a hybrid approach: templates handle 70% of common patterns, while LLM generation handles the remaining 30% of complex test scenarios (see [ADR-004](./ADR-004-E2E-TEST-GENERATION.md)).
+Quetrex's E2E test generation system uses a hybrid approach: templates handle 70% of common patterns, while LLM generation handles the remaining 30% of complex test scenarios (see [ADR-004](./ADR-004-E2E-TEST-GENERATION.md)).
 
 For LLM-generated tests, we need to choose which AI model to use. The LLM must:
 1. Generate valid Playwright test code from specifications
-2. Follow Sentra's testing conventions (AAA pattern, data-testid selectors)
+2. Follow Quetrex's testing conventions (AAA pattern, data-testid selectors)
 3. Handle complex edge cases and conditional logic
 4. Produce code that passes validation (TypeScript + ESLint) on first attempt
 5. Operate cost-effectively for 30% of test suite (≈60 tests per project)
@@ -245,14 +245,14 @@ For LLM-generated tests, we need to choose which AI model to use. The LLM must:
 ### Prompt Template
 
 ```typescript
-const SYSTEM_PROMPT = `You are an expert Playwright test generator for Sentra.
+const SYSTEM_PROMPT = `You are an expert Playwright test generator for Quetrex.
 
 You generate E2E tests that:
 1. Follow AAA pattern (Arrange, Act, Assert)
 2. Use data-testid selectors when available
 3. Include proper waitForTimeout for animations
 4. Handle edge cases (empty states, loading, errors)
-5. Match Sentra's code style and conventions
+5. Match Quetrex's code style and conventions
 
 Generate ONLY the test code, no explanations.`
 

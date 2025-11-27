@@ -14,7 +14,7 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { ProjectDetailPanel } from "@/components/ProjectDetailPanel";
 import { NewProjectModal } from "@/components/NewProjectModal";
 import { UserMenu } from "@/components/UserMenu";
-import { createGithubIssue, approveSpecVersion, setProjectMuted, type SpecInfo, type Project } from "@/services/sentra-api";
+import { createGithubIssue, approveSpecVersion, setProjectMuted, type SpecInfo, type Project } from "@/services/quetrex-api";
 import "@/lib/i18n"; // Initialize i18n
 
 export default function Home() {
@@ -41,7 +41,7 @@ export default function Home() {
 
     if (pendingSpec) {
       try {
-        const { listSpecs, getSpec } = await import('@/services/sentra-api');
+        const { listSpecs, getSpec } = await import('@/services/quetrex-api');
 
         // Get the full spec content and metadata
         const { content, info } = await getSpec(
@@ -142,7 +142,7 @@ export default function Home() {
       console.log(`[Reject] Spec title: ${selectedSpec.specInfo.title}`);
 
       // Delete the spec (or specific version)
-      const { deleteSpec } = await import('@/services/sentra-api');
+      const { deleteSpec } = await import('@/services/quetrex-api');
       const versionFile = selectedSpec.specInfo.filePath.split('/').pop() || '';
 
       console.log(`[Reject] Deleting spec version: ${versionFile}`);
@@ -232,8 +232,8 @@ export default function Home() {
             {/* Logo */}
             <div className="w-16 h-16 flex items-center justify-center">
               <Image
-                src="/sentra-logo.png"
-                alt="Sentra"
+                src="/quetrex-logo.png"
+                alt="Quetrex"
                 width={64}
                 height={64}
                 priority
@@ -359,10 +359,10 @@ export default function Home() {
       </div>
 
       {/* Active Agents */}
-      <div className="sentra-card mb-8">
+      <div className="quetrex-card mb-8">
         <h2 className="text-xl font-semibold mb-4">{t('dashboard.activeAgentsSection.title')}</h2>
         {agents.length === 0 ? (
-          <div className="sentra-glass p-8 rounded-lg text-center">
+          <div className="quetrex-glass p-8 rounded-lg text-center">
             <p className="text-muted-foreground">{t('dashboard.activeAgentsSection.noAgents')}</p>
             <p className="text-sm text-muted-foreground mt-2">
               {t('dashboard.activeAgentsSection.noAgentsSubtext')}
@@ -371,7 +371,7 @@ export default function Home() {
         ) : (
           <div className="space-y-3">
             {agents.map((agent) => (
-              <div key={agent.id} className="sentra-glass p-4 rounded-lg">
+              <div key={agent.id} className="quetrex-glass p-4 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
@@ -382,7 +382,7 @@ export default function Home() {
                       <p className="text-sm text-muted-foreground">{agent.title}</p>
                     </div>
                   </div>
-                  <span className="text-xs px-2 py-1 rounded sentra-status-running">
+                  <span className="text-xs px-2 py-1 rounded quetrex-status-running">
                     {agent.status}
                   </span>
                 </div>

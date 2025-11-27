@@ -1,9 +1,9 @@
-# Sentra Assets
+# Quetrex Assets
 
 ## Logo
 
-Place your Sentra logo (green beaker/flask with "S") as:
-- `sentra-icon.png` - Main logo (512x512 or 1024x1024 recommended)
+Place your Quetrex logo (green beaker/flask with "S") as:
+- `quetrex-icon.png` - Main logo (512x512 or 1024x1024 recommended)
 
 The app will automatically use it in the header.
 

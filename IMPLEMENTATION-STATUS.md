@@ -1,4 +1,4 @@
-# Sentra Implementation Status
+# Quetrex Implementation Status
 
 **Version:** 2.0
 **Last Updated:** 2025-01-12
@@ -8,22 +8,22 @@
 
 ## Architecture Overview
 
-Sentra uses a **hybrid deployment model:**
+Quetrex uses a **hybrid deployment model:**
 - **Native apps** (Mac, Windows, Linux) - Tauri + Next.js
 - **Cloud web app** - Next.js + Node.js API
 - **Shared codebase** - Same frontend works in both modes
 
-See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-architecture.md)
+See: [Cloud Architecture Documentation](../docs/architecture/quetrex-cloud-architecture.md)
 
 ---
 
 ## Documentation
 
 📚 **Key Documents:**
-- [Cloud Architecture](../docs/architecture/sentra-cloud-architecture.md) - Complete system design with Mermaid diagrams
-- [Implementation Plan](../docs/SENTRA-IMPLEMENTATION-PLAN.md) - Detailed task breakdown (4 phases, 20+ tasks)
+- [Cloud Architecture](../docs/architecture/quetrex-cloud-architecture.md) - Complete system design with Mermaid diagrams
+- [Implementation Plan](../docs/QUETREX-IMPLEMENTATION-PLAN.md) - Detailed task breakdown (4 phases, 20+ tasks)
 - [ADR 0001](../docs/adr/0001-hybrid-deployment-model.md) - Hybrid deployment decision
-- [GitHub Issue Template](../.github/ISSUE_TEMPLATE/sentra-task.md) - Template for creating tasks
+- [GitHub Issue Template](../.github/ISSUE_TEMPLATE/quetrex-task.md) - Template for creating tasks
 
 ---
 
@@ -43,7 +43,7 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 - Task 1.1: SpecViewer component ❌
 - Task 1.2: Project card badge ❌
 - Task 1.3: Approve/reject handlers ❌
-- Task 1.4: Change storage to `.sentra/specs/` ❌
+- Task 1.4: Change storage to `.quetrex/specs/` ❌
 - Task 1.5: Create GitHub issue from spec ❌
 - Task 1.6: End-to-end testing ❌
 
@@ -77,7 +77,7 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 - ✅ Conversation text collection in ref (fixed state timing issue)
 
 #### 2. Spec Generation
-- ✅ Voice conversation with Sentra (OpenAI Realtime API)
+- ✅ Voice conversation with Quetrex (OpenAI Realtime API)
 - ✅ Spec creation via Claude Sonnet/Opus (Anthropic API)
 - ✅ Handoff only triggers on explicit user confirmation:
   - "No" (in response to "Anything else?")
@@ -100,7 +100,7 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 - ✅ Added `savePendingSpec()` function
 - ✅ Added `approveSpec()` function
 - ✅ Added `rejectSpec()` function
-- ✅ Handoff handler saves spec to `.sentra/specs/pending-spec.md`
+- ✅ Handoff handler saves spec to `.quetrex/specs/pending-spec.md`
 
 ### In Progress 🚧
 
@@ -118,7 +118,7 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
    - Scrollable content area
    - Approve button (green)
    - Reject button (red)
-   - On reject: allow reopening conversation with Sentra
+   - On reject: allow reopening conversation with Quetrex
 
 2. **Update Project Card** (`src/app/page.tsx` or wherever project cards are)
    - Show "View Spec" badge/button when project.pendingSpec exists
@@ -142,25 +142,25 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 - `src/app/page.tsx` - Main dashboard (TODO: add View Spec button)
 
 **Spec Storage Location:**
-- **Pending specs:** `<project>/.sentra/specs/pending-spec.md`
-- **Approved specs:** `<project>/.sentra/specs/approved-spec.md`
-- **Archive:** `<project>/.sentra/specs/archive/YYYY-MM-DD-HH-MM.md`
+- **Pending specs:** `<project>/.quetrex/specs/pending-spec.md`
+- **Approved specs:** `<project>/.quetrex/specs/approved-spec.md`
+- **Archive:** `<project>/.quetrex/specs/archive/YYYY-MM-DD-HH-MM.md`
 
 ### Technical Notes
 
 - **Who creates the spec?** Claude (Anthropic), NOT OpenAI
 - **OpenAI's role:** Voice conversation only (Realtime API)
 - **Claude's role:** Creates technical specification
-- **Echo prevention:** 1000ms delay before resuming recording after Sentra speaks
+- **Echo prevention:** 1000ms delay before resuming recording after Quetrex speaks
 - **State management:** Using refs for conversation text to avoid React timing issues
 
 ### Current Workflow
 
-1. ✅ User opens voice dialog → Sentra greets
-2. ✅ User describes features → Sentra listens and asks clarifying questions
-3. ✅ User confirms done → Sentra triggers handoff
+1. ✅ User opens voice dialog → Quetrex greets
+2. ✅ User describes features → Quetrex listens and asks clarifying questions
+3. ✅ User confirms done → Quetrex triggers handoff
 4. ✅ Claude creates spec
-5. ✅ Spec saved to `.sentra/specs/pending-spec.md`
+5. ✅ Spec saved to `.quetrex/specs/pending-spec.md`
 6. ✅ Dialog closes
 7. ❌ **MISSING:** User sees "View Spec" on project card
 8. ❌ **MISSING:** User clicks to view formatted markdown
@@ -185,20 +185,20 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 
 ---
 
-## Using Sentra to Build Sentra 🐕
+## Using Quetrex to Build Quetrex 🐕
 
 **Meta Strategy:** Dogfooding from day one!
 
 1. ✅ Created detailed implementation plan
 2. ⏳ Create GitHub issues for each task (in progress)
-3. ⏳ Use Sentra voice to create specs
-4. ⏳ Approve specs via Sentra UI (once built!)
+3. ⏳ Use Quetrex voice to create specs
+4. ⏳ Approve specs via Quetrex UI (once built!)
 5. ⏳ Let agents implement tasks
 6. ⏳ Review PRs and iterate
 
 **Current Limitation:**
 - Phase 1 tasks need manual implementation (chicken-egg problem)
-- Once Phase 1 complete → use Sentra to build Phase 2+
+- Once Phase 1 complete → use Quetrex to build Phase 2+
 
 ---
 
@@ -208,12 +208,12 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 - [ ] Create issue for Task 1.1 (SpecViewer)
 - [ ] Create issue for Task 1.2 (Project card badge)
 - [ ] Create issue for Task 1.3 (Approve/reject handlers)
-- [ ] Create issue for Task 1.4 (Change to `.sentra/specs/`)
+- [ ] Create issue for Task 1.4 (Change to `.quetrex/specs/`)
 - [ ] Create issue for Task 1.5 (GitHub issue creation)
 - [ ] Create issue for Task 1.6 (E2E testing)
 
 ### 2. Start with Task 1.1 (Manual Implementation)
-**Why manual?** Need working UI before we can use Sentra to build Sentra!
+**Why manual?** Need working UI before we can use Quetrex to build Quetrex!
 
 **Steps:**
 1. Install `react-markdown` and `remark-gfm`
@@ -224,7 +224,7 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 
 ### 3. Test the Workflow
 - Voice → Spec → Approve → GitHub Issue
-- If working → create issue for Task 1.2 using Sentra voice!
+- If working → create issue for Task 1.2 using Quetrex voice!
 
 ---
 
@@ -236,7 +236,7 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 **Risk:** Agent breaks existing code
 **Solution:** Pre-commit hooks catch build failures (from Phase I)
 
-**Risk:** Sentra not good enough to build itself yet
+**Risk:** Quetrex not good enough to build itself yet
 **Solution:** Start manual, transition to agents gradually
 
 ---
@@ -247,11 +247,11 @@ See: [Cloud Architecture Documentation](../docs/architecture/sentra-cloud-archit
 **Approved By:** Glen Barnhardt
 **Status:** Approved - Implementation Starting This Week
 
-Based on comprehensive research into Claude Code for Web's architecture, Sentra will implement a 3-phase containerization and security approach for its AI agent system.
+Based on comprehensive research into Claude Code for Web's architecture, Quetrex will implement a 3-phase containerization and security approach for its AI agent system.
 
 ### Context
 
-Sentra's GitHub Actions-based AI agents currently have critical security gaps compared to Claude Code for Web:
+Quetrex's GitHub Actions-based AI agents currently have critical security gaps compared to Claude Code for Web:
 - No filesystem isolation
 - No network isolation
 - Credentials in environment variables
@@ -358,7 +358,7 @@ Sentra's GitHub Actions-based AI agents currently have critical security gaps co
 
 - [ ] Voice → Spec → Approve → GitHub Issue (full workflow)
 - [ ] 10 test runs with 90%+ success rate
-- [ ] Specs stored in `.sentra/specs/` directory
+- [ ] Specs stored in `.quetrex/specs/` directory
 - [ ] Native app works on Mac (Windows/Linux later)
-- [ ] Ready to use Sentra to build remaining phases
+- [ ] Ready to use Quetrex to build remaining phases
 - [ ] Docker containerization deployed (Phase 1 security)

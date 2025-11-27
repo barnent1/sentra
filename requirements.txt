@@ -1,14 +1,14 @@
-# Sentra AI-Powered SaaS Factory - Python Dependencies
+# Quetrex AI-Powered SaaS Factory - Python Dependencies
 #
-# These dependencies are used by Sentra automation scripts:
-# - .sentra/scripts/init-project.py
-# - .sentra/scripts/init-existing-project.py
-# - .sentra/scripts/auto-refactor.py
-# - .sentra/scripts/dashboard-generator.py
-# - .sentra/scripts/metrics-collector.py
+# These dependencies are used by Quetrex automation scripts:
+# - .quetrex/scripts/init-project.py
+# - .quetrex/scripts/init-existing-project.py
+# - .quetrex/scripts/auto-refactor.py
+# - .quetrex/scripts/dashboard-generator.py
+# - .quetrex/scripts/metrics-collector.py
 #
 # Install with: pip install -r requirements.txt
-# Or via setup script: ./scripts/setup-sentra.sh
+# Or via setup script: ./scripts/setup-quetrex.sh
 
 # HTTP requests (for API calls)
 requests>=2.31.0

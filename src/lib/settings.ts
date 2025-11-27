@@ -1,5 +1,5 @@
 /**
- * Database-backed settings system for Sentra web app
+ * Database-backed settings system for Quetrex web app
  * Uses authenticated API endpoints with encrypted storage
  */
 

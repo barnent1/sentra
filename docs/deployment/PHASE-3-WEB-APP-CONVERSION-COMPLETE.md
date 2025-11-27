@@ -8,7 +8,7 @@
 
 ## Overview
 
-Phase 3 of the Sentra project is now complete. The application has been successfully converted from a Tauri desktop application to a modern web application built with Next.js 15, enabling universal cross-platform access via any web browser.
+Phase 3 of the Quetrex project is now complete. The application has been successfully converted from a Tauri desktop application to a modern web application built with Next.js 15, enabling universal cross-platform access via any web browser.
 
 ---
 
@@ -22,12 +22,12 @@ Phase 3 of the Sentra project is now complete. The application has been successf
 - Changed introduction from "desktop application" to "web application"
 - Updated Prerequisites section to remove macOS-specific requirements
 - Updated Quick Start section with live demo link and web deployment instructions
-- Changed Vision section from "today, Sentra is a macOS app" to "today, Sentra is a web application"
+- Changed Vision section from "today, Quetrex is a macOS app" to "today, Quetrex is a web application"
 - Updated Phase 2 & 3 planned features (removed cross-platform desktop, added enhanced web features)
 
 **Key Additions:**
 ```bash
-**Live Demo:** https://sentra.vercel.app
+**Live Demo:** https://quetrex.vercel.app
 
 ### Web Deployment
 Deploy to Vercel (Recommended):
@@ -39,7 +39,7 @@ See Web Deployment Guide for Netlify, Railway, or custom server deployments.
 
 ### 2. CLAUDE.md Updates
 
-**Section 1: What is Sentra?**
+**Section 1: What is Quetrex?**
 - Changed from "platform that combines Native desktop apps" to "web application that provides"
 - Removed "Tauri 2.x" references
 - Added "Universal browser access" and "Perfect voice support"
@@ -81,7 +81,7 @@ See Web Deployment Guide for Netlify, Railway, or custom server deployments.
 
 4. **Selection Logic** (Line 92-101)
    - Simplified from complex conditional logic checking for WKWebView
-   - Now states: "Sentra uses the WebRTC (Realtime) approach by default for all browsers"
+   - Now states: "Quetrex uses the WebRTC (Realtime) approach by default for all browsers"
    - Removed `isWKWebViewWithAudioLimitations()` check
 
 5. **Comparison Matrix** (Line 103-119)
@@ -114,17 +114,17 @@ See Web Deployment Guide for Netlify, Railway, or custom server deployments.
 
 ### Files Updated
 
-1. `/Users/barnent1/Projects/sentra/README.md`
+1. `/Users/barnent1/Projects/quetrex/README.md`
    - Badge removed
    - Installation instructions simplified
    - Phase/roadmap updates
 
-2. `/Users/barnent1/Projects/sentra/CLAUDE.md`
+2. `/Users/barnent1/Projects/quetrex/CLAUDE.md`
    - Technology stack updated
    - Project structure simplified
    - Gotchas section rewritten
 
-3. `/Users/barnent1/Projects/sentra/docs/architecture/VOICE-SYSTEM.md`
+3. `/Users/barnent1/Projects/quetrex/docs/architecture/VOICE-SYSTEM.md`
    - Technology stack cleaned
    - Component locations simplified
    - WKWebView section deleted entirely
@@ -134,9 +134,9 @@ See Web Deployment Guide for Netlify, Railway, or custom server deployments.
 
 The following documentation files reference Tauri but are archived and intentionally preserved for historical context:
 
-- `/Users/barnent1/Projects/sentra/docs/archive/tauri/README.md`
-- `/Users/barnent1/Projects/sentra/docs/development/HANDOVER-WEB-APP-CONVERSION.md`
-- `/Users/barnent1/Projects/sentra/docs/development/abandoned-approaches/HANDOVER-2025-11-14-AUDIOWORKLET.md`
+- `/Users/barnent1/Projects/quetrex/docs/archive/tauri/README.md`
+- `/Users/barnent1/Projects/quetrex/docs/development/HANDOVER-WEB-APP-CONVERSION.md`
+- `/Users/barnent1/Projects/quetrex/docs/development/abandoned-approaches/HANDOVER-2025-11-14-AUDIOWORKLET.md`
 
 These are kept as historical records but are not referenced in active documentation.
 
@@ -146,7 +146,7 @@ These are kept as historical records but are not referenced in active documentat
 
 ### Web Deployment Documentation
 
-The file `/Users/barnent1/Projects/sentra/docs/deployment/WEB-DEPLOYMENT.md` was already prepared and includes:
+The file `/Users/barnent1/Projects/quetrex/docs/deployment/WEB-DEPLOYMENT.md` was already prepared and includes:
 
 1. **Vercel Deployment** (Recommended)
    - Step-by-step instructions
@@ -233,7 +233,7 @@ The file `/Users/barnent1/Projects/sentra/docs/deployment/WEB-DEPLOYMENT.md` was
 - [x] WKWebView audio limitations section removed
 
 ### Live Demo
-- [x] Live demo URL: https://sentra.vercel.app in README
+- [x] Live demo URL: https://quetrex.vercel.app in README
 - [x] Quick Start links to web deployment guide
 
 ---
@@ -241,7 +241,7 @@ The file `/Users/barnent1/Projects/sentra/docs/deployment/WEB-DEPLOYMENT.md` was
 ## Impact Summary
 
 ### Positive Changes
-1. **Unified Platform**: Sentra now runs on any device with a modern web browser (macOS, Windows, Linux, tablets, phones)
+1. **Unified Platform**: Quetrex now runs on any device with a modern web browser (macOS, Windows, Linux, tablets, phones)
 2. **No Installation Required**: Users can visit the URL and start using immediately
 3. **Easier Updates**: Deploy once, everyone gets the update automatically
 4. **Perfect Voice**: Echo cancellation works reliably across all platforms
@@ -259,7 +259,7 @@ The file `/Users/barnent1/Projects/sentra/docs/deployment/WEB-DEPLOYMENT.md` was
 ## Next Steps
 
 ### Immediate (This Week)
-- [ ] Deploy to production: https://sentra.app (currently staging at vercel.app)
+- [ ] Deploy to production: https://quetrex.app (currently staging at vercel.app)
 - [ ] Test voice functionality across browsers (Chrome, Safari, Firefox, Edge)
 - [ ] Verify PWA installation works on iOS/Android
 - [ ] Set up monitoring (Vercel Analytics, error tracking)
@@ -287,7 +287,7 @@ The file `/Users/barnent1/Projects/sentra/docs/deployment/WEB-DEPLOYMENT.md` was
 ## Files Modified
 
 ### Documentation Files
-1. `/Users/barnent1/Projects/sentra/README.md`
+1. `/Users/barnent1/Projects/quetrex/README.md`
    - Live demo link added
    - Quick start simplified
    - Deployment section added
@@ -295,14 +295,14 @@ The file `/Users/barnent1/Projects/sentra/docs/deployment/WEB-DEPLOYMENT.md` was
    - Vision section rewritten
    - Installation requirements simplified
 
-2. `/Users/barnent1/Projects/sentra/CLAUDE.md`
-   - What is Sentra section updated
+2. `/Users/barnent1/Projects/quetrex/CLAUDE.md`
+   - What is Quetrex section updated
    - Technology Stack section cleaned
    - Project Structure simplified
    - Known Gotchas rewritten
    - Common Commands simplified
 
-3. `/Users/barnent1/Projects/sentra/docs/architecture/VOICE-SYSTEM.md`
+3. `/Users/barnent1/Projects/quetrex/docs/architecture/VOICE-SYSTEM.md`
    - Technology Stack section cleaned
    - Component Locations simplified
    - Table of Contents updated
@@ -313,21 +313,21 @@ The file `/Users/barnent1/Projects/sentra/docs/deployment/WEB-DEPLOYMENT.md` was
    - WKWebView Audio Limitations section deleted (entire section, ~130 lines)
 
 ### Deployment Files (Already in place)
-- `/Users/barnent1/Projects/sentra/docs/deployment/WEB-DEPLOYMENT.md` - Comprehensive deployment guide
-- `/Users/barnent1/Projects/sentra/docs/deployment/CHECKLIST.md` - Deployment checklist
-- `/Users/barnent1/Projects/sentra/docs/deployment/QUICK-START.md` - Quick start guide
-- `/Users/barnent1/Projects/sentra/docs/deployment/READINESS-REPORT.md` - Readiness report
+- `/Users/barnent1/Projects/quetrex/docs/deployment/WEB-DEPLOYMENT.md` - Comprehensive deployment guide
+- `/Users/barnent1/Projects/quetrex/docs/deployment/CHECKLIST.md` - Deployment checklist
+- `/Users/barnent1/Projects/quetrex/docs/deployment/QUICK-START.md` - Quick start guide
+- `/Users/barnent1/Projects/quetrex/docs/deployment/READINESS-REPORT.md` - Readiness report
 
 ---
 
 ## Conclusion
 
-Phase 3 is complete. Sentra has been successfully converted from a desktop application to a modern web application. All documentation has been updated to reflect the web-first approach, Tauri references have been removed from active documentation (while preserved in archives for historical context), and comprehensive deployment guides are in place.
+Phase 3 is complete. Quetrex has been successfully converted from a desktop application to a modern web application. All documentation has been updated to reflect the web-first approach, Tauri references have been removed from active documentation (while preserved in archives for historical context), and comprehensive deployment guides are in place.
 
 The application is ready for:
 - Local development (`npm run dev`)
-- Staging deployment (current: https://sentra.vercel.app)
-- Production deployment (recommended: https://sentra.app)
+- Staging deployment (current: https://quetrex.vercel.app)
+- Production deployment (recommended: https://quetrex.app)
 - Mobile/tablet access
 - PWA installation
 

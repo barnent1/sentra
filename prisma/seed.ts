@@ -18,7 +18,7 @@ async function main() {
 
   const user1 = await prisma.user.create({
     data: {
-      email: 'glen@sentra.ai',
+      email: 'glen@quetrex.ai',
       name: 'Glen Barnhardt',
       password: hashedPassword,
     },
@@ -26,7 +26,7 @@ async function main() {
 
   const user2 = await prisma.user.create({
     data: {
-      email: 'demo@sentra.ai',
+      email: 'demo@quetrex.ai',
       name: 'Demo User',
       password: hashedPassword,
     },
@@ -35,10 +35,10 @@ async function main() {
   console.log('✓ Created 2 users');
 
   // Create projects for user1
-  const sentraProject = await prisma.project.create({
+  const quetrexProject = await prisma.project.create({
     data: {
-      name: 'Sentra',
-      path: '/Users/glen/Projects/sentra',
+      name: 'Quetrex',
+      path: '/Users/glen/Projects/quetrex',
       userId: user1.id,
       settings: JSON.stringify({
         notifications: { enabled: true, voice: true },
@@ -78,7 +78,7 @@ async function main() {
   // Create agents
   const completedAgent = await prisma.agent.create({
     data: {
-      projectId: sentraProject.id,
+      projectId: quetrexProject.id,
       status: 'completed',
       startTime: new Date(Date.now() - 3600000), // 1 hour ago
       endTime: new Date(Date.now() - 1800000), // 30 min ago
@@ -95,7 +95,7 @@ async function main() {
 
   const runningAgent = await prisma.agent.create({
     data: {
-      projectId: sentraProject.id,
+      projectId: quetrexProject.id,
       status: 'running',
       startTime: new Date(Date.now() - 600000), // 10 min ago
       endTime: null,
@@ -123,9 +123,9 @@ async function main() {
 
   // Create costs
   const costs = [
-    // Sentra project costs
+    // Quetrex project costs
     {
-      projectId: sentraProject.id,
+      projectId: quetrexProject.id,
       amount: 0.045,
       model: 'gpt-4o',
       provider: 'openai',
@@ -134,7 +134,7 @@ async function main() {
       timestamp: new Date(Date.now() - 3600000),
     },
     {
-      projectId: sentraProject.id,
+      projectId: quetrexProject.id,
       amount: 0.036,
       model: 'claude-sonnet-4-5',
       provider: 'anthropic',
@@ -143,7 +143,7 @@ async function main() {
       timestamp: new Date(Date.now() - 3000000),
     },
     {
-      projectId: sentraProject.id,
+      projectId: quetrexProject.id,
       amount: 0.009,
       model: 'whisper-1',
       provider: 'openai',
@@ -178,16 +178,16 @@ async function main() {
 
   // Create activities
   const activities = [
-    // Sentra project activities
+    // Quetrex project activities
     {
-      projectId: sentraProject.id,
+      projectId: quetrexProject.id,
       type: 'agent_started',
       message: 'Agent started working on issue #125',
       metadata: JSON.stringify({ issueNumber: 125, estimatedCost: 0.5 }),
       timestamp: new Date(Date.now() - 600000),
     },
     {
-      projectId: sentraProject.id,
+      projectId: quetrexProject.id,
       type: 'agent_completed',
       message: 'Agent completed issue #123 - Pull request #124 created',
       metadata: JSON.stringify({
@@ -199,7 +199,7 @@ async function main() {
       timestamp: new Date(Date.now() - 1800000),
     },
     {
-      projectId: sentraProject.id,
+      projectId: quetrexProject.id,
       type: 'cost_alert',
       message: 'Project costs have exceeded $1.00 this week',
       metadata: JSON.stringify({ threshold: 1.0, actual: 1.23 }),

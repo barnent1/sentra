@@ -178,11 +178,11 @@ describe('Feature', () => {
 - These patterns were auto-detected from the codebase
 - Follow these patterns for consistency
 - Update this file as new patterns emerge
-- See `.sentra/memory/patterns.md` for comprehensive pattern documentation
+- See `.quetrex/memory/patterns.md` for comprehensive pattern documentation
 
 ---
 
 **Next Steps:**
 1. Review detected patterns
-2. Update `.sentra/memory/patterns.md` with validated patterns
+2. Update `.quetrex/memory/patterns.md` with validated patterns
 3. Use patterns as templates for new features

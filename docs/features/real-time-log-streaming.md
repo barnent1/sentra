@@ -1,10 +1,10 @@
 # Real-Time Agent Log Streaming
 
-This document explains how to use the real-time agent log streaming feature in Sentra.
+This document explains how to use the real-time agent log streaming feature in Quetrex.
 
 ## Overview
 
-Sentra implements Server-Sent Events (SSE) for streaming agent execution logs in real-time from the backend to the frontend. This allows users to see agent output as it happens, without polling or manual refreshing.
+Quetrex implements Server-Sent Events (SSE) for streaming agent execution logs in real-time from the backend to the frontend. This allows users to see agent output as it happens, without polling or manual refreshing.
 
 ## Architecture
 

@@ -12,7 +12,7 @@ This document provides **25+ mapping rules** that translate human-readable test 
 
 **Related Documents:**
 - ADR-004: E2E Test Generation Strategy
-- Template Library: `.sentra/templates/e2e/`
+- Template Library: `.quetrex/templates/e2e/`
 
 ---
 
@@ -869,9 +869,9 @@ This document defines **35 core rules** covering:
 - ✅ Conditional Logic (2 rules)
 - ✅ Advanced (3 rules)
 
-**Coverage:** 90%+ of existing Sentra E2E test patterns
+**Coverage:** 90%+ of existing Quetrex E2E test patterns
 
-**Next Steps:** Implement these rules in template generators (`.sentra/templates/e2e/`)
+**Next Steps:** Implement these rules in template generators (`.quetrex/templates/e2e/`)
 
 ---
 

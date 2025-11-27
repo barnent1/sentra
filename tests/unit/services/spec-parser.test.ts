@@ -249,7 +249,7 @@ e2e_tests:
   describe('parseFile', () => {
     it('should parse YAML file by path', async () => {
       // ARRANGE
-      const filePath = '/Users/barnent1/Projects/sentra/tests/fixtures/specs/dashboard.yaml';
+      const filePath = '/Users/barnent1/Projects/quetrex/tests/fixtures/specs/dashboard.yaml';
 
       // ACT
       const result = await parser.parseFile(filePath);

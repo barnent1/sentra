@@ -1,6 +1,6 @@
 # Zod Validation Patterns Skill
 
-**Use this skill when:** Working with user input validation, API request validation, form data validation, or data transformation in Sentra.
+**Use this skill when:** Working with user input validation, API request validation, form data validation, or data transformation in Quetrex.
 
 ## Purpose
 
@@ -202,7 +202,7 @@ const usernameSchema = z.string()
   }, { message: 'Username already taken' })
 ```
 
-## Integration with Sentra
+## Integration with Quetrex
 
 ### TypeScript Strict Mode Compliance
 

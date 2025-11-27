@@ -393,8 +393,8 @@ res.setHeader('Access-Control-Allow-Origin', '*')
 
 // ✅ DO: Whitelist specific origins
 const allowedOrigins = [
-  'https://app.sentra.com',
-  'https://staging.sentra.com',
+  'https://app.quetrex.com',
+  'https://staging.quetrex.com',
 ]
 
 const origin = req.headers.get('origin')

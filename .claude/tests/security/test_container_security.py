@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Security Test Suite for Sentra AI Agent Container
+Security Test Suite for Quetrex AI Agent Container
 
 This test suite verifies all security measures defined in Phase 1:
 Docker Containerization (SECURITY-ARCHITECTURE.md lines 1215-1292)
@@ -20,7 +20,7 @@ Usage:
 
 Requirements:
     - Docker installed and running
-    - Image built: docker build -t sentra-ai-agent:latest -f .claude/docker/Dockerfile .
+    - Image built: docker build -t quetrex-ai-agent:latest -f .claude/docker/Dockerfile .
     - pytest installed: pip install pytest
 """
 
@@ -31,7 +31,7 @@ import os
 
 
 # Container image to test
-IMAGE_NAME = "sentra-ai-agent:latest"
+IMAGE_NAME = "quetrex-ai-agent:latest"
 
 # Runtime security options (matches .github/workflows/ai-agent.yml)
 SECURITY_OPTIONS = [
@@ -344,7 +344,7 @@ class TestRuntimeEnvironment:
         result = run_docker_command("git config --get user.name")
 
         assert result.returncode == 0
-        assert "Sentra AI Agent" in result.stdout
+        assert "Quetrex AI Agent" in result.stdout
 
 
 class TestSecurityVerification:

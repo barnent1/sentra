@@ -19,4 +19,4 @@ These documents are kept for historical reference only.
 
 ---
 
-**Note:** If you're looking for how voice currently works in Sentra, do NOT refer to documents in this directory. Check the main architecture documentation instead.
+**Note:** If you're looking for how voice currently works in Quetrex, do NOT refer to documents in this directory. Check the main architecture documentation instead.

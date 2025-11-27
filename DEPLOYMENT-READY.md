@@ -1,4 +1,4 @@
-# 🚀 Sentra - Ready for Vercel Deployment
+# 🚀 Quetrex - Ready for Vercel Deployment
 
 ## Quick Deploy
 
@@ -43,8 +43,8 @@ Set these in Vercel Dashboard (Settings → Environment Variables):
 DATABASE_URL="postgres://postgres.vmrmllmmmzwyigfqjcrc:PV0Hq3slVhw1MWnG@aws-1-us-east-1.pooler.supabase.com:6543/postgres?sslmode=require"
 
 # Authentication
-JWT_SECRET="sentra-dev-secret-change-in-production-2024"
-JWT_REFRESH_SECRET="sentra-dev-refresh-secret-change-in-production-2024"
+JWT_SECRET="quetrex-dev-secret-change-in-production-2024"
+JWT_REFRESH_SECRET="quetrex-dev-refresh-secret-change-in-production-2024"
 
 # Encryption (for API keys)
 ENCRYPTION_SECRET="kQ8yB/afCL6BfLZ2n/HLQvV6dLMEXpO9FofeefolRRs="
@@ -90,7 +90,7 @@ vercel env add ENCRYPTION_SECRET
 vercel --prod
 ```
 
-**Done!** Your app will be live at `https://sentra-<your-id>.vercel.app`
+**Done!** Your app will be live at `https://quetrex-<your-id>.vercel.app`
 
 ---
 
@@ -107,7 +107,7 @@ vercel --prod
 
 ### 2. Configure Custom Domain (Optional)
 ```bash
-vercel domains add sentra.yourdomain.com
+vercel domains add quetrex.yourdomain.com
 ```
 
 Then add DNS records as shown by Vercel.
@@ -296,7 +296,7 @@ If you exceed free tier:
 ## Support
 
 **Documentation**: Check `/docs` directory in repository
-**Issues**: File at https://github.com/barnent1/sentra/issues
+**Issues**: File at https://github.com/barnent1/quetrex/issues
 **Vercel Docs**: https://vercel.com/docs
 
 ---
