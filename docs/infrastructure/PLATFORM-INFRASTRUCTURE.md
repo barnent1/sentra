@@ -1,95 +1,174 @@
 # Quetrex Platform Infrastructure
 
-**Version:** 1.0.0
+**Version:** 2.0.0
 **Last Updated:** 2025-11-28
+**Architecture Decision:** ADR-003-HOSTING-PLATFORM.md
 
 ---
 
 ## Overview
 
-This document describes the infrastructure for the Quetrex platform itself (not user runners). The platform is intentionally minimal since users host their own runners.
+Quetrex uses a "one move" architecture designed to scale from MVP to $2M+ ARR without migrations.
+
+| Component | Provider | Purpose | Cost |
+|-----------|----------|---------|------|
+| DNS/CDN | Cloudflare | DNS, DDoS, SSL, CDN | Free |
+| Application | Hetzner CX32 | Next.js, Redis, Runner | $9/mo |
+| Database | Supabase | PostgreSQL, Auth, Real-time | Free → $25/mo |
 
 ---
 
-## Architecture
+## Architecture Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│               Hetzner Cloud - Quetrex Platform              │
-│                                                             │
+│                    Cloudflare (Free)                         │
+│                                                              │
+│  • DNS management                                           │
+│  • DDoS protection                                          │
+│  • SSL termination (Full Strict)                            │
+│  • CDN for static assets                                    │
+│  • Page rules for API bypass                                │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              │ HTTPS (proxied)
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│           Hetzner CX32 - Ashburn, USA ($9/mo)               │
+│           4 vCPU │ 8GB RAM │ 80GB NVMe │ 20TB traffic       │
+│                                                              │
 │  ┌─────────────────────────────────────────────────────────┐│
-│  │                 CX32 VPS (~$9/mo)                       ││
-│  │                 4 vCPU | 8GB RAM | 80GB SSD             ││
+│  │                    Docker Compose                        ││
 │  │                                                          ││
 │  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐       ││
-│  │  │   Next.js   │ │ PostgreSQL  │ │    Redis    │       ││
-│  │  │   Web App   │ │  Database   │ │    Cache    │       ││
-│  │  │   Port 3000 │ │  Port 5432  │ │  Port 6379  │       ││
+│  │  │   Next.js   │ │    Redis    │ │   Runner    │       ││
+│  │  │   App       │ │    Cache    │ │  Container  │       ││
+│  │  │  Port 3000  │ │  Port 6379  │ │  Port 8080  │       ││
 │  │  └─────────────┘ └─────────────┘ └─────────────┘       ││
 │  │                                                          ││
 │  │  ┌─────────────────────────────────────────────────────┐││
 │  │  │                    Nginx                            │││
-│  │  │            Reverse Proxy + SSL                      │││
-│  │  │              Port 80, 443                           │││
+│  │  │         Reverse Proxy (Cloudflare Origin)          │││
+│  │  │                   Port 443                          │││
 │  │  └─────────────────────────────────────────────────────┘││
 │  └─────────────────────────────────────────────────────────┘│
-│                                                             │
+│                                                              │
 └─────────────────────────────────────────────────────────────┘
                               │
-                              │ Rsync (nightly)
+                              │ Postgres connection (pooled)
                               ▼
 ┌─────────────────────────────────────────────────────────────┐
-│           Hetzner Storage Box BX10 (~$3/mo)                 │
-│                         1TB Storage                          │
-│                                                             │
-│  /backups/                                                  │
-│  ├── postgres/          Daily database dumps                │
-│  ├── redis/             RDB snapshots                       │
-│  └── config/            Docker configs, .env                │
-│                                                             │
+│                 Supabase (Free → $25/mo)                    │
+│                                                              │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │ PostgreSQL  │ │    Auth     │ │  Real-time  │           │
+│  │  Database   │ │   Service   │ │  Subscriptions│          │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+│                                                              │
+│  • Auto-backups (daily)                                     │
+│  • Point-in-time recovery                                   │
+│  • Row Level Security (RLS)                                 │
+│  • Connection pooling (PgBouncer)                           │
+│                                                              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Server Specifications
+## Provider Details
 
-### Production Server
+### Cloudflare (Free Tier)
+
+**DNS Settings:**
+- Proxy status: Proxied (orange cloud) for all records
+- SSL/TLS mode: Full (strict)
+- Always Use HTTPS: On
+- Minimum TLS Version: 1.2
+
+**Page Rules:**
+```
+# Bypass cache for API routes
+quetrex.app/api/*
+  Cache Level: Bypass
+
+# Cache static assets
+quetrex.app/_next/static/*
+  Cache Level: Cache Everything
+  Edge Cache TTL: 1 month
+```
+
+**Security:**
+- Bot Fight Mode: On
+- Security Level: Medium
+- Challenge Passage: 30 minutes
+
+---
+
+### Hetzner CX32 (Ashburn, USA)
+
+**Server Specifications:**
 
 | Spec | Value |
 |------|-------|
-| Provider | Hetzner Cloud |
 | Plan | CX32 |
 | vCPU | 4 (shared) |
 | RAM | 8GB |
 | Storage | 80GB NVMe SSD |
 | Traffic | 20TB included |
-| Location | Nuremberg, Germany (nbg1) |
+| Location | Ashburn, Virginia (ash) |
+| IPv4 | Included |
 | Cost | ~$9/month |
 
-### Backup Storage
+**Why Ashburn?**
+- Primary user base in US
+- Low latency to East Coast
+- Good connectivity to EU via transatlantic cables
+- Supabase default region is also US
 
-| Spec | Value |
-|------|-------|
-| Provider | Hetzner Storage Box |
-| Plan | BX10 |
-| Storage | 1TB |
-| Access | SFTP, Rsync, Samba |
-| Cost | ~$3/month |
+**Resource Allocation:**
 
-### Total Platform Cost
-
-| Component | Monthly |
-|-----------|---------|
-| CX32 Server | $9 |
-| Storage Box | $3 |
-| **Total** | **$12/month** |
+| Service | RAM | CPU | Purpose |
+|---------|-----|-----|---------|
+| Next.js | 2GB | 1.5 cores | Web application |
+| Redis | 512MB | 0.25 cores | Session cache, rate limiting |
+| Runner | 3GB | 1.5 cores | Your personal AI runner |
+| Nginx | 256MB | 0.25 cores | Reverse proxy |
+| System | 1GB | 0.5 cores | OS overhead |
+| **Buffer** | **1.2GB** | - | **Headroom** |
 
 ---
 
-## Services
+### Supabase
 
-### Docker Compose Stack
+**Project Settings:**
+
+| Setting | Value |
+|---------|-------|
+| Region | East US (to match Hetzner Ashburn) |
+| Plan | Free → Pro ($25/mo) |
+| Database | PostgreSQL 15 |
+| Connection | Pooled (PgBouncer) |
+
+**Free Tier Limits:**
+
+| Resource | Limit |
+|----------|-------|
+| Database size | 500MB |
+| Storage | 1GB |
+| Bandwidth | 2GB |
+| Auth users | Unlimited |
+| Projects | 2 |
+
+**When to Upgrade to Pro ($25/mo):**
+- Database > 500MB
+- Need daily backups with 7-day retention
+- Need point-in-time recovery
+- Approaching 2GB bandwidth
+
+---
+
+## Docker Compose Stack
 
 ```yaml
 # docker-compose.yml
@@ -97,38 +176,50 @@ version: '3.8'
 
 services:
   web:
-    build: .
+    image: ghcr.io/quetrex/web:latest
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
-      - DATABASE_URL=postgresql://quetrex:${DB_PASSWORD}@postgres:5432/quetrex
+      - NODE_ENV=production
+      - NEXT_PUBLIC_SUPABASE_URL=${SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
       - REDIS_URL=redis://redis:6379
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-      - NEXTAUTH_URL=${NEXTAUTH_URL}
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
-      - HETZNER_REFERRAL_URL=${HETZNER_REFERRAL_URL}
     depends_on:
-      - postgres
       - redis
-
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=quetrex
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=quetrex
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  runner:
+    image: ghcr.io/quetrex/runner:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./runner-config.yml:/app/config.yml:ro
+      - runner_workspace:/workspace
+    environment:
+      - QUETREX_API_URL=http://web:3000/api
+    depends_on:
+      - web
 
   nginx:
     image: nginx:alpine
@@ -139,147 +230,193 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
-      - certbot_data:/var/www/certbot:ro
     depends_on:
       - web
+      - runner
 
 volumes:
-  postgres_data:
   redis_data:
-  certbot_data:
+  runner_workspace:
 ```
-
-### Resource Allocation
-
-| Service | RAM | CPU | Notes |
-|---------|-----|-----|-------|
-| Next.js | 2GB | 1 core | Main application |
-| PostgreSQL | 2GB | 1 core | User data, configs |
-| Redis | 512MB | 0.25 core | Sessions, cache |
-| Nginx | 256MB | 0.25 core | Reverse proxy |
-| System | 1GB | 0.5 core | OS overhead |
-| **Buffer** | **2GB** | **1 core** | **Headroom** |
-| **Total** | **8GB** | **4 cores** | **CX32 capacity** |
 
 ---
 
-## Database Schema (Key Tables)
+## Nginx Configuration
+
+```nginx
+# nginx.conf
+events {
+    worker_connections 1024;
+}
+
+http {
+    upstream nextjs {
+        server web:3000;
+    }
+
+    upstream runner {
+        server runner:8080;
+    }
+
+    # Redirect HTTP to HTTPS
+    server {
+        listen 80;
+        server_name quetrex.app;
+        return 301 https://$server_name$request_uri;
+    }
+
+    # Main HTTPS server
+    server {
+        listen 443 ssl http2;
+        server_name quetrex.app;
+
+        # Cloudflare Origin Certificate
+        ssl_certificate /etc/nginx/ssl/cloudflare-origin.pem;
+        ssl_certificate_key /etc/nginx/ssl/cloudflare-origin-key.pem;
+
+        # Only allow Cloudflare IPs (optional, extra security)
+        # include /etc/nginx/cloudflare-ips.conf;
+
+        # Next.js app
+        location / {
+            proxy_pass http://nextjs;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        # Runner API (internal, or protected)
+        location /runner/ {
+            proxy_pass http://runner/;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+        }
+    }
+}
+```
+
+---
+
+## Environment Variables
+
+```bash
+# .env (on Hetzner server)
+
+# Supabase
+SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIs...
+
+# Stripe
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Hetzner (for user provisioning)
+HETZNER_API_TOKEN=...
+
+# App
+NEXT_PUBLIC_APP_URL=https://quetrex.app
+```
+
+---
+
+## Supabase Schema
 
 ```sql
--- Users
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(255) UNIQUE NOT NULL,
-  name VARCHAR(255),
-  password_hash VARCHAR(255),
-  stripe_customer_id VARCHAR(255),
-  subscription_status VARCHAR(50) DEFAULT 'inactive',
-  subscription_tier VARCHAR(50) DEFAULT 'individual',
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+-- Users (extends Supabase Auth)
+CREATE TABLE public.profiles (
+  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  email TEXT NOT NULL,
+  full_name TEXT,
+  avatar_url TEXT,
+  stripe_customer_id TEXT,
+  subscription_status TEXT DEFAULT 'inactive',
+  subscription_tier TEXT DEFAULT 'individual',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Projects
-CREATE TABLE projects (
+CREATE TABLE public.projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL,
-  github_repo VARCHAR(255),
-  github_owner VARCHAR(255),
-  runner_status VARCHAR(50) DEFAULT 'disconnected',
-  last_activity TIMESTAMP,
-  created_at TIMESTAMP DEFAULT NOW()
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  github_repo TEXT,
+  github_owner TEXT,
+  runner_status TEXT DEFAULT 'disconnected',
+  last_activity TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Runner Configs
-CREATE TABLE runner_configs (
+CREATE TABLE public.runner_configs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  hetzner_server_id VARCHAR(255),
-  hetzner_server_ip VARCHAR(45),
-  hetzner_server_name VARCHAR(255),
-  status VARCHAR(50) DEFAULT 'pending',
-  created_at TIMESTAMP DEFAULT NOW()
+  user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+  hetzner_server_id TEXT,
+  hetzner_server_ip INET,
+  hetzner_region TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Billing History
-CREATE TABLE billing_history (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  stripe_invoice_id VARCHAR(255),
-  amount_cents INTEGER,
-  status VARCHAR(50),
-  period_start TIMESTAMP,
-  period_end TIMESTAMP,
-  created_at TIMESTAMP DEFAULT NOW()
-);
+-- Row Level Security
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.runner_configs ENABLE ROW LEVEL SECURITY;
+
+-- Policies: Users can only see their own data
+CREATE POLICY "Users can view own profile" ON public.profiles
+  FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile" ON public.profiles
+  FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Users can view own projects" ON public.projects
+  FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own runner config" ON public.runner_configs
+  FOR ALL USING (auth.uid() = user_id);
 ```
-
----
-
-## Backup Strategy
-
-### Automated Backup Script
-
-```bash
-#!/bin/bash
-# /opt/quetrex/scripts/backup.sh
-# Runs via cron: 0 3 * * * /opt/quetrex/scripts/backup.sh
-
-set -e
-
-DATE=$(date +%Y%m%d)
-BACKUP_DIR="/tmp/backup-${DATE}"
-STORAGE_BOX="u123456@u123456.your-storagebox.de"
-
-# Create backup directory
-mkdir -p ${BACKUP_DIR}
-
-# Backup PostgreSQL
-docker exec quetrex-postgres-1 pg_dump -U quetrex quetrex > ${BACKUP_DIR}/postgres.sql
-
-# Backup Redis
-docker exec quetrex-redis-1 redis-cli BGSAVE
-sleep 5
-docker cp quetrex-redis-1:/data/dump.rdb ${BACKUP_DIR}/redis.rdb
-
-# Backup configs (excluding secrets in .env)
-cp /opt/quetrex/docker-compose.yml ${BACKUP_DIR}/
-cp /opt/quetrex/nginx.conf ${BACKUP_DIR}/
-
-# Compress
-tar -czf /tmp/backup-${DATE}.tar.gz -C /tmp backup-${DATE}
-
-# Upload to Storage Box
-rsync -avz /tmp/backup-${DATE}.tar.gz ${STORAGE_BOX}:backups/
-
-# Cleanup local
-rm -rf ${BACKUP_DIR} /tmp/backup-${DATE}.tar.gz
-
-# Cleanup old backups (keep 30 days)
-ssh ${STORAGE_BOX} 'find ~/backups -mtime +30 -delete'
-
-echo "Backup completed: ${DATE}"
-```
-
-### Backup Schedule
-
-| Backup Type | Frequency | Retention |
-|-------------|-----------|-----------|
-| PostgreSQL | Daily 3am | 30 days |
-| Redis | Daily 3am | 7 days |
-| Configs | Daily 3am | 30 days |
-| Full server snapshot | Weekly | 4 weeks |
 
 ---
 
 ## Deployment
 
-### GitHub Actions Workflow
+### Initial Server Setup
+
+```bash
+# 1. Create Hetzner server via console or Terraform
+
+# 2. SSH into server
+ssh root@<server-ip>
+
+# 3. Run setup script
+curl -fsSL https://raw.githubusercontent.com/quetrex/quetrex/main/scripts/server-setup.sh | bash
+
+# 4. Clone repo and configure
+git clone https://github.com/quetrex/quetrex.git /opt/quetrex
+cd /opt/quetrex
+cp .env.example .env
+nano .env  # Add your secrets
+
+# 5. Start services
+docker compose up -d
+
+# 6. Configure Cloudflare DNS
+# Point quetrex.app A record to server IP (proxied)
+```
+
+### GitHub Actions Deploy
 
 ```yaml
 # .github/workflows/deploy.yml
-name: Deploy to Production
+name: Deploy
 
 on:
   push:
@@ -291,21 +428,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build Docker image
-        run: docker build -t quetrex:${{ github.sha }} .
-
-      - name: Push to registry
+      - name: Build and push Docker image
         run: |
-          echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-          docker tag quetrex:${{ github.sha }} ${{ secrets.DOCKER_REGISTRY }}/quetrex:${{ github.sha }}
-          docker tag quetrex:${{ github.sha }} ${{ secrets.DOCKER_REGISTRY }}/quetrex:latest
-          docker push ${{ secrets.DOCKER_REGISTRY }}/quetrex:${{ github.sha }}
-          docker push ${{ secrets.DOCKER_REGISTRY }}/quetrex:latest
+          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker build -t ghcr.io/quetrex/web:${{ github.sha }} .
+          docker tag ghcr.io/quetrex/web:${{ github.sha }} ghcr.io/quetrex/web:latest
+          docker push ghcr.io/quetrex/web:${{ github.sha }}
+          docker push ghcr.io/quetrex/web:latest
 
-      - name: Deploy to server
+      - name: Deploy to Hetzner
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.SERVER_HOST }}
+          host: ${{ secrets.HETZNER_HOST }}
           username: deploy
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
@@ -321,93 +455,69 @@ jobs:
 
 ### Health Checks
 
-```bash
-# /opt/quetrex/scripts/healthcheck.sh
-#!/bin/bash
-
-# Check web app
-curl -sf http://localhost:3000/api/health || exit 1
-
-# Check PostgreSQL
-docker exec quetrex-postgres-1 pg_isready -U quetrex || exit 1
-
-# Check Redis
-docker exec quetrex-redis-1 redis-cli ping | grep -q PONG || exit 1
-
-echo "All services healthy"
-```
+**Application:** `https://quetrex.app/api/health`
+**Runner:** `https://quetrex.app/runner/health`
 
 ### Uptime Monitoring
 
-Use external service (e.g., UptimeRobot, Better Uptime) to monitor:
-- `https://quetrex.app/api/health`
-- Alert on 5+ minutes downtime
+Use external service (UptimeRobot, Better Uptime):
+- Monitor: `https://quetrex.app/api/health`
+- Interval: 1 minute
+- Alert: Email + SMS on failure
 
----
+### Supabase Dashboard
 
-## Scaling Plan
-
-| Users | Server | Action |
-|-------|--------|--------|
-| 0-500 | CX32 ($9) | Current setup |
-| 500-2000 | CX42 ($18) | Upgrade in-place |
-| 2000-5000 | Dedicated + replicas | Split web/db |
-| 5000+ | Kubernetes cluster | Full orchestration |
-
----
-
-## Security
-
-### Firewall Rules
-
-```bash
-# UFW configuration
-ufw default deny incoming
-ufw default allow outgoing
-ufw allow 22/tcp    # SSH
-ufw allow 80/tcp    # HTTP
-ufw allow 443/tcp   # HTTPS
-ufw enable
-```
-
-### SSL/TLS
-
-- Let's Encrypt via Certbot
-- Auto-renewal via cron
-- TLS 1.2+ only
-- HSTS enabled
-
-### Secrets Management
-
-| Secret | Storage |
-|--------|---------|
-| Database password | .env file (not in git) |
-| Stripe keys | .env file |
-| JWT secret | .env file |
-| SSH keys | GitHub Secrets + server |
+Monitor via Supabase dashboard:
+- Database size
+- Active connections
+- Query performance
+- Auth usage
 
 ---
 
 ## Disaster Recovery
 
-### Recovery Time Objective (RTO)
+### If Hetzner Server Dies
 
-| Scenario | RTO |
-|----------|-----|
-| Service restart | < 5 minutes |
-| Server migration | < 1 hour |
-| Full rebuild from backup | < 4 hours |
+1. Supabase has all data (safe)
+2. Create new CX32 in Hetzner console (2 min)
+3. Run setup script (5 min)
+4. Update Cloudflare DNS (instant via API)
+5. Back online in < 10 minutes
 
-### Recovery Procedure
+### If Supabase Has Issues
 
-1. Provision new CX32 server
-2. Run Ansible playbook to configure
-3. Restore PostgreSQL from backup
-4. Restore Redis from backup
-5. Deploy latest Docker images
-6. Update DNS to new IP
-7. Verify health checks
+- Supabase SLA: 99.9%
+- Daily backups (Pro plan)
+- Point-in-time recovery (Pro plan)
+- If extended outage: Export and migrate to another Postgres
 
 ---
 
-*Document created by Glen Barnhardt with Claude Code assistance.*
+## Scaling Path
+
+| Users | Hetzner | Supabase | Total Cost |
+|-------|---------|----------|------------|
+| 0-500 | CX32 ($9) | Free | $9/mo |
+| 500-2000 | CX32 ($9) | Pro ($25) | $34/mo |
+| 2000-5000 | CX42 ($18) | Pro ($25) | $43/mo |
+| 5000-10000 | CX52 ($35) | Pro ($25) | $60/mo |
+
+**No migrations required. Just upgrade Hetzner plan as needed.**
+
+---
+
+## Cost Summary
+
+| Component | Starting | At Scale |
+|-----------|----------|----------|
+| Cloudflare | $0 | $0 |
+| Hetzner CX32 | $9 | $35 (CX52) |
+| Supabase | $0 | $25 |
+| Domain | ~$12/year | ~$12/year |
+| **Total** | **$9/mo** | **$60/mo** |
+
+---
+
+*Document reflects final architecture decision per ADR-003.*
+*No migrations planned. This architecture scales to $2M+ ARR.*
