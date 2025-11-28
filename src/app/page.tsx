@@ -364,7 +364,7 @@ export default function LandingPage() {
             {[
               {
                 quote:
-                  "Finally, I can see what the AI is doing instead of hoping it doesn't break everything.",
+                  "Finally, I can see what the AI is doing instead of hoping it doesn&apos;t break everything.",
                 author: "Sarah K.",
                 role: "Senior Developer",
               },
@@ -385,7 +385,7 @@ export default function LandingPage() {
                 key={index}
                 className="p-6 bg-[#18181B] border border-[#27272A] rounded-xl text-left"
               >
-                <p className="text-gray-300 mb-4 italic">"{testimonial.quote}"</p>
+                <p className="text-gray-300 mb-4 italic">&ldquo;{testimonial.quote}&rdquo;</p>
                 <div>
                   <p className="font-semibold">{testimonial.author}</p>
                   <p className="text-gray-500 text-sm">{testimonial.role}</p>
@@ -416,7 +416,7 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Free until you're hooked
+              Free until you&apos;re hooked
             </h2>
             <p className="text-gray-400 text-lg">
               Start building. Pay only when you need more.
@@ -522,7 +522,7 @@ export default function LandingPage() {
             Stop babysitting. Start shipping.
           </h2>
           <p className="text-xl text-gray-400 mb-8">
-            Join developers who've taken back control of their AI-powered workflow.
+            Join developers who&apos;ve taken back control of their AI-powered workflow.
           </p>
           <Link
             href="/signup"
