@@ -1,433 +1,574 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
-import { Activity, Folder, DollarSign, TrendingUp, Loader2, Settings as SettingsIcon, UserCircle, Mic, FileText, Plus } from "lucide-react";
-import { useTranslation } from "react-i18next";
-import { useDashboard } from "@/hooks/useDashboard";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { Settings } from "@/components/Settings";
-import { ArchitectChat } from "@/components/ArchitectChat";
-import { SpecViewer } from "@/components/SpecViewer";
-import { ProjectCard } from "@/components/ProjectCard";
-import { ProjectDetailPanel } from "@/components/ProjectDetailPanel";
-import { NewProjectModal } from "@/components/NewProjectModal";
-import { UserMenu } from "@/components/UserMenu";
-import { createGithubIssue, approveSpecVersion, setProjectMuted, type SpecInfo, type Project } from "@/services/quetrex-api";
-import "@/lib/i18n"; // Initialize i18n
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import {
+  ArrowRight,
+  Check,
+  Zap,
+  Shield,
+  Eye,
+  Clock,
+  DollarSign,
+  Users,
+  Terminal,
+  Brain,
+  GitBranch,
+  Play,
+  Pause,
+  ChevronDown,
+} from "lucide-react";
 
-export default function Home() {
-  const { t } = useTranslation();
-  const { projects, agents, stats, loading, refetch } = useDashboard();
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [newProjectOpen, setNewProjectOpen] = useState(false);
-  const [architectChatOpen, setArchitectChatOpen] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<{ id: string; name: string; path: string } | null>(null);
-  const [specViewerOpen, setSpecViewerOpen] = useState(false);
-  const [selectedSpec, setSelectedSpec] = useState<{ spec: string; specInfo?: SpecInfo; name: string; path: string } | null>(null);
-  const [detailPanelOpen, setDetailPanelOpen] = useState(false);
-  const [detailPanelProject, setDetailPanelProject] = useState<Project | null>(null);
+export default function LandingPage() {
+  const [activePain, setActivePain] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
-  const handleSpeakToArchitect = (project: { id: string; name: string; path: string }) => {
-    console.log(`Starting voice conversation for project: ${project.name}`);
-    setSelectedProject(project);
-    setArchitectChatOpen(true);
-  };
+  useEffect(() => {
+    setIsVisible(true);
+    // Rotate through pain points
+    const interval = setInterval(() => {
+      setActivePain((prev) => (prev + 1) % painPoints.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleViewSpec = async (project: { name: string; path: string; specs?: SpecInfo[] }) => {
-    // Find the first unapproved spec (pending spec)
-    const pendingSpec = project.specs?.find(spec => !spec.isApproved);
-
-    if (pendingSpec) {
-      try {
-        const { listSpecs, getSpec } = await import('@/services/quetrex-api');
-
-        // Get the full spec content and metadata
-        const { content, info } = await getSpec(
-          project.name,
-          project.path,
-          pendingSpec.id
-        );
-
-        setSelectedSpec({
-          spec: content,
-          specInfo: info,
-          name: project.name,
-          path: project.path
-        });
-        setSpecViewerOpen(true);
-      } catch (error) {
-        console.error('Failed to load spec:', error);
-        alert('Failed to load specification. Please try again.');
-      }
-    }
-  };
-
-  const handleApproveSpec = async () => {
-    if (!selectedSpec || !selectedSpec.specInfo) {
-      console.error('No spec selected for approval');
-      throw new Error('No spec selected');
-    }
-
-    try {
-      const { logger } = await import('@/services/logger');
-
-      logger.info('Starting spec approval process', {
-        project: selectedSpec.name,
-        specTitle: selectedSpec.specInfo.title,
-        specId: selectedSpec.specInfo.id,
-      });
-
-      // Create GitHub issue using gh CLI
-      const title = `[AI Feature] ${selectedSpec.specInfo.title}`;
-      const body = `${selectedSpec.spec}\n\n---\nSpec file: ${selectedSpec.specInfo.filePath}`;
-
-      logger.info('Creating GitHub issue from spec', {
-        project: selectedSpec.name,
-        specTitle: selectedSpec.specInfo.title,
-      });
-
-      const issueUrl = await createGithubIssue(
-        title,
-        body,
-        ['ai-feature']
-      );
-
-      logger.info('GitHub issue created successfully', {
-        project: selectedSpec.name,
-        issueUrl,
-      });
-
-      // Approve the spec version (new versioning system)
-      const versionFile = selectedSpec.specInfo.filePath.split('/').pop() || '';
-
-      logger.info('Approving spec version', {
-        project: selectedSpec.name,
-        specId: selectedSpec.specInfo.id,
-        versionFile,
-        issueUrl,
-      });
-
-      await approveSpecVersion(
-        selectedSpec.name,
-        selectedSpec.path,
-        selectedSpec.specInfo.id,
-        versionFile,
-        issueUrl
-      );
-
-      logger.info('Spec approval process completed', {
-        project: selectedSpec.name,
-        specId: selectedSpec.specInfo.id,
-      });
-
-      // Refresh the projects list
-      await refetch();
-    } catch (error) {
-      const { logger } = await import('@/services/logger');
-      logger.error('Spec approval process failed', error);
-      throw error; // Re-throw to let SpecViewer handle the error display
-    }
-  };
-
-  const handleRejectSpec = async () => {
-    if (!selectedSpec || !selectedSpec.specInfo) {
-      console.error('No spec selected for rejection');
-      throw new Error('No spec selected');
-    }
-
-    try {
-      console.log(`[Reject] Starting rejection process for ${selectedSpec.name}`);
-      console.log(`[Reject] Spec title: ${selectedSpec.specInfo.title}`);
-
-      // Delete the spec (or specific version)
-      const { deleteSpec } = await import('@/services/quetrex-api');
-      const versionFile = selectedSpec.specInfo.filePath.split('/').pop() || '';
-
-      console.log(`[Reject] Deleting spec version: ${versionFile}`);
-      await deleteSpec(
-        selectedSpec.name,
-        selectedSpec.path,
-        selectedSpec.specInfo.id,
-        versionFile
-      );
-
-      console.log(`[Reject] ✅ Spec deleted successfully`);
-
-      // Refresh the projects list
-      console.log(`[Reject] Refreshing projects list...`);
-      await refetch();
-
-      console.log(`[Reject] ✅ Rejection process completed`);
-    } catch (error) {
-      console.error('[Reject] ❌ Failed to reject spec:', error);
-      throw error; // Re-throw to let SpecViewer handle the error display
-    }
-  };
-
-  const handleMuteToggle = async (projectName: string, shouldMute: boolean) => {
-    try {
-      await setProjectMuted(projectName, shouldMute);
-      // Refresh to get updated mute state
-      refetch();
-    } catch (error) {
-      console.error('Failed to toggle mute:', error);
-      alert('Failed to update mute state. Please try again.');
-    }
-  };
-
-  const handleViewDetails = (project: Project) => {
-    setDetailPanelProject(project);
-    setDetailPanelOpen(true);
-  };
-
-  // Keyboard Shortcuts
-  useKeyboardShortcuts([
+  const painPoints = [
     {
-      key: ',',
-      meta: true,
-      description: 'Open Settings',
-      handler: () => setSettingsOpen(true),
+      icon: Terminal,
+      pain: "Babysitting AI in terminals",
+      solution: "Visual dashboard with real-time progress",
     },
     {
-      key: 'n',
-      meta: true,
-      description: 'New Project',
-      handler: () => setNewProjectOpen(true),
+      icon: Eye,
+      pain: "No idea what AI is doing",
+      solution: "See every file change as it happens",
     },
     {
-      key: 'Escape',
-      description: 'Close Modal',
-      handler: () => {
-        setSettingsOpen(false);
-        setNewProjectOpen(false);
-        setArchitectChatOpen(false);
-        setSpecViewerOpen(false);
-        setDetailPanelOpen(false);
-      },
+      icon: DollarSign,
+      pain: "Surprise API bills",
+      solution: "Budget caps and cost tracking per project",
     },
-  ], !settingsOpen && !newProjectOpen && !architectChatOpen && !specViewerOpen && !detailPanelOpen);
+    {
+      icon: Clock,
+      pain: "Context switching kills flow",
+      solution: "All projects in one mission control",
+    },
+    {
+      icon: Shield,
+      pain: "AI making unseen mistakes",
+      solution: "Approve specs before execution",
+    },
+    {
+      icon: Users,
+      pain: "Can't share with team",
+      solution: "Collaborative web dashboard",
+    },
+  ];
 
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-background p-8 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">{t('dashboard.loading')}</p>
-        </div>
-      </main>
-    );
-  }
+  const features = [
+    {
+      icon: Brain,
+      title: "Voice-First Interface",
+      description:
+        "Just speak. Describe features naturally and let AI architect them. No more writing specs.",
+    },
+    {
+      icon: Eye,
+      title: "Real-Time Visibility",
+      description:
+        "Watch AI agents work in real-time. See file changes, test results, and PR creation as it happens.",
+    },
+    {
+      icon: Shield,
+      title: "Spec Approval Flow",
+      description:
+        "AI creates detailed specs. You review and approve before a single line of code is written.",
+    },
+    {
+      icon: GitBranch,
+      title: "GitHub Integration",
+      description:
+        "Issues become PRs automatically. Quality gates ensure only good code gets merged.",
+    },
+    {
+      icon: DollarSign,
+      title: "Cost Control",
+      description:
+        "Set monthly budgets per project. Never get surprised by API costs again.",
+    },
+    {
+      icon: Zap,
+      title: "Parallel Execution",
+      description:
+        "Run multiple AI agents across projects simultaneously. Scale your development capacity.",
+    },
+  ];
 
-  const remainingBudget = stats ? (stats.monthlyBudget ?? 100) - (stats.todayCost ?? 0) : 0;
+  const stats = [
+    { value: "10x", label: "Faster prototyping" },
+    { value: "90%", label: "Less context switching" },
+    { value: "$0", label: "Until you ship" },
+  ];
 
   return (
-    <ProtectedRoute>
-      <main id="main-content" className="min-h-screen bg-[#0A0A0B] p-8">
-        {/* Header */}
-        <header className="mb-8">
-        <div className="flex items-center justify-between mb-2">
+    <div className="min-h-screen bg-[#0A0A0B] text-white overflow-x-hidden">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0A0A0B]/80 backdrop-blur-xl border-b border-[#27272A]">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Logo */}
-            <div className="w-16 h-16 flex items-center justify-center">
-              <Image
-                src="/quetrex-logo.png"
-                alt="Quetrex"
-                width={64}
-                height={64}
-                priority
-              />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">{t('dashboard.title')}</h1>
-              <p className="text-sm text-muted-foreground">{t('dashboard.subtitle')}</p>
-            </div>
+            <Image
+              src="/quetrex-logo.png"
+              alt="Quetrex"
+              width={40}
+              height={40}
+              className="rounded-lg"
+            />
+            <span className="text-xl font-bold">Quetrex</span>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex items-center gap-3">
-            {/* New Project Button */}
-            <button
-              data-testid="new-project-button"
-              onClick={() => setNewProjectOpen(true)}
-              className="px-4 py-2 bg-violet-500 hover:bg-violet-600 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
-              title={t('dashboard.buttons.newProject')}
+          <div className="flex items-center gap-6">
+            <a href="#features" className="text-gray-400 hover:text-white transition text-sm">
+              Features
+            </a>
+            <a href="#how-it-works" className="text-gray-400 hover:text-white transition text-sm">
+              How It Works
+            </a>
+            <a href="#pricing" className="text-gray-400 hover:text-white transition text-sm">
+              Pricing
+            </a>
+            <Link
+              href="/login"
+              className="text-gray-400 hover:text-white transition text-sm"
             >
-              <Plus className="w-5 h-5" />
-              {t('dashboard.buttons.newProject')}
-            </button>
-
-            {/* User Menu with Avatar */}
-            <UserMenu onSettingsClick={() => setSettingsOpen(true)} />
+              Sign In
+            </Link>
+            <Link
+              href="/signup"
+              className="px-4 py-2 bg-violet-500 hover:bg-violet-600 rounded-lg font-medium transition text-sm"
+            >
+              Get Started Free
+            </Link>
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* Settings Modal */}
-      <Settings isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-6 relative">
+        {/* Background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-violet-500/5 via-transparent to-transparent" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-violet-500/10 rounded-full blur-3xl opacity-30" />
 
-      {/* New Project Modal */}
-      <NewProjectModal
-        isOpen={newProjectOpen}
-        onClose={() => setNewProjectOpen(false)}
-        onSuccess={() => {
-          // Refresh projects list after creating a new project
-          refetch();
-        }}
-      />
-
-      {/* Architect Chat Modal */}
-      <ArchitectChat
-        isOpen={architectChatOpen}
-        onClose={() => {
-          setArchitectChatOpen(false);
-          // Refresh projects to pick up any new pending specs
-          refetch();
-        }}
-        projectId={selectedProject?.id || ''}
-        projectName={selectedProject?.name || ''}
-        projectPath={selectedProject?.path}
-      />
-
-      {/* Spec Viewer Modal */}
-      {selectedSpec && (
-        <SpecViewer
-          isOpen={specViewerOpen}
-          onClose={() => setSpecViewerOpen(false)}
-          spec={selectedSpec.spec}
-          specInfo={selectedSpec.specInfo}
-          projectName={selectedSpec.name}
-          projectPath={selectedSpec.path}
-          onApprove={handleApproveSpec}
-          onReject={handleRejectSpec}
-        />
-      )}
-
-      {/* Project Detail Panel */}
-      {detailPanelProject && (
-        <ProjectDetailPanel
-          project={detailPanelProject}
-          isOpen={detailPanelOpen}
-          onClose={() => setDetailPanelOpen(false)}
-        />
-      )}
-
-      {/* Stats Overview */}
-      <div data-testid="stats-grid" className="grid grid-cols-4 gap-6 mb-8">
-        <div data-testid="stat-card" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.activeAgents')}</span>
-            <Activity className="w-4 h-4 text-violet-500" />
+        <div className="max-w-5xl mx-auto text-center relative">
+          {/* Pain point rotator */}
+          <div
+            className={`mb-6 transition-all duration-700 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-red-400 text-sm">
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              Stop {painPoints[activePain].pain.toLowerCase()}
+            </span>
           </div>
-          <p className="text-3xl font-bold text-[#FAFAFA]">{stats?.activeAgents || 0}</p>
-          <p className="text-xs text-green-400 mt-1">
-            {stats?.activeAgents ? t('dashboard.stats.running') : t('dashboard.stats.idle')}
+
+          <h1
+            className={`text-5xl md:text-7xl font-bold mb-6 leading-tight transition-all duration-700 delay-100 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
+            Your AI Agents.
+            <br />
+            <span className="bg-gradient-to-r from-violet-400 via-violet-500 to-violet-600 bg-clip-text text-transparent">
+              Under Control.
+            </span>
+          </h1>
+
+          <p
+            className={`text-xl text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed transition-all duration-700 delay-200 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
+            Mission control for AI-powered development. Voice interface, real-time visibility,
+            and approval workflows that let you ship faster without losing control.
           </p>
-        </div>
 
-        <div data-testid="stat-card" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.projects')}</span>
-            <Folder className="w-4 h-4 text-violet-500" />
+          <div
+            className={`flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 transition-all duration-700 delay-300 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
+            <Link
+              href="/signup"
+              className="group px-8 py-4 bg-violet-500 hover:bg-violet-600 rounded-lg font-semibold text-lg transition flex items-center gap-2"
+            >
+              Start Building Free
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <a
+              href="#how-it-works"
+              className="px-8 py-4 bg-[#18181B] hover:bg-[#27272A] border border-[#27272A] rounded-lg font-semibold text-lg transition flex items-center gap-2"
+            >
+              <Play className="w-5 h-5" />
+              See It Work
+            </a>
           </div>
-          <p className="text-3xl font-bold text-[#FAFAFA]">{stats?.totalProjects || 0}</p>
-          <p className="text-xs text-[#A1A1AA] mt-1">{t('dashboard.stats.tracked')}</p>
-        </div>
 
-        <div data-testid="stat-card" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.todayCost')}</span>
-            <DollarSign className="w-4 h-4 text-violet-500" />
+          {/* Stats */}
+          <div
+            className={`flex justify-center gap-12 transition-all duration-700 delay-400 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}
+          >
+            {stats.map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-3xl font-bold text-violet-400">{stat.value}</div>
+                <div className="text-sm text-gray-500">{stat.label}</div>
+              </div>
+            ))}
           </div>
-          <p className="text-3xl font-bold text-[#FAFAFA]">${(stats?.todayCost ?? 0).toFixed(2)}</p>
-          <p className="text-xs text-[#A1A1AA] mt-1">
-            ${remainingBudget.toFixed(2)} {t('dashboard.stats.remaining')}
-          </p>
         </div>
 
-        <div data-testid="stat-card" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6 transition-all hover:border-[#3f3f46]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-[#A1A1AA]">{t('dashboard.stats.successRate')}</span>
-            <TrendingUp className="w-4 h-4 text-violet-500" />
-          </div>
-          <p className="text-3xl font-bold text-[#FAFAFA]">{stats?.successRate ?? 0}%</p>
-          <p className="text-xs text-green-400 mt-1">
-            {stats && (stats.successRate ?? 0) >= 90 ? t('dashboard.stats.thisWeek') : t('dashboard.stats.improving')}
-          </p>
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <ChevronDown className="w-6 h-6 text-gray-500" />
         </div>
-      </div>
+      </section>
 
-      {/* Active Agents */}
-      <div className="quetrex-card mb-8">
-        <h2 className="text-xl font-semibold mb-4">{t('dashboard.activeAgentsSection.title')}</h2>
-        {agents.length === 0 ? (
-          <div className="quetrex-glass p-8 rounded-lg text-center">
-            <p className="text-muted-foreground">{t('dashboard.activeAgentsSection.noAgents')}</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              {t('dashboard.activeAgentsSection.noAgentsSubtext')}
+      {/* Pain Points Section */}
+      <section className="py-20 px-6 bg-[#0F0F10]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Sound familiar?
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Every developer using AI tools hits these walls.
             </p>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {agents.map((agent) => (
-              <div key={agent.id} className="quetrex-glass p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <div>
-                      <p className="font-medium">
-                        {agent.project} - Issue #{agent.issue}
-                      </p>
-                      <p className="text-sm text-muted-foreground">{agent.title}</p>
-                    </div>
-                  </div>
-                  <span className="text-xs px-2 py-1 rounded quetrex-status-running">
-                    {agent.status}
-                  </span>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {painPoints.map((point, index) => (
+              <div
+                key={index}
+                className={`p-6 rounded-xl border transition-all duration-300 ${
+                  index === activePain
+                    ? "bg-violet-500/10 border-violet-500/30"
+                    : "bg-[#18181B] border-[#27272A] hover:border-[#3F3F46]"
+                }`}
+              >
+                <point.icon
+                  className={`w-8 h-8 mb-4 ${
+                    index === activePain ? "text-violet-400" : "text-gray-500"
+                  }`}
+                />
+                <p className="text-red-400 text-sm font-medium mb-2">THE PROBLEM</p>
+                <p className="text-white font-semibold mb-4">{point.pain}</p>
+                <p className="text-green-400 text-sm font-medium mb-2">QUETREX FIX</p>
+                <p className="text-gray-300">{point.solution}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              From idea to deployed in 3 steps
+            </h2>
+            <p className="text-gray-400 text-lg">
+              No terminal babysitting. No context switching. Just results.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                step: "1",
+                title: "Speak your feature",
+                description:
+                  "Open voice chat, describe what you want in plain language. AI architect asks clarifying questions and creates a detailed spec.",
+                highlight: "30 seconds to spec",
+              },
+              {
+                step: "2",
+                title: "Review & approve",
+                description:
+                  "Read the generated spec. Make edits if needed. One click to approve and create a GitHub issue automatically.",
+                highlight: "You stay in control",
+              },
+              {
+                step: "3",
+                title: "AI builds it",
+                description:
+                  "Quetrex agents write tests, implement code, and create PRs. Watch progress in real-time or get notified when done.",
+                highlight: "Quality gates enforced",
+              },
+            ].map((item) => (
+              <div key={item.step} className="relative">
+                <div className="absolute -top-4 -left-4 w-12 h-12 bg-violet-500 rounded-full flex items-center justify-center text-xl font-bold">
+                  {item.step}
                 </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>{agent.phase}</span>
-                  <span>•</span>
-                  <span>{t('dashboard.activeAgentsSection.elapsed', { minutes: agent.elapsedMinutes })}</span>
-                  <span>•</span>
-                  <span>{t('dashboard.activeAgentsSection.spent', { cost: (agent.cost ?? 0).toFixed(2) })}</span>
+                <div className="pt-8 pl-8">
+                  <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                  <p className="text-gray-400 mb-4">{item.description}</p>
+                  <span className="inline-block px-3 py-1 bg-green-500/10 text-green-400 text-sm rounded-full">
+                    {item.highlight}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-        )}
-      </div>
-
-      {/* Projects */}
-      <div id="projects-section" className="bg-[#18181B] border border-[#27272A] rounded-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-[#FAFAFA]">{t('dashboard.projectsSection.title')}</h2>
         </div>
+      </section>
 
-        {projects.length === 0 ? (
-          <div className="bg-[#0A0A0B] p-8 rounded-lg text-center">
-            <p className="text-[#A1A1AA]">{t('dashboard.projectsSection.noProjects')}</p>
-            <p className="text-sm text-[#A1A1AA] mt-2">
-              {t('dashboard.projectsSection.noProjectsSubtext')}
+      {/* Features Grid */}
+      <section id="features" className="py-20 px-6 bg-[#0F0F10]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Everything you need to ship faster
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Built by developers who were tired of the same problems.
             </p>
           </div>
-        ) : (
-          <div data-testid="projects-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <ProjectCard
-                key={project.name}
-                project={project}
-                onMuteToggle={handleMuteToggle}
-                onViewDetails={handleViewDetails}
-                onSpeakToArchitect={handleSpeakToArchitect}
-                onViewSpec={handleViewSpec}
-              />
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feature, index) => (
+              <div
+                key={index}
+                className="p-6 bg-[#18181B] border border-[#27272A] rounded-xl hover:border-violet-500/30 transition-all group"
+              >
+                <div className="w-12 h-12 bg-violet-500/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-violet-500/20 transition">
+                  <feature.icon className="w-6 h-6 text-violet-400" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                <p className="text-gray-400">{feature.description}</p>
+              </div>
             ))}
           </div>
-        )}
-      </div>
-      </main>
-    </ProtectedRoute>
+        </div>
+      </section>
+
+      {/* Trust/Social Proof Section */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12">
+            Built for developers who value their time
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-8 mb-12">
+            {[
+              {
+                quote:
+                  "Finally, I can see what the AI is doing instead of hoping it doesn't break everything.",
+                author: "Sarah K.",
+                role: "Senior Developer",
+              },
+              {
+                quote:
+                  "The spec approval flow saved us from so many bad implementations. Game changer.",
+                author: "Mike R.",
+                role: "Tech Lead",
+              },
+              {
+                quote:
+                  "I manage 4 projects now with less stress than I used to have with 1.",
+                author: "Alex T.",
+                role: "Indie Hacker",
+              },
+            ].map((testimonial, index) => (
+              <div
+                key={index}
+                className="p-6 bg-[#18181B] border border-[#27272A] rounded-xl text-left"
+              >
+                <p className="text-gray-300 mb-4 italic">"{testimonial.quote}"</p>
+                <div>
+                  <p className="font-semibold">{testimonial.author}</p>
+                  <p className="text-gray-500 text-sm">{testimonial.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-4 text-gray-500 text-sm">
+            <span className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-500" />
+              No credit card required
+            </span>
+            <span className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-500" />
+              Free tier forever
+            </span>
+            <span className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-green-500" />
+              Setup in 2 minutes
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 px-6 bg-[#0F0F10]">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Free until you're hooked
+            </h2>
+            <p className="text-gray-400 text-lg">
+              Start building. Pay only when you need more.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Starter",
+                price: "Free",
+                description: "For indie hackers and side projects",
+                features: [
+                  "1 project",
+                  "100 agent minutes/month",
+                  "Basic voice interface",
+                  "GitHub integration",
+                  "Community support",
+                ],
+                cta: "Get Started",
+                highlight: false,
+              },
+              {
+                name: "Pro",
+                price: "$49",
+                period: "/month",
+                description: "For professional developers",
+                features: [
+                  "Unlimited projects",
+                  "1,000 agent minutes/month",
+                  "Advanced voice features",
+                  "Priority execution",
+                  "Email support",
+                  "Team sharing (coming soon)",
+                ],
+                cta: "Start Free Trial",
+                highlight: true,
+              },
+              {
+                name: "Team",
+                price: "$199",
+                period: "/month",
+                description: "For development teams",
+                features: [
+                  "Everything in Pro",
+                  "5,000 agent minutes/month",
+                  "5 team members",
+                  "Custom runners",
+                  "Priority support",
+                  "SSO (coming soon)",
+                ],
+                cta: "Contact Sales",
+                highlight: false,
+              },
+            ].map((plan, index) => (
+              <div
+                key={index}
+                className={`p-8 rounded-xl border ${
+                  plan.highlight
+                    ? "bg-violet-500/10 border-violet-500/30 scale-105"
+                    : "bg-[#18181B] border-[#27272A]"
+                }`}
+              >
+                {plan.highlight && (
+                  <span className="inline-block px-3 py-1 bg-violet-500 text-white text-xs font-medium rounded-full mb-4">
+                    MOST POPULAR
+                  </span>
+                )}
+                <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
+                <div className="mb-4">
+                  <span className="text-4xl font-bold">{plan.price}</span>
+                  {plan.period && <span className="text-gray-400">{plan.period}</span>}
+                </div>
+                <p className="text-gray-400 text-sm mb-6">{plan.description}</p>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm">
+                      <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      <span className="text-gray-300">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/signup"
+                  className={`block w-full py-3 text-center rounded-lg font-medium transition ${
+                    plan.highlight
+                      ? "bg-violet-500 hover:bg-violet-600 text-white"
+                      : "bg-[#27272A] hover:bg-[#3F3F46] text-white"
+                  }`}
+                >
+                  {plan.cta}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20 px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+            Stop babysitting. Start shipping.
+          </h2>
+          <p className="text-xl text-gray-400 mb-8">
+            Join developers who've taken back control of their AI-powered workflow.
+          </p>
+          <Link
+            href="/signup"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-violet-500 hover:bg-violet-600 rounded-lg font-semibold text-lg transition group"
+          >
+            Get Started Free
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <p className="text-gray-500 text-sm mt-4">
+            Free forever. No credit card required.
+          </p>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 border-t border-[#27272A]">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/quetrex-logo.png"
+              alt="Quetrex"
+              width={32}
+              height={32}
+              className="rounded-lg"
+            />
+            <span className="font-semibold">Quetrex</span>
+          </div>
+          <div className="flex items-center gap-6 text-sm text-gray-400">
+            <a href="#" className="hover:text-white transition">
+              Privacy
+            </a>
+            <a href="#" className="hover:text-white transition">
+              Terms
+            </a>
+            <a href="#" className="hover:text-white transition">
+              Docs
+            </a>
+            <a href="https://github.com/barnent1/quetrex" className="hover:text-white transition">
+              GitHub
+            </a>
+          </div>
+          <p className="text-sm text-gray-500">
+            2025 Quetrex. Built with Claude.
+          </p>
+        </div>
+      </footer>
+    </div>
   );
 }
