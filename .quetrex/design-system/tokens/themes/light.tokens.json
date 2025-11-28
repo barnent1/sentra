@@ -1,0 +1,19 @@
+{
+  "$description": "Quetrex Light Theme",
+
+  "color": {
+    "background": {
+      "base": { "$value": "{color.neutral.50}", "$type": "color" },
+      "surface": { "$value": "#ffffff", "$type": "color" },
+      "elevated": { "$value": "#ffffff", "$type": "color" }
+    },
+    "text": {
+      "primary": { "$value": "{color.neutral.900}", "$type": "color" },
+      "secondary": { "$value": "{color.neutral.600}", "$type": "color" },
+      "muted": { "$value": "{color.neutral.500}", "$type": "color" }
+    },
+    "border": {
+      "default": { "$value": "{color.neutral.200}", "$type": "color" }
+    }
+  }
+}

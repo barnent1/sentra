@@ -1,0 +1,54 @@
+{
+  "color": {
+    "$description": "Quetrex core color palette - raw values",
+
+    "indigo": {
+      "$description": "Primary brand color",
+      "50": { "$value": "#eef2ff", "$type": "color" },
+      "100": { "$value": "#e0e7ff", "$type": "color" },
+      "200": { "$value": "#c7d2fe", "$type": "color" },
+      "300": { "$value": "#a5b4fc", "$type": "color" },
+      "400": { "$value": "#818cf8", "$type": "color" },
+      "500": { "$value": "#6366f1", "$type": "color", "$description": "Primary accent" },
+      "600": { "$value": "#4f46e5", "$type": "color" },
+      "700": { "$value": "#4338ca", "$type": "color" },
+      "800": { "$value": "#3730a3", "$type": "color" },
+      "900": { "$value": "#312e81", "$type": "color" },
+      "950": { "$value": "#1e1b4b", "$type": "color" }
+    },
+
+    "neutral": {
+      "$description": "Grayscale for backgrounds and text",
+      "50": { "$value": "#fafafa", "$type": "color" },
+      "100": { "$value": "#f4f4f5", "$type": "color" },
+      "200": { "$value": "#e4e4e7", "$type": "color" },
+      "300": { "$value": "#d4d4d8", "$type": "color" },
+      "400": { "$value": "#a1a1aa", "$type": "color" },
+      "500": { "$value": "#71717a", "$type": "color" },
+      "600": { "$value": "#52525b", "$type": "color" },
+      "700": { "$value": "#3f3f46", "$type": "color" },
+      "800": { "$value": "#27272a", "$type": "color" },
+      "900": { "$value": "#18181b", "$type": "color" },
+      "950": { "$value": "#0a0a0a", "$type": "color", "$description": "True dark base" }
+    },
+
+    "semantic": {
+      "$description": "Semantic colors for states",
+      "success": { "$value": "#22c55e", "$type": "color" },
+      "success-light": { "$value": "#86efac", "$type": "color" },
+      "success-dark": { "$value": "#16a34a", "$type": "color" },
+
+      "warning": { "$value": "#f59e0b", "$type": "color" },
+      "warning-light": { "$value": "#fcd34d", "$type": "color" },
+      "warning-dark": { "$value": "#d97706", "$type": "color" },
+
+      "error": { "$value": "#ef4444", "$type": "color" },
+      "error-light": { "$value": "#fca5a5", "$type": "color" },
+      "error-dark": { "$value": "#dc2626", "$type": "color" },
+
+      "info": { "$value": "#3b82f6", "$type": "color" },
+      "info-light": { "$value": "#93c5fd", "$type": "color" },
+      "info-dark": { "$value": "#2563eb", "$type": "color" }
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "$description": "Quetrex Dark Theme (Default)",
+
+  "color": {
+    "background": {
+      "base": { "$value": "{color.neutral.950}", "$type": "color" },
+      "surface": { "$value": "{color.neutral.900}", "$type": "color" },
+      "elevated": { "$value": "{color.neutral.800}", "$type": "color" }
+    },
+    "text": {
+      "primary": { "$value": "{color.neutral.50}", "$type": "color" },
+      "secondary": { "$value": "{color.neutral.400}", "$type": "color" },
+      "muted": { "$value": "{color.neutral.500}", "$type": "color" }
+    },
+    "border": {
+      "default": { "$value": "rgba(255, 255, 255, 0.1)", "$type": "color" }
+    }
+  }
+}

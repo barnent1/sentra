@@ -1,0 +1,130 @@
+{
+  "color": {
+    "$description": "Semantic color tokens - contextual usage",
+
+    "background": {
+      "base": {
+        "$value": "{color.neutral.950}",
+        "$type": "color",
+        "$description": "Primary app background - true dark"
+      },
+      "surface": {
+        "$value": "{color.neutral.900}",
+        "$type": "color",
+        "$description": "Cards, panels, elevated surfaces"
+      },
+      "elevated": {
+        "$value": "{color.neutral.800}",
+        "$type": "color",
+        "$description": "Modals, popovers, dropdowns"
+      },
+      "hover": {
+        "$value": "rgba(255, 255, 255, 0.05)",
+        "$type": "color",
+        "$description": "Hover state for interactive surfaces"
+      },
+      "active": {
+        "$value": "rgba(255, 255, 255, 0.1)",
+        "$type": "color",
+        "$description": "Active/pressed state"
+      }
+    },
+
+    "text": {
+      "primary": {
+        "$value": "{color.neutral.50}",
+        "$type": "color",
+        "$description": "Primary text - headings, important content"
+      },
+      "secondary": {
+        "$value": "{color.neutral.400}",
+        "$type": "color",
+        "$description": "Secondary text - descriptions, labels"
+      },
+      "muted": {
+        "$value": "{color.neutral.500}",
+        "$type": "color",
+        "$description": "Muted text - placeholders, disabled"
+      },
+      "inverse": {
+        "$value": "{color.neutral.950}",
+        "$type": "color",
+        "$description": "Text on light backgrounds"
+      }
+    },
+
+    "accent": {
+      "primary": {
+        "$value": "{color.indigo.500}",
+        "$type": "color",
+        "$description": "Primary actions, links, focus states"
+      },
+      "hover": {
+        "$value": "{color.indigo.400}",
+        "$type": "color",
+        "$description": "Hover state for primary accent"
+      },
+      "active": {
+        "$value": "{color.indigo.600}",
+        "$type": "color",
+        "$description": "Active/pressed state"
+      },
+      "muted": {
+        "$value": "rgba(99, 102, 241, 0.1)",
+        "$type": "color",
+        "$description": "Subtle accent backgrounds"
+      },
+      "text": {
+        "$value": "{color.indigo.400}",
+        "$type": "color",
+        "$description": "Accent colored text"
+      }
+    },
+
+    "border": {
+      "default": {
+        "$value": "rgba(255, 255, 255, 0.1)",
+        "$type": "color",
+        "$description": "Default border color"
+      },
+      "hover": {
+        "$value": "rgba(255, 255, 255, 0.2)",
+        "$type": "color",
+        "$description": "Border on hover"
+      },
+      "focus": {
+        "$value": "{color.indigo.500}",
+        "$type": "color",
+        "$description": "Focus ring color"
+      },
+      "accent": {
+        "$value": "rgba(99, 102, 241, 0.3)",
+        "$type": "color",
+        "$description": "Accent border"
+      }
+    },
+
+    "state": {
+      "success": {
+        "background": { "$value": "rgba(34, 197, 94, 0.1)", "$type": "color" },
+        "text": { "$value": "{color.semantic.success}", "$type": "color" },
+        "border": { "$value": "rgba(34, 197, 94, 0.2)", "$type": "color" }
+      },
+      "warning": {
+        "background": { "$value": "rgba(245, 158, 11, 0.1)", "$type": "color" },
+        "text": { "$value": "{color.semantic.warning}", "$type": "color" },
+        "border": { "$value": "rgba(245, 158, 11, 0.2)", "$type": "color" }
+      },
+      "error": {
+        "background": { "$value": "rgba(239, 68, 68, 0.1)", "$type": "color" },
+        "text": { "$value": "{color.semantic.error}", "$type": "color" },
+        "border": { "$value": "rgba(239, 68, 68, 0.2)", "$type": "color" }
+      },
+      "info": {
+        "background": { "$value": "rgba(59, 130, 246, 0.1)", "$type": "color" },
+        "text": { "$value": "{color.semantic.info}", "$type": "color" },
+        "border": { "$value": "rgba(59, 130, 246, 0.2)", "$type": "color" }
+      }
+    }
+  }
+}

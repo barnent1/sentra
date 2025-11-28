@@ -1,0 +1,111 @@
+{
+  "$schema": "https://quetrex.app/schemas/design-system.json",
+  "name": "Quetrex Design System",
+  "version": "1.0.0",
+  "created": "2025-11-28",
+  "updated": "2025-11-28",
+  "format": "DTCG-2025.10",
+
+  "brand": {
+    "name": "Quetrex",
+    "tagline": "AI-Powered SaaS Factory",
+    "personality": ["Calm", "Focused", "Futuristic", "Professional", "Trustworthy"],
+    "targetAudience": "Developers, non-technical founders, and agencies who want to build stellar apps with AI assistance",
+    "voiceTone": "Professional yet approachable. Clear and concise. Confident but not arrogant."
+  },
+
+  "themes": {
+    "default": "dark",
+    "available": ["dark", "light"],
+    "strategy": "Dark mode default, user can switch to light"
+  },
+
+  "colors": {
+    "primary": {
+      "name": "Indigo",
+      "value": "#6366f1",
+      "reasoning": "Balances futuristic/creative (like violet) with trustworthy/professional (like blue). More universally appealing than pure violet while maintaining distinctiveness."
+    },
+    "semantic": {
+      "success": "#22c55e",
+      "warning": "#f59e0b",
+      "error": "#ef4444",
+      "info": "#3b82f6"
+    },
+    "background": {
+      "dark": "#0a0a0a",
+      "light": "#fafafa"
+    }
+  },
+
+  "typography": {
+    "headingFont": {
+      "name": "Plus Jakarta Sans",
+      "fallback": "system-ui, sans-serif",
+      "reasoning": "Modern, geometric, distinctive. Conveys futuristic professionalism."
+    },
+    "bodyFont": {
+      "name": "Inter",
+      "fallback": "system-ui, sans-serif",
+      "reasoning": "Excellent readability for long focus sessions. Industry standard for body text."
+    },
+    "monoFont": {
+      "name": "JetBrains Mono",
+      "fallback": "Fira Code, monospace",
+      "reasoning": "Developer-friendly with ligatures. Professional for code display."
+    }
+  },
+
+  "borderRadius": {
+    "style": "rounded",
+    "reasoning": "Friendlier, approachable feel like Linear. Consistent with calm/focused personality."
+  },
+
+  "motion": {
+    "duration": {
+      "fast": "150ms",
+      "normal": "200ms",
+      "slow": "300ms"
+    },
+    "easing": "cubic-bezier(0.33, 1, 0.68, 1)"
+  },
+
+  "decisions": [
+    {
+      "date": "2025-11-28",
+      "area": "Primary Color",
+      "decision": "Indigo (#6366f1) instead of Violet",
+      "reasoning": "More universally appealing while maintaining futuristic feel. Less 'AI-ish' than pure violet.",
+      "decidedBy": "Glen Barnhardt with Maya (Design Specialist)"
+    },
+    {
+      "date": "2025-11-28",
+      "area": "Theme Strategy",
+      "decision": "Dark mode default with light mode option",
+      "reasoning": "Target audience (developers, long focus sessions) prefers dark. Matches Linear/Tailwind inspiration.",
+      "decidedBy": "Glen Barnhardt with Maya (Design Specialist)"
+    },
+    {
+      "date": "2025-11-28",
+      "area": "Border Radius",
+      "decision": "Rounded style (like Linear)",
+      "reasoning": "Friendlier, more approachable. Aligns with calm/focused brand personality.",
+      "decidedBy": "Glen Barnhardt with Maya (Design Specialist)"
+    }
+  ],
+
+  "inspirations": [
+    {
+      "name": "Linear",
+      "url": "https://linear.app",
+      "aspects": ["Dark mode aesthetic", "Clean minimal UI", "Subtle animations"]
+    },
+    {
+      "name": "TailwindCSS",
+      "url": "https://tailwindcss.com",
+      "aspects": ["Developer-focused", "Clean typography", "Technical precision"]
+    }
+  ],
+
+  "buildTargets": ["css", "tailwind", "json", "typescript"]
+}
