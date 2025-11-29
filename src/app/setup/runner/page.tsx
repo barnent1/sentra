@@ -87,10 +87,16 @@ export default function RunnerSetupPage() {
     setLoading(true);
 
     try {
+      const accessToken = localStorage.getItem('accessToken');
+      if (!accessToken) {
+        throw new Error('Please log in to continue');
+      }
+
       const response = await fetch('/api/runners', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
           provider: provider === 'existing' ? 'hetzner' : provider,
