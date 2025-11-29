@@ -156,7 +156,7 @@ export default function RunnerSetupPage() {
                     Create New Hetzner Account
                   </h3>
                   <p className="text-gray-400 text-sm mt-1">
-                    We'll help you set up a Hetzner Cloud account. CX32 costs ~$8/mo.
+                    We&apos;ll help you set up a Hetzner Cloud account. CX32 costs ~$8/mo.
                   </p>
                   <div className="flex items-center gap-2 mt-3">
                     <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded">Recommended</span>
@@ -195,7 +195,7 @@ export default function RunnerSetupPage() {
               onClick={handleSkip}
               className="text-gray-500 hover:text-gray-400 text-sm"
             >
-              Skip for now - I'll set this up later
+              Skip for now - I&apos;ll set this up later
             </button>
           </div>
         </div>
