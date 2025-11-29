@@ -6,6 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { drizzleDb } from '@/services/database-drizzle';
+import { validateHetznerToken, provisionRunner, ServerType } from '@/services/runner-provisioning';
+import { randomBytes } from 'crypto';
 
 export const runtime = 'nodejs';
 
@@ -66,9 +68,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate Hetzner API token if provided
+    if (provider === 'hetzner' && apiToken) {
+      const isValidToken = await validateHetznerToken(apiToken);
+      if (!isValidToken) {
+        return NextResponse.json(
+          { error: 'Invalid Hetzner API token. Please check your token and try again.' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Get user's organizations to find their personal org
     const userOrgs = await drizzleDb.listUserOrganizations(user.userId);
     const personalOrg = userOrgs.find(org => org.type === 'personal') || userOrgs[0];
+
+    // Generate a unique API key for this runner to communicate with Quetrex
+    const runnerApiKey = `qr_${randomBytes(32).toString('hex')}`;
 
     // Create the runner
     const runner = await drizzleDb.createRunner({
@@ -79,18 +95,40 @@ export async function POST(request: NextRequest) {
       region,
       serverType,
       maxConcurrentJobs: concurrentJobs,
-      apiToken,
+      apiToken, // Note: In production, encrypt this before storing
     });
 
-    // TODO: In a real implementation, we would:
-    // 1. Encrypt the API token before storing
-    // 2. Trigger a background job to provision the server
-    // 3. Set up the runner agent on the server
-    // 4. Update the runner status to 'provisioning' then 'active'
+    // If Hetzner and API token provided, start provisioning in background
+    if (provider === 'hetzner' && apiToken) {
+      // Fire and forget - provisioning runs in background
+      // The provisionRunner function updates the runner status as it progresses
+      provisionRunner({
+        userId: user.userId,
+        runnerId: runner.id,
+        apiToken,
+        serverType: serverType as ServerType,
+        region,
+        maxConcurrentJobs: concurrentJobs,
+        quetrexApiKey: runnerApiKey,
+      }).catch((error) => {
+        console.error('[Runners] Background provisioning error:', error);
+      });
 
-    // For now, simulate provisioning
-    await drizzleDb.updateRunner(runner.id, { status: 'provisioning' });
+      // Return immediately with provisioning status
+      return NextResponse.json({
+        id: runner.id,
+        name: runner.name,
+        provider: runner.provider,
+        region: runner.region,
+        serverType: runner.serverType,
+        maxConcurrentJobs: runner.maxConcurrentJobs,
+        status: 'provisioning',
+        message: 'Runner is being provisioned. This typically takes 2-3 minutes.',
+        createdAt: runner.createdAt,
+      }, { status: 201 });
+    }
 
+    // For non-Hetzner or no API token, just create the record
     return NextResponse.json({
       id: runner.id,
       name: runner.name,
