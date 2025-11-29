@@ -8,11 +8,12 @@
 import { drizzleDb } from './database-drizzle';
 
 // Server type configurations based on concurrent job capacity
+// Using CPX (shared vCPU) servers for US region availability
 export const SERVER_CONFIGS = {
-  cx22: { ram: '4GB', vcpu: 2, storage: '40GB', maxJobs: 1, monthlyPrice: 4.35 },
-  cx32: { ram: '8GB', vcpu: 4, storage: '80GB', maxJobs: 2, monthlyPrice: 8.49 },
-  cx42: { ram: '16GB', vcpu: 8, storage: '160GB', maxJobs: 4, monthlyPrice: 16.99 },
-  cx52: { ram: '32GB', vcpu: 16, storage: '240GB', maxJobs: 8, monthlyPrice: 33.99 },
+  cpx11: { ram: '2GB', vcpu: 2, storage: '40GB', maxJobs: 1, monthlyPrice: 4.99 },
+  cpx31: { ram: '8GB', vcpu: 4, storage: '160GB', maxJobs: 2, monthlyPrice: 17.99 },
+  cpx41: { ram: '16GB', vcpu: 8, storage: '240GB', maxJobs: 4, monthlyPrice: 33.49 },
+  cpx51: { ram: '32GB', vcpu: 16, storage: '360GB', maxJobs: 8, monthlyPrice: 66.99 },
 } as const;
 
 export type ServerType = keyof typeof SERVER_CONFIGS;

@@ -44,7 +44,7 @@ export default function DashboardPage() {
 
   const fetchData = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('accessToken');
       const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
