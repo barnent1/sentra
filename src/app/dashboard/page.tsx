@@ -210,11 +210,21 @@ export default function DashboardPage() {
               </div>
               <h4 className="text-white font-medium mb-2">No projects yet</h4>
               <p className="text-gray-400 text-sm mb-6 max-w-md mx-auto">
-                Add your first project by running the init command in your project directory.
+                Install the Quetrex CLI and initialize your first project.
               </p>
-              <div className="bg-[#0A0A0B] rounded-lg p-4 max-w-md mx-auto">
-                <p className="text-gray-500 text-xs mb-2"># In your project directory, run:</p>
-                <code className="text-violet-400 font-mono">quetrex init</code>
+              <div className="bg-[#0A0A0B] rounded-lg p-4 max-w-lg mx-auto text-left space-y-4">
+                <div>
+                  <p className="text-gray-500 text-xs mb-2"># Step 1: Install Quetrex CLI</p>
+                  <code className="text-violet-400 font-mono text-sm">curl -fsSL https://quetrex.com/install.sh | bash</code>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-2"># Step 2: Login to your account</p>
+                  <code className="text-violet-400 font-mono text-sm">quetrex login</code>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-xs mb-2"># Step 3: Initialize in your project</p>
+                  <code className="text-violet-400 font-mono text-sm">cd your-project && quetrex init</code>
+                </div>
               </div>
             </div>
           ) : (

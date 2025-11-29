@@ -1,0 +1,655 @@
+#!/usr/bin/env python3
+"""
+Quetrex CLI - AI-Powered Development Platform
+
+Commands:
+    quetrex login              - Authenticate with Quetrex
+    quetrex init [directory]   - Initialize a project with Quetrex
+    quetrex logout             - Clear saved credentials
+    quetrex doctor             - Check installation health
+    quetrex update             - Update the CLI to latest version
+
+Created by Glen Barnhardt with help from Claude Code
+"""
+
+import os
+import sys
+import json
+import subprocess
+import argparse
+import getpass
+from pathlib import Path
+from typing import Optional, Dict, Any
+from urllib.request import urlopen, Request
+from urllib.error import HTTPError, URLError
+
+VERSION = "1.0.0"
+API_URL = os.environ.get("QUETREX_API_URL", "https://quetrex.com")
+CONFIG_DIR = Path.home() / ".quetrex"
+CREDENTIALS_FILE = CONFIG_DIR / "credentials.json"
+
+
+# =============================================================================
+# Terminal Colors
+# =============================================================================
+
+class Colors:
+    HEADER = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    RED = '\033[91m'
+    END = '\033[0m'
+    BOLD = '\033[1m'
+
+
+def print_header(text: str):
+    print(f"\n{Colors.BOLD}{Colors.HEADER}{text}{Colors.END}\n")
+
+
+def print_success(text: str):
+    print(f"{Colors.GREEN}✓ {text}{Colors.END}")
+
+
+def print_error(text: str):
+    print(f"{Colors.RED}✗ {text}{Colors.END}")
+
+
+def print_warning(text: str):
+    print(f"{Colors.YELLOW}! {text}{Colors.END}")
+
+
+def print_info(text: str):
+    print(f"{Colors.CYAN}→ {text}{Colors.END}")
+
+
+# =============================================================================
+# Configuration & Credentials
+# =============================================================================
+
+def ensure_config_dir():
+    """Ensure config directory exists with proper permissions."""
+    CONFIG_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
+
+
+def save_credentials(credentials: Dict[str, Any]):
+    """Save credentials to disk."""
+    ensure_config_dir()
+    CREDENTIALS_FILE.write_text(json.dumps(credentials, indent=2))
+    CREDENTIALS_FILE.chmod(0o600)
+
+
+def load_credentials() -> Optional[Dict[str, Any]]:
+    """Load credentials from disk."""
+    if not CREDENTIALS_FILE.exists():
+        return None
+    try:
+        creds = json.loads(CREDENTIALS_FILE.read_text())
+        # Check if expired
+        if creds.get("expiresAt") and creds["expiresAt"] < (import_time() * 1000):
+            return None
+        return creds
+    except Exception:
+        return None
+
+
+def import_time():
+    """Get current timestamp."""
+    import time
+    return time.time()
+
+
+def clear_credentials():
+    """Clear saved credentials."""
+    if CREDENTIALS_FILE.exists():
+        CREDENTIALS_FILE.unlink()
+
+
+def is_logged_in() -> bool:
+    """Check if user is logged in."""
+    return load_credentials() is not None
+
+
+def get_access_token() -> Optional[str]:
+    """Get access token if logged in."""
+    creds = load_credentials()
+    return creds.get("accessToken") if creds else None
+
+
+# =============================================================================
+# API Client
+# =============================================================================
+
+def api_request(endpoint: str, method: str = "GET", data: Optional[Dict] = None) -> Dict:
+    """Make API request to Quetrex."""
+    url = f"{API_URL}{endpoint}"
+    headers = {"Content-Type": "application/json"}
+
+    token = get_access_token()
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    body = json.dumps(data).encode() if data else None
+    req = Request(url, data=body, headers=headers, method=method)
+
+    try:
+        with urlopen(req, timeout=30) as response:
+            return json.loads(response.read().decode())
+    except HTTPError as e:
+        error_body = e.read().decode()
+        try:
+            error_data = json.loads(error_body)
+            raise Exception(error_data.get("error", f"HTTP {e.code}"))
+        except json.JSONDecodeError:
+            raise Exception(f"HTTP {e.code}: {error_body}")
+    except URLError as e:
+        raise Exception(f"Connection error: {e.reason}")
+
+
+def api_login(email: str, password: str) -> Dict:
+    """Login to Quetrex."""
+    return api_request("/api/auth/login", "POST", {"email": email, "password": password})
+
+
+def api_get_organizations() -> Dict:
+    """Get user's organizations."""
+    return api_request("/api/organizations")
+
+
+def api_create_project(name: str, path: str, org_id: str) -> Dict:
+    """Create a project."""
+    return api_request("/api/projects", "POST", {
+        "name": name,
+        "path": path,
+        "orgId": org_id
+    })
+
+
+# =============================================================================
+# Commands
+# =============================================================================
+
+def cmd_login(args):
+    """Login to Quetrex."""
+    print_header("Quetrex Login")
+
+    # Check if already logged in
+    creds = load_credentials()
+    if creds:
+        print_warning(f"Already logged in as {creds.get('email')}")
+        response = input("Log in with a different account? [y/N]: ").strip().lower()
+        if response != 'y':
+            print_info("Using existing credentials.")
+            return
+
+    # Get credentials
+    print()
+    email = input("Email: ").strip()
+    password = getpass.getpass("Password: ")
+
+    print()
+    print_info("Logging in...")
+
+    try:
+        result = api_login(email, password)
+
+        # Save credentials
+        save_credentials({
+            "accessToken": result["accessToken"],
+            "refreshToken": result.get("refreshToken"),
+            "userId": result["user"]["id"],
+            "email": result["user"]["email"],
+            "name": result["user"].get("name"),
+            "expiresAt": import_time() * 1000 + result.get("expiresIn", 86400) * 1000
+        })
+
+        print_success(f"Logged in as {result['user'].get('name') or result['user']['email']}")
+        print()
+        print("Next steps:")
+        print(f"  {Colors.CYAN}cd your-project{Colors.END}")
+        print(f"  {Colors.CYAN}quetrex init{Colors.END}")
+        print()
+    except Exception as e:
+        print_error(f"Login failed: {e}")
+        print()
+        print_info(f"Don't have an account? Sign up at {API_URL}/signup")
+        sys.exit(1)
+
+
+def cmd_logout(args):
+    """Logout from Quetrex."""
+    print_header("Quetrex Logout")
+
+    if not is_logged_in():
+        print_info("Not logged in.")
+        return
+
+    clear_credentials()
+    print_success("Logged out successfully.")
+
+
+def cmd_init(args):
+    """Initialize a project with Quetrex."""
+    print_header("Quetrex Project Initialization")
+
+    # Determine target directory
+    target_dir = Path(args.directory) if args.directory else Path.cwd()
+    target_dir = target_dir.absolute()
+
+    print_info(f"Project directory: {target_dir}")
+    print()
+
+    if not target_dir.exists():
+        print_error(f"Directory does not exist: {target_dir}")
+        sys.exit(1)
+
+    # Check if already initialized
+    config_file = target_dir / ".quetrex" / "config.json"
+    if config_file.exists() and not args.force:
+        try:
+            config = json.loads(config_file.read_text())
+            print_warning("This project is already registered with Quetrex.")
+            print_info(f"Project ID: {config.get('projectId')}")
+            print()
+            print("Use --force to re-initialize.")
+            return
+        except Exception:
+            pass
+
+    # Step 1: Run npx create-quetrex
+    print(f"{Colors.BOLD}Step 1: Installing Quetrex infrastructure{Colors.END}")
+    print_info("Running npx create-quetrex...")
+
+    try:
+        result = subprocess.run(
+            ["npx", "create-quetrex", "--yes"],
+            cwd=target_dir,
+            capture_output=False
+        )
+        if result.returncode == 0:
+            print_success("Installed agents, skills, and hooks")
+        else:
+            print_warning("create-quetrex failed, continuing with manual setup...")
+    except FileNotFoundError:
+        print_warning("npx not found, skipping create-quetrex...")
+    except Exception as e:
+        print_warning(f"create-quetrex failed: {e}")
+
+    print()
+
+    # Step 2: Create CLAUDE.md if not exists
+    print(f"{Colors.BOLD}Step 2: Setting up CLAUDE.md{Colors.END}")
+    claude_md = target_dir / "CLAUDE.md"
+    if not claude_md.exists():
+        project_name = get_project_name(target_dir)
+        claude_md.write_text(get_claude_md_template(project_name))
+        print_success("Created CLAUDE.md")
+    else:
+        print_info("CLAUDE.md already exists")
+
+    print()
+
+    # Step 3: Create GitHub Actions workflow
+    print(f"{Colors.BOLD}Step 3: Setting up GitHub Actions{Colors.END}")
+    workflow_dir = target_dir / ".github" / "workflows"
+    workflow_file = workflow_dir / "quetrex-agent.yml"
+
+    if not workflow_file.exists():
+        workflow_dir.mkdir(parents=True, exist_ok=True)
+        workflow_file.write_text(get_github_workflow_template())
+        print_success("Created GitHub Actions workflow")
+    else:
+        print_info("GitHub Actions workflow already exists")
+
+    print()
+
+    # Step 4: Register with Quetrex
+    print(f"{Colors.BOLD}Step 4: Registering with Quetrex{Colors.END}")
+
+    if not is_logged_in():
+        print_warning("Not logged in. Run 'quetrex login' to register this project.")
+        print()
+        print_success("Local setup complete!")
+        print()
+        print("To complete registration:")
+        print(f"  {Colors.CYAN}quetrex login{Colors.END}")
+        print(f"  {Colors.CYAN}quetrex init{Colors.END}")
+        return
+
+    print_info("Registering project...")
+
+    try:
+        # Get organizations
+        orgs_result = api_get_organizations()
+        orgs = orgs_result.get("organizations", [])
+        personal_org = next((o for o in orgs if o.get("type") == "personal"), orgs[0] if orgs else None)
+
+        if not personal_org:
+            raise Exception("No organization found")
+
+        # Get project info
+        project_name = get_project_name(target_dir)
+        project_path = get_git_remote(target_dir) or str(target_dir)
+
+        # Create project
+        project = api_create_project(project_name, project_path, personal_org["id"])
+
+        # Save config locally
+        quetrex_dir = target_dir / ".quetrex"
+        quetrex_dir.mkdir(parents=True, exist_ok=True)
+        config_file = quetrex_dir / "config.json"
+        config_file.write_text(json.dumps({
+            "projectId": project["id"],
+            "name": project["name"],
+            "orgId": personal_org["id"],
+            "registeredAt": subprocess.check_output(["date", "-Iseconds"]).decode().strip()
+        }, indent=2))
+
+        print_success("Project registered!")
+        print()
+        print_info(f"Project ID: {project['id']}")
+
+        # Remind about GitHub secrets
+        print()
+        print(f"{Colors.YELLOW}Important: Add these secrets to your GitHub repository:{Colors.END}")
+        print("  Settings > Secrets and variables > Actions")
+        print()
+        print(f"  {Colors.BOLD}QUETREX_PROJECT_ID{Colors.END} = {project['id']}")
+        print(f"  {Colors.BOLD}QUETREX_API_KEY{Colors.END} = (get from Quetrex dashboard)")
+
+    except Exception as e:
+        print_error(f"Registration failed: {e}")
+        print()
+        print_info("Local setup is complete. You can register later.")
+
+    print()
+    print_success("Initialization complete!")
+    print()
+    print("Next steps:")
+    print(f"  1. Review and customize {Colors.CYAN}CLAUDE.md{Colors.END}")
+    print(f"  2. Add GitHub secrets for the workflow")
+    print(f"  3. Create an issue with {Colors.CYAN}ai-feature{Colors.END} label")
+    print()
+
+
+def cmd_doctor(args):
+    """Check installation health."""
+    print_header("Quetrex Health Check")
+
+    checks = []
+
+    # Check Python
+    checks.append(("Python", True, f"Python {sys.version.split()[0]}"))
+
+    # Check Git
+    try:
+        result = subprocess.run(["git", "--version"], capture_output=True, text=True)
+        if result.returncode == 0:
+            checks.append(("Git", True, result.stdout.strip()))
+        else:
+            checks.append(("Git", False, "Not found"))
+    except FileNotFoundError:
+        checks.append(("Git", False, "Not installed"))
+
+    # Check Node.js
+    try:
+        result = subprocess.run(["node", "--version"], capture_output=True, text=True)
+        if result.returncode == 0:
+            checks.append(("Node.js", True, f"Node.js {result.stdout.strip()}"))
+        else:
+            checks.append(("Node.js", False, "Not found"))
+    except FileNotFoundError:
+        checks.append(("Node.js", False, "Not installed"))
+
+    # Check npx
+    try:
+        result = subprocess.run(["npx", "--version"], capture_output=True, text=True)
+        if result.returncode == 0:
+            checks.append(("npx", True, f"npx {result.stdout.strip()}"))
+        else:
+            checks.append(("npx", False, "Not found"))
+    except FileNotFoundError:
+        checks.append(("npx", False, "Not installed"))
+
+    # Check Claude Code CLI
+    try:
+        result = subprocess.run(["claude", "--version"], capture_output=True, text=True)
+        if result.returncode == 0:
+            checks.append(("Claude Code", True, result.stdout.strip()))
+        else:
+            checks.append(("Claude Code", False, "Not found"))
+    except FileNotFoundError:
+        checks.append(("Claude Code", False, "Not installed"))
+
+    # Check login status
+    creds = load_credentials()
+    if creds:
+        checks.append(("Quetrex Login", True, f"Logged in as {creds.get('email')}"))
+    else:
+        checks.append(("Quetrex Login", False, "Not logged in"))
+
+    # Check .claude directory in current directory
+    claude_dir = Path.cwd() / ".claude"
+    if claude_dir.exists():
+        checks.append((".claude/ directory", True, "Present"))
+    else:
+        checks.append((".claude/ directory", False, "Not found (run quetrex init)"))
+
+    # Print results
+    print()
+    for name, status, info in checks:
+        if status:
+            print_success(f"{name}: {info}")
+        else:
+            print_error(f"{name}: {info}")
+
+    print()
+    all_ok = all(status for _, status, _ in checks)
+    if all_ok:
+        print_success("All systems operational!")
+    else:
+        print_warning("Some components need attention")
+
+
+def cmd_update(args):
+    """Update the CLI to latest version."""
+    print_header("Quetrex CLI Update")
+    print_info("Downloading latest version...")
+
+    try:
+        subprocess.run(
+            ["bash", "-c", f"curl -fsSL {API_URL}/install.sh | bash"],
+            check=True
+        )
+        print_success("Updated successfully!")
+    except Exception as e:
+        print_error(f"Update failed: {e}")
+        sys.exit(1)
+
+
+# =============================================================================
+# Helpers
+# =============================================================================
+
+def get_project_name(target_dir: Path) -> str:
+    """Get project name from package.json or directory name."""
+    package_json = target_dir / "package.json"
+    if package_json.exists():
+        try:
+            data = json.loads(package_json.read_text())
+            if data.get("name"):
+                return data["name"]
+        except Exception:
+            pass
+    return target_dir.name
+
+
+def get_git_remote(target_dir: Path) -> Optional[str]:
+    """Get git remote URL."""
+    try:
+        result = subprocess.run(
+            ["git", "remote", "get-url", "origin"],
+            cwd=target_dir,
+            capture_output=True,
+            text=True
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return None
+
+
+def get_claude_md_template(project_name: str) -> str:
+    """Get CLAUDE.md template."""
+    return f"""# {project_name}
+
+## Project Overview
+
+<!-- Add a brief description of your project here -->
+
+## Development Standards
+
+### TypeScript
+- Strict mode enabled
+- No `any` types
+- Explicit return types on functions
+
+### Testing
+- Minimum 75% code coverage
+- TDD approach: write tests first
+
+### Code Quality
+- ESLint with strict rules
+- Prettier for formatting
+- No console.log in production code
+
+## Architecture
+
+<!-- Document your project architecture here -->
+
+## Common Commands
+
+```bash
+npm run dev       # Start development server
+npm run build     # Build for production
+npm run test      # Run tests
+npm run lint      # Run ESLint
+```
+
+## Notes for AI Agents
+
+- Follow existing code patterns
+- Write tests for new functionality
+- Run `npm run build` before completing tasks
+- Keep commits atomic and well-described
+
+---
+
+*Initialized with Quetrex CLI*
+"""
+
+
+def get_github_workflow_template() -> str:
+    """Get GitHub Actions workflow template."""
+    return """name: Quetrex AI Agent
+
+on:
+  issues:
+    types: [opened, labeled]
+  issue_comment:
+    types: [created]
+
+jobs:
+  process-issue:
+    if: contains(github.event.issue.labels.*.name, 'ai-feature') || contains(github.event.issue.labels.*.name, 'ai-fix')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Notify Quetrex Runner
+        env:
+          QUETREX_API_KEY: ${{ secrets.QUETREX_API_KEY }}
+          QUETREX_PROJECT_ID: ${{ secrets.QUETREX_PROJECT_ID }}
+        run: |
+          curl -X POST "https://quetrex.com/api/jobs" \\
+            -H "Authorization: Bearer $QUETREX_API_KEY" \\
+            -H "Content-Type: application/json" \\
+            -d '{
+              "projectId": "'$QUETREX_PROJECT_ID'",
+              "issueNumber": ${{ github.event.issue.number }},
+              "issueTitle": "${{ github.event.issue.title }}",
+              "repository": "${{ github.repository }}",
+              "action": "${{ github.event.action }}"
+            }'
+"""
+
+
+# =============================================================================
+# Main
+# =============================================================================
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Quetrex CLI - AI-Powered Development Platform",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=f"""
+Examples:
+  quetrex login                    # Login to Quetrex
+  quetrex init                     # Initialize in current directory
+  quetrex init ~/my-project        # Initialize in specific directory
+  quetrex doctor                   # Check installation health
+
+Version: {VERSION}
+Documentation: https://quetrex.com/docs
+        """
+    )
+
+    parser.add_argument('--version', action='version', version=f'Quetrex CLI v{VERSION}')
+
+    subparsers = parser.add_subparsers(dest='command', help='Command to run')
+
+    # login
+    parser_login = subparsers.add_parser('login', help='Login to Quetrex')
+    parser_login.set_defaults(func=cmd_login)
+
+    # logout
+    parser_logout = subparsers.add_parser('logout', help='Logout from Quetrex')
+    parser_logout.set_defaults(func=cmd_logout)
+
+    # init
+    parser_init = subparsers.add_parser('init', help='Initialize a project')
+    parser_init.add_argument('directory', nargs='?', help='Target directory (default: current)')
+    parser_init.add_argument('--force', '-f', action='store_true', help='Force re-initialization')
+    parser_init.set_defaults(func=cmd_init)
+
+    # doctor
+    parser_doctor = subparsers.add_parser('doctor', help='Check installation health')
+    parser_doctor.set_defaults(func=cmd_doctor)
+
+    # update
+    parser_update = subparsers.add_parser('update', help='Update CLI to latest version')
+    parser_update.set_defaults(func=cmd_update)
+
+    args = parser.parse_args()
+
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
+
+    try:
+        args.func(args)
+    except KeyboardInterrupt:
+        print()
+        print_warning("Cancelled")
+        sys.exit(1)
+    except Exception as e:
+        print_error(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
