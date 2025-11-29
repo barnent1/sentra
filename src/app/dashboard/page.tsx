@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Project {
   id: string;
@@ -29,6 +30,7 @@ export default function DashboardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [runners, setRunners] = useState<Runner[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingRunnerId, setDeletingRunnerId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -72,6 +74,35 @@ export default function DashboardPage() {
     }
   };
 
+  const handleDeleteRunner = async (runnerId: string) => {
+    if (!confirm('Are you sure you want to delete this runner? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeletingRunnerId(runnerId);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const response = await fetch(`/api/runners/${runnerId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setRunners(runners.filter(r => r.id !== runnerId));
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to delete runner');
+      }
+    } catch (error) {
+      console.error('Failed to delete runner:', error);
+      alert('Failed to delete runner');
+    } finally {
+      setDeletingRunnerId(null);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-[#0A0A0B] flex items-center justify-center">
@@ -92,7 +123,13 @@ export default function DashboardPage() {
       {/* Header */}
       <header className="border-b border-[#27272A] bg-[#18181B]">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/quetrex-logo.png"
+              alt="Quetrex"
+              width={40}
+              height={40}
+            />
             <h1 className="text-xl font-bold text-white">Quetrex</h1>
           </div>
           <div className="flex items-center gap-4">
@@ -246,19 +283,38 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <span
-                      className={`text-xs px-2 py-1 rounded ${
-                        runner.status === 'active'
-                          ? 'bg-green-500/20 text-green-400'
-                          : runner.status === 'provisioning'
-                          ? 'bg-yellow-500/20 text-yellow-400'
-                          : runner.status === 'error'
-                          ? 'bg-red-500/20 text-red-400'
-                          : 'bg-gray-500/20 text-gray-400'
-                      }`}
-                    >
-                      {runner.status}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          runner.status === 'active'
+                            ? 'bg-green-500/20 text-green-400'
+                            : runner.status === 'provisioning'
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : runner.status === 'error'
+                            ? 'bg-red-500/20 text-red-400'
+                            : 'bg-gray-500/20 text-gray-400'
+                        }`}
+                      >
+                        {runner.status}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteRunner(runner.id)}
+                        disabled={deletingRunnerId === runner.id}
+                        className="text-gray-500 hover:text-red-400 transition disabled:opacity-50"
+                        title="Delete runner"
+                      >
+                        {deletingRunnerId === runner.id ? (
+                          <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
