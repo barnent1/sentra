@@ -97,6 +97,9 @@ packages:
   - docker-compose
   - curl
   - jq
+  - git
+  - ca-certificates
+  - gnupg
 
 write_files:
   - path: /opt/quetrex-runner/docker-compose.yml
@@ -164,9 +167,26 @@ write_files:
       echo "Quetrex runner started!"
 
 runcmd:
+  # Enable and start Docker
   - systemctl enable docker
   - systemctl start docker
   - mkdir -p /opt/quetrex-runner/workspace
+
+  # Install Node.js 20.x
+  - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  - apt-get install -y nodejs
+
+  # Install Quetrex CLI
+  - curl -fsSL https://quetrex.com/install.sh | bash
+  - export PATH="$HOME/.quetrex/bin:$PATH"
+
+  # Install Claude Code CLI
+  - npm install -g @anthropic-ai/claude-code || true
+
+  # Install Quetrex agents, skills, and hooks
+  - cd /opt/quetrex-runner && npx create-quetrex --yes || echo "create-quetrex not yet published"
+
+  # Start the runner
   - /opt/quetrex-runner/start.sh
   - echo "Runner provisioning complete!" > /var/log/quetrex-provision.log
 `;
