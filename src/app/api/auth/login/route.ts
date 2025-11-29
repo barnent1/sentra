@@ -97,8 +97,9 @@ export async function POST(request: NextRequest) {
     await drizzleDb.updateUserRefreshToken(user.id, refreshToken)
 
     return NextResponse.json({
-      token,
+      accessToken: token,
       refreshToken,
+      expiresIn: 3600, // 1 hour in seconds
       user: {
         id: user.id,
         email: user.email,

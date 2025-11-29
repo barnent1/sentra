@@ -5,6 +5,10 @@
 
 import { fetchWithAuth } from '@/services/api';
 
+export interface AgentNames {
+  [key: string]: string;
+}
+
 export interface Settings {
   userName: string;
   voice: string;
@@ -18,6 +22,7 @@ export interface Settings {
   notifyOnFailure: boolean;
   notifyOnStart: boolean;
   language: string;
+  agentNames?: AgentNames;
 }
 
 // Backend settings structure
@@ -38,6 +43,7 @@ interface BackendSettings {
     onStart: boolean;
   };
   language?: string;
+  agentNames?: AgentNames;
 }
 
 const DEFAULT_SETTINGS: Settings = {
@@ -72,6 +78,7 @@ function transformBackendToFrontend(backend: BackendSettings): Settings {
     notifyOnFailure: backend.notificationSettings?.onFailure ?? true,
     notifyOnStart: backend.notificationSettings?.onStart ?? false,
     language: backend.language || 'en',
+    agentNames: backend.agentNames || {},
   };
 }
 
@@ -96,6 +103,7 @@ function transformFrontendToBackend(frontend: Settings): BackendSettings {
       onStart: frontend.notifyOnStart,
     },
     language: frontend.language,
+    agentNames: frontend.agentNames,
   };
 }
 

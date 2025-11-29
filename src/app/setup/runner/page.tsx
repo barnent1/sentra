@@ -413,7 +413,7 @@ export default function RunnerSetupPage() {
     );
   }
 
-  // Complete step
+  // Complete step - redirect to dashboard after short delay
   return (
     <div className="min-h-screen bg-[#0A0A0B] flex items-center justify-center p-4">
       <div className="w-full max-w-lg text-center">
@@ -449,17 +449,6 @@ export default function RunnerSetupPage() {
               <span className="text-white">{selectedCapacity.monthlyCost} (billed by Hetzner)</span>
             </div>
           </div>
-        </div>
-
-        <div className="bg-[#18181B] border border-[#27272A] rounded-lg p-6 text-left mb-6">
-          <h3 className="text-white font-medium mb-4">Next: Add your first project</h3>
-          <div className="bg-[#0A0A0B] rounded-lg p-4 font-mono text-sm">
-            <p className="text-gray-500 mb-1"># In your project directory, run:</p>
-            <p className="text-violet-400">quetrex init</p>
-          </div>
-          <p className="text-gray-500 text-sm mt-3">
-            This connects your project to Quetrex and enables AI-powered workflows.
-          </p>
         </div>
 
         <button

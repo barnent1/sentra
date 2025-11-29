@@ -83,8 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const data = await response.json();
-    saveTokens(data.token, data.refreshToken);
-    return data.token;
+    saveTokens(data.accessToken, data.refreshToken);
+    return data.accessToken;
   }, [API_URL]);
 
   const login = async (email: string, password: string) => {
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await response.json();
       console.log('[Auth] Login successful, user:', data.user);
 
-      saveTokens(data.token, data.refreshToken);
+      saveTokens(data.accessToken, data.refreshToken);
       console.log('[Auth] Tokens saved');
 
       setUser(data.user);
@@ -132,7 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const data = await response.json();
-    saveTokens(data.token, data.refreshToken);
+    saveTokens(data.accessToken, data.refreshToken);
     setUser(data.user);
   };
 

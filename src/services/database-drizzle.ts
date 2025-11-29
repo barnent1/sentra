@@ -484,6 +484,21 @@ export class DrizzleDatabaseService {
     await db().update(users).set({ refreshToken }).where(eq(users.id, userId));
   }
 
+  /**
+   * Update user profile
+   */
+  async updateUser(userId: string, data: { name?: string }): Promise<User | null> {
+    const [updated] = await db()
+      .update(users)
+      .set({
+        name: data.name,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return updated || null;
+  }
+
   // --------------------------------------------------------------------------
   // Project Operations
   // --------------------------------------------------------------------------

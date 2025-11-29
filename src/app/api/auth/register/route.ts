@@ -146,8 +146,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        token: tokens.token,
+        accessToken: tokens.token,
         refreshToken: tokens.refreshToken,
+        expiresIn: 3600, // 1 hour in seconds
         user: {
           id: user.id,
           email: user.email,
