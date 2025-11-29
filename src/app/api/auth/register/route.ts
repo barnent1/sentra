@@ -36,18 +36,10 @@ function isValidEmail(email: string): boolean {
 }
 
 /**
- * Validate password strength
- * Requires: min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+ * Validate password - just minimum 8 characters (simple signup)
  */
 function isValidPassword(password: string): boolean {
-  if (password.length < 8) return false
-
-  const hasUppercase = /[A-Z]/.test(password)
-  const hasLowercase = /[a-z]/.test(password)
-  const hasNumber = /[0-9]/.test(password)
-  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password)
-
-  return hasUppercase && hasLowercase && hasNumber && hasSpecial
+  return password.length >= 8
 }
 
 /**
@@ -103,13 +95,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate password strength
+    // Validate password length
     if (!isValidPassword(password)) {
       return NextResponse.json(
-        {
-          error:
-            'Password must be at least 8 characters and contain uppercase, lowercase, number, and special character',
-        },
+        { error: 'Password must be at least 8 characters' },
         { status: 400 }
       )
     }
@@ -134,6 +123,21 @@ export async function POST(request: NextRequest) {
       name: name || undefined,
     })
 
+    // Create a personal organization for the user
+    const slug = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now()
+    const organization = await drizzleDb.createOrganization({
+      name: name ? `${name}'s Workspace` : 'Personal Workspace',
+      slug,
+      description: 'Personal organization created on signup',
+    })
+
+    // Add user as owner of the organization
+    await drizzleDb.addOrganizationMember({
+      orgId: organization.id,
+      userId: user.id,
+      role: 'owner',
+    })
+
     // Generate tokens
     const tokens = await generateTokens(user.id, user.email)
 
@@ -148,6 +152,11 @@ export async function POST(request: NextRequest) {
           id: user.id,
           email: user.email,
           name: user.name,
+        },
+        organization: {
+          id: organization.id,
+          name: organization.name,
+          slug: organization.slug,
         },
       },
       { status: 201 }

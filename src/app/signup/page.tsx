@@ -11,32 +11,15 @@ export default function SignupPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const validatePassword = (pwd: string): string | null => {
-    if (pwd.length < 8) return 'Password must be at least 8 characters';
-    if (!/[A-Z]/.test(pwd)) return 'Password must contain uppercase letter';
-    if (!/[a-z]/.test(pwd)) return 'Password must contain lowercase letter';
-    if (!/[0-9]/.test(pwd)) return 'Password must contain a number';
-    if (!/[!@#$%^&*]/.test(pwd)) return 'Password must contain special character';
-    return null;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validation
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    const pwdError = validatePassword(password);
-    if (pwdError) {
-      setError(pwdError);
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters');
       return;
     }
 
@@ -44,41 +27,34 @@ export default function SignupPage() {
 
     try {
       await signup(email, password, name);
-      router.push('/');
-    } catch (err: any) {
-      setError(err.message || 'Signup failed');
+      // Redirect to runner setup wizard after signup
+      router.push('/setup/runner');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Signup failed';
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
-  const passwordStrength = (pwd: string): { score: number; label: string; color: string } => {
-    let score = 0;
-    if (pwd.length >= 8) score++;
-    if (/[A-Z]/.test(pwd)) score++;
-    if (/[a-z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd)) score++;
-    if (/[!@#$%^&*]/.test(pwd)) score++;
-
-    if (score <= 2) return { score, label: 'Weak', color: 'bg-red-500' };
-    if (score <= 4) return { score, label: 'Medium', color: 'bg-yellow-500' };
-    return { score, label: 'Strong', color: 'bg-green-500' };
-  };
-
-  const strength = passwordStrength(password);
-
   return (
     <div className="min-h-screen bg-[#0A0A0B] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Free badge */}
+        <div className="text-center mb-6">
+          <span className="inline-block px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded-full border border-green-500/30">
+            Free - No credit card required
+          </span>
+        </div>
+
         <div className="bg-[#18181B] border border-[#27272A] rounded-lg p-8">
-          <h1 className="text-2xl font-bold text-white mb-6">Create Your Account</h1>
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-white">Get Started with Quetrex</h1>
+            <p className="text-gray-400 mt-2">AI-powered development in 2 minutes</p>
+          </div>
 
           {error && (
-            <div
-              className="bg-red-500/10 border border-red-500/50 rounded p-3 mb-4"
-              role="alert"
-              aria-live="polite"
-            >
+            <div className="bg-red-500/10 border border-red-500/50 rounded p-3 mb-4">
               <p className="text-red-400 text-sm">{error}</p>
             </div>
           )}
@@ -94,8 +70,7 @@ export default function SignupPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                aria-required="true"
-                className="w-full px-4 py-2 bg-[#27272A] border border-[#3F3F46] rounded text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                className="w-full px-4 py-3 bg-[#27272A] border border-[#3F3F46] rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
                 placeholder="Your name"
               />
             </div>
@@ -110,9 +85,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                aria-required="true"
-                aria-invalid={error ? 'true' : 'false'}
-                className="w-full px-4 py-2 bg-[#27272A] border border-[#3F3F46] rounded text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                className="w-full px-4 py-3 bg-[#27272A] border border-[#3F3F46] rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
                 placeholder="you@example.com"
               />
             </div>
@@ -127,67 +100,34 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                aria-required="true"
-                aria-invalid={error ? 'true' : 'false'}
-                aria-describedby={password ? 'password-strength' : undefined}
-                className="w-full px-4 py-2 bg-[#27272A] border border-[#3F3F46] rounded text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-                placeholder="••••••••"
-              />
-              {password && (
-                <div id="password-strength" className="mt-2" aria-live="polite">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1 bg-[#27272A] rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all ${strength.color}`}
-                        style={{ width: `${(strength.score / 5) * 100}%` }}
-                        role="progressbar"
-                        aria-valuenow={strength.score}
-                        aria-valuemin={0}
-                        aria-valuemax={5}
-                        aria-label="Password strength"
-                      />
-                    </div>
-                    <span className={`text-xs ${strength.color.replace('bg-', 'text-')}`}>
-                      {strength.label}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm text-gray-300 mb-2">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                aria-required="true"
-                aria-invalid={confirmPassword && password !== confirmPassword ? 'true' : 'false'}
-                className="w-full px-4 py-2 bg-[#27272A] border border-[#3F3F46] rounded text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-                placeholder="••••••••"
+                minLength={8}
+                className="w-full px-4 py-3 bg-[#27272A] border border-[#3F3F46] rounded-lg text-white focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
+                placeholder="At least 8 characters"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              aria-busy={loading}
-              className="w-full bg-violet-600 hover:bg-violet-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white py-2 rounded font-medium transition"
+              className="w-full bg-violet-600 hover:bg-violet-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition text-lg"
             >
-              {loading ? 'Creating account...' : 'Sign Up'}
+              {loading ? 'Creating account...' : 'Create Free Account'}
             </button>
           </form>
 
-          <p className="text-gray-400 text-sm text-center mt-6">
-            Already have an account?{' '}
-            <Link href="/login" className="text-violet-400 hover:text-violet-300 underline">
-              Sign in
-            </Link>
-          </p>
+          <div className="mt-6 text-center">
+            <p className="text-gray-500 text-sm">
+              Already have an account?{' '}
+              <Link href="/login" className="text-violet-400 hover:text-violet-300">
+                Sign in
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        {/* What's next preview */}
+        <div className="mt-6 text-center text-gray-500 text-sm">
+          <p>Next: Set up your AI runner (2 min)</p>
         </div>
       </div>
     </div>

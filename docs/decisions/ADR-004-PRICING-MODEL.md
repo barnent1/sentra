@@ -2,6 +2,7 @@
 
 **Status:** Accepted
 **Date:** 2025-11-28
+**Updated:** 2025-11-28
 **Decision Maker:** Glen Barnhardt
 
 ---
@@ -12,13 +13,31 @@ Quetrex needs a pricing strategy that:
 1. Allows users to try the product before committing
 2. Converts trial users to paying customers
 3. Doesn't feel manipulative with artificial limitations
-4. Accounts for the fact users already pay for Anthropic ($100-200/mo)
+4. Reflects the true value of an AI development team
+5. Positions Quetrex as a professional tool, not a cheap utility
 
 ## Decision
 
-**14-day free trial with full access, then $15/month flat rate.**
+**14-day free trial with full access, then $49/month for Pro tier.**
 
 No crippled free tier. No artificial feature limitations. No "upgrade to unlock."
+
+### Pricing Rationale
+
+Quetrex is not a simple tool - it's an **AI development team**:
+- 13 specialized agents (architecture, testing, security, design)
+- Multi-agent workflows with quality enforcement
+- GitHub automation with runner infrastructure
+- Design system generation
+- TDD enforcement
+
+**Comparable products:**
+- ChatGPT Plus: $20/mo (just chat)
+- GitHub Copilot: $19-39/mo (just autocomplete)
+- Cursor: $20/mo (AI editor)
+- ClickFunnels: $99/mo (funnel builder)
+
+$49/mo positions Quetrex as a professional tool while remaining accessible.
 
 ### Trial Terms
 
@@ -30,14 +49,14 @@ No crippled free tier. No artificial feature limitations. No "upgrade to unlock.
 | Credit card required | Yes (to continue after trial) |
 | Data retention | Exported on request if not converting |
 
-### Pricing After Trial
+### Pricing Tiers
 
 | Tier | Price | Included |
 |------|-------|----------|
-| Individual | $15/mo | 1 user, unlimited projects, all features |
-| Team | $30/mo | 5 users, shared projects |
-| Agency | $50/mo | 10 users, client workspaces |
-| Enterprise | Custom | SSO, audit logs, SLA |
+| **Pro** | $49/mo | 1 user, unlimited projects, all features |
+| **Team** | $99/mo | 5 users, shared projects, team dashboard |
+| **Agency** | $199/mo | 10 users, client workspaces, white-label reports |
+| **Enterprise** | Custom | SSO, audit logs, SLA, dedicated support |
 
 ### User's Total Cost Stack
 
@@ -45,31 +64,33 @@ No crippled free tier. No artificial feature limitations. No "upgrade to unlock.
 |---------|----------|------|-------|
 | AI Subscription | Anthropic | $100-200/mo | Required, user's existing cost |
 | Runner Hosting | Hetzner | ~$4/mo | €20 credit covers first month |
-| **Platform Fee** | **Quetrex** | **$15/mo** | **Our revenue** |
+| **Platform Fee** | **Quetrex** | **$49/mo** | **Our revenue** |
 | GitHub | GitHub | $0-4/mo | Optional paid features |
 
-## Rationale
+**Total: ~$153-253/mo** for a complete AI development setup.
 
-### Why No Crippled Free Tier
+## Why $49/Month
 
-1. **Feels manipulative** - "Upgrade to unlock security-auditor" annoys users
-2. **Founder instinct** - Glen expressed personal dislike for this model
-3. **Value leakage** - Giving away agents for free undercuts the business
-4. **Complexity** - Tracking usage limits adds engineering overhead
+### Underpricing Hurts
 
-### Why 14-Day Trial
+$15/mo signals:
+- "Cheap tool, probably not that good"
+- "Side project, not a real business"
+- Attracts price-sensitive users (high churn)
+- Leaves money on the table
 
-1. **Enough time** - Users can build something real and see value
-2. **Natural conversion** - They're invested by day 15
-3. **Low friction** - No credit card upfront to start
-4. **Industry standard** - Users expect and understand trials
+### $49/mo Signals
 
-### Why $15/Month is Right
+- Professional tool for serious developers
+- Worth the investment
+- Real company behind it
+- Still trivial vs developer hourly rate ($50-200/hr)
 
-1. **Small vs Anthropic bill** - $15 is trivial compared to $100-200/mo AI cost
-2. **Clear value** - 13 agents, commands, hooks, automation
-3. **Room for tiers** - Team ($30) and Agency ($50) for growth
-4. **Sustainable** - 96% margins at scale
+### The Math
+
+Someone paying $100-200/mo for Claude won't blink at $49 for tools that make it 10x more useful.
+
+$49 = less than 1 hour of developer time saved per month.
 
 ## Implementation
 
@@ -85,11 +106,25 @@ No crippled free tier. No artificial feature limitations. No "upgrade to unlock.
 7. Day 15: Access suspended until payment
 ```
 
+### Protection
+
+Both plugin and runner validate subscription status:
+
+```typescript
+// Before every agent/command execution
+const status = await checkSubscription(userToken);
+if (!status.active) {
+  showSubscriptionRequired();
+  return;
+}
+```
+
 ### Trial State Tracking
 
 ```typescript
 interface UserSubscription {
   status: 'trial' | 'active' | 'expired' | 'cancelled';
+  tier: 'pro' | 'team' | 'agency' | 'enterprise';
   trialStartedAt: Date;
   trialEndsAt: Date;  // trialStartedAt + 14 days
   subscriptionStartedAt?: Date;
@@ -108,22 +143,45 @@ interface UserSubscription {
 
 ### Positive
 
+- Professional positioning attracts serious users
+- Higher revenue per user (3x vs $15)
+- Lower churn (price-sensitive users self-select out)
+- Room for discounts/promotions without going too low
 - Simple, honest pricing users respect
-- No engineering complexity for usage tracking
-- Clear conversion point drives urgency
-- $15/mo is easy decision vs $100+ Anthropic cost
 
 ### Negative
 
-- No free tier means some users won't try at all
-- Trial abuse possible (new accounts)
-- 14 days may not be enough for slow evaluators
+- Higher price point may reduce trial signups
+- Some solo developers may find it expensive
+- Competitors could undercut on price
 
 ### Mitigations
 
-- Trial abuse: Track by email domain, GitHub account, IP patterns
-- Slow evaluators: Allow one-time 7-day extension on request
-- No free tier: Plugin README clearly states trial available
+- 14-day trial lets them prove value before paying
+- Annual discount: $39/mo paid yearly ($468/yr vs $588)
+- Student/OSS discount: 50% off ($25/mo)
+- Money-back guarantee: 30 days, no questions asked
+
+---
+
+## Revenue Projections
+
+### Per-User Revenue
+
+| Tier | Monthly | Annual |
+|------|---------|--------|
+| Pro | $49 | $588 |
+| Team | $99 | $1,188 |
+| Agency | $199 | $2,388 |
+
+### At Scale (Assuming 80% Pro, 15% Team, 5% Agency)
+
+| Users | Monthly Revenue | Annual Revenue |
+|-------|-----------------|----------------|
+| 100 | $5,740 | $68,880 |
+| 500 | $28,700 | $344,400 |
+| 1,000 | $57,400 | $688,800 |
+| 5,000 | $287,000 | $3,444,000 |
 
 ---
 
@@ -136,8 +194,10 @@ interface UserSubscription {
 │                                                              │
 │  ✓ 14-day free trial (full access)                         │
 │  ✓ No credit card to start                                 │
-│  ✓ $15/month after trial                                   │
-│  ✓ All features included                                   │
+│  ✓ Pro: $49/month after trial                              │
+│  ✓ Team: $99/month (5 users)                               │
+│  ✓ Agency: $199/month (10 users)                           │
+│  ✓ All features included at every tier                     │
 │  ✓ Cancel anytime                                          │
 │                                                              │
 │  No artificial limits. No "upgrade to unlock."              │

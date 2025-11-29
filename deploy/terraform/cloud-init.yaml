@@ -1,0 +1,102 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+packages:
+  - curl
+  - git
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+  - jq
+
+write_files:
+  - path: /opt/quetrex/.env
+    permissions: '0600'
+    content: |
+      # Quetrex Production Environment
+      DATABASE_URL="${database_url}"
+      NEXT_PUBLIC_SUPABASE_URL="${supabase_url}"
+      NEXT_PUBLIC_SUPABASE_ANON_KEY="${supabase_anon_key}"
+      SUPABASE_SERVICE_ROLE_KEY="${supabase_service_role_key}"
+      JWT_SECRET="${jwt_secret}"
+      JWT_REFRESH_SECRET="${jwt_refresh_secret}"
+      NODE_ENV=production
+      PORT=3000
+
+  - path: /opt/quetrex/install.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      set -e
+
+      echo "Installing Node.js 20..."
+      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      apt-get install -y nodejs
+
+      echo "Installing PM2..."
+      npm install -g pm2
+
+      echo "Cloning Quetrex..."
+      cd /opt
+      git clone ${github_repo} quetrex-app
+      cd quetrex-app
+
+      echo "Copying environment file..."
+      cp /opt/quetrex/.env .env
+
+      echo "Installing dependencies..."
+      npm install
+
+      echo "Building application..."
+      npm run build
+
+      echo "Starting with PM2..."
+      pm2 start npm --name "quetrex" -- start
+      pm2 save
+      pm2 startup systemd -u root --hp /root
+
+      echo "Quetrex installed and running!"
+
+  - path: /etc/nginx/sites-available/quetrex
+    content: |
+      server {
+          listen 80;
+          server_name ${domain != "" ? domain : "_"};
+
+          client_max_body_size 50M;
+
+          location / {
+              proxy_pass http://127.0.0.1:3000;
+              proxy_http_version 1.1;
+              proxy_set_header Upgrade $http_upgrade;
+              proxy_set_header Connection 'upgrade';
+              proxy_set_header Host $host;
+              proxy_set_header X-Real-IP $remote_addr;
+              proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+              proxy_set_header X-Forwarded-Proto $scheme;
+              proxy_cache_bypass $http_upgrade;
+              proxy_read_timeout 86400;
+              proxy_send_timeout 86400;
+          }
+      }
+
+  - path: /opt/quetrex/setup-ssl.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      DOMAIN="${domain}"
+      if [ -n "$DOMAIN" ]; then
+          echo "Setting up SSL for $DOMAIN..."
+          certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email admin@$DOMAIN || echo "SSL setup requires DNS to be configured first"
+      else
+          echo "No domain configured, skipping SSL setup"
+      fi
+
+runcmd:
+  - /opt/quetrex/install.sh
+  - ln -sf /etc/nginx/sites-available/quetrex /etc/nginx/sites-enabled/
+  - rm -f /etc/nginx/sites-enabled/default
+  - systemctl restart nginx
+  - /opt/quetrex/setup-ssl.sh
+  - echo "Quetrex deployment complete!"

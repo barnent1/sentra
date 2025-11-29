@@ -1,0 +1,29 @@
+# Hetzner Cloud API Token
+# Get from: https://console.hetzner.cloud/projects/YOUR_PROJECT/security/tokens
+hcloud_token = "YOUR_HETZNER_API_TOKEN"
+
+# SSH Key Path
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+
+# Server Configuration
+server_name = "quetrex-prod"
+server_type = "cx32"  # 4 vCPU, 8GB RAM, 80GB SSD - ~€15/month
+location    = "fsn1"  # Falkenstein, Germany
+
+# Domain (optional - leave empty for IP-only access)
+domain = ""  # e.g., "quetrex.yourdomain.com"
+
+# GitHub Repository
+github_repo = "https://github.com/barnent1/quetrex.git"
+
+# Database - Supabase PostgreSQL
+database_url = "postgresql://postgres:Quetrex2025!SecureDB@db.stfaeixxqisbomitnziy.supabase.co:5432/postgres?sslmode=require"
+
+# Supabase Configuration
+supabase_url              = "https://stfaeixxqisbomitnziy.supabase.co"
+supabase_anon_key         = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0ZmFlaXh4cWlzYm9taXRueml5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzMjYzNzQsImV4cCI6MjA3OTkwMjM3NH0.HGR4LO52hKNeINJE6VFJWD2oDiESRVhh6qPxN4T2cI0"
+supabase_service_role_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN0ZmFlaXh4cWlzYm9taXRueml5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDMyNjM3NCwiZXhwIjoyMDc5OTAyMzc0fQ.AlZr8FstI8hzUBkIKybWhnz-6l1kyAts-uaJX9cec24"
+
+# JWT Secrets (CHANGE THESE IN PRODUCTION!)
+jwt_secret         = "quetrex-production-jwt-secret-change-this-to-random-string"
+jwt_refresh_secret = "quetrex-production-refresh-secret-change-this-to-random-string"

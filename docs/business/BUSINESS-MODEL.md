@@ -32,7 +32,7 @@ This model eliminates infrastructure billing risk, ensures ToS compliance, and m
 
 | Service | Cost | Description |
 |---------|------|-------------|
-| Platform Fee | $15/mo | Dashboard, orchestration, automation |
+| Platform Fee | $49/mo | Dashboard, orchestration, automation |
 
 ### Money Flow Diagram
 
@@ -44,7 +44,7 @@ This model eliminates infrastructure billing risk, ensures ToS compliance, and m
            ▼              ▼              ▼
     ┌──────────┐   ┌──────────┐   ┌──────────┐
     │ Hetzner  │   │Anthropic │   │ Quetrex  │
-    │ ~$4-8/mo │   │$100-200  │   │ $15/mo   │
+    │ ~$4-8/mo │   │$100-200  │   │ $49/mo   │
     └──────────┘   └──────────┘   └──────────┘
            │                            │
            │ €10 referral bonus         │ Platform revenue
@@ -80,13 +80,13 @@ This model eliminates infrastructure billing risk, ensures ToS compliance, and m
 ### High Margins
 
 ```
-Revenue:        $15.00/user/month
-- Stripe (2.9%): $0.44
+Revenue:        $49.00/user/month
+- Stripe (2.9%): $1.42
 - Infrastructure: $0.15 (amortized)
 ─────────────────────────────
-Net:            $14.41/user/month
+Net:            $47.43/user/month
 
-Margin:         96%
+Margin:         97%
 ```
 
 ---
@@ -97,10 +97,10 @@ Margin:         96%
 
 | Tier | Price | Features |
 |------|-------|----------|
-| Individual | $15/mo | 1 user, unlimited projects |
-| Team | $30/mo | 5 users, shared projects |
-| Agency | $50/mo | 10 users, client workspaces |
-| Enterprise | Custom | SSO, audit logs, SLA |
+| Pro | $49/mo | 1 user, unlimited projects, all features |
+| Team | $99/mo | 5 users, shared projects, team dashboard |
+| Agency | $199/mo | 10 users, client workspaces, white-label reports |
+| Enterprise | Custom | SSO, audit logs, SLA, dedicated support |
 
 ### 2. Hetzner Referral (One-Time)
 
@@ -125,13 +125,14 @@ Margin:         96%
 
 ## Pricing Strategy
 
-### Individual Tier - $15/month
+### Pro Tier - $49/month
 
 **Target:** Solo developers, indie hackers, freelancers
 
 **Includes:**
 - Quetrex dashboard access
 - Unlimited projects
+- All 13 specialized agents (orchestrator, test-writer, security-auditor, etc.)
 - Runner automation scripts (Terraform)
 - GitHub integration
 - Voice interface
@@ -143,18 +144,18 @@ Margin:         96%
 - Anthropic Max subscription ($100-200/mo)
 - GitHub account
 
-### Team Tier - $30/month
+### Team Tier - $99/month
 
 **Target:** Small teams, startups
 
-**Includes everything in Individual, plus:**
+**Includes everything in Pro, plus:**
 - Up to 5 team members
 - Shared project dashboard
 - Team activity feed
 - Role-based permissions
 - Priority email support
 
-### Agency Tier - $50/month
+### Agency Tier - $199/month
 
 **Target:** Agencies managing client projects
 
@@ -411,60 +412,62 @@ Total Quetrex infrastructure: ~$12/month
 
 ## Growth Milestones
 
-### Year 1: Foundation ($10K)
+**Pricing assumptions:** 80% Pro ($49), 15% Team ($99), 5% Agency ($199) = ~$57/user average
+
+### Year 1: Foundation ($32K)
 
 | Quarter | Users | MRR | Focus |
 |---------|-------|-----|-------|
-| Q1 | 5 | $75 | Beta, iterate |
-| Q2 | 20 | $300 | Public launch |
-| Q3 | 45 | $675 | Early traction |
-| Q4 | 80 | $1,200 | Word of mouth |
+| Q1 | 5 | $245 | Beta, iterate |
+| Q2 | 20 | $980 | Public launch |
+| Q3 | 45 | $2,200 | Early traction |
+| Q4 | 80 | $4,600 | Word of mouth |
 
-### Year 2: Traction ($45K)
-
-| Quarter | Users | MRR | Focus |
-|---------|-------|-----|-------|
-| Q1 | 120 | $1,800 | Improve onboarding |
-| Q2 | 180 | $2,700 | Self-serve launch |
-| Q3 | 280 | $4,200 | Integrations |
-| Q4 | 400 | $6,000 | Community |
-
-### Year 3: Scale ($180K)
+### Year 2: Traction ($145K)
 
 | Quarter | Users | MRR | Focus |
 |---------|-------|-----|-------|
-| Q1 | 550 | $8,250 | Team features |
-| Q2 | 750 | $13,500 | Agency tier |
-| Q3 | 1,000 | $18,000 | Enterprise |
-| Q4 | 1,200 | $22,000 | Go full-time |
+| Q1 | 120 | $6,900 | Improve onboarding |
+| Q2 | 180 | $10,300 | Self-serve launch |
+| Q3 | 280 | $16,000 | Integrations |
+| Q4 | 400 | $23,000 | Community |
 
-### Year 4: Expansion ($550K)
-
-| Quarter | Users | MRR | Focus |
-|---------|-------|-----|-------|
-| Q1 | 1,500 | $32,000 | Enterprise tier |
-| Q2 | 1,900 | $42,000 | Sales hire |
-| Q3 | 2,400 | $55,000 | Partners |
-| Q4 | 3,000 | $70,000 | International |
-
-### Year 5: Maturity ($1.5M)
+### Year 3: Scale ($580K)
 
 | Quarter | Users | MRR | Focus |
 |---------|-------|-----|-------|
-| Q1 | 3,800 | $95,000 | Market leader |
-| Q2 | 4,800 | $125,000 | Partnerships |
-| Q3 | 6,000 | $160,000 | Global |
-| Q4 | 7,500 | $200,000 | Series A or profitable |
+| Q1 | 550 | $31,500 | Team features |
+| Q2 | 750 | $43,000 | Agency tier |
+| Q3 | 1,000 | $57,000 | Enterprise |
+| Q4 | 1,200 | $69,000 | Go full-time |
+
+### Year 4: Expansion ($1.6M)
+
+| Quarter | Users | MRR | Focus |
+|---------|-------|-----|-------|
+| Q1 | 1,500 | $86,000 | Enterprise tier |
+| Q2 | 1,900 | $109,000 | Sales hire |
+| Q3 | 2,400 | $138,000 | Partners |
+| Q4 | 3,000 | $172,000 | International |
+
+### Year 5: Maturity ($4.3M)
+
+| Quarter | Users | MRR | Focus |
+|---------|-------|-----|-------|
+| Q1 | 3,800 | $218,000 | Market leader |
+| Q2 | 4,800 | $275,000 | Partnerships |
+| Q3 | 6,000 | $344,000 | Global |
+| Q4 | 7,500 | $430,000 | Series A or profitable |
 
 ### 5-Year Summary
 
 | Year | Users | ARR | Cumulative Revenue |
 |------|-------|-----|-------------------|
-| 1 | 80 | $14K | $10K |
-| 2 | 400 | $72K | $55K |
-| 3 | 1,200 | $264K | $235K |
-| 4 | 3,000 | $840K | $785K |
-| 5 | 7,500 | $2.4M | $2.3M |
+| 1 | 80 | $55K | $32K |
+| 2 | 400 | $276K | $177K |
+| 3 | 1,200 | $828K | $757K |
+| 4 | 3,000 | $2.1M | $2.4M |
+| 5 | 7,500 | $5.2M | $6.7M |
 
 ---
 
@@ -514,7 +517,8 @@ Total Quetrex infrastructure: ~$12/month
 | Team collaboration | ✅ | ✅ | ✅ |
 | Bring your own AI | ✅ | ❌ | Partial |
 | Agency workflows | ✅ | ❌ | ❌ |
-| Price | $15/mo + AI sub | $19-39/mo | $20-40/mo |
+| Multi-agent workflows | ✅ (13 agents) | ❌ | ❌ |
+| Price | $49/mo + AI sub | $19-39/mo | $20-40/mo |
 
 ---
 
