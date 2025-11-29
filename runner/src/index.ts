@@ -166,11 +166,19 @@ async function executeJob(job: Job): Promise<void> {
         `https://github.com/${job.repo}.git`,
         workDir,
       ]);
+
+      // Install Quetrex skills, agents, and hooks using create-quetrex
+      logger.info(`Installing Quetrex configuration for ${job.repo}`);
+      await execCommand('npx', ['create-quetrex', '--yes'], { cwd: workDir });
+      logger.info('Quetrex configuration installed successfully');
     } else {
       // Pull latest changes
       await execCommand('git', ['-C', workDir, 'fetch', '--all']);
       await execCommand('git', ['-C', workDir, 'checkout', 'main']);
       await execCommand('git', ['-C', workDir, 'pull']);
+
+      // Update Quetrex configuration if needed
+      await execCommand('npx', ['create-quetrex', '--update', '--yes'], { cwd: workDir });
     }
 
     // Create a branch for this issue
