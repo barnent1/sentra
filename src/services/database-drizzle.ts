@@ -37,6 +37,7 @@ import {
   teamMembers,
   organizationInvitations,
   architectSessions,
+  runners,
   type User,
   type Project,
   type Agent,
@@ -52,6 +53,7 @@ import {
   type TeamMember,
   type OrganizationInvitation,
   type ArchitectSession,
+  type Runner,
 } from '../db/schema';
 
 // Lazy database initialization
@@ -64,6 +66,7 @@ function getDb() {
   }
 
   const databaseUrl = process.env.DATABASE_URL;
+  console.log('[DB] DATABASE_URL:', databaseUrl?.substring(0, 50) + '...');
   if (!databaseUrl) {
     throw new Error('DATABASE_URL environment variable is not set');
   }
@@ -104,6 +107,7 @@ export type {
   TeamMember,
   OrganizationInvitation,
   ArchitectSession,
+  Runner,
 };
 
 // ============================================================================
@@ -249,6 +253,29 @@ export interface CreateInvitationInput {
   invitedBy: string;
   token: string;
   expiresAt: Date;
+}
+
+export interface CreateRunnerInput {
+  userId: string;
+  orgId?: string;
+  name: string;
+  provider: 'hetzner' | 'aws' | 'gcp' | 'azure' | 'other';
+  region: string;
+  serverType: string;
+  maxConcurrentJobs?: number;
+  apiToken?: string;
+}
+
+export interface UpdateRunnerInput {
+  status?: 'pending' | 'provisioning' | 'active' | 'error' | 'stopped' | 'deleted';
+  ipAddress?: string;
+  lastHeartbeat?: Date;
+  errorMessage?: string;
+  cpuUsage?: number;
+  memoryUsage?: number;
+  diskUsage?: number;
+  maxConcurrentJobs?: number;
+  serverType?: string;
 }
 
 // ============================================================================
@@ -1512,6 +1539,98 @@ export class DrizzleDatabaseService {
       .from(teamMembers)
       .where(eq(teamMembers.teamId, teamId))
       .orderBy(desc(teamMembers.joinedAt));
+  }
+
+  // --------------------------------------------------------------------------
+  // Runner Operations
+  // --------------------------------------------------------------------------
+
+  /**
+   * Create a new runner
+   */
+  async createRunner(input: CreateRunnerInput): Promise<Runner> {
+    const [runner] = await db()
+      .insert(runners)
+      .values({
+        userId: input.userId,
+        orgId: input.orgId || null,
+        name: input.name,
+        provider: input.provider,
+        region: input.region,
+        serverType: input.serverType,
+        maxConcurrentJobs: input.maxConcurrentJobs ?? 1,
+        apiToken: input.apiToken || null,
+        status: 'pending',
+      })
+      .returning();
+
+    return runner;
+  }
+
+  /**
+   * Get runner by ID
+   */
+  async getRunnerById(id: string): Promise<Runner | null> {
+    const [runner] = await db()
+      .select()
+      .from(runners)
+      .where(eq(runners.id, id))
+      .limit(1);
+
+    return runner || null;
+  }
+
+  /**
+   * List runners by user
+   */
+  async listRunnersByUser(userId: string): Promise<Runner[]> {
+    return await db()
+      .select()
+      .from(runners)
+      .where(eq(runners.userId, userId))
+      .orderBy(desc(runners.createdAt));
+  }
+
+  /**
+   * Update runner
+   */
+  async updateRunner(id: string, input: UpdateRunnerInput): Promise<Runner> {
+    const updateData: Partial<typeof runners.$inferInsert> = {};
+
+    if (input.status !== undefined) updateData.status = input.status;
+    if (input.ipAddress !== undefined) updateData.ipAddress = input.ipAddress;
+    if (input.lastHeartbeat !== undefined) updateData.lastHeartbeat = input.lastHeartbeat;
+    if (input.errorMessage !== undefined) updateData.errorMessage = input.errorMessage;
+    if (input.cpuUsage !== undefined) updateData.cpuUsage = input.cpuUsage;
+    if (input.memoryUsage !== undefined) updateData.memoryUsage = input.memoryUsage;
+    if (input.diskUsage !== undefined) updateData.diskUsage = input.diskUsage;
+    if (input.maxConcurrentJobs !== undefined) updateData.maxConcurrentJobs = input.maxConcurrentJobs;
+    if (input.serverType !== undefined) updateData.serverType = input.serverType;
+
+    updateData.updatedAt = new Date();
+
+    const [runner] = await db()
+      .update(runners)
+      .set(updateData)
+      .where(eq(runners.id, id))
+      .returning();
+
+    return runner;
+  }
+
+  /**
+   * Delete runner
+   */
+  async deleteRunner(id: string): Promise<boolean> {
+    try {
+      const result = await db()
+        .delete(runners)
+        .where(eq(runners.id, id))
+        .returning();
+      return result.length > 0;
+    } catch (error) {
+      return false;
+    }
   }
 
   // --------------------------------------------------------------------------

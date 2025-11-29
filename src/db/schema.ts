@@ -84,6 +84,59 @@ export const organizationInvitations = pgTable('organization_invitations', {
 }));
 
 // ============================================================================
+// Runner Table (Self-Hosted Runners)
+// ============================================================================
+
+export const runners = pgTable('runners', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  userId: text('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  orgId: text('org_id').references(() => organizations.id, { onDelete: 'cascade' }),
+
+  // Runner configuration
+  name: text('name').notNull(),
+  provider: text('provider', { enum: ['hetzner', 'aws', 'gcp', 'azure', 'other'] }).notNull(),
+  region: text('region').notNull(),
+  serverType: text('server_type').notNull(), // e.g., cx22, cx32, cx42, cx52
+  maxConcurrentJobs: integer('max_concurrent_jobs').notNull().default(1), // 1, 2, 4, or 8
+
+  // Connection details (encrypted)
+  ipAddress: text('ip_address'),
+  sshKeyId: text('ssh_key_id'),
+  apiToken: text('api_token'), // Provider API token (encrypted)
+
+  // Status
+  status: text('status', { enum: ['pending', 'provisioning', 'active', 'error', 'stopped', 'deleted'] }).notNull().default('pending'),
+  lastHeartbeat: timestamp('last_heartbeat'),
+  errorMessage: text('error_message'),
+
+  // Resource usage
+  cpuUsage: real('cpu_usage'),
+  memoryUsage: real('memory_usage'),
+  diskUsage: real('disk_usage'),
+
+  // Metadata
+  metadata: text('metadata'), // JSON string for additional config
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index('runners_user_id_idx').on(table.userId),
+  orgIdIdx: index('runners_org_id_idx').on(table.orgId),
+  statusIdx: index('runners_status_idx').on(table.status),
+}));
+
+// Runner relations
+export const runnersRelations = relations(runners, ({ one }) => ({
+  user: one(users, {
+    fields: [runners.userId],
+    references: [users.id],
+  }),
+  organization: one(organizations, {
+    fields: [runners.orgId],
+    references: [organizations.id],
+  }),
+}));
+
+// ============================================================================
 // User Table
 // ============================================================================
 
@@ -570,3 +623,6 @@ export type NewTeamMember = typeof teamMembers.$inferInsert;
 
 export type OrganizationInvitation = typeof organizationInvitations.$inferSelect;
 export type NewOrganizationInvitation = typeof organizationInvitations.$inferInsert;
+
+export type Runner = typeof runners.$inferSelect;
+export type NewRunner = typeof runners.$inferInsert;
