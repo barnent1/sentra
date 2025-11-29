@@ -120,9 +120,8 @@ export default function LandingPage() {
             <Image
               src="/quetrex-logo.png"
               alt="Quetrex"
-              width={40}
-              height={40}
-              className="rounded-lg"
+              width={56}
+              height={56}
             />
             <span className="text-xl font-bold">Quetrex</span>
           </div>
@@ -544,9 +543,8 @@ export default function LandingPage() {
             <Image
               src="/quetrex-logo.png"
               alt="Quetrex"
-              width={32}
-              height={32}
-              className="rounded-lg"
+              width={48}
+              height={48}
             />
             <span className="font-semibold">Quetrex</span>
           </div>
