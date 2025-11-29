@@ -1,0 +1,70 @@
+# Build and publish Quetrex Runner Docker image
+name: Build Runner Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'runner/**'
+      - '.github/workflows/build-runner.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: runner/package-lock.json
+
+      - name: Install dependencies
+        working-directory: runner
+        run: npm ci || npm install
+
+      - name: Build TypeScript
+        working-directory: runner
+        run: npm run build
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/barnent1/quetrex/runner
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: runner
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Summary
+        run: |
+          echo "## Runner Image Built" >> "$GITHUB_STEP_SUMMARY"
+          echo "Image: ghcr.io/barnent1/quetrex/runner:latest" >> "$GITHUB_STEP_SUMMARY"
